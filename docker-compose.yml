@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: spplabs-web
+    container_name: spplabs
     restart: unless-stopped
     expose:
       - 3000
