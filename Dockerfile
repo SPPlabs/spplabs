@@ -8,7 +8,9 @@ WORKDIR /app
 
 # Install dependencies based on package-lock.json
 COPY package.json package-lock.json* ./
+COPY prisma ./prisma/
 RUN npm ci
+RUN npx prisma generate
 
 # 2. Rebuild the source code only when needed
 FROM base AS builder
