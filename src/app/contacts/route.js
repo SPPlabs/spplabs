@@ -2,13 +2,30 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyApiKey } from "@/lib/crypto";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, x-api-key, x-website-domain",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
+
+function jsonResponse(data, init = {}) {
+  return NextResponse.json(data, {
+    ...init,
+    headers: { ...corsHeaders, ...(init.headers || {}) },
+  });
+}
+
 export async function POST(request) {
   try {
     let body = {};
     try {
       body = await request.json();
     } catch {
-      return NextResponse.json(
+      return jsonResponse(
         { error: "Invalid JSON payload" },
         { status: 400 }
       );
@@ -34,21 +51,21 @@ export async function POST(request) {
 
     // Validate request inputs
     if (!domain) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: "Bad Request", message: "Website domain is required (header: x-website-domain or body: domain)" },
         { status: 400 }
       );
     }
 
     if (!apiKey) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: "Unauthorized", message: "API key is required" },
         { status: 401 }
       );
     }
 
     if (!name || !email || !message) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: "Bad Request", message: "name, email, and message are required" },
         { status: 400 }
       );
@@ -61,7 +78,7 @@ export async function POST(request) {
     });
 
     if (!website) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: "Unauthorized", message: "Domain is not registered" },
         { status: 401 }
       );
@@ -83,7 +100,7 @@ export async function POST(request) {
     }
 
     if (!activeKey) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: "Unauthorized", message: "Invalid API key" },
         { status: 401 }
       );
@@ -108,14 +125,14 @@ export async function POST(request) {
       })
       .catch((e) => console.error("Failed to update API key lastUsedAt:", e));
 
-    return NextResponse.json({
+    return jsonResponse({
       success: true,
       message: "Contact form submitted successfully",
       id: submission.id,
     });
   } catch (error) {
     console.error("Public contacts API error:", error);
-    return NextResponse.json(
+    return jsonResponse(
       { error: "Internal Server Error", message: "Failed to submit contact form" },
       { status: 500 }
     );
