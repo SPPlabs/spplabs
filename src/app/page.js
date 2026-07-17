@@ -5,6 +5,107 @@ import { useState } from "react";
 export default function Home() {
   const [activeTab, setActiveTab] = useState("throughput");
 
+  // Contact Form State
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactMessage, setContactMessage] = useState("");
+  const [contactLoading, setContactLoading] = useState(false);
+  const [contactResult, setContactResult] = useState(null);
+
+  // Booking Form State
+  const [bookingName, setBookingName] = useState("");
+  const [bookingEmail, setBookingEmail] = useState("");
+  const [bookingPhone, setBookingPhone] = useState("");
+  const [bookingDate, setBookingDate] = useState("");
+  const [bookingTime, setBookingTime] = useState("");
+  const [bookingMessage, setBookingMessage] = useState("");
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingResult, setBookingResult] = useState(null);
+
+  // Submit handlers
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    setContactLoading(true);
+    setContactResult(null);
+
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "https://api.spplabs.es";
+    const apiKey = process.env.NEXT_PUBLIC_SPP_API_KEY || "spp_api_spplabs_es_admin_key_2026_dev_placeholder";
+
+    try {
+      const res = await fetch(`${apiBase}/contacts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body: JSON.stringify({
+          domain: "spplabs.es",
+          name: contactName,
+          email: contactEmail,
+          phone: contactPhone,
+          message: contactMessage,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || data.error || "Failed to submit");
+
+      setContactResult({ success: true, message: "Thank you! Your message was submitted successfully." });
+      setContactName("");
+      setContactEmail("");
+      setContactPhone("");
+      setContactMessage("");
+    } catch (err) {
+      setContactResult({ success: false, message: err.message });
+    } finally {
+      setContactLoading(false);
+    }
+  };
+
+  const handleBookingSubmit = async (e) => {
+    e.preventDefault();
+    setBookingLoading(true);
+    setBookingResult(null);
+
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "https://api.spplabs.es";
+    const apiKey = process.env.NEXT_PUBLIC_SPP_API_KEY || "spp_api_spplabs_es_admin_key_2026_dev_placeholder";
+
+    try {
+      const res = await fetch(`${apiBase}/bookings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body: JSON.stringify({
+          domain: "spplabs.es",
+          name: bookingName,
+          email: bookingEmail,
+          phone: bookingPhone,
+          date: bookingDate,
+          time: bookingTime,
+          message: bookingMessage,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || data.error || "Failed to book");
+
+      setBookingResult({ success: true, message: "Appointment requested! We will confirm shortly." });
+      setBookingName("");
+      setBookingEmail("");
+      setBookingPhone("");
+      setBookingDate("");
+      setBookingTime("");
+      setBookingMessage("");
+    } catch (err) {
+      setBookingResult({ success: false, message: err.message });
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
   // Simulated metrics for the interactive dashboard mockup
   const metrics = {
     throughput: {
@@ -493,6 +594,218 @@ export default function Home() {
                   Talk to Sales
                 </button>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Contact & Bookings Section */}
+        <section id="contact-bookings" className="py-24 bg-zinc-50 border-y border-zinc-100 scroll-mt-20">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <span className="text-xs font-bold uppercase tracking-widest text-brand-blue mb-4 block">Get in Touch</span>
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black">
+                Connect with our team or book a consultation
+              </h2>
+              <p className="text-zinc-600 mt-4 text-sm leading-relaxed">
+                Submit a general inquiry or select a convenient date and time to reserve a consulting call directly into our operations database.
+              </p>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-12 items-stretch">
+              
+              {/* Card 1: Contact Form */}
+              <div className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-brand-blue/5 rounded-bl-full pointer-events-none"></div>
+                <div>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-black">Send a Message</h3>
+                  </div>
+
+                  {contactResult && (
+                    <div className={`p-4 rounded-xl text-sm mb-6 ${
+                      contactResult.success ? "bg-emerald-50 border border-emerald-200 text-emerald-800" : "bg-red-50 border border-red-200 text-red-800"
+                    }`}>
+                      {contactResult.message}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleContactSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Name</label>
+                      <input
+                        type="text"
+                        required
+                        value={contactName}
+                        onChange={(e) => setContactName(e.target.value)}
+                        placeholder="John Doe"
+                        className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-blue focus:bg-white text-black transition-all"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Email</label>
+                        <input
+                          type="email"
+                          required
+                          value={contactEmail}
+                          onChange={(e) => setContactEmail(e.target.value)}
+                          placeholder="john@example.com"
+                          className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-blue focus:bg-white text-black transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Phone (Optional)</label>
+                        <input
+                          type="text"
+                          value={contactPhone}
+                          onChange={(e) => setContactPhone(e.target.value)}
+                          placeholder="+34 600 000 000"
+                          className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-blue focus:bg-white text-black transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Message</label>
+                      <textarea
+                        required
+                        value={contactMessage}
+                        onChange={(e) => setContactMessage(e.target.value)}
+                        placeholder="Tell us about your project requirements..."
+                        className="w-full h-28 border border-zinc-200 bg-zinc-50 rounded-xl p-4 text-sm focus:outline-none focus:border-brand-blue focus:bg-white text-black transition-all resize-none"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={contactLoading}
+                      className="w-full h-11 bg-black hover:bg-brand-blue text-white rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow duration-200 cursor-pointer disabled:opacity-50 flex items-center justify-center"
+                    >
+                      {contactLoading ? (
+                        <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      ) : (
+                        "Submit Query"
+                      )}
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              {/* Card 2: Booking Form */}
+              <div className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-brand-green/5 rounded-bl-full pointer-events-none"></div>
+                <div>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-black">Schedule Consultation</h3>
+                  </div>
+
+                  {bookingResult && (
+                    <div className={`p-4 rounded-xl text-sm mb-6 ${
+                      bookingResult.success ? "bg-emerald-50 border border-emerald-200 text-emerald-800" : "bg-red-50 border border-red-200 text-red-800"
+                    }`}>
+                      {bookingResult.message}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleBookingSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Name</label>
+                      <input
+                        type="text"
+                        required
+                        value={bookingName}
+                        onChange={(e) => setBookingName(e.target.value)}
+                        placeholder="Jane Smith"
+                        className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Email</label>
+                        <input
+                          type="email"
+                          required
+                          value={bookingEmail}
+                          onChange={(e) => setBookingEmail(e.target.value)}
+                          placeholder="jane@example.com"
+                          className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Phone</label>
+                        <input
+                          type="text"
+                          required
+                          value={bookingPhone}
+                          onChange={(e) => setBookingPhone(e.target.value)}
+                          placeholder="+34 611 111 111"
+                          className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Select Date</label>
+                        <input
+                          type="date"
+                          required
+                          value={bookingDate}
+                          onChange={(e) => setBookingDate(e.target.value)}
+                          className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Preferred Time</label>
+                        <input
+                          type="text"
+                          required
+                          value={bookingTime}
+                          onChange={(e) => setBookingTime(e.target.value)}
+                          placeholder="e.g. 10:00 or 15:30"
+                          className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Inquiry / Note</label>
+                      <input
+                        type="text"
+                        value={bookingMessage}
+                        onChange={(e) => setBookingMessage(e.target.value)}
+                        placeholder="Inquiry focus (e.g., SEO, Frontend consulting)"
+                        className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={bookingLoading}
+                      className="w-full h-11 bg-black hover:bg-brand-green text-white rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow duration-200 cursor-pointer disabled:opacity-50 flex items-center justify-center"
+                    >
+                      {bookingLoading ? (
+                        <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      ) : (
+                        "Request Booking"
+                      )}
+                    </button>
+                  </form>
+                </div>
+              </div>
+
             </div>
           </div>
         </section>
