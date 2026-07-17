@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function DashboardClient({
@@ -40,6 +40,32 @@ export default function DashboardClient({
   const [simLoading, setSimLoading] = useState(false);
 
   const isImpersonating = session.role === "ADMIN" && currentWebsite.domain !== "spplabs.es";
+
+  // Analytics state
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsError, setAnalyticsError] = useState("");
+
+  const fetchAnalytics = async () => {
+    setAnalyticsLoading(true);
+    setAnalyticsError("");
+    try {
+      const res = await fetch(`/api/admin/analytics?domain=${currentWebsite.domain}`);
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Failed to load analytics");
+      setAnalyticsData(result.data);
+    } catch (err) {
+      setAnalyticsError(err.message);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "analytics") {
+      fetchAnalytics();
+    }
+  }, [activeTab, currentWebsite.domain]);
 
   // Handle Logout
   const handleLogout = async () => {
@@ -237,6 +263,20 @@ export default function DashboardClient({
               Admin control
             </button>
           )}
+
+          <button
+            onClick={() => setActiveTab("analytics")}
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all ${
+              activeTab === "analytics"
+                ? "bg-white text-black shadow-lg"
+                : "bg-slate-900/50 hover:bg-slate-900 text-slate-400 hover:text-white"
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Visitor Analytics
+          </button>
 
           <button
             onClick={() => setActiveTab("overview")}
@@ -475,6 +515,268 @@ export default function DashboardClient({
                   </table>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* TAB: VISITOR ANALYTICS */}
+          {activeTab === "analytics" && (
+            <div className="space-y-8">
+              {/* Header stats */}
+              <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-md">
+                <div>
+                  <span className="bg-slate-800 text-slate-300 text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">
+                    {currentWebsite.domain}
+                  </span>
+                  <h2 className="text-2xl font-black mt-3">Visitor Analytics</h2>
+                  <p className="text-slate-400 text-sm mt-1">Multi-tenant ClickHouse Ingestion Stats</p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {/* Real-time indicator */}
+                  <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/35 rounded-2xl px-4 py-2 text-brand-green font-bold text-xs">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    {analyticsData?.overview?.active_visitors || 0} active users (last 5 min)
+                  </div>
+                  <button
+                    onClick={fetchAnalytics}
+                    disabled={analyticsLoading}
+                    className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    <svg className={`w-5 h-5 ${analyticsLoading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {analyticsLoading && !analyticsData && (
+                <div className="flex flex-col items-center justify-center py-20 gap-4">
+                  <div className="w-10 h-10 border-4 border-brand-blue border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-sm text-slate-400 font-bold">Querying ClickHouse tables...</span>
+                </div>
+              )}
+
+              {analyticsError && (
+                <div className="bg-red-950/40 border border-red-500/50 text-red-200 text-sm p-4 rounded-xl">
+                  {analyticsError}
+                </div>
+              )}
+
+              {analyticsData && (
+                <div className="space-y-6">
+                  
+                  {/* Overview aggregate counters */}
+                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 text-center">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-1">Total Hits</span>
+                      <span className="text-2xl font-black font-mono text-white">{analyticsData.overview.visitors}</span>
+                    </div>
+                    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 text-center">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-1">Unique Visitors</span>
+                      <span className="text-2xl font-black font-mono text-brand-blue">{analyticsData.overview.unique_visitors}</span>
+                    </div>
+                    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 text-center">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-1">Sessions</span>
+                      <span className="text-2xl font-black font-mono text-brand-green">{analyticsData.overview.sessions}</span>
+                    </div>
+                    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 text-center">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-1">Avg Session Duration</span>
+                      <span className="text-2xl font-black font-mono text-white">{analyticsData.overview.avg_duration}s</span>
+                    </div>
+                    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 text-center col-span-2 lg:col-span-1">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-1">Bounce Rate</span>
+                      <span className="text-2xl font-black font-mono text-red-400">{analyticsData.overview.bounce_rate}%</span>
+                    </div>
+                  </div>
+
+                  {/* Hourly/Daily Traffic Trend Bar Chart (pure CSS) */}
+                  <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+                    <h3 className="text-sm font-bold text-slate-300 mb-6 uppercase tracking-wider">Traffic volume (Last 7 Days)</h3>
+                    {analyticsData.trends.length === 0 ? (
+                      <p className="text-sm text-slate-500 py-10 text-center">No trend data logged yet.</p>
+                    ) : (
+                      <div>
+                        <div className="flex items-end justify-between gap-2 h-44 border-b border-slate-800 pb-2">
+                          {analyticsData.trends.map((t, idx) => {
+                            const maxVal = Math.max(...analyticsData.trends.map(x => x.count), 1);
+                            const heightPct = Math.round((t.count / maxVal) * 100);
+                            return (
+                              <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
+                                <span className="text-[10px] font-bold font-mono text-brand-blue opacity-0 group-hover:opacity-100 transition-opacity">
+                                  {t.count}
+                                </span>
+                                <div
+                                  style={{ height: `${Math.max(heightPct, 6)}%` }}
+                                  className="w-full bg-brand-blue/35 group-hover:bg-brand-blue rounded-t-md transition-all duration-300 relative"
+                                >
+                                  <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-all rounded-t-md"></div>
+                                </div>
+                                <span className="text-[9px] font-semibold text-slate-500 uppercase tracking-wide truncate max-w-[50px] sm:max-w-none">
+                                  {t.date.split("-").slice(1).join("/")}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content & Traffic Sources Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Top Pages */}
+                    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+                      <h3 className="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider">Top Pages</h3>
+                      {analyticsData.topPages.length === 0 ? (
+                        <p className="text-xs text-slate-500 py-6 text-center">No page views recorded.</p>
+                      ) : (
+                        <div className="space-y-4">
+                          {analyticsData.topPages.map((p, idx) => {
+                            const maxCount = Math.max(...analyticsData.topPages.map(x => x.count), 1);
+                            const widthPct = Math.round((p.count / maxCount) * 100);
+                            return (
+                              <div key={idx} className="space-y-1">
+                                <div className="flex justify-between text-xs font-semibold">
+                                  <span className="font-mono text-slate-300">{p.page_url}</span>
+                                  <span className="text-white font-mono">{p.count} views</span>
+                                </div>
+                                <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden">
+                                  <div style={{ width: `${widthPct}%` }} className="h-full bg-brand-blue rounded-full"></div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Top Referrers */}
+                    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+                      <h3 className="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider">Traffic Sources</h3>
+                      {analyticsData.referrers.length === 0 ? (
+                        <p className="text-xs text-slate-500 py-6 text-center">No referrers logged.</p>
+                      ) : (
+                        <div className="space-y-4">
+                          {analyticsData.referrers.map((r, idx) => {
+                            const maxCount = Math.max(...analyticsData.referrers.map(x => x.count), 1);
+                            const widthPct = Math.round((r.count / maxCount) * 100);
+                            return (
+                              <div key={idx} className="space-y-1">
+                                <div className="flex justify-between text-xs font-semibold">
+                                  <span className="text-slate-300">{r.referrer}</span>
+                                  <span className="text-white font-mono">{r.count} hits</span>
+                                </div>
+                                <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden">
+                                  <div style={{ width: `${widthPct}%` }} className="h-full bg-brand-green rounded-full"></div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Countries & Systems Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Countries */}
+                    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+                      <h3 className="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider">Geographic Origin</h3>
+                      {analyticsData.countries.length === 0 ? (
+                        <p className="text-xs text-slate-500 py-6 text-center">No location metrics logged.</p>
+                      ) : (
+                        <div className="divide-y divide-slate-800/50">
+                          {analyticsData.countries.map((c, idx) => (
+                            <div key={idx} className="flex justify-between items-center py-2.5 text-xs font-semibold">
+                              <span className="text-slate-300">{c.country}</span>
+                              <span className="bg-slate-950 border border-slate-800 font-mono text-white px-2 py-0.5 rounded">
+                                {c.count} sessions
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Devices, Browsers & OS Tabular Summary */}
+                    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md flex flex-col gap-6">
+                      {/* Devices */}
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wide">Devices</h4>
+                        <div className="flex gap-2 flex-wrap">
+                          {analyticsData.devices.map((d, idx) => (
+                            <span key={idx} className="bg-slate-950 border border-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-white">
+                              {d.device_type}: <span className="font-mono text-brand-blue">{d.count}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Browsers */}
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wide">Browsers</h4>
+                        <div className="flex gap-2 flex-wrap">
+                          {analyticsData.browsers.map((b, idx) => (
+                            <span key={idx} className="bg-slate-950 border border-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-white">
+                              {b.browser}: <span className="font-mono text-brand-green">{b.count}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Operating Systems */}
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wide">Operating Systems</h4>
+                        <div className="flex gap-2 flex-wrap">
+                          {analyticsData.os.map((o, idx) => (
+                            <span key={idx} className="bg-slate-950 border border-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-white">
+                              {o.os}: <span className="font-mono text-amber-400">{o.count}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Conversions Table */}
+                  <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+                    <h3 className="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider">Conversion & Event Summaries</h3>
+                    {analyticsData.conversions.length === 0 ? (
+                      <p className="text-xs text-slate-500 py-6 text-center">No conversions logged.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {analyticsData.conversions.map((c, idx) => {
+                          let label = c.event_type;
+                          let color = "text-white";
+                          if (c.event_type === "form_submit") {
+                            label = "Form Submissions";
+                            color = "text-brand-blue";
+                          } else if (c.event_type === "booking_created") {
+                            label = "Bookings Created";
+                            color = "text-brand-green";
+                          } else if (c.event_type === "button_click") {
+                            label = "Button Clicks";
+                            color = "text-slate-300";
+                          } else if (c.event_type === "outbound_link") {
+                            label = "Outbound Links";
+                            color = "text-red-400";
+                          }
+                          return (
+                            <div key={idx} className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center">
+                              <span className="text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wide">{label}</span>
+                              <span className={`text-2xl font-black font-mono ${color}`}>{c.count}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                </div>
+              )}
             </div>
           )}
 

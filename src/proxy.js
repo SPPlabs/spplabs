@@ -12,8 +12,13 @@ export async function proxy(request) {
 
   // 1. API Domain Enforcements (e.g. api.spplabs.es)
   if (isApiDomain) {
-    // Only permit POST requests to /contacts, /bookings, or other public API paths
-    if (path === "/contacts" || path === "/bookings") {
+    // Permit contacts, bookings, analytics POST requests, and the public tracker script
+    if (
+      path === "/contacts" ||
+      path === "/bookings" ||
+      path === "/api/analytics" ||
+      path === "/tracker.js"
+    ) {
       return NextResponse.next();
     }
     

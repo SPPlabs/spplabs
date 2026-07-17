@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Script from "next/script";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("throughput");
@@ -859,6 +860,13 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      <Script
+        defer
+        src={`${process.env.NEXT_PUBLIC_API_URL || "https://api.spplabs.es"}/tracker.js`}
+        data-domain="spplabs.es"
+        data-api-key={process.env.NEXT_PUBLIC_SPP_API_KEY || "spp_api_spplabs_es_admin_key_2026_dev_placeholder"}
+      />
     </div>
   );
 }
