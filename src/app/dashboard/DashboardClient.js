@@ -67,6 +67,65 @@ export default function DashboardClient({
     }
   }, [activeTab, currentWebsite.domain]);
 
+  // Handle Update Booking Status
+  const handleUpdateBookingStatus = async (bookingId, status) => {
+    if (!confirm(`Are you sure you want to mark this booking as ${status}?`)) return;
+    try {
+      const res = await fetch("/api/admin/bookings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId, status }),
+      });
+      if (res.ok) {
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.message || "Failed to update booking status");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to update booking status");
+    }
+  };
+
+  // Handle Delete Booking
+  const handleDeleteBooking = async (id) => {
+    if (!confirm("Are you sure you want to permanently delete this booking?")) return;
+    try {
+      const res = await fetch(`/api/admin/bookings?id=${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.message || "Failed to delete booking");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to delete booking");
+    }
+  };
+
+  // Handle Delete Contact
+  const handleDeleteContact = async (id) => {
+    if (!confirm("Are you sure you want to permanently delete this contact submission?")) return;
+    try {
+      const res = await fetch(`/api/admin/contacts?id=${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.message || "Failed to delete contact submission");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to delete contact submission");
+    }
+  };
+
   // Handle Logout
   const handleLogout = async () => {
     try {
@@ -189,7 +248,7 @@ export default function DashboardClient({
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col font-sans selection:bg-brand-blue selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-brand-blue selection:text-white">
       {/* Impersonation Alert Banner */}
       {isImpersonating && (
         <div className="bg-brand-blue text-white px-6 py-2.5 text-center text-sm font-semibold flex items-center justify-center gap-3 shadow-md z-40 relative">
@@ -213,16 +272,10 @@ export default function DashboardClient({
       )}
 
       {/* Main Dashboard Navigation Header */}
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-30">
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative w-8 h-8 flex items-center justify-center">
-              <div className="absolute inset-0 bg-brand-blue rounded-lg transform rotate-6"></div>
-              <div className="absolute inset-0.5 bg-slate-950 rounded-md flex items-center justify-center">
-                <div className="w-4 h-4 bg-brand-green rounded transform -rotate-12"></div>
-              </div>
-              <div className="absolute w-2 h-2 bg-white rounded-full"></div>
-            </div>
+            <img src="/logo.webp" alt="SPP Labs Logo" className="w-8 h-8 object-contain" />
             <span className="font-bold text-lg tracking-tight">
               SPP <span className="text-slate-500 font-medium">labs</span>
             </span>
@@ -231,11 +284,11 @@ export default function DashboardClient({
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
               <span className="text-xs text-slate-500 font-medium block">Logged in as</span>
-              <span className="text-sm font-semibold">{session.domain}</span>
+              <span className="text-sm font-semibold text-slate-700">{session.domain}</span>
             </div>
             <button
               onClick={handleLogout}
-              className="px-4 h-10 text-xs font-bold border border-slate-800 hover:border-red-500 hover:text-red-400 rounded-lg transition-all"
+              className="px-4 h-10 text-xs font-bold border border-slate-200 hover:border-red-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
             >
               Sign Out
             </button>
@@ -251,10 +304,10 @@ export default function DashboardClient({
           {session.role === "ADMIN" && (
             <button
               onClick={() => setActiveTab("admin")}
-              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all ${
+              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
                 activeTab === "admin"
-                  ? "bg-brand-blue text-white shadow-lg"
-                  : "bg-slate-900/50 hover:bg-slate-900 text-slate-400 hover:text-white"
+                  ? "bg-brand-blue text-white shadow-md animate-fade-in"
+                  : "bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 shadow-sm"
               }`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -266,10 +319,10 @@ export default function DashboardClient({
 
           <button
             onClick={() => setActiveTab("analytics")}
-            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all ${
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
               activeTab === "analytics"
-                ? "bg-white text-black shadow-lg"
-                : "bg-slate-900/50 hover:bg-slate-900 text-slate-400 hover:text-white"
+                ? "bg-slate-900 text-white shadow-md"
+                : "bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 shadow-sm"
             }`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -280,10 +333,10 @@ export default function DashboardClient({
 
           <button
             onClick={() => setActiveTab("overview")}
-            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all ${
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
               activeTab === "overview"
-                ? "bg-white text-black shadow-lg"
-                : "bg-slate-900/50 hover:bg-slate-900 text-slate-400 hover:text-white"
+                ? "bg-slate-900 text-white shadow-md"
+                : "bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 shadow-sm"
             }`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -294,10 +347,10 @@ export default function DashboardClient({
 
           <button
             onClick={() => setActiveTab("contacts")}
-            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all ${
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
               activeTab === "contacts"
-                ? "bg-white text-black shadow-lg"
-                : "bg-slate-900/50 hover:bg-slate-900 text-slate-400 hover:text-white"
+                ? "bg-slate-900 text-white shadow-md"
+                : "bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 shadow-sm"
             }`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -313,10 +366,10 @@ export default function DashboardClient({
 
           <button
             onClick={() => setActiveTab("bookings")}
-            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all ${
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
               activeTab === "bookings"
-                ? "bg-white text-black shadow-lg"
-                : "bg-slate-900/50 hover:bg-slate-900 text-slate-400 hover:text-white"
+                ? "bg-slate-900 text-white shadow-md"
+                : "bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 shadow-sm"
             }`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -332,10 +385,10 @@ export default function DashboardClient({
 
           <button
             onClick={() => setActiveTab("simulator")}
-            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all ${
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
               activeTab === "simulator"
-                ? "bg-white text-black shadow-lg"
-                : "bg-slate-900/50 hover:bg-slate-900 text-slate-400 hover:text-white"
+                ? "bg-slate-900 text-white shadow-md"
+                : "bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 shadow-sm"
             }`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -350,21 +403,21 @@ export default function DashboardClient({
 
           {/* TAB: ADMIN PANEL */}
           {activeTab === "admin" && session.role === "ADMIN" && (
-            <div className="space-y-8">
+            <div className="space-y-8 animate-fade-in">
               {/* Provision Website Form */}
-              <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
-                <h3 className="text-lg font-bold mb-1">Provision New Client Website</h3>
-                <p className="text-sm text-slate-400 mb-6">Create a website tenant record. You will generate a signup token (for client sign up) and a secure client API key.</p>
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <h3 className="text-lg font-bold mb-1 text-slate-900">Provision New Client Website</h3>
+                <p className="text-sm text-slate-500 mb-6">Create a website tenant record. You will generate a signup token (for client sign up) and a secure client API key.</p>
                 
                 {createError && (
-                  <div className="bg-red-950/40 border border-red-500/50 text-red-200 text-sm p-4 rounded-xl mb-6">
+                  <div className="bg-red-50 border border-red-200 text-red-800 text-sm p-4 rounded-xl mb-6">
                     {createError}
                   </div>
                 )}
 
                 <form onSubmit={handleCreateClient} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
                       Client Domain Name
                     </label>
                     <input
@@ -373,12 +426,12 @@ export default function DashboardClient({
                       placeholder="clientdomain.com"
                       value={newDomain}
                       onChange={(e) => setNewDomain(e.target.value)}
-                      className="w-full h-11 bg-slate-950 border border-slate-800 rounded-xl px-4 text-sm font-medium focus:outline-none focus:border-brand-blue"
+                      className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
                       Company / Display Name
                     </label>
                     <input
@@ -387,7 +440,7 @@ export default function DashboardClient({
                       placeholder="ACME Corporation"
                       value={newDisplayName}
                       onChange={(e) => setNewDisplayName(e.target.value)}
-                      className="w-full h-11 bg-slate-950 border border-slate-800 rounded-xl px-4 text-sm font-medium focus:outline-none focus:border-brand-blue"
+                      className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white transition-all"
                     />
                   </div>
 
@@ -408,7 +461,7 @@ export default function DashboardClient({
 
                 {/* Display Credentials After Creation */}
                 {createdCredentials && (
-                  <div className="mt-8 bg-slate-950 border border-brand-green/30 rounded-2xl p-6 shadow-inner relative overflow-hidden">
+                  <div className="mt-8 bg-slate-50 border border-brand-green/30 rounded-2xl p-6 shadow-sm relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-brand-green/5 rounded-bl-full"></div>
                     
                     <div className="flex items-center gap-2 text-brand-green font-bold text-sm mb-4">
@@ -418,20 +471,20 @@ export default function DashboardClient({
                       Client Tenant Provisioned Successfully!
                     </div>
 
-                    <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-                      <span className="font-bold text-red-400">WARNING:</span> Copy the API key now. It is hashed using Argon2id and stored in the database, and **will not be shown again**.
+                    <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                      <span className="font-bold text-red-500">WARNING:</span> Copy the API key now. It is hashed using Argon2id and stored in the database, and **will not be shown again**.
                     </p>
 
                     <div className="space-y-4">
                       <div>
                         <span className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Signup Token (Send manually to client)</span>
                         <div className="flex items-center gap-2">
-                          <code className="flex-1 bg-slate-900 border border-slate-800 px-3 py-2 rounded-lg text-xs font-mono text-white select-all">
+                          <code className="flex-1 bg-white border border-slate-200 px-3 py-2 rounded-lg text-xs font-mono text-slate-900 select-all">
                             {createdCredentials.signupToken}
                           </code>
                           <button
                             onClick={() => navigator.clipboard.writeText(createdCredentials.signupToken)}
-                            className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs px-3 py-2 rounded-lg font-bold transition-all active:scale-95"
+                            className="bg-white hover:bg-slate-100 border border-slate-200 text-xs px-3 py-2 rounded-lg font-bold transition-all active:scale-95 cursor-pointer"
                           >
                             Copy
                           </button>
@@ -441,12 +494,12 @@ export default function DashboardClient({
                       <div>
                         <span className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">API Key (For client's public website requests)</span>
                         <div className="flex items-center gap-2">
-                          <code className="flex-1 bg-slate-900 border border-slate-800 px-3 py-2 rounded-lg text-xs font-mono text-brand-green select-all">
+                          <code className="flex-1 bg-white border border-slate-200 px-3 py-2 rounded-lg text-xs font-mono text-brand-green select-all">
                             {createdCredentials.rawApiKey}
                           </code>
                           <button
                             onClick={() => navigator.clipboard.writeText(createdCredentials.rawApiKey)}
-                            className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs px-3 py-2 rounded-lg font-bold transition-all active:scale-95"
+                            className="bg-white hover:bg-slate-100 border border-slate-200 text-xs px-3 py-2 rounded-lg font-bold transition-all active:scale-95 cursor-pointer"
                           >
                             Copy
                           </button>
@@ -458,14 +511,14 @@ export default function DashboardClient({
               </div>
 
               {/* Client Directory List */}
-              <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
-                <h3 className="text-lg font-bold mb-1">Provisioned Client Directory</h3>
-                <p className="text-sm text-slate-400 mb-6">List of all active client websites. Click "Enter Dashboard" to verify progress and view submissions.</p>
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <h3 className="text-lg font-bold mb-1 text-slate-900">Provisioned Client Directory</h3>
+                <p className="text-sm text-slate-500 mb-6">List of all active client websites. Click "Enter Dashboard" to verify progress and view submissions.</p>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
+                  <table className="w-full text-left text-sm text-slate-700">
                     <thead>
-                      <tr className="border-b border-slate-800 text-slate-500 font-bold">
+                      <tr className="border-b border-slate-200 text-slate-500 font-bold">
                         <th className="pb-3 font-semibold">Client Name</th>
                         <th className="pb-3 font-semibold">Domain</th>
                         <th className="pb-3 font-semibold">Status</th>
@@ -473,11 +526,11 @@ export default function DashboardClient({
                         <th className="pb-3 text-right font-semibold">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/50">
+                    <tbody className="divide-y divide-slate-150">
                       {allWebsites.map((web) => (
-                        <tr key={web.id} className="hover:bg-slate-900/30 transition-all">
-                          <td className="py-3.5 font-semibold text-white">{web.displayName}</td>
-                          <td className="py-3.5 text-slate-300 font-mono text-xs">{web.domain}</td>
+                        <tr key={web.id} className="hover:bg-slate-50 transition-all">
+                          <td className="py-3.5 font-semibold text-slate-900">{web.displayName}</td>
+                          <td className="py-3.5 text-slate-650 font-mono text-xs">{web.domain}</td>
                           <td className="py-3.5">
                             {web.role === "ADMIN" ? (
                               <span className="bg-brand-blue/15 text-brand-blue text-xs px-2.5 py-0.5 rounded-full font-bold">
@@ -488,12 +541,12 @@ export default function DashboardClient({
                                 Registered
                               </span>
                             ) : (
-                              <span className="bg-amber-500/15 text-amber-400 text-xs px-2.5 py-0.5 rounded-full font-bold">
+                              <span className="bg-amber-500/15 text-amber-500 text-xs px-2.5 py-0.5 rounded-full font-bold">
                                 Pending Setup
                               </span>
                             )}
                           </td>
-                          <td className="py-3.5 text-slate-400 text-xs">
+                          <td className="py-3.5 text-slate-500 text-xs">
                             {new Date(web.createdAt).toLocaleDateString()}
                           </td>
                           <td className="py-3.5 text-right">
@@ -503,7 +556,7 @@ export default function DashboardClient({
                                   router.push(`/dashboard?domain=${web.domain}`);
                                   setActiveTab("overview");
                                 }}
-                                className="bg-slate-800 hover:bg-white hover:text-black text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all"
+                                className="bg-slate-900 hover:bg-black text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer shadow-sm"
                               >
                                 Enter Dashboard
                               </button>
@@ -520,20 +573,20 @@ export default function DashboardClient({
 
           {/* TAB: VISITOR ANALYTICS */}
           {activeTab === "analytics" && (
-            <div className="space-y-8">
+            <div className="space-y-8 animate-fade-in">
               {/* Header stats */}
-              <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-md">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
                 <div>
-                  <span className="bg-slate-800 text-slate-300 text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">
+                  <span className="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">
                     {currentWebsite.domain}
                   </span>
-                  <h2 className="text-2xl font-black mt-3">Visitor Analytics</h2>
-                  <p className="text-slate-400 text-sm mt-1">Multi-tenant ClickHouse Ingestion Stats</p>
+                  <h2 className="text-2xl font-black mt-3 text-slate-950">Visitor Analytics</h2>
+                  <p className="text-slate-500 text-sm mt-1">Multi-tenant ClickHouse Ingestion Stats</p>
                 </div>
 
                 <div className="flex items-center gap-3">
                   {/* Real-time indicator */}
-                  <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/35 rounded-2xl px-4 py-2 text-brand-green font-bold text-xs">
+                  <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2 text-brand-green font-bold text-xs">
                     <span className="relative flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -543,7 +596,7 @@ export default function DashboardClient({
                   <button
                     onClick={fetchAnalytics}
                     disabled={analyticsLoading}
-                    className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all active:scale-95 disabled:opacity-50"
+                    className="p-2.5 bg-slate-150 hover:bg-slate-200 border border-slate-200 text-slate-600 hover:text-slate-900 rounded-xl transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
                     <svg className={`w-5 h-5 ${analyticsLoading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3" />
@@ -555,12 +608,12 @@ export default function DashboardClient({
               {analyticsLoading && !analyticsData && (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
                   <div className="w-10 h-10 border-4 border-brand-blue border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-sm text-slate-400 font-bold">Querying ClickHouse tables...</span>
+                  <span className="text-sm text-slate-500 font-bold">Querying ClickHouse tables...</span>
                 </div>
               )}
 
               {analyticsError && (
-                <div className="bg-red-950/40 border border-red-500/50 text-red-200 text-sm p-4 rounded-xl">
+                <div className="bg-red-50 border border-red-200 text-red-800 text-sm p-4 rounded-xl">
                   {analyticsError}
                 </div>
               )}
@@ -570,36 +623,36 @@ export default function DashboardClient({
                   
                   {/* Overview aggregate counters */}
                   <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 text-center">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-1">Total Hits</span>
-                      <span className="text-2xl font-black font-mono text-white">{analyticsData.overview.visitors}</span>
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Total Hits</span>
+                      <span className="text-2xl font-black font-mono text-slate-900">{analyticsData.overview.visitors}</span>
                     </div>
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 text-center">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-1">Unique Visitors</span>
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Unique Visitors</span>
                       <span className="text-2xl font-black font-mono text-brand-blue">{analyticsData.overview.unique_visitors}</span>
                     </div>
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 text-center">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-1">Sessions</span>
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Sessions</span>
                       <span className="text-2xl font-black font-mono text-brand-green">{analyticsData.overview.sessions}</span>
                     </div>
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 text-center">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-1">Avg Session Duration</span>
-                      <span className="text-2xl font-black font-mono text-white">{analyticsData.overview.avg_duration}s</span>
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Avg Session Duration</span>
+                      <span className="text-2xl font-black font-mono text-slate-900">{analyticsData.overview.avg_duration}s</span>
                     </div>
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 text-center col-span-2 lg:col-span-1">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-1">Bounce Rate</span>
-                      <span className="text-2xl font-black font-mono text-red-400">{analyticsData.overview.bounce_rate}%</span>
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Bounce Rate</span>
+                      <span className="text-2xl font-black font-mono text-red-500">{analyticsData.overview.bounce_rate}%</span>
                     </div>
                   </div>
 
                   {/* Hourly/Daily Traffic Trend Bar Chart (pure CSS) */}
-                  <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
-                    <h3 className="text-sm font-bold text-slate-300 mb-6 uppercase tracking-wider">Traffic volume (Last 7 Days)</h3>
+                  <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                    <h3 className="text-sm font-bold text-slate-900 mb-6 uppercase tracking-wider">Traffic volume (Last 7 Days)</h3>
                     {analyticsData.trends.length === 0 ? (
-                      <p className="text-sm text-slate-500 py-10 text-center">No trend data logged yet.</p>
+                      <p className="text-sm text-slate-450 py-10 text-center">No trend data logged yet.</p>
                     ) : (
                       <div>
-                        <div className="flex items-end justify-between gap-2 h-44 border-b border-slate-800 pb-2">
+                        <div className="flex items-end justify-between gap-2 h-44 border-b border-slate-200/80 pb-2">
                           {analyticsData.trends.map((t, idx) => {
                             const maxVal = Math.max(...analyticsData.trends.map(x => x.count), 1);
                             const heightPct = Math.round((t.count / maxVal) * 100);
@@ -614,7 +667,7 @@ export default function DashboardClient({
                                 >
                                   <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-all rounded-t-md"></div>
                                 </div>
-                                <span className="text-[9px] font-semibold text-slate-500 uppercase tracking-wide truncate max-w-[50px] sm:max-w-none">
+                                <span className="text-[9px] font-semibold text-slate-550 uppercase tracking-wide truncate max-w-[50px] sm:max-w-none">
                                   {t.date.split("-").slice(1).join("/")}
                                 </span>
                               </div>
@@ -628,10 +681,10 @@ export default function DashboardClient({
                   {/* Content & Traffic Sources Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Top Pages */}
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
-                      <h3 className="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider">Top Pages</h3>
+                    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                      <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Top Pages</h3>
                       {analyticsData.topPages.length === 0 ? (
-                        <p className="text-xs text-slate-500 py-6 text-center">No page views recorded.</p>
+                        <p className="text-xs text-slate-450 py-6 text-center">No page views recorded.</p>
                       ) : (
                         <div className="space-y-4">
                           {analyticsData.topPages.map((p, idx) => {
@@ -640,10 +693,10 @@ export default function DashboardClient({
                             return (
                               <div key={idx} className="space-y-1">
                                 <div className="flex justify-between text-xs font-semibold">
-                                  <span className="font-mono text-slate-300">{p.page_url}</span>
-                                  <span className="text-white font-mono">{p.count} views</span>
+                                  <span className="font-mono text-slate-700">{p.page_url}</span>
+                                  <span className="text-slate-950 font-mono">{p.count} views</span>
                                 </div>
-                                <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden">
+                                <div className="h-1.5 bg-slate-100 border border-slate-200/50 rounded-full overflow-hidden">
                                   <div style={{ width: `${widthPct}%` }} className="h-full bg-brand-blue rounded-full"></div>
                                 </div>
                               </div>
@@ -654,10 +707,10 @@ export default function DashboardClient({
                     </div>
 
                     {/* Top Referrers */}
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
-                      <h3 className="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider">Traffic Sources</h3>
+                    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                      <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Traffic Sources</h3>
                       {analyticsData.referrers.length === 0 ? (
-                        <p className="text-xs text-slate-500 py-6 text-center">No referrers logged.</p>
+                        <p className="text-xs text-slate-450 py-6 text-center">No referrers logged.</p>
                       ) : (
                         <div className="space-y-4">
                           {analyticsData.referrers.map((r, idx) => {
@@ -666,10 +719,10 @@ export default function DashboardClient({
                             return (
                               <div key={idx} className="space-y-1">
                                 <div className="flex justify-between text-xs font-semibold">
-                                  <span className="text-slate-300">{r.referrer}</span>
-                                  <span className="text-white font-mono">{r.count} hits</span>
+                                  <span className="text-slate-700">{r.referrer}</span>
+                                  <span className="text-slate-950 font-mono">{r.count} hits</span>
                                 </div>
-                                <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden">
+                                <div className="h-1.5 bg-slate-100 border border-slate-200/50 rounded-full overflow-hidden">
                                   <div style={{ width: `${widthPct}%` }} className="h-full bg-brand-green rounded-full"></div>
                                 </div>
                               </div>
@@ -683,16 +736,16 @@ export default function DashboardClient({
                   {/* Countries & Systems Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Countries */}
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
-                      <h3 className="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider">Geographic Origin</h3>
+                    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                      <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Geographic Origin</h3>
                       {analyticsData.countries.length === 0 ? (
-                        <p className="text-xs text-slate-500 py-6 text-center">No location metrics logged.</p>
+                        <p className="text-xs text-slate-450 py-6 text-center">No location metrics logged.</p>
                       ) : (
-                        <div className="divide-y divide-slate-800/50">
+                        <div className="divide-y divide-slate-150">
                           {analyticsData.countries.map((c, idx) => (
-                            <div key={idx} className="flex justify-between items-center py-2.5 text-xs font-semibold">
-                              <span className="text-slate-300">{c.country}</span>
-                              <span className="bg-slate-950 border border-slate-800 font-mono text-white px-2 py-0.5 rounded">
+                            <div key={idx} className="flex justify-between items-center py-2.5 text-xs font-semibold text-slate-750">
+                              <span className="text-slate-700">{c.country}</span>
+                              <span className="bg-slate-100 border border-slate-200 font-mono text-slate-950 px-2 py-0.5 rounded">
                                 {c.count} sessions
                               </span>
                             </div>
@@ -702,13 +755,13 @@ export default function DashboardClient({
                     </div>
 
                     {/* Devices, Browsers & OS Tabular Summary */}
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md flex flex-col gap-6">
+                    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col gap-6">
                       {/* Devices */}
                       <div>
                         <h4 className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wide">Devices</h4>
                         <div className="flex gap-2 flex-wrap">
                           {analyticsData.devices.map((d, idx) => (
-                            <span key={idx} className="bg-slate-950 border border-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-white">
+                            <span key={idx} className="bg-slate-50 border border-slate-200 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-800">
                               {d.device_type}: <span className="font-mono text-brand-blue">{d.count}</span>
                             </span>
                           ))}
@@ -720,7 +773,7 @@ export default function DashboardClient({
                         <h4 className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wide">Browsers</h4>
                         <div className="flex gap-2 flex-wrap">
                           {analyticsData.browsers.map((b, idx) => (
-                            <span key={idx} className="bg-slate-950 border border-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-white">
+                            <span key={idx} className="bg-slate-50 border border-slate-200 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-800">
                               {b.browser}: <span className="font-mono text-brand-green">{b.count}</span>
                             </span>
                           ))}
@@ -732,8 +785,8 @@ export default function DashboardClient({
                         <h4 className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wide">Operating Systems</h4>
                         <div className="flex gap-2 flex-wrap">
                           {analyticsData.os.map((o, idx) => (
-                            <span key={idx} className="bg-slate-950 border border-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-white">
-                              {o.os}: <span className="font-mono text-amber-400">{o.count}</span>
+                            <span key={idx} className="bg-slate-50 border border-slate-200 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-800">
+                              {o.os}: <span className="font-mono text-amber-500">{o.count}</span>
                             </span>
                           ))}
                         </div>
@@ -742,15 +795,15 @@ export default function DashboardClient({
                   </div>
 
                   {/* Conversions Table */}
-                  <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
-                    <h3 className="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider">Conversion & Event Summaries</h3>
+                  <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                    <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Conversion & Event Summaries</h3>
                     {analyticsData.conversions.length === 0 ? (
-                      <p className="text-xs text-slate-500 py-6 text-center">No conversions logged.</p>
+                      <p className="text-xs text-slate-450 py-6 text-center">No conversions logged.</p>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {analyticsData.conversions.map((c, idx) => {
                           let label = c.event_type;
-                          let color = "text-white";
+                          let color = "text-slate-950";
                           if (c.event_type === "form_submit") {
                             label = "Form Submissions";
                             color = "text-brand-blue";
@@ -759,13 +812,13 @@ export default function DashboardClient({
                             color = "text-brand-green";
                           } else if (c.event_type === "button_click") {
                             label = "Button Clicks";
-                            color = "text-slate-300";
+                            color = "text-slate-700";
                           } else if (c.event_type === "outbound_link") {
                             label = "Outbound Links";
-                            color = "text-red-400";
+                            color = "text-red-500";
                           }
                           return (
-                            <div key={idx} className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center">
+                            <div key={idx} className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-center shadow-sm">
                               <span className="text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wide">{label}</span>
                               <span className={`text-2xl font-black font-mono ${color}`}>{c.count}</span>
                             </div>
@@ -784,21 +837,21 @@ export default function DashboardClient({
           {activeTab === "overview" && (
             <div className="space-y-6">
               {/* Header stats */}
-              <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-md">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
                 <div>
-                  <span className="bg-slate-800 text-slate-300 text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">
+                  <span className="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">
                     {currentWebsite.domain}
                   </span>
-                  <h2 className="text-2xl font-black mt-3">{currentWebsite.displayName}</h2>
-                  <p className="text-slate-400 text-sm mt-1">Tenant Overview & Telemetry Stats</p>
+                  <h2 className="text-2xl font-black mt-3 text-slate-950">{currentWebsite.displayName}</h2>
+                  <p className="text-slate-500 text-sm mt-1">Tenant Overview & Telemetry Stats</p>
                 </div>
 
                 <div className="flex gap-4">
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 min-w-[120px]">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 min-w-[120px]">
                     <span className="text-xs text-slate-500 font-bold block mb-1">Contacts</span>
-                    <span className="text-2xl font-black font-mono">{contactForms.length}</span>
+                    <span className="text-2xl font-black font-mono text-slate-900">{contactForms.length}</span>
                   </div>
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 min-w-[120px]">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 min-w-[120px]">
                     <span className="text-xs text-slate-500 font-bold block mb-1">Bookings</span>
                     <span className="text-2xl font-black font-mono text-brand-green">{bookings.length}</span>
                   </div>
@@ -809,33 +862,33 @@ export default function DashboardClient({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 {/* Contact List Box */}
-                <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
                   <div className="flex justify-between items-center mb-6">
-                    <h3 className="font-bold text-base">Recent Contacts</h3>
+                    <h3 className="font-bold text-base text-slate-900">Recent Contacts</h3>
                     <button
                       onClick={() => setActiveTab("contacts")}
-                      className="text-xs font-bold text-brand-blue hover:underline"
+                      className="text-xs font-bold text-brand-blue hover:underline cursor-pointer"
                     >
                       View All
                     </button>
                   </div>
 
                   {contactForms.length === 0 ? (
-                    <div className="text-center py-10 text-slate-500 text-sm">
+                    <div className="text-center py-10 text-slate-450 text-sm">
                       No contacts received yet.
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {contactForms.slice(0, 3).map((form) => (
-                        <div key={form.id} className="bg-slate-950 border border-slate-800/80 rounded-xl p-4 text-sm">
+                        <div key={form.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm">
                           <div className="flex justify-between items-start mb-2">
-                            <span className="font-bold text-white">{form.name}</span>
+                            <span className="font-bold text-slate-900">{form.name}</span>
                             <span className="text-[10px] text-slate-500 font-mono">
                               {new Date(form.createdAt).toLocaleDateString()}
                             </span>
                           </div>
-                          <span className="text-slate-400 block text-xs truncate mb-2">{form.email}</span>
-                          <p className="text-slate-300 text-xs bg-slate-900/30 p-2 rounded-lg border border-slate-900 line-clamp-2">
+                          <span className="text-slate-500 block text-xs truncate mb-2">{form.email}</span>
+                          <p className="text-slate-600 text-xs bg-white p-2 rounded-lg border border-slate-200 line-clamp-2">
                             {form.message}
                           </p>
                         </div>
@@ -845,61 +898,69 @@ export default function DashboardClient({
                 </div>
 
                 {/* Booking List Box */}
-                <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
                   <div className="flex justify-between items-center mb-6">
-                    <h3 className="font-bold text-base">Upcoming Bookings</h3>
+                    <h3 className="font-bold text-base text-slate-900">Upcoming Bookings</h3>
                     <button
                       onClick={() => setActiveTab("bookings")}
-                      className="text-xs font-bold text-brand-green hover:underline"
+                      className="text-xs font-bold text-brand-green hover:underline cursor-pointer"
                     >
                       View All
                     </button>
                   </div>
 
                   {bookings.length === 0 ? (
-                    <div className="text-center py-10 text-slate-500 text-sm">
+                    <div className="text-center py-10 text-slate-450 text-sm">
                       No bookings scheduled yet.
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {bookings.slice(0, 3).map((booking) => (
-                        <div key={booking.id} className="bg-slate-950 border border-slate-800/80 rounded-xl p-4 text-sm">
-                          <div className="flex justify-between items-start mb-2">
-                            <span className="font-bold text-white">{booking.name}</span>
-                            <span className="bg-brand-green/15 text-brand-green font-bold text-[10px] px-2 py-0.5 rounded">
-                              {booking.status}
-                            </span>
+                      {bookings.slice(0, 3).map((booking) => {
+                        let badgeColor = "bg-amber-50 border-amber-200 text-amber-700";
+                        if (booking.status === "CONFIRMED") {
+                          badgeColor = "bg-emerald-50 border-emerald-200 text-emerald-700";
+                        } else if (booking.status === "CANCELLED") {
+                          badgeColor = "bg-rose-50 border-rose-200 text-rose-700";
+                        }
+                        return (
+                          <div key={booking.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm">
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="font-bold text-slate-900">{booking.name}</span>
+                              <span className={`font-bold text-[10px] px-2 py-0.5 rounded border ${badgeColor}`}>
+                                {booking.status}
+                              </span>
+                            </div>
+                            <div className="flex gap-4 text-xs font-mono text-slate-500 mb-2">
+                              <span>📅 {new Date(booking.date).toLocaleDateString()}</span>
+                              <span>⏰ {booking.time}</span>
+                            </div>
+                            <p className="text-slate-650 text-xs line-clamp-1 italic">
+                              "{booking.message}"
+                            </p>
                           </div>
-                          <div className="flex gap-4 text-xs font-mono text-slate-400 mb-2">
-                            <span>📅 {new Date(booking.date).toLocaleDateString()}</span>
-                            <span>⏰ {booking.time}</span>
-                          </div>
-                          <p className="text-slate-300 text-xs line-clamp-1 italic">
-                            "{booking.message}"
-                          </p>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
               </div>
 
               {/* API Configuration Card */}
-              <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
-                <h3 className="font-bold text-base mb-4">API Configuration</h3>
-                <p className="text-sm text-slate-400 mb-6">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <h3 className="font-bold text-base mb-4 text-slate-900">API Configuration</h3>
+                <p className="text-sm text-slate-500 mb-6">
                   Integrate your business website with SPP Labs' central API database by forwarding bookings and forms.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">API Key Endpoint</span>
-                    <span className="text-sm font-semibold text-white font-mono">api.spplabs.es</span>
+                    <span className="text-sm font-semibold text-slate-900 font-mono">api.spplabs.es</span>
                   </div>
 
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">Active Credentials</span>
-                    <span className="text-sm font-semibold text-white">
+                    <span className="text-sm font-semibold text-slate-900">
                       {apiKeys.length} key(s) linked
                     </span>
                   </div>
@@ -908,7 +969,7 @@ export default function DashboardClient({
                 <div className="mt-6 flex justify-end">
                   <button
                     onClick={() => setActiveTab("simulator")}
-                    className="h-10 px-6 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
+                    className="h-10 px-6 bg-slate-900 hover:bg-slate-850 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -923,44 +984,53 @@ export default function DashboardClient({
 
           {/* TAB: CONTACTS */}
           {activeTab === "contacts" && (
-            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
-              <h3 className="text-lg font-bold mb-1">Contact Submissions</h3>
-              <p className="text-sm text-slate-400 mb-6">List of contact form messages forwarded from client website via public API.</p>
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+              <h3 className="text-lg font-bold mb-1 text-slate-900">Contact Submissions</h3>
+              <p className="text-sm text-slate-500 mb-6">List of contact form messages forwarded from client website via public API.</p>
 
               {contactForms.length === 0 ? (
-                <div className="text-center py-20 text-slate-500 text-sm">
+                <div className="text-center py-20 text-slate-450 text-sm">
                   No contact forms found for this domain.
                 </div>
               ) : (
                 <div className="space-y-4">
                   {contactForms.map((form) => (
-                    <div key={form.id} className="bg-slate-950 border border-slate-800/80 rounded-2xl p-5 shadow-inner">
+                    <div key={form.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
                       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4">
                         <div>
-                          <span className="font-bold text-lg text-white block">{form.name}</span>
-                          <span className="text-xs text-brand-blue font-mono">{form.email}</span>
+                          <span className="font-bold text-lg text-slate-900 block">{form.name}</span>
+                          <span className="text-xs text-brand-blue font-semibold">{form.email}</span>
                         </div>
                         <div className="text-right text-xs text-slate-500 font-mono">
                           {new Date(form.createdAt).toLocaleString()}
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mb-4 border-t border-slate-900 pt-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mb-4 border-t border-slate-200 pt-4">
                         <div>
                           <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Phone</span>
-                          <span className="text-slate-300 font-mono">{form.phone || "Not provided"}</span>
+                          <span className="text-slate-700 font-mono">{form.phone || "Not provided"}</span>
                         </div>
                         <div>
                           <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Form Submission ID</span>
-                          <span className="text-slate-300 font-mono">{form.id}</span>
+                          <span className="text-slate-700 font-mono">{form.id}</span>
                         </div>
                       </div>
 
-                      <div>
+                      <div className="mb-4">
                         <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px] mb-2">Message</span>
-                        <div className="bg-slate-900/50 border border-slate-900 rounded-xl p-4 text-sm text-slate-200 leading-relaxed font-sans">
+                        <div className="bg-white border border-slate-200 rounded-xl p-4 text-sm text-slate-700 leading-relaxed font-sans">
                           {form.message}
                         </div>
+                      </div>
+
+                      <div className="flex justify-end pt-3 border-t border-slate-200">
+                        <button
+                          onClick={() => handleDeleteContact(form.id)}
+                          className="px-4 py-1.5 border border-red-200 hover:bg-red-50 text-red-655 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                        >
+                          Delete Record
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -971,61 +1041,94 @@ export default function DashboardClient({
 
           {/* TAB: BOOKINGS */}
           {activeTab === "bookings" && (
-            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
-              <h3 className="text-lg font-bold mb-1">Bookings & Appointments</h3>
-              <p className="text-sm text-slate-400 mb-6">List of scheduled bookings forwarded from booking calendars.</p>
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+              <h3 className="text-lg font-bold mb-1 text-slate-900">Bookings & Appointments</h3>
+              <p className="text-sm text-slate-500 mb-6">List of scheduled bookings forwarded from booking calendars.</p>
 
               {bookings.length === 0 ? (
-                <div className="text-center py-20 text-slate-500 text-sm">
+                <div className="text-center py-20 text-slate-450 text-sm">
                   No bookings found for this domain.
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {bookings.map((booking) => (
-                    <div key={booking.id} className="bg-slate-950 border border-slate-800/80 rounded-2xl p-5 shadow-inner">
-                      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4">
-                        <div>
-                          <span className="font-bold text-lg text-white block">{booking.name}</span>
-                          <span className="text-xs text-brand-green font-mono">{booking.email}</span>
+                  {bookings.map((booking) => {
+                    let badgeColor = "bg-amber-50 border-amber-200 text-amber-700";
+                    if (booking.status === "CONFIRMED") {
+                      badgeColor = "bg-emerald-50 border-emerald-200 text-emerald-700";
+                    } else if (booking.status === "CANCELLED") {
+                      badgeColor = "bg-rose-50 border-rose-200 text-rose-700";
+                    }
+                    return (
+                      <div key={booking.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
+                        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4">
+                          <div>
+                            <span className="font-bold text-lg text-slate-900 block">{booking.name}</span>
+                            <span className="text-xs text-brand-green font-semibold">{booking.email}</span>
+                          </div>
+                          <div>
+                            <span className={`font-bold text-xs px-3 py-1 rounded-full border ${badgeColor}`}>
+                              {booking.status}
+                            </span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="bg-brand-green/20 text-brand-green font-bold text-xs px-3 py-1 rounded-full border border-brand-green/20">
-                            {booking.status}
-                          </span>
-                        </div>
-                      </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs mb-4 border-y border-slate-900 py-4">
-                        <div>
-                          <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Appt Date</span>
-                          <span className="text-slate-200 font-mono font-bold text-sm">
-                            {new Date(booking.date).toLocaleDateString()}
-                          </span>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs mb-4 border-y border-slate-200 py-4">
+                          <div>
+                            <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Appt Date</span>
+                            <span className="text-slate-900 font-mono font-bold text-sm">
+                              {new Date(booking.date).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Appt Time</span>
+                            <span className="text-slate-900 font-mono font-bold text-sm">{booking.time}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Phone</span>
+                            <span className="text-slate-700 font-mono">{booking.phone || "Not provided"}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Received</span>
+                            <span className="text-slate-750 font-mono">
+                              {new Date(booking.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Appt Time</span>
-                          <span className="text-slate-200 font-mono font-bold text-sm">{booking.time}</span>
-                        </div>
-                        <div>
-                          <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Phone</span>
-                          <span className="text-slate-300 font-mono">{booking.phone || "Not provided"}</span>
-                        </div>
-                        <div>
-                          <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Received</span>
-                          <span className="text-slate-300 font-mono">
-                            {new Date(booking.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
 
-                      <div>
-                        <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px] mb-2">Customer Request Note</span>
-                        <div className="bg-slate-900/50 border border-slate-900 rounded-xl p-3 text-xs text-slate-300 italic">
-                          "{booking.message || "No notes attached."}"
+                        <div className="mb-4">
+                          <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px] mb-2">Customer Request Note</span>
+                          <div className="bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-600 italic">
+                            "{booking.message || "No notes attached."}"
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-3 border-t border-slate-200">
+                          {booking.status === "PENDING" && (
+                            <>
+                              <button
+                                onClick={() => handleUpdateBookingStatus(booking.id, "CONFIRMED")}
+                                className="px-3.5 py-1.5 bg-brand-green hover:bg-brand-green-dark text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
+                              >
+                                Accept
+                              </button>
+                              <button
+                                onClick={() => handleUpdateBookingStatus(booking.id, "CANCELLED")}
+                                className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
+                              >
+                                Reject
+                              </button>
+                            </>
+                          )}
+                          <button
+                            onClick={() => handleDeleteBooking(booking.id)}
+                            className="ml-auto px-3.5 py-1.5 border border-red-200 hover:bg-red-50 text-red-655 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                          >
+                            Delete Record
+                          </button>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -1033,16 +1136,16 @@ export default function DashboardClient({
 
           {/* TAB: SIMULATOR */}
           {activeTab === "simulator" && (
-            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
-              <h3 className="text-lg font-bold mb-1">API Integration Simulator</h3>
-              <p className="text-sm text-slate-400 mb-6">
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm animate-fade-in">
+              <h3 className="text-lg font-bold mb-1 text-slate-900">API Integration Simulator</h3>
+              <p className="text-sm text-slate-500 mb-6">
                 Simulate how your external frontends forward forms to `api.spplabs.es`. Firing requests here executes real database operations and key validations.
               </p>
 
               <form onSubmit={handleSimulateSubmit} className="space-y-6">
                 
                 {/* Credentials Selection */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-950 p-5 rounded-2xl border border-slate-800">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Sender Domain</label>
                     <input
@@ -1050,7 +1153,7 @@ export default function DashboardClient({
                       required
                       value={simDomain}
                       onChange={(e) => setSimDomain(e.target.value)}
-                      className="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg px-3 text-xs font-mono text-white focus:outline-none"
+                      className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3 text-xs font-mono text-slate-900 focus:outline-none focus:border-brand-blue"
                     />
                   </div>
 
@@ -1064,20 +1167,20 @@ export default function DashboardClient({
                       placeholder="Paste your raw API key here to test validation"
                       value={simApiKey}
                       onChange={(e) => setSimApiKey(e.target.value)}
-                      className="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg px-3 text-xs font-mono text-white focus:outline-none focus:border-brand-blue"
+                      className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3 text-xs font-mono text-slate-900 focus:outline-none focus:border-brand-blue"
                     />
                   </div>
                 </div>
 
                 {/* Form Type Selector */}
-                <div className="flex gap-4 border-b border-slate-800 pb-2">
+                <div className="flex gap-4 border-b border-slate-200 pb-2">
                   <button
                     type="button"
                     onClick={() => setSimType("contact")}
-                    className={`pb-2 text-sm font-bold border-b-2 transition-all ${
+                    className={`pb-2 text-sm font-bold border-b-2 transition-all cursor-pointer ${
                       simType === "contact"
-                        ? "border-brand-blue text-white"
-                        : "border-transparent text-slate-500 hover:text-white"
+                        ? "border-brand-blue text-brand-blue"
+                        : "border-transparent text-slate-450 hover:text-slate-800"
                     }`}
                   >
                     Contact Form Post
@@ -1085,10 +1188,10 @@ export default function DashboardClient({
                   <button
                     type="button"
                     onClick={() => setSimType("booking")}
-                    className={`pb-2 text-sm font-bold border-b-2 transition-all ${
+                    className={`pb-2 text-sm font-bold border-b-2 transition-all cursor-pointer ${
                       simType === "booking"
-                        ? "border-brand-green text-white"
-                        : "border-transparent text-slate-500 hover:text-white"
+                        ? "border-brand-green text-brand-green"
+                        : "border-transparent text-slate-450 hover:text-slate-800"
                     }`}
                   >
                     Booking Calendar Post
@@ -1099,112 +1202,112 @@ export default function DashboardClient({
                 {simType === "contact" ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-400 mb-2">Customer Name</label>
+                      <label className="block text-xs font-semibold text-slate-550 mb-2">Customer Name</label>
                       <input
                         type="text"
                         required
                         placeholder="John Doe"
                         value={simContactName}
                         onChange={(e) => setSimContactName(e.target.value)}
-                        className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                        className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3 text-xs text-slate-900 focus:outline-none focus:border-brand-blue"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-400 mb-2">Customer Email</label>
+                      <label className="block text-xs font-semibold text-slate-550 mb-2">Customer Email</label>
                       <input
                         type="email"
                         required
                         placeholder="john@example.com"
                         value={simContactEmail}
                         onChange={(e) => setSimContactEmail(e.target.value)}
-                        className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                        className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3 text-xs text-slate-900 focus:outline-none focus:border-brand-blue"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-400 mb-2">Customer Phone</label>
+                      <label className="block text-xs font-semibold text-slate-550 mb-2">Customer Phone</label>
                       <input
                         type="text"
                         placeholder="+34 600 000 000"
                         value={simContactPhone}
                         onChange={(e) => setSimContactPhone(e.target.value)}
-                        className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                        className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3 text-xs text-slate-900 focus:outline-none focus:border-brand-blue"
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-semibold text-slate-400 mb-2">Message</label>
+                      <label className="block text-xs font-semibold text-slate-550 mb-2">Message</label>
                       <textarea
                         required
                         placeholder="Hello, I want to inquire about custom software developments."
                         value={simContactMessage}
                         onChange={(e) => setSimContactMessage(e.target.value)}
-                        className="w-full h-24 bg-slate-950 border border-slate-850 rounded-lg p-3 text-xs resize-none"
+                        className="w-full h-24 bg-white border border-slate-200 rounded-lg p-3 text-xs resize-none text-slate-900 focus:outline-none focus:border-brand-blue"
                       />
                     </div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-400 mb-2">Client Name</label>
+                      <label className="block text-xs font-semibold text-slate-550 mb-2">Client Name</label>
                       <input
                         type="text"
                         required
                         placeholder="Jane Smith"
                         value={simBookingName}
                         onChange={(e) => setSimBookingName(e.target.value)}
-                        className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                        className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3 text-xs text-slate-900 focus:outline-none focus:border-brand-blue"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-400 mb-2">Client Email</label>
+                      <label className="block text-xs font-semibold text-slate-550 mb-2">Client Email</label>
                       <input
                         type="email"
                         required
                         placeholder="jane@example.com"
                         value={simBookingEmail}
                         onChange={(e) => setSimBookingEmail(e.target.value)}
-                        className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                        className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3 text-xs text-slate-900 focus:outline-none focus:border-brand-blue"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-400 mb-2">Client Phone</label>
+                      <label className="block text-xs font-semibold text-slate-550 mb-2">Client Phone</label>
                       <input
                         type="text"
                         placeholder="+34 611 111 111"
                         value={simBookingPhone}
                         onChange={(e) => setSimBookingPhone(e.target.value)}
-                        className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                        className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3 text-xs text-slate-900 focus:outline-none focus:border-brand-blue"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-400 mb-2">Appt Date</label>
+                        <label className="block text-xs font-semibold text-slate-550 mb-2">Appt Date</label>
                         <input
                           type="date"
                           required
                           value={simBookingDate}
                           onChange={(e) => setSimBookingDate(e.target.value)}
-                          className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                          className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3 text-xs text-slate-900 focus:outline-none focus:border-brand-blue"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-400 mb-2">Appt Time</label>
+                        <label className="block text-xs font-semibold text-slate-550 mb-2">Appt Time</label>
                         <input
                           type="text"
                           required
                           placeholder="11:30"
                           value={simBookingTime}
                           onChange={(e) => setSimBookingTime(e.target.value)}
-                          className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                          className="w-full h-10 bg-white border border-slate-200 rounded-lg px-3 text-xs text-slate-900 focus:outline-none focus:border-brand-blue"
                         />
                       </div>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-semibold text-slate-400 mb-2">Request Note</label>
+                      <label className="block text-xs font-semibold text-slate-550 mb-2">Request Note</label>
                       <textarea
                         placeholder="Requesting consult for SEO analysis."
                         value={simBookingMessage}
                         onChange={(e) => setSimBookingMessage(e.target.value)}
-                        className="w-full h-24 bg-slate-950 border border-slate-850 rounded-lg p-3 text-xs resize-none"
+                        className="w-full h-24 bg-white border border-slate-200 rounded-lg p-3 text-xs resize-none text-slate-900 focus:outline-none focus:border-brand-blue"
                       />
                     </div>
                   </div>
@@ -1227,17 +1330,17 @@ export default function DashboardClient({
 
               {/* SIMULATOR RESPONSE CODE VIEWER */}
               {simResult && (
-                <div className="mt-8 bg-slate-950 border border-slate-850 rounded-2xl p-5 shadow-inner">
+                <div className="mt-8 bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-500">API Server Response</span>
-                    <span className={`text-xs font-bold px-2.5 py-0.5 rounded font-mono ${
-                      simResult.ok ? "bg-brand-green/20 text-brand-green" : "bg-red-500/20 text-red-400"
+                    <span className={`text-xs font-bold px-2.5 py-0.5 rounded border font-mono ${
+                      simResult.ok ? "bg-emerald-50 border-emerald-250 text-emerald-700" : "bg-rose-50 border-rose-250 text-rose-700"
                     }`}>
                       HTTP {simResult.status} {simResult.ok ? "OK" : "Error"}
                     </span>
                   </div>
 
-                  <pre className="bg-slate-900 border border-slate-850 p-4 rounded-xl text-xs font-mono overflow-x-auto text-slate-300 select-all">
+                  <pre className="bg-white border border-slate-200 p-4 rounded-xl text-xs font-mono overflow-x-auto text-slate-800 select-all">
                     {JSON.stringify(simResult.data, null, 2)}
                   </pre>
                 </div>

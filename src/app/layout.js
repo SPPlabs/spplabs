@@ -14,6 +14,9 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "SPP Labs | Next-Generation Operations & Analytics Platform",
   description: "Accelerate your development cycle, monitor performance, and scale secure workflows with SPP Labs' premium operations platform.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({ children }) {

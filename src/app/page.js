@@ -24,6 +24,55 @@ export default function Home() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingResult, setBookingResult] = useState(null);
 
+  // Calendar states
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const renderCalendarDays = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+
+    const days = [];
+    // Pad previous month days
+    for (let i = 0; i < firstDayIndex; i++) {
+      days.push(<div key={`pad-${i}`} className="w-8 h-8"></div>);
+    }
+
+    // Render current month days
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let day = 1; day <= totalDays; day++) {
+      const dateObj = new Date(year, month, day);
+      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      const isPast = dateObj < today;
+      const isSelected = bookingDate === dateStr;
+
+      days.push(
+        <button
+          key={day}
+          type="button"
+          disabled={isPast}
+          onClick={() => {
+            setBookingDate(dateStr);
+            setBookingTime(""); // reset time when date changes
+          }}
+          className={`w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
+            isSelected
+              ? "bg-brand-green text-white shadow-md font-extrabold"
+              : isPast
+              ? "text-zinc-300 cursor-not-allowed"
+              : "hover:bg-zinc-200 hover:text-black text-zinc-800 bg-white border border-zinc-100"
+          }`}
+        >
+          {day}
+        </button>
+      );
+    }
+    return days;
+  };
+
   // Submit handlers
   const handleContactSubmit = async (e) => {
     e.preventDefault();
@@ -181,14 +230,7 @@ export default function Home() {
       <header className="border-b border-zinc-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <a href="#" className="flex items-center gap-3 group" id="nav-logo">
-            {/* SPP Labs Logo */}
-            <div className="relative w-8 h-8 flex items-center justify-center">
-              <div className="absolute inset-0 bg-brand-blue rounded-lg transform rotate-6 group-hover:rotate-12 transition-transform duration-300"></div>
-              <div className="absolute inset-0.5 bg-white rounded-md flex items-center justify-center">
-                <div className="w-4.5 h-4.5 bg-brand-green rounded transform -rotate-12 group-hover:rotate-0 transition-transform duration-300"></div>
-              </div>
-              <div className="absolute w-2 h-2 bg-black rounded-full"></div>
-            </div>
+            <img src="/logo.webp" alt="SPP Labs Logo" className="w-8 h-8 object-contain" />
             <span className="font-bold text-xl tracking-tight">
               SPP <span className="text-zinc-500 font-medium">labs</span>
             </span>
@@ -757,28 +799,82 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Select Date</label>
-                        <input
-                          type="date"
-                          required
-                          value={bookingDate}
-                          onChange={(e) => setBookingDate(e.target.value)}
-                          className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
-                        />
+                    {/* Interactive Calendar Component */}
+                    <div className="border border-zinc-200 rounded-2xl p-4 bg-zinc-50 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-zinc-700 uppercase tracking-wider">
+                          Select Date & Time
+                        </span>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const prev = new Date(currentMonth);
+                              prev.setMonth(prev.getMonth() - 1);
+                              setCurrentMonth(prev);
+                            }}
+                            className="p-1.5 hover:bg-zinc-200 text-zinc-600 rounded-lg transition-all cursor-pointer"
+                          >
+                            ‹
+                          </button>
+                          <span className="text-xs font-bold text-zinc-850">
+                            {currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = new Date(currentMonth);
+                              next.setMonth(next.getMonth() + 1);
+                              setCurrentMonth(next);
+                            }}
+                            className="p-1.5 hover:bg-zinc-200 text-zinc-600 rounded-lg transition-all cursor-pointer"
+                          >
+                            ›
+                          </button>
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Preferred Time</label>
-                        <input
-                          type="text"
-                          required
-                          value={bookingTime}
-                          onChange={(e) => setBookingTime(e.target.value)}
-                          placeholder="e.g. 10:00 or 15:30"
-                          className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
-                        />
+
+                      {/* Day Grid Header */}
+                      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-zinc-400 uppercase">
+                        <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
                       </div>
+                      
+                      {/* Days Grid */}
+                      <div className="grid grid-cols-7 gap-1">
+                        {renderCalendarDays()}
+                      </div>
+
+                      {/* Hourly slots grid */}
+                      {bookingDate ? (
+                        <div className="space-y-2.5 pt-2 border-t border-zinc-200/60">
+                          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
+                            Slots for {new Date(bookingDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}:
+                          </span>
+                          <div className="grid grid-cols-4 gap-1.5">
+                            {["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"].map((t) => (
+                              <button
+                                key={t}
+                                type="button"
+                                onClick={() => setBookingTime(t)}
+                                className={`py-1.5 rounded-lg text-xs font-bold font-mono transition-all text-center border cursor-pointer ${
+                                  bookingTime === t
+                                    ? "bg-brand-green border-brand-green text-white shadow-sm"
+                                    : "bg-white border-zinc-200 text-zinc-800 hover:border-brand-green hover:bg-brand-green/5"
+                                }`}
+                              >
+                                {t}
+                              </button>
+                            ))}
+                          </div>
+                          {/* Hidden inputs to make HTML5 required validator trigger if submit is clicked without selections */}
+                          <input type="hidden" name="booking_date" required value={bookingDate} />
+                          <input type="hidden" name="booking_time" required value={bookingTime} />
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-zinc-400 italic text-center pt-2 border-t border-zinc-200/60">
+                          Please select a date from the calendar to check hours.
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -847,7 +943,8 @@ export default function Home() {
       <footer className="bg-white border-t border-zinc-100 py-12 mt-auto">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <span className="font-bold text-base tracking-tight text-black">
+            <img src="/logo.webp" alt="SPP Labs Logo" className="w-6 h-6 object-contain" />
+            <span className="font-bold text-xl tracking-tight">
               SPP <span className="text-zinc-500 font-medium">labs</span>
             </span>
             <span className="text-xs text-zinc-400">| © 2026 SPP Labs Inc. All rights reserved.</span>
