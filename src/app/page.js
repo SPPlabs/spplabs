@@ -94,17 +94,24 @@ export default function Home() {
 
           <nav className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm font-medium text-zinc-600 hover:text-black transition-colors" id="nav-link-features">Features</a>
-            <a href="#demo" className="text-sm font-medium text-zinc-600 hover:text-black transition-colors" id="nav-link-demo">Interactive Demo</a>
+            <a href="#demo" className="text-sm font-medium text-zinc-600 hover:text-black transition-colors" id="nav-link-demo">Demo Telemetry</a>
             <a href="#pricing" className="text-sm font-medium text-zinc-600 hover:text-black transition-colors" id="nav-link-pricing">Pricing</a>
           </nav>
 
-          <div>
+          <div className="flex items-center gap-4">
             <a
-              href="#demo"
-              className="inline-flex items-center justify-center px-5 h-11 text-sm font-medium bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 shadow-sm hover:shadow-md"
+              href="/signup"
+              className="text-sm font-semibold text-zinc-600 hover:text-black transition-colors"
+              id="nav-signup-link"
+            >
+              Sign Up
+            </a>
+            <a
+              href="/login"
+              className="inline-flex items-center justify-center px-5 h-10 text-sm font-bold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 shadow-sm hover:shadow-md cursor-pointer"
               id="nav-cta"
             >
-              Launch Demo
+              Dashboard Login
             </a>
           </div>
         </div>
@@ -135,18 +142,18 @@ export default function Home() {
 
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                   <a
-                    href="#demo"
-                    className="inline-flex items-center justify-center px-8 h-13 text-base font-semibold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 shadow-lg hover:shadow-xl"
+                    href="/login"
+                    className="inline-flex items-center justify-center px-8 h-13 text-base font-semibold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 shadow-lg hover:shadow-xl cursor-pointer"
                     id="hero-primary-cta"
                   >
-                    Start Monitoring
+                    Dashboard Portal
                   </a>
                   <a
-                    href="#features"
-                    className="inline-flex items-center justify-center px-8 h-13 text-base font-semibold bg-white text-black border border-zinc-300 rounded-lg hover:border-black transition-colors duration-300"
+                    href="/signup"
+                    className="inline-flex items-center justify-center px-8 h-13 text-base font-semibold bg-white text-black border border-zinc-300 rounded-lg hover:border-black transition-colors duration-300 cursor-pointer"
                     id="hero-secondary-cta"
                   >
-                    Explore Capabilities
+                    Register Tenant
                   </a>
                 </div>
 
@@ -504,18 +511,18 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <a
-                href="#demo"
-                className="inline-flex items-center justify-center px-8 h-12 text-sm font-bold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300"
+                href="/login"
+                className="inline-flex items-center justify-center px-8 h-12 text-sm font-bold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 cursor-pointer"
                 id="footer-banner-cta-primary"
               >
-                Launch Free Trial
+                Access Dashboard
               </a>
               <a
-                href="#features"
-                className="inline-flex items-center justify-center px-8 h-12 text-sm font-bold bg-white text-black border border-zinc-300 rounded-lg hover:border-black transition-colors duration-300"
+                href="/signup"
+                className="inline-flex items-center justify-center px-8 h-12 text-sm font-bold bg-white text-black border border-zinc-300 rounded-lg hover:border-black transition-colors duration-300 cursor-pointer"
                 id="footer-banner-cta-secondary"
               >
-                Learn More
+                Register Account
               </a>
             </div>
           </div>

@@ -1,0 +1,949 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+
+export default function DashboardClient({
+  session,
+  allWebsites,
+  currentWebsite,
+  contactForms,
+  bookings,
+  apiKeys,
+}) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState(session.role === "ADMIN" && !searchParams.get("domain") ? "admin" : "overview");
+
+  // Form states for creating a new client (admin only)
+  const [newDomain, setNewDomain] = useState("");
+  const [newDisplayName, setNewDisplayName] = useState("");
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createdCredentials, setCreatedCredentials] = useState(null);
+  const [createError, setCreateError] = useState("");
+
+  // Simulator states
+  const [simType, setSimType] = useState("contact"); // contact | booking
+  const [simApiKey, setSimApiKey] = useState("");
+  const [simDomain, setSimDomain] = useState(currentWebsite.domain);
+  const [simContactName, setSimContactName] = useState("");
+  const [simContactEmail, setSimContactEmail] = useState("");
+  const [simContactPhone, setSimContactPhone] = useState("");
+  const [simContactMessage, setSimContactMessage] = useState("");
+  const [simBookingName, setSimBookingName] = useState("");
+  const [simBookingEmail, setSimBookingEmail] = useState("");
+  const [simBookingPhone, setSimBookingPhone] = useState("");
+  const [simBookingDate, setSimBookingDate] = useState("");
+  const [simBookingTime, setSimBookingTime] = useState("");
+  const [simBookingMessage, setSimBookingMessage] = useState("");
+  const [simResult, setSimResult] = useState(null);
+  const [simLoading, setSimLoading] = useState(false);
+
+  const isImpersonating = session.role === "ADMIN" && currentWebsite.domain !== "spplabs.es";
+
+  // Handle Logout
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (res.ok) {
+        router.push("/login");
+        router.refresh();
+      }
+    } catch (e) {
+      console.error("Logout error:", e);
+    }
+  };
+
+  // Handle Create Client Website (Admin only)
+  const handleCreateClient = async (e) => {
+    e.preventDefault();
+    setCreateError("");
+    setCreatedCredentials(null);
+    setCreateLoading(true);
+
+    try {
+      const res = await fetch("/api/admin/create-client", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain: newDomain, displayName: newDisplayName }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || data.error || "Failed to create client");
+      }
+
+      setCreatedCredentials(data);
+      setNewDomain("");
+      setNewDisplayName("");
+      router.refresh();
+    } catch (err) {
+      setCreateError(err.message);
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+
+  // Run Simulator Endpoint (POST /contacts or POST /bookings)
+  const handleSimulateSubmit = async (e) => {
+    e.preventDefault();
+    setSimResult(null);
+    setSimLoading(true);
+
+    const payload = simType === "contact"
+      ? {
+          domain: simDomain,
+          name: simContactName,
+          email: simContactEmail,
+          phone: simContactPhone,
+          message: simContactMessage,
+        }
+      : {
+          domain: simDomain,
+          name: simBookingName,
+          email: simBookingEmail,
+          phone: simBookingPhone,
+          date: simBookingDate,
+          time: simBookingTime,
+          message: simBookingMessage,
+        };
+
+    try {
+      // Determine the API base URL dynamically for local testing vs production environment
+      const isLocal = window.location.hostname.includes("localhost") || window.location.hostname.includes("127.0.0.1");
+      const apiBase = isLocal
+        ? `${window.location.protocol}//api.localhost:${window.location.port}`
+        : (process.env.NEXT_PUBLIC_API_URL || "https://api.spplabs.es");
+      
+      const endpoint = `${apiBase}${simType === "contact" ? "/contacts" : "/bookings"}`;
+      
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": simApiKey,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      setSimResult({
+        status: res.status,
+        ok: res.ok,
+        data,
+      });
+
+      if (res.ok) {
+        // Clear inputs on success
+        if (simType === "contact") {
+          setSimContactName("");
+          setSimContactEmail("");
+          setSimContactPhone("");
+          setSimContactMessage("");
+        } else {
+          setSimBookingName("");
+          setSimBookingEmail("");
+          setSimBookingPhone("");
+          setSimBookingDate("");
+          setSimBookingTime("");
+          setSimBookingMessage("");
+        }
+        // Refresh dashboard data so new entry is fetched
+        setTimeout(() => router.refresh(), 500);
+      }
+    } catch (err) {
+      setSimResult({
+        status: "Network Error",
+        ok: false,
+        data: { error: err.message },
+      });
+    } finally {
+      setSimLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col font-sans selection:bg-brand-blue selection:text-white">
+      {/* Impersonation Alert Banner */}
+      {isImpersonating && (
+        <div className="bg-brand-blue text-white px-6 py-2.5 text-center text-sm font-semibold flex items-center justify-center gap-3 shadow-md z-40 relative">
+          <span className="flex items-center gap-1.5">
+            <svg className="w-4.5 h-4.5 animate-pulse" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            Impersonation View: <span className="underline font-bold">{currentWebsite.domain}</span> ({currentWebsite.displayName})
+          </span>
+          <button
+            onClick={() => {
+              router.push("/dashboard");
+              setActiveTab("admin");
+            }}
+            className="bg-black/35 hover:bg-black/60 text-white px-3 py-1 rounded-md text-xs font-bold transition-all border border-white/20"
+          >
+            Exit Impersonation
+          </button>
+        </div>
+      )}
+
+      {/* Main Dashboard Navigation Header */}
+      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="relative w-8 h-8 flex items-center justify-center">
+              <div className="absolute inset-0 bg-brand-blue rounded-lg transform rotate-6"></div>
+              <div className="absolute inset-0.5 bg-slate-950 rounded-md flex items-center justify-center">
+                <div className="w-4 h-4 bg-brand-green rounded transform -rotate-12"></div>
+              </div>
+              <div className="absolute w-2 h-2 bg-white rounded-full"></div>
+            </div>
+            <span className="font-bold text-lg tracking-tight">
+              SPP <span className="text-slate-500 font-medium">labs</span>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="text-right hidden sm:block">
+              <span className="text-xs text-slate-500 font-medium block">Logged in as</span>
+              <span className="text-sm font-semibold">{session.domain}</span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="px-4 h-10 text-xs font-bold border border-slate-800 hover:border-red-500 hover:text-red-400 rounded-lg transition-all"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Layout Area */}
+      <div className="flex-1 max-w-7xl w-full mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Sidebar Menu */}
+        <aside className="lg:col-span-3 flex flex-col gap-2">
+          {session.role === "ADMIN" && (
+            <button
+              onClick={() => setActiveTab("admin")}
+              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all ${
+                activeTab === "admin"
+                  ? "bg-brand-blue text-white shadow-lg"
+                  : "bg-slate-900/50 hover:bg-slate-900 text-slate-400 hover:text-white"
+              }`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Admin control
+            </button>
+          )}
+
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all ${
+              activeTab === "overview"
+                ? "bg-white text-black shadow-lg"
+                : "bg-slate-900/50 hover:bg-slate-900 text-slate-400 hover:text-white"
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
+            </svg>
+            Telemetry Overview
+          </button>
+
+          <button
+            onClick={() => setActiveTab("contacts")}
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all ${
+              activeTab === "contacts"
+                ? "bg-white text-black shadow-lg"
+                : "bg-slate-900/50 hover:bg-slate-900 text-slate-400 hover:text-white"
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Contact Forms
+            {contactForms.length > 0 && (
+              <span className="ml-auto bg-brand-blue text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                {contactForms.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab("bookings")}
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all ${
+              activeTab === "bookings"
+                ? "bg-white text-black shadow-lg"
+                : "bg-slate-900/50 hover:bg-slate-900 text-slate-400 hover:text-white"
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Bookings Calendar
+            {bookings.length > 0 && (
+              <span className="ml-auto bg-brand-green text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                {bookings.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab("simulator")}
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-sm font-bold transition-all ${
+              activeTab === "simulator"
+                ? "bg-white text-black shadow-lg"
+                : "bg-slate-900/50 hover:bg-slate-900 text-slate-400 hover:text-white"
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+            </svg>
+            API Integration Simulator
+          </button>
+        </aside>
+
+        {/* Detail Panel */}
+        <main className="lg:col-span-9 flex flex-col gap-6">
+
+          {/* TAB: ADMIN PANEL */}
+          {activeTab === "admin" && session.role === "ADMIN" && (
+            <div className="space-y-8">
+              {/* Provision Website Form */}
+              <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+                <h3 className="text-lg font-bold mb-1">Provision New Client Website</h3>
+                <p className="text-sm text-slate-400 mb-6">Create a website tenant record. You will generate a signup token (for client sign up) and a secure client API key.</p>
+                
+                {createError && (
+                  <div className="bg-red-950/40 border border-red-500/50 text-red-200 text-sm p-4 rounded-xl mb-6">
+                    {createError}
+                  </div>
+                )}
+
+                <form onSubmit={handleCreateClient} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                      Client Domain Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="clientdomain.com"
+                      value={newDomain}
+                      onChange={(e) => setNewDomain(e.target.value)}
+                      className="w-full h-11 bg-slate-950 border border-slate-800 rounded-xl px-4 text-sm font-medium focus:outline-none focus:border-brand-blue"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                      Company / Display Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="ACME Corporation"
+                      value={newDisplayName}
+                      onChange={(e) => setNewDisplayName(e.target.value)}
+                      className="w-full h-11 bg-slate-950 border border-slate-800 rounded-xl px-4 text-sm font-medium focus:outline-none focus:border-brand-blue"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2 mt-2">
+                    <button
+                      type="submit"
+                      disabled={createLoading}
+                      className="w-full md:w-auto h-11 px-8 bg-brand-blue hover:bg-brand-blue-dark text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 flex items-center justify-center cursor-pointer"
+                    >
+                      {createLoading ? (
+                        <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      ) : (
+                        "Generate Credentials"
+                      )}
+                    </button>
+                  </div>
+                </form>
+
+                {/* Display Credentials After Creation */}
+                {createdCredentials && (
+                  <div className="mt-8 bg-slate-950 border border-brand-green/30 rounded-2xl p-6 shadow-inner relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-brand-green/5 rounded-bl-full"></div>
+                    
+                    <div className="flex items-center gap-2 text-brand-green font-bold text-sm mb-4">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Client Tenant Provisioned Successfully!
+                    </div>
+
+                    <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                      <span className="font-bold text-red-400">WARNING:</span> Copy the API key now. It is hashed using Argon2id and stored in the database, and **will not be shown again**.
+                    </p>
+
+                    <div className="space-y-4">
+                      <div>
+                        <span className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Signup Token (Send manually to client)</span>
+                        <div className="flex items-center gap-2">
+                          <code className="flex-1 bg-slate-900 border border-slate-800 px-3 py-2 rounded-lg text-xs font-mono text-white select-all">
+                            {createdCredentials.signupToken}
+                          </code>
+                          <button
+                            onClick={() => navigator.clipboard.writeText(createdCredentials.signupToken)}
+                            className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs px-3 py-2 rounded-lg font-bold transition-all active:scale-95"
+                          >
+                            Copy
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">API Key (For client's public website requests)</span>
+                        <div className="flex items-center gap-2">
+                          <code className="flex-1 bg-slate-900 border border-slate-800 px-3 py-2 rounded-lg text-xs font-mono text-brand-green select-all">
+                            {createdCredentials.rawApiKey}
+                          </code>
+                          <button
+                            onClick={() => navigator.clipboard.writeText(createdCredentials.rawApiKey)}
+                            className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs px-3 py-2 rounded-lg font-bold transition-all active:scale-95"
+                          >
+                            Copy
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Client Directory List */}
+              <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+                <h3 className="text-lg font-bold mb-1">Provisioned Client Directory</h3>
+                <p className="text-sm text-slate-400 mb-6">List of all active client websites. Click "Enter Dashboard" to verify progress and view submissions.</p>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-800 text-slate-500 font-bold">
+                        <th className="pb-3 font-semibold">Client Name</th>
+                        <th className="pb-3 font-semibold">Domain</th>
+                        <th className="pb-3 font-semibold">Status</th>
+                        <th className="pb-3 font-semibold">Provisioned At</th>
+                        <th className="pb-3 text-right font-semibold">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/50">
+                      {allWebsites.map((web) => (
+                        <tr key={web.id} className="hover:bg-slate-900/30 transition-all">
+                          <td className="py-3.5 font-semibold text-white">{web.displayName}</td>
+                          <td className="py-3.5 text-slate-300 font-mono text-xs">{web.domain}</td>
+                          <td className="py-3.5">
+                            {web.role === "ADMIN" ? (
+                              <span className="bg-brand-blue/15 text-brand-blue text-xs px-2.5 py-0.5 rounded-full font-bold">
+                                Admin Account
+                              </span>
+                            ) : web.passwordHash ? (
+                              <span className="bg-brand-green/15 text-brand-green text-xs px-2.5 py-0.5 rounded-full font-bold">
+                                Registered
+                              </span>
+                            ) : (
+                              <span className="bg-amber-500/15 text-amber-400 text-xs px-2.5 py-0.5 rounded-full font-bold">
+                                Pending Setup
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3.5 text-slate-400 text-xs">
+                            {new Date(web.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="py-3.5 text-right">
+                            {web.role !== "ADMIN" && (
+                              <button
+                                onClick={() => {
+                                  router.push(`/dashboard?domain=${web.domain}`);
+                                  setActiveTab("overview");
+                                }}
+                                className="bg-slate-800 hover:bg-white hover:text-black text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all"
+                              >
+                                Enter Dashboard
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: OVERVIEW */}
+          {activeTab === "overview" && (
+            <div className="space-y-6">
+              {/* Header stats */}
+              <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-md">
+                <div>
+                  <span className="bg-slate-800 text-slate-300 text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">
+                    {currentWebsite.domain}
+                  </span>
+                  <h2 className="text-2xl font-black mt-3">{currentWebsite.displayName}</h2>
+                  <p className="text-slate-400 text-sm mt-1">Tenant Overview & Telemetry Stats</p>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 min-w-[120px]">
+                    <span className="text-xs text-slate-500 font-bold block mb-1">Contacts</span>
+                    <span className="text-2xl font-black font-mono">{contactForms.length}</span>
+                  </div>
+                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 min-w-[120px]">
+                    <span className="text-xs text-slate-500 font-bold block mb-1">Bookings</span>
+                    <span className="text-2xl font-black font-mono text-brand-green">{bookings.length}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Data Lists Briefs */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* Contact List Box */}
+                <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-bold text-base">Recent Contacts</h3>
+                    <button
+                      onClick={() => setActiveTab("contacts")}
+                      className="text-xs font-bold text-brand-blue hover:underline"
+                    >
+                      View All
+                    </button>
+                  </div>
+
+                  {contactForms.length === 0 ? (
+                    <div className="text-center py-10 text-slate-500 text-sm">
+                      No contacts received yet.
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {contactForms.slice(0, 3).map((form) => (
+                        <div key={form.id} className="bg-slate-950 border border-slate-800/80 rounded-xl p-4 text-sm">
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="font-bold text-white">{form.name}</span>
+                            <span className="text-[10px] text-slate-500 font-mono">
+                              {new Date(form.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <span className="text-slate-400 block text-xs truncate mb-2">{form.email}</span>
+                          <p className="text-slate-300 text-xs bg-slate-900/30 p-2 rounded-lg border border-slate-900 line-clamp-2">
+                            {form.message}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Booking List Box */}
+                <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-bold text-base">Upcoming Bookings</h3>
+                    <button
+                      onClick={() => setActiveTab("bookings")}
+                      className="text-xs font-bold text-brand-green hover:underline"
+                    >
+                      View All
+                    </button>
+                  </div>
+
+                  {bookings.length === 0 ? (
+                    <div className="text-center py-10 text-slate-500 text-sm">
+                      No bookings scheduled yet.
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {bookings.slice(0, 3).map((booking) => (
+                        <div key={booking.id} className="bg-slate-950 border border-slate-800/80 rounded-xl p-4 text-sm">
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="font-bold text-white">{booking.name}</span>
+                            <span className="bg-brand-green/15 text-brand-green font-bold text-[10px] px-2 py-0.5 rounded">
+                              {booking.status}
+                            </span>
+                          </div>
+                          <div className="flex gap-4 text-xs font-mono text-slate-400 mb-2">
+                            <span>📅 {new Date(booking.date).toLocaleDateString()}</span>
+                            <span>⏰ {booking.time}</span>
+                          </div>
+                          <p className="text-slate-300 text-xs line-clamp-1 italic">
+                            "{booking.message}"
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* API Configuration Card */}
+              <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+                <h3 className="font-bold text-base mb-4">API Configuration</h3>
+                <p className="text-sm text-slate-400 mb-6">
+                  Integrate your business website with SPP Labs' central API database by forwarding bookings and forms.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">API Key Endpoint</span>
+                    <span className="text-sm font-semibold text-white font-mono">api.spplabs.es</span>
+                  </div>
+
+                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">Active Credentials</span>
+                    <span className="text-sm font-semibold text-white">
+                      {apiKeys.length} key(s) linked
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={() => setActiveTab("simulator")}
+                    className="h-10 px-6 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Try API Simulator
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: CONTACTS */}
+          {activeTab === "contacts" && (
+            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+              <h3 className="text-lg font-bold mb-1">Contact Submissions</h3>
+              <p className="text-sm text-slate-400 mb-6">List of contact form messages forwarded from client website via public API.</p>
+
+              {contactForms.length === 0 ? (
+                <div className="text-center py-20 text-slate-500 text-sm">
+                  No contact forms found for this domain.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {contactForms.map((form) => (
+                    <div key={form.id} className="bg-slate-950 border border-slate-800/80 rounded-2xl p-5 shadow-inner">
+                      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4">
+                        <div>
+                          <span className="font-bold text-lg text-white block">{form.name}</span>
+                          <span className="text-xs text-brand-blue font-mono">{form.email}</span>
+                        </div>
+                        <div className="text-right text-xs text-slate-500 font-mono">
+                          {new Date(form.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mb-4 border-t border-slate-900 pt-4">
+                        <div>
+                          <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Phone</span>
+                          <span className="text-slate-300 font-mono">{form.phone || "Not provided"}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Form Submission ID</span>
+                          <span className="text-slate-300 font-mono">{form.id}</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px] mb-2">Message</span>
+                        <div className="bg-slate-900/50 border border-slate-900 rounded-xl p-4 text-sm text-slate-200 leading-relaxed font-sans">
+                          {form.message}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB: BOOKINGS */}
+          {activeTab === "bookings" && (
+            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+              <h3 className="text-lg font-bold mb-1">Bookings & Appointments</h3>
+              <p className="text-sm text-slate-400 mb-6">List of scheduled bookings forwarded from booking calendars.</p>
+
+              {bookings.length === 0 ? (
+                <div className="text-center py-20 text-slate-500 text-sm">
+                  No bookings found for this domain.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {bookings.map((booking) => (
+                    <div key={booking.id} className="bg-slate-950 border border-slate-800/80 rounded-2xl p-5 shadow-inner">
+                      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4">
+                        <div>
+                          <span className="font-bold text-lg text-white block">{booking.name}</span>
+                          <span className="text-xs text-brand-green font-mono">{booking.email}</span>
+                        </div>
+                        <div>
+                          <span className="bg-brand-green/20 text-brand-green font-bold text-xs px-3 py-1 rounded-full border border-brand-green/20">
+                            {booking.status}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs mb-4 border-y border-slate-900 py-4">
+                        <div>
+                          <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Appt Date</span>
+                          <span className="text-slate-200 font-mono font-bold text-sm">
+                            {new Date(booking.date).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Appt Time</span>
+                          <span className="text-slate-200 font-mono font-bold text-sm">{booking.time}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Phone</span>
+                          <span className="text-slate-300 font-mono">{booking.phone || "Not provided"}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">Received</span>
+                          <span className="text-slate-300 font-mono">
+                            {new Date(booking.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px] mb-2">Customer Request Note</span>
+                        <div className="bg-slate-900/50 border border-slate-900 rounded-xl p-3 text-xs text-slate-300 italic">
+                          "{booking.message || "No notes attached."}"
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB: SIMULATOR */}
+          {activeTab === "simulator" && (
+            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-md">
+              <h3 className="text-lg font-bold mb-1">API Integration Simulator</h3>
+              <p className="text-sm text-slate-400 mb-6">
+                Simulate how your external frontends forward forms to `api.spplabs.es`. Firing requests here executes real database operations and key validations.
+              </p>
+
+              <form onSubmit={handleSimulateSubmit} className="space-y-6">
+                
+                {/* Credentials Selection */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-950 p-5 rounded-2xl border border-slate-800">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Sender Domain</label>
+                    <input
+                      type="text"
+                      required
+                      value={simDomain}
+                      onChange={(e) => setSimDomain(e.target.value)}
+                      className="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg px-3 text-xs font-mono text-white focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                      Raw API Key (`spp_api_...`)
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="Paste your raw API key here to test validation"
+                      value={simApiKey}
+                      onChange={(e) => setSimApiKey(e.target.value)}
+                      className="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg px-3 text-xs font-mono text-white focus:outline-none focus:border-brand-blue"
+                    />
+                  </div>
+                </div>
+
+                {/* Form Type Selector */}
+                <div className="flex gap-4 border-b border-slate-800 pb-2">
+                  <button
+                    type="button"
+                    onClick={() => setSimType("contact")}
+                    className={`pb-2 text-sm font-bold border-b-2 transition-all ${
+                      simType === "contact"
+                        ? "border-brand-blue text-white"
+                        : "border-transparent text-slate-500 hover:text-white"
+                    }`}
+                  >
+                    Contact Form Post
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSimType("booking")}
+                    className={`pb-2 text-sm font-bold border-b-2 transition-all ${
+                      simType === "booking"
+                        ? "border-brand-green text-white"
+                        : "border-transparent text-slate-500 hover:text-white"
+                    }`}
+                  >
+                    Booking Calendar Post
+                  </button>
+                </div>
+
+                {/* SIMULATOR INPUT FIELDS */}
+                {simType === "contact" ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 mb-2">Customer Name</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="John Doe"
+                        value={simContactName}
+                        onChange={(e) => setSimContactName(e.target.value)}
+                        className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 mb-2">Customer Email</label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="john@example.com"
+                        value={simContactEmail}
+                        onChange={(e) => setSimContactEmail(e.target.value)}
+                        className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 mb-2">Customer Phone</label>
+                      <input
+                        type="text"
+                        placeholder="+34 600 000 000"
+                        value={simContactPhone}
+                        onChange={(e) => setSimContactPhone(e.target.value)}
+                        className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-semibold text-slate-400 mb-2">Message</label>
+                      <textarea
+                        required
+                        placeholder="Hello, I want to inquire about custom software developments."
+                        value={simContactMessage}
+                        onChange={(e) => setSimContactMessage(e.target.value)}
+                        className="w-full h-24 bg-slate-950 border border-slate-850 rounded-lg p-3 text-xs resize-none"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 mb-2">Client Name</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Jane Smith"
+                        value={simBookingName}
+                        onChange={(e) => setSimBookingName(e.target.value)}
+                        className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 mb-2">Client Email</label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="jane@example.com"
+                        value={simBookingEmail}
+                        onChange={(e) => setSimBookingEmail(e.target.value)}
+                        className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 mb-2">Client Phone</label>
+                      <input
+                        type="text"
+                        placeholder="+34 611 111 111"
+                        value={simBookingPhone}
+                        onChange={(e) => setSimBookingPhone(e.target.value)}
+                        className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-2">Appt Date</label>
+                        <input
+                          type="date"
+                          required
+                          value={simBookingDate}
+                          onChange={(e) => setSimBookingDate(e.target.value)}
+                          className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-2">Appt Time</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="11:30"
+                          value={simBookingTime}
+                          onChange={(e) => setSimBookingTime(e.target.value)}
+                          className="w-full h-10 bg-slate-950 border border-slate-850 rounded-lg px-3 text-xs"
+                        />
+                      </div>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-semibold text-slate-400 mb-2">Request Note</label>
+                      <textarea
+                        placeholder="Requesting consult for SEO analysis."
+                        value={simBookingMessage}
+                        onChange={(e) => setSimBookingMessage(e.target.value)}
+                        className="w-full h-24 bg-slate-950 border border-slate-850 rounded-lg p-3 text-xs resize-none"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={simLoading}
+                  className={`w-full md:w-auto h-11 px-8 rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 flex items-center justify-center cursor-pointer ${
+                    simType === "contact" ? "bg-brand-blue hover:bg-brand-blue-dark text-white" : "bg-brand-green hover:bg-brand-green-dark text-white"
+                  }`}
+                >
+                  {simLoading ? (
+                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  ) : (
+                    `Fire POST ${simType === "contact" ? "/contacts" : "/bookings"}`
+                  )}
+                </button>
+              </form>
+
+              {/* SIMULATOR RESPONSE CODE VIEWER */}
+              {simResult && (
+                <div className="mt-8 bg-slate-950 border border-slate-850 rounded-2xl p-5 shadow-inner">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">API Server Response</span>
+                    <span className={`text-xs font-bold px-2.5 py-0.5 rounded font-mono ${
+                      simResult.ok ? "bg-brand-green/20 text-brand-green" : "bg-red-500/20 text-red-400"
+                    }`}>
+                      HTTP {simResult.status} {simResult.ok ? "OK" : "Error"}
+                    </span>
+                  </div>
+
+                  <pre className="bg-slate-900 border border-slate-850 p-4 rounded-xl text-xs font-mono overflow-x-auto text-slate-300 select-all">
+                    {JSON.stringify(simResult.data, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}

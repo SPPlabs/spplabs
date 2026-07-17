@@ -1,0 +1,186 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum WebsiteRole {
+  ADMIN
+  USER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model Website {
+  id                      String                    @id @default(uuid()) @db.Uuid
+  domain                  String                    @unique
+  displayName             String                    @map("display_name")
+  passwordHash            String?                   @map("password_hash")
+  role                    WebsiteRole
+  registeredAt            DateTime?                 @map("registered_at") @db.Timestamptz
+  createdAt               DateTime                  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt               DateTime                  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  
+  apiKeys                 WebsiteApiKey[]
+  contactForms            ContactForm[]
+  bookings                Booking[]
+  notifications           Notification[]
+  supportRequests         SupportRequest[]
+  aiUsageMonthly          AiUsageMonthly[]
+  chatbotKnowledge        ChatbotKnowledge?
+  googleCalendarConnection GoogleCalendarConnection?
+  
+  viewerDashboardStates   WebsiteDashboardState[]   @relation("ViewerWebsite")
+  targetDashboardStates   WebsiteDashboardState[]   @relation("TargetWebsite")
+
+  @@map("websites")
+}
+
+model SignupToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  token     String   @unique
+  domain    String   @unique
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("signup_tokens")
+}
+
+model WebsiteApiKey {
+  id         String    @id @default(uuid()) @db.Uuid
+  websiteId  String    @map("website_id") @db.Uuid
+  name       String
+  keyHash    String    @map("key_hash")
+  lastUsedAt DateTime? @map("last_used_at") @db.Timestamptz
+  expiresAt  DateTime? @map("expires_at") @db.Timestamptz
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  
+  website    Website   @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@unique([websiteId, name])
+  @@map("website_api_keys")
+}
+
+model ContactForm {
+  id        String   @id @default(uuid()) @db.Uuid
+  websiteId String   @map("website_id") @db.Uuid
+  name      String
+  phone     String
+  email     String
+  message   String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  website   Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@index([websiteId])
+  @@map("contact_forms")
+}
+
+model Booking {
+  id        String        @id @default(uuid()) @db.Uuid
+  websiteId String        @map("website_id") @db.Uuid
+  date      DateTime      @db.Date
+  time      String        // TIME is stored as hh:mm format string for simplicity and consistency in client interfaces
+  name      String
+  phone     String
+  email     String
+  message   String
+  status    BookingStatus @default(PENDING)
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz
+
+  website   Website       @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@index([websiteId])
+  @@map("bookings")
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  websiteId String?  @map("website_id") @db.Uuid
+  title     String
+  message   String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  website   Website? @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@index([websiteId])
+  @@map("notifications")
+}
+
+model SupportRequest {
+  id        String   @id @default(uuid()) @db.Uuid
+  websiteId String   @map("website_id") @db.Uuid
+  title     String
+  message   String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  website   Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@index([websiteId])
+  @@map("support_requests")
+}
+
+model AiUsageMonthly {
+  id               String   @id @default(uuid()) @db.Uuid
+  websiteId        String   @map("website_id") @db.Uuid
+  year             Int
+  month            Int
+  promptTokens     BigInt   @default(0) @map("prompt_tokens")
+  completionTokens BigInt   @default(0) @map("completion_tokens")
+  totalTokens      BigInt   @default(0) @map("total_tokens")
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  website          Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@unique([websiteId, year, month])
+  @@map("ai_usage_monthly")
+}
+
+model ChatbotKnowledge {
+  id           String    @id @default(uuid()) @db.Uuid
+  websiteId    String    @unique @map("website_id") @db.Uuid
+  content      String
+  lastSyncedAt DateTime? @map("last_synced_at") @db.Timestamptz
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  website      Website   @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@map("chatbot_knowledge")
+}
+
+model GoogleCalendarConnection {
+  id                 String   @id @default(uuid()) @db.Uuid
+  websiteId          String   @unique @map("website_id") @db.Uuid
+  googleAccountEmail String   @map("google_account_email")
+  googleCalendarId   String   @map("google_calendar_id")
+  accessToken        String   @map("access_token")
+  refreshToken       String   @map("refresh_token")
+  tokenExpiresAt     DateTime @map("token_expires_at") @db.Timestamptz
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  website            Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@map("google_calendar_connections")
+}
+
+model WebsiteDashboardState {
+  id                   String    @id @default(uuid()) @db.Uuid
+  viewerWebsiteId      String    @map("viewer_website_id") @db.Uuid
+  targetWebsiteId      String    @map("target_website_id") @db.Uuid
+  lastContactView      DateTime? @map("last_contact_view") @db.Timestamptz
+  lastBookingView      DateTime? @map("last_booking_view") @db.Timestamptz
+  lastNotificationView DateTime? @map("last_notification_view") @db.Timestamptz
+  lastSupportView      DateTime? @map("last_support_view") @db.Timestamptz
+
+  viewerWebsite        Website   @relation("ViewerWebsite", fields: [viewerWebsiteId], references: [id], onDelete: Cascade)
+  targetWebsite        Website   @relation("TargetWebsite", fields: [targetWebsiteId], references: [id], onDelete: Cascade)
+
+  @@unique([viewerWebsiteId, targetWebsiteId])
+  @@map("website_dashboard_state")
+}
