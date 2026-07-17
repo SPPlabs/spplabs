@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spplabs-web
+    restart: unless-stopped
+    expose:
+      - 3000
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      # Route all requested domains to this container
+      - "traefik.http.routers.spplabs.rule=Host(`spplabs.es`) || Host(`www.spplabs.es`) || Host(`api.spplabs.es`)"
+      - "traefik.http.routers.spplabs.entrypoints=websecure"
+      - "traefik.http.routers.spplabs.tls=true"
+      # Note: If your Traefik setup uses a specific Let's Encrypt resolver,
+      # you can uncomment and adjust the following label:
+      # - "traefik.http.routers.spplabs.tls.certresolver=letsencrypt"
+      - "traefik.http.services.spplabs.loadbalancer.server.port=3000"
+
+networks:
+  proxy:
+    external: true
