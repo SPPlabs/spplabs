@@ -8,6 +8,7 @@ const database = process.env.CLICKHOUSE_DATABASE || "analytics";
 
 let client = null;
 let isMock = true;
+let isSetupCompleted = false;
 
 // Temporary in-memory store for development/testing when ClickHouse is not connected
 const mockEvents = [];
@@ -30,12 +31,92 @@ if (host) {
   console.log("No CLICKHOUSE_HOST defined. ClickHouse is running in MOCK mode.");
 }
 
+// Ensures ClickHouse schema exists on the first interaction (idempotent, non-blocking to runtime if database is down)
+async function ensureSchema() {
+  if (isSetupCompleted || isMock) return;
+
+  try {
+    console.log("[ClickHouse] Verifying database schema...");
+    
+    // 1. Create database (requires connecting to root/default first)
+    const baseClient = createClient({
+      url: host,
+      username,
+      password,
+    });
+    await baseClient.exec({
+      query: `CREATE DATABASE IF NOT EXISTS ${database}`,
+    });
+    await baseClient.close();
+    
+    // 2. Create partitionable MergeTree table with a 2-year TTL
+    await client.exec({
+      query: `
+        CREATE TABLE IF NOT EXISTS ${database}.analytics_events
+        (
+          website_id String,
+          event_time DateTime64(3),
+
+          visitor_id UUID,
+          session_id UUID,
+
+          event_type LowCardinality(String),
+
+          page_url String,
+          page_title String,
+          referrer String,
+
+          utm_source String,
+          utm_medium String,
+          utm_campaign String,
+          utm_term String,
+          utm_content String,
+
+          country LowCardinality(String),
+          region LowCardinality(String),
+          city LowCardinality(String),
+
+          device_type LowCardinality(String),
+          browser LowCardinality(String),
+          os LowCardinality(String),
+
+          screen_width UInt16,
+          screen_height UInt16,
+
+          duration_ms UInt32,
+          scroll_percent UInt8,
+
+          button_name String,
+          form_name String,
+          booking_id String,
+
+          conversion UInt8,
+
+          ip_hash FixedString(64)
+        )
+        ENGINE = MergeTree
+        PARTITION BY toYYYYMM(event_time)
+        ORDER BY (website_id, event_time, event_type, session_id)
+        TTL event_time + INTERVAL 2 YEAR DELETE;
+      `,
+    });
+
+    isSetupCompleted = true;
+    console.log(`[ClickHouse] Schema successfully validated in database '${database}'.`);
+  } catch (err) {
+    console.error("[ClickHouse] Schema verification/migration failed:", err.message);
+    // Do not crash the application, allow queries/inserts to run or try again on next interaction
+  }
+}
+
 export async function clickhouseQuery(sql, params = {}) {
   if (isMock) {
     console.log("[Mock ClickHouse Query]:", sql, "Params:", params);
-    // Return standard mock query results depending on the query target to make the dashboard render correctly!
     return mockQueryHandler(sql, params);
   }
+  
+  // Ensure tables exist before running query
+  await ensureSchema();
   
   try {
     const resultSet = await client.query({
@@ -53,7 +134,6 @@ export async function clickhouseQuery(sql, params = {}) {
 export async function clickhouseInsert(table, values) {
   if (isMock) {
     console.log(`[Mock ClickHouse Insert] Table: ${table}, Values Count: ${values.length}`);
-    // Save to in-memory array for retrieval
     const now = new Date();
     values.forEach(v => {
       mockEvents.push({
@@ -68,6 +148,9 @@ export async function clickhouseInsert(table, values) {
     });
     return;
   }
+
+  // Ensure tables exist before running insert
+  await ensureSchema();
 
   try {
     await client.insert({
