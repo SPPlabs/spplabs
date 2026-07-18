@@ -42,3 +42,34 @@ export async function POST(request) {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
+
+export async function DELETE(request) {
+  try {
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("spp_session")?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const session = await verifyJWT(sessionToken);
+    if (!session || session.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden", message: "Admin access required." }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "ID is required" }, { status: 400 });
+    }
+
+    await prisma.notification.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true, message: "Announcement deleted successfully." });
+  } catch (error) {
+    console.error("Notification deletion error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}

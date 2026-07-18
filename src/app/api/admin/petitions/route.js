@@ -55,3 +55,48 @@ export async function POST(request) {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
+
+export async function DELETE(request) {
+  try {
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("spp_session")?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const session = await verifyJWT(sessionToken);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "ID is required" }, { status: 400 });
+    }
+
+    const requestToMsg = await prisma.supportRequest.findUnique({
+      where: { id },
+      include: { website: true }
+    });
+
+    if (!requestToMsg) {
+      return NextResponse.json({ error: "Request not found" }, { status: 404 });
+    }
+
+    // Security check: Only Admin or the owner of that website can delete the request
+    if (session.role !== "ADMIN" && session.domain !== requestToMsg.website.domain) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    await prisma.supportRequest.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true, message: "Petition deleted successfully." });
+  } catch (error) {
+    console.error("Support request deletion error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
