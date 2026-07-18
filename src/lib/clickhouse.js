@@ -6,6 +6,14 @@ const username = process.env.CLICKHOUSE_USER || "default";
 const password = process.env.CLICKHOUSE_PASSWORD || "";
 const database = process.env.CLICKHOUSE_DATABASE || "analytics";
 
+// Validate database name to prevent SQL injection
+if (database && !/^[a-zA-Z0-9_]+$/.test(database)) {
+  throw new Error(
+    `FATAL: CLICKHOUSE_DATABASE contains invalid characters: "${database}". ` +
+    "Only alphanumeric characters and underscores are allowed."
+  );
+}
+
 let client = null;
 let isMock = true;
 let isSetupCompleted = false;
@@ -13,22 +21,62 @@ let isSetupCompleted = false;
 // Temporary in-memory store for development/testing when ClickHouse is not connected
 const mockEvents = [];
 
-if (host) {
+function createClickHouseClient() {
   try {
-    client = createClient({
+    const newClient = createClient({
       url: host,
       username,
       password,
       database,
+      request_timeout: 30000,
+      clickhouse_settings: {
+        connect_timeout: 10,
+        receive_timeout: 30,
+        send_timeout: 30,
+      },
     });
-    isMock = false;
     console.log("ClickHouse client initialized targeting:", host);
+    return newClient;
   } catch (err) {
-    console.error("ClickHouse initialization failed, falling back to mock mode:", err.message);
-    isMock = true;
+    console.error("ClickHouse initialization failed:", err.message);
+    return null;
+  }
+}
+
+if (host) {
+  client = createClickHouseClient();
+  if (client) {
+    isMock = false;
   }
 } else {
   console.log("No CLICKHOUSE_HOST defined. ClickHouse is running in MOCK mode.");
+}
+
+// Health check and auto-reconnect
+async function ensureConnection() {
+  if (isMock || !host) return;
+
+  try {
+    await client.ping();
+  } catch (err) {
+    console.warn("[ClickHouse] Connection lost, attempting reconnect:", err.message);
+    try {
+      if (client) {
+        await client.close().catch(() => {});
+      }
+      client = createClickHouseClient();
+      if (client) {
+        await client.ping();
+        console.log("[ClickHouse] Reconnected successfully.");
+        isSetupCompleted = false; // Re-verify schema on reconnect
+      } else {
+        throw new Error("Failed to create new client");
+      }
+    } catch (reconnectErr) {
+      console.error("[ClickHouse] Reconnection failed:", reconnectErr.message);
+      throw reconnectErr;
+    }
+  }
 }
 
 // Ensures ClickHouse schema exists on the first interaction (idempotent, non-blocking to runtime if database is down)
@@ -115,7 +163,8 @@ export async function clickhouseQuery(sql, params = {}) {
     return mockQueryHandler(sql, params);
   }
   
-  // Ensure tables exist before running query
+  // Ensure connection is alive and tables exist
+  await ensureConnection();
   await ensureSchema();
   
   try {
@@ -149,7 +198,8 @@ export async function clickhouseInsert(table, values) {
     return;
   }
 
-  // Ensure tables exist before running insert
+  // Ensure connection is alive and tables exist
+  await ensureConnection();
   await ensureSchema();
 
   try {

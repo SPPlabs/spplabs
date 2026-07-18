@@ -97,6 +97,7 @@ model Booking {
   website   Website       @relation(fields: [websiteId], references: [id], onDelete: Cascade)
 
   @@index([websiteId])
+  @@index([websiteId, date])
   @@map("bookings")
 }
 

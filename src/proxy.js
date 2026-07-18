@@ -80,8 +80,9 @@ export const config = {
      * - api/auth (authentication endpoints)
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
+     * - favicon.ico, logo.webp (static assets)
+     * - tracker.js (analytics tracker script served from /public)
      */
-    "/((?!api/auth|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api/auth|_next/static|_next/image|favicon\\.ico|logo\\.webp|tracker\\.js).*)",
   ],
 };

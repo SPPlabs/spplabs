@@ -5,8 +5,11 @@ const prisma = new PrismaClient();
 
 async function main() {
   const adminDomain = "spplabs.es";
-  // Secure default admin password
-  const adminPassword = "spp_admin_password_2026";
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    console.error("ERROR: ADMIN_PASSWORD environment variable is required to seed the admin account.");
+    process.exit(1);
+  }
   
   const hashedPassword = await hash(adminPassword, {
     memoryCost: 65536,

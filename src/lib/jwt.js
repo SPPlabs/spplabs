@@ -1,8 +1,13 @@
 import { SignJWT, jwtVerify } from "jose";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "spp_labs_dashboard_super_secret_key_2026_change_me"
-);
+if (!process.env.JWT_SECRET) {
+  throw new Error(
+    "FATAL: JWT_SECRET environment variable is not set. " +
+    "Generate a cryptographically random 64+ character string and set it in your .env file."
+  );
+}
+
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 /**
  * Signs a payload and returns a signed JWT token.

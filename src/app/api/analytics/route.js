@@ -25,7 +25,10 @@ export async function POST(request) {
   try {
     let body = {};
     try {
-      body = await request.json();
+      // sendBeacon may send with Content-Type: text/plain;charset=UTF-8
+      // so we read as text first, then parse as JSON
+      const rawText = await request.text();
+      body = JSON.parse(rawText);
     } catch {
       return jsonResponse({ error: "Invalid JSON payload" }, { status: 400 });
     }
