@@ -74,12 +74,13 @@ export default function DashboardClient({
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [analyticsError, setAnalyticsError] = useState("");
+  const [analyticsTimeframe, setAnalyticsTimeframe] = useState("week");
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async (timeframeParam = analyticsTimeframe) => {
     setAnalyticsLoading(true);
     setAnalyticsError("");
     try {
-      const res = await fetch(`/api/admin/analytics?domain=${currentWebsite.domain}`);
+      const res = await fetch(`/api/admin/analytics?domain=${currentWebsite.domain}&timeframe=${timeframeParam}`);
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || "Failed to load analytics");
       setAnalyticsData(result.data);
@@ -92,9 +93,9 @@ export default function DashboardClient({
 
   useEffect(() => {
     if (activeTab === "analytics") {
-      fetchAnalytics();
+      fetchAnalytics(analyticsTimeframe);
     }
-  }, [activeTab, currentWebsite.domain]);
+  }, [activeTab, currentWebsite.domain, analyticsTimeframe]);
 
   // Handle Update Booking Status
   const handleUpdateBookingStatus = async (bookingId, status) => {
@@ -302,7 +303,356 @@ export default function DashboardClient({
       console.error(err);
       alert("Failed to delete client account");
     }
-  };  return (
+  };
+
+  // ========================================================
+  // HELPER VISUAL COMPONENTS FOR ANALYTICS, MAPS & BOOKINGS
+  // ========================================================
+  
+  function DonutChart({ data, title }) {
+    if (!data || data.length === 0) return <p className="text-xs text-slate-400 py-6 text-center">No hay datos</p>;
+    
+    const total = data.reduce((acc, item) => acc + Number(item.count || 0), 0);
+    const colors = [
+      "#3b82f6", // Blue
+      "#10b981", // Green
+      "#f59e0b", // Amber
+      "#ef4444", // Red
+      "#8b5cf6", // Purple
+      "#ec4899", // Pink
+      "#6b7280", // Gray
+    ];
+
+    let accumulatedPercent = 0;
+
+    const slices = data.map((item, index) => {
+      const count = Number(item.count || 0);
+      const percent = total > 0 ? (count / total) * 100 : 0;
+      const color = colors[index % colors.length];
+      const offset = 100 - accumulatedPercent;
+      accumulatedPercent += percent;
+
+      return {
+        name: item.name || item.device_type || item.browser || item.os || item.page_url || "Otro",
+        count,
+        percent: percent.toFixed(1),
+        color,
+        strokeDasharray: `${percent} ${100 - percent}`,
+        strokeDashoffset: offset,
+      };
+    });
+
+    return (
+      <div className="flex flex-col items-center justify-center p-4">
+        <div className="relative w-36 h-36 flex items-center justify-center">
+          <svg viewBox="0 0 42 42" className="w-full h-full transform -rotate-90">
+            <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#f1f5f9" strokeWidth="4.5" />
+            {slices.map((slice, idx) => (
+              <circle
+                key={idx}
+                cx="21"
+                cy="21"
+                r="15.91549430918954"
+                fill="transparent"
+                stroke={slice.color}
+                strokeWidth="4.5"
+                strokeDasharray={slice.strokeDasharray}
+                strokeDashoffset={slice.strokeDashoffset}
+                className="transition-all duration-500 hover:stroke-[5.5] cursor-pointer"
+              />
+            ))}
+          </svg>
+          <div className="absolute flex flex-col items-center justify-center">
+            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total</span>
+            <span className="text-base font-black text-slate-900">{total}</span>
+          </div>
+        </div>
+
+        <div className="mt-4 w-full space-y-1.5 max-h-36 overflow-y-auto px-2">
+          {slices.slice(0, 5).map((slice, idx) => (
+            <div key={idx} className="flex items-center justify-between text-xs font-semibold text-slate-700">
+              <div className="flex items-center gap-2 truncate">
+                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: slice.color }}></span>
+                <span className="truncate max-w-[120px]" title={slice.name}>{slice.name}</span>
+              </div>
+              <span className="font-mono text-slate-900 shrink-0">{slice.count} ({slice.percent}%)</span>
+            </div>
+          ))}
+          {slices.length > 5 && (
+            <div className="text-[10px] text-slate-400 italic text-center font-medium pt-1">
+              + {slices.length - 5} {lang === "es" ? "más" : "more"}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  function ReferralFunnel({ data }) {
+    if (!data || data.length === 0) return <p className="text-xs text-slate-450 py-6 text-center">No hay datos</p>;
+
+    const total = data.reduce((acc, item) => acc + Number(item.count || 0), 0);
+    const sortedData = [...data].sort((a, b) => b.count - a.count).slice(0, 5);
+    const colors = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"];
+
+    let currentFunnelY = 80;
+    const funnelHeight = 40;
+
+    const lanes = sortedData.map((item, idx) => {
+      const fraction = total > 0 ? item.count / total : 0;
+      const laneWidth = Math.max(fraction * funnelHeight, 2);
+      const color = colors[idx % colors.length];
+
+      const sourceY = 20 + idx * 35;
+      const destY = currentFunnelY + laneWidth / 2;
+      currentFunnelY += laneWidth;
+
+      const pathD = `M 20 ${sourceY} C 100 ${sourceY}, 100 ${destY}, 180 ${destY}`;
+
+      return {
+        name: item.referrer || "Direct / None",
+        count: item.count,
+        percent: total > 0 ? ((item.count / total) * 100).toFixed(1) : 0,
+        pathD,
+        laneWidth,
+        color,
+        sourceY,
+      };
+    });
+
+    return (
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row gap-6 items-center w-full">
+        {/* SVG Canvas for Funnel Lanes */}
+        <div className="w-full md:w-1/2 h-52 relative">
+          <svg viewBox="0 0 240 200" className="w-full h-full overflow-visible">
+            {/* Funnel Mouth Indicator on the Right */}
+            <path d="M 180 75 L 210 75 L 225 100 L 225 120 L 210 145 L 180 145 Z" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1" />
+            <text x="202" y="113" fill="#64748b" className="text-[7px] font-black tracking-widest font-mono">FUNNEL</text>
+            
+            {/* Render bezier lanes */}
+            {lanes.map((lane, idx) => (
+              <g key={idx} className="group">
+                <path
+                  d={lane.pathD}
+                  fill="none"
+                  stroke={lane.color}
+                  strokeWidth={lane.laneWidth}
+                  strokeOpacity="0.4"
+                  className="transition-all duration-300 group-hover:stroke-opacity-80"
+                />
+                <path
+                  d={lane.pathD}
+                  fill="none"
+                  stroke={lane.color}
+                  strokeWidth="1.5"
+                  className="transition-all duration-300"
+                />
+                <circle cx="20" cy={lane.sourceY} r="3.5" fill={lane.color} />
+              </g>
+            ))}
+          </svg>
+        </div>
+
+        {/* Funnel Legend */}
+        <div className="w-full md:w-1/2 space-y-3">
+          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+            {lang === "es" ? "Orígenes de Tráfico" : "Traffic Sources"}
+          </h4>
+          {lanes.map((lane, idx) => (
+            <div key={idx} className="space-y-1">
+              <div className="flex items-center justify-between text-xs font-bold">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: lane.color }}></span>
+                  <span className="text-slate-800 font-medium truncate max-w-[120px]">{lane.name}</span>
+                </div>
+                <span className="font-mono text-slate-900">{lane.count} ({lane.percent}%)</span>
+              </div>
+              <div className="h-2 bg-slate-100 border border-slate-200/50 rounded-full overflow-hidden">
+                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${lane.percent}%`, backgroundColor: lane.color }}></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  function BookingsCalendar({ bookings, lang, onAccept, onReject, onDelete, t }) {
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [selectedDayBookings, setSelectedDayBookings] = useState([]);
+    const [selectedDateStr, setSelectedDateStr] = useState("");
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const adjustedFirstDayIndex = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+    const totalDays = new Date(year, month + 1, 0).getDate();
+
+    const daysArray = Array.from({ length: totalDays }, (_, i) => i + 1);
+    const leadingBlanks = Array.from({ length: adjustedFirstDayIndex });
+
+    const bookingsMap = {};
+    bookings.forEach(b => {
+      const bDate = new Date(b.date);
+      const dateStr = bDate.toISOString().split("T")[0];
+      if (!bookingsMap[dateStr]) {
+        bookingsMap[dateStr] = [];
+      }
+      bookingsMap[dateStr].push(b);
+    });
+
+    const monthsEs = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    const monthsEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const monthLabel = lang === "es" ? monthsEs[month] : monthsEn[month];
+
+    const handlePrevMonth = () => {
+      setCurrentDate(new Date(year, month - 1, 1));
+    };
+    const handleNextMonth = () => {
+      setCurrentDate(new Date(year, month + 1, 1));
+    };
+
+    const handleDayClick = (day) => {
+      const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      setSelectedDateStr(formattedDate);
+      setSelectedDayBookings(bookingsMap[formattedDate] || []);
+    };
+
+    const weekdayHeaders = lang === "es" 
+      ? ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+      : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm lg:col-span-7 w-full">
+          <div className="flex items-center justify-between mb-6">
+            <h4 className="font-extrabold text-lg text-slate-900">{monthLabel} {year}</h4>
+            <div className="flex gap-2">
+              <button
+                onClick={handlePrevMonth}
+                className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl transition-all cursor-pointer text-sm font-bold"
+              >
+                &larr;
+              </button>
+              <button
+                onClick={handleNextMonth}
+                className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl transition-all cursor-pointer text-sm font-bold"
+              >
+                &rarr;
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-7 gap-2.5 text-center">
+            {weekdayHeaders.map(h => (
+              <span key={h} className="text-xs font-bold text-slate-400 uppercase tracking-wide py-1.5">{h}</span>
+            ))}
+
+            {leadingBlanks.map((_, i) => (
+              <div key={`blank-${i}`} className="aspect-square bg-slate-50/20 rounded-xl border border-transparent"></div>
+            ))}
+
+            {daysArray.map(day => {
+              const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+              const dayBookings = bookingsMap[dateStr] || [];
+              const hasBooking = dayBookings.length > 0;
+              const isSelected = selectedDateStr === dateStr;
+
+              return (
+                <button
+                  key={day}
+                  onClick={() => handleDayClick(day)}
+                  className={`aspect-square rounded-2xl flex flex-col items-center justify-between p-1.5 transition-all border cursor-pointer relative ${
+                    isSelected 
+                      ? "bg-slate-900 border-slate-900 text-white shadow-md scale-95" 
+                      : hasBooking
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-950 hover:bg-emerald-100"
+                        : "bg-slate-50/50 border-slate-200/60 hover:bg-slate-100 text-slate-800"
+                  }`}
+                >
+                  <span className="text-xs font-bold block">{day}</span>
+                  {hasBooking && (
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? "bg-white" : "bg-emerald-500"}`}></span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="lg:col-span-5 space-y-4 w-full">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm min-h-[300px] w-full">
+            <h4 className="font-extrabold text-base text-slate-900 mb-4 border-b border-slate-100 pb-3">
+              {lang === "es" ? "Reservas para la fecha:" : "Bookings for date:"}{" "}
+              <span className="text-brand-blue font-mono font-bold text-sm block mt-1">
+                {selectedDateStr ? new Date(selectedDateStr).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { dateStyle: "long" }) : (lang === "es" ? "Seleccione un día" : "Select a day")}
+              </span>
+            </h4>
+
+            {selectedDayBookings.length === 0 ? (
+              <p className="text-slate-450 italic text-sm text-center py-10">
+                {lang === "es" ? "No hay reservas programadas para este día." : "No bookings scheduled for this day."}
+              </p>
+            ) : (
+              <div className="space-y-4 max-h-[350px] overflow-y-auto pr-1">
+                {selectedDayBookings.map((b) => {
+                  let statusBadge = "bg-amber-50 border-amber-200 text-amber-700";
+                  if (b.status === "CONFIRMED") statusBadge = "bg-emerald-50 border-emerald-200 text-emerald-700";
+                  if (b.status === "CANCELLED") statusBadge = "bg-rose-50 border-rose-200 text-rose-700";
+
+                  return (
+                    <div key={b.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="font-bold text-slate-950 block">{b.name}</span>
+                          <span className="text-xs text-slate-400 font-mono">{b.time}</span>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusBadge}`}>
+                          {b.status}
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-slate-600 bg-white p-2 border border-slate-200 rounded-lg italic">
+                        "{b.message || "Sin comentarios."}"
+                      </p>
+
+                      <div className="flex gap-2 pt-2 border-t border-slate-200/50">
+                        {b.status === "PENDING" && (
+                          <>
+                            <button
+                              onClick={() => onAccept(b.id, "CONFIRMED")}
+                              className="bg-brand-green hover:bg-brand-green-dark text-white font-bold text-[10px] px-2.5 py-1 rounded cursor-pointer"
+                            >
+                              {t.clientesAccept}
+                            </button>
+                            <button
+                              onClick={() => onReject(b.id, "CANCELLED")}
+                              className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10px] px-2.5 py-1 rounded cursor-pointer"
+                            >
+                              {t.clientesReject}
+                            </button>
+                          </>
+                        )}
+                        <button
+                          onClick={() => onDelete(b.id)}
+                          className="ml-auto text-red-650 hover:bg-red-50 font-semibold text-[10px] px-2.5 py-1 rounded border border-red-100"
+                        >
+                          {t.clientesDelete}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className="h-screen w-screen bg-slate-50 flex overflow-hidden font-sans selection:bg-brand-blue selection:text-white text-slate-900">
       
       {/* LEFT FIXED SIDEBAR */}
@@ -494,7 +844,7 @@ export default function DashboardClient({
         </header>
 
         {/* Tab content viewport window */}
-        <main className="flex-1 overflow-y-auto p-8 max-w-5xl w-full mx-auto">
+        <main className="flex-1 overflow-y-auto p-8 w-full max-w-full">
           {/* TAB: ADMIN PANEL (USUARIOS) */}
           {activeTab === "admin" && session.role === "ADMIN" && (
             <div className="space-y-8 animate-fade-in">
@@ -674,9 +1024,9 @@ export default function DashboardClient({
           )}
           {/* TAB: VISITOR ANALYTICS */}
           {activeTab === "analytics" && (
-            <div className="space-y-8 animate-fade-in">
+            <div className="space-y-8 animate-fade-in w-full">
               {/* Header stats */}
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm w-full">
                 <div>
                   <span className="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider font-mono">
                     {currentWebsite.domain}
@@ -685,24 +1035,52 @@ export default function DashboardClient({
                   <p className="text-slate-500 text-sm mt-1">{t.analyticsSubtitle}</p>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  {/* Real-time indicator */}
-                  <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2 text-brand-green font-bold text-xs">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    {(analyticsData?.overview?.active_visitors || 0) + " " + t.analyticsActiveUsers}
+                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4">
+                  {/* Timeframe Buttons Switcher */}
+                  <div className="flex bg-slate-100 rounded-xl p-1 border border-slate-200/60 max-w-sm shrink-0">
+                    {[
+                      { key: "day", label: lang === "es" ? "Día" : "Day" },
+                      { key: "week", label: lang === "es" ? "Semana" : "Week" },
+                      { key: "month", label: lang === "es" ? "Mes" : "Month" },
+                      { key: "year", label: lang === "es" ? "Año" : "Year" },
+                      { key: "all", label: lang === "es" ? "Todo" : "All" }
+                    ].map(opt => (
+                      <button
+                        key={opt.key}
+                        onClick={() => {
+                          setAnalyticsTimeframe(opt.key);
+                          fetchAnalytics(opt.key);
+                        }}
+                        className={`text-center py-1.5 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          analyticsTimeframe === opt.key 
+                            ? "bg-white text-slate-900 shadow-sm" 
+                            : "text-slate-500 hover:text-slate-800"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
                   </div>
-                  <button
-                    onClick={fetchAnalytics}
-                    disabled={analyticsLoading}
-                    className="p-2.5 bg-slate-155 hover:bg-slate-200 border border-slate-200 text-slate-650 hover:text-slate-900 rounded-xl transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
-                  >
-                    <svg className={`w-5 h-5 ${analyticsLoading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3" />
-                    </svg>
-                  </button>
+
+                  <div className="flex items-center gap-3">
+                    {/* Real-time indicator */}
+                    <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2 text-brand-green font-bold text-xs">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      {(analyticsData?.overview?.active_visitors || 0) + " " + t.analyticsActiveUsers}
+                    </div>
+                    <button
+                      onClick={() => fetchAnalytics(analyticsTimeframe)}
+                      disabled={analyticsLoading}
+                      className="p-2.5 bg-slate-100 hover:bg-slate-250 border border-slate-200 text-slate-650 hover:text-slate-900 rounded-xl transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                    >
+                      <svg className={`w-5 h-5 ${analyticsLoading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -720,187 +1098,237 @@ export default function DashboardClient({
               )}
 
               {analyticsData && (
-                <div className="space-y-6">
+                <div className="space-y-8 w-full">
                   {/* Overview aggregate counters */}
-                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 w-full">
+                    <div className="bg-slate-55 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
                       <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">{t.analyticsTotalHits}</span>
                       <span className="text-2xl font-black font-mono text-slate-900">{analyticsData.overview.visitors}</span>
                     </div>
-                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+                    <div className="bg-slate-55 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
                       <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">{t.analyticsUniques}</span>
                       <span className="text-2xl font-black font-mono text-brand-blue">{analyticsData.overview.unique_visitors}</span>
                     </div>
-                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+                    <div className="bg-slate-55 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
                       <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">{t.analyticsSessions}</span>
                       <span className="text-2xl font-black font-mono text-brand-green">{analyticsData.overview.sessions}</span>
                     </div>
-                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+                    <div className="bg-slate-55 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
                       <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">{t.analyticsDuration}</span>
                       <span className="text-2xl font-black font-mono text-slate-900">{analyticsData.overview.avg_duration}s</span>
                     </div>
-                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm">
+                    <div className="bg-slate-55 border border-slate-200 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm">
                       <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">{t.analyticsBounce}</span>
                       <span className="text-2xl font-black font-mono text-red-500">{analyticsData.overview.bounce_rate}%</span>
                     </div>
                   </div>
 
-                  {/* Hourly/Daily Traffic Trend Bar Chart (pure CSS) */}
-                  <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-                    <h3 className="text-sm font-bold text-slate-900 mb-6 uppercase tracking-wider">{t.analyticsTrafficVolume}</h3>
+                  {/* Hourly/Daily Traffic Trend Line Chart (custom SVG line area chart) */}
+                  <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm w-full">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">{t.analyticsTrafficVolume}</h3>
+                      <span className="bg-brand-blue/10 text-brand-blue text-xs px-3 py-0.5 rounded-full font-bold uppercase tracking-wider font-mono">
+                        {analyticsTimeframe}
+                      </span>
+                    </div>
+                    
                     {analyticsData.trends.length === 0 ? (
                       <p className="text-sm text-slate-450 py-10 text-center">No trend data logged yet.</p>
                     ) : (
-                      <div>
-                        <div className="flex items-end justify-between gap-2 h-44 border-b border-slate-200/80 pb-2">
-                          {analyticsData.trends.map((trend, idx) => {
-                            const maxVal = Math.max(...analyticsData.trends.map(x => x.count), 1);
-                            const heightPct = Math.round((trend.count / maxVal) * 100);
-                            return (
-                              <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
-                                <span className="text-[10px] font-bold font-mono text-brand-blue opacity-0 group-hover:opacity-100 transition-opacity">
-                                  {trend.count}
-                                </span>
-                                <div
-                                  style={{ height: `${Math.max(heightPct, 6)}%` }}
-                                  className="w-full bg-brand-blue/35 group-hover:bg-brand-blue rounded-t-md transition-all duration-300 relative"
-                                >
-                                  <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-all rounded-t-md"></div>
-                                </div>
-                                <span className="text-[9px] font-semibold text-slate-550 uppercase tracking-wide truncate max-w-[50px] sm:max-w-none">
-                                  {trend.date.split("-").slice(1).join("/")}
-                                </span>
+                      <div className="w-full">
+                        {(() => {
+                          const trendPoints = analyticsData.trends;
+                          const maxVal = Math.max(...trendPoints.map(t => Number(t.count || 0)), 1);
+                          const width = 800;
+                          const height = 180;
+                          const spacing = trendPoints.length > 1 ? width / (trendPoints.length - 1) : width;
+                          
+                          const pts = trendPoints.map((t, idx) => {
+                            const x = idx * spacing;
+                            const y = height - (Number(t.count || 0) / maxVal) * (height - 20) - 10;
+                            return `${x},${y}`;
+                          }).join(" ");
+
+                          const areaPts = trendPoints.length > 0 
+                            ? `0,${height} ${pts} ${width},${height}` 
+                            : "";
+
+                          return (
+                            <div className="w-full overflow-x-auto">
+                              <div className="min-w-[600px] p-4">
+                                <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-48 overflow-visible">
+                                  <defs>
+                                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                                      <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4"/>
+                                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0"/>
+                                    </linearGradient>
+                                  </defs>
+                                  {/* Area Fill */}
+                                  {areaPts && <polygon points={areaPts} fill="url(#areaGrad)" />}
+                                  {/* Grid Lines */}
+                                  <line x1="0" y1={height - 10} x2={width} y2={height - 10} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 4" />
+                                  <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 4" />
+                                  <line x1="0" y1="10" x2={width} y2="10" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 4" />
+                                  
+                                  {/* Stroke Line */}
+                                  {pts && <polyline points={pts} fill="none" stroke="#3b82f6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />}
+                                  
+                                  {/* Interactive Points */}
+                                  {trendPoints.map((t, idx) => {
+                                    const x = idx * spacing;
+                                    const y = height - (Number(t.count || 0) / maxVal) * (height - 20) - 10;
+                                    return (
+                                      <g key={idx} className="group">
+                                        <circle cx={x} cy={y} r="5.5" fill="#3b82f6" stroke="#fff" strokeWidth="2.5" className="cursor-pointer transition-all group-hover:scale-125" />
+                                        <text x={x} y={y - 12} fill="#1e293b" fontSize="8" fontWeight="black" textAnchor="middle" className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none font-mono">
+                                          {t.count}
+                                        </text>
+                                        <text x={x} y={height + 10} fill="#94a3b8" fontSize="8" fontWeight="bold" textAnchor="middle" className="pointer-events-none">
+                                          {t.date.split("-").slice(1).join("/")}
+                                        </text>
+                                      </g>
+                                    );
+                                  })}
+                                </svg>
                               </div>
-                            );
-                          })}
-                        </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
 
-                  {/* Content & Traffic Sources Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Top Pages */}
-                    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-                      <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">{t.analyticsTopPages}</h3>
-                      {analyticsData.topPages.length === 0 ? (
-                        <p className="text-xs text-slate-450 py-6 text-center">No page views recorded.</p>
-                      ) : (
-                        <div className="space-y-4">
-                          {analyticsData.topPages.map((p, idx) => {
-                            const maxCount = Math.max(...analyticsData.topPages.map(x => x.count), 1);
-                            const widthPct = Math.round((p.count / maxCount) * 100);
-                            return (
-                              <div key={idx} className="space-y-1">
-                                <div className="flex justify-between text-xs font-semibold">
-                                  <span className="font-mono text-slate-700">{p.page_url}</span>
-                                  <span className="text-slate-950 font-mono">{p.count} views</span>
-                                </div>
-                                <div className="h-1.5 bg-slate-100 border border-slate-200/50 rounded-full overflow-hidden">
-                                  <div style={{ width: `${widthPct}%` }} className="h-full bg-brand-blue rounded-full"></div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
+                  {/* Funnel of Traffic Referrers */}
+                  <ReferralFunnel data={analyticsData.referrers} />
+
+                  {/* Geographic Location & Spain Map Inset */}
+                  <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col lg:flex-row gap-8 w-full">
+                    {/* World countries grid list */}
+                    <div className="w-full lg:w-1/2 space-y-4">
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        {lang === "es" ? "Ubicación Geográfica" : "Geographic Origin"}
+                      </h4>
+                      <div className="divide-y divide-slate-150 max-h-48 overflow-y-auto">
+                        {analyticsData.countries.map((c, idx) => (
+                          <div key={idx} className="flex justify-between items-center py-2.5 text-xs font-bold text-slate-700">
+                            <span className="flex items-center gap-2">
+                              <span className="text-slate-400">🌍</span>
+                              <span>{c.country}</span>
+                            </span>
+                            <span className="font-mono text-slate-900 bg-slate-100 px-2 py-0.5 rounded">{c.count}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
-                    {/* Top Referrers */}
-                    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-                      <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">{t.analyticsReferrers}</h3>
-                      {analyticsData.referrers.length === 0 ? (
-                        <p className="text-xs text-slate-450 py-6 text-center">No referrers logged.</p>
-                      ) : (
-                        <div className="space-y-4">
-                          {analyticsData.referrers.map((r, idx) => {
-                            const maxCount = Math.max(...analyticsData.referrers.map(x => x.count), 1);
-                            const widthPct = Math.round((r.count / maxCount) * 100);
-                            return (
-                              <div key={idx} className="space-y-1">
-                                <div className="flex justify-between text-xs font-semibold">
-                                  <span className="text-slate-700">{r.referrer}</span>
-                                  <span className="text-slate-950 font-mono">{r.count} hits</span>
+                    {/* Spain cities map inset */}
+                    {(() => {
+                      const spainCitiesList = analyticsData.spainCities || [];
+                      const cityMapCoords = {
+                        "Madrid": { x: 95, y: 70 },
+                        "Barcelona": { x: 165, y: 45 },
+                        "Valencia": { x: 135, y: 85 },
+                        "Sevilla": { x: 75, y: 112 },
+                        "Zaragoza": { x: 128, y: 46 },
+                        "Málaga": { x: 82, y: 125 },
+                        "Murcia": { x: 122, y: 106 },
+                        "Palma": { x: 178, y: 80 },
+                        "Bilbao": { x: 95, y: 25 },
+                        "Alicante": { x: 132, y: 96 },
+                      };
+
+                      return (
+                        <div className="w-full lg:w-1/2 flex flex-col sm:flex-row gap-6 border-l border-slate-150 pl-0 lg:pl-8">
+                          <div className="flex-1">
+                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+                              {lang === "es" ? "Mapa de Tráfico (España)" : "Spain Traffic Map"}
+                            </h4>
+                            <div className="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 flex items-center justify-center relative">
+                              <svg viewBox="0 0 200 150" className="w-full h-44 overflow-visible">
+                                <path d="M 30 100 L 40 40 L 70 20 L 150 20 L 180 50 L 175 100 L 120 130 L 70 120 L 45 110 Z" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1.2" />
+                                <path d="M 30 100 L 40 40 L 52 40 L 52 110 Z" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
+                                <rect x="8" y="115" width="40" height="30" fill="none" stroke="#e2e8f0" strokeDasharray="2 2" />
+                                <circle cx="18" cy="125" r="1.5" fill="#94a3b8" />
+                                <circle cx="26" cy="128" r="2" fill="#94a3b8" />
+                                <circle cx="34" cy="130" r="1.5" fill="#94a3b8" />
+
+                                {spainCitiesList.map((c, idx) => {
+                                  const coords = cityMapCoords[c.city];
+                                  if (!coords) return null;
+                                  return (
+                                    <g key={idx} className="group">
+                                      <circle cx={coords.x} cy={coords.y} r="7" fill="#10b981" className="animate-ping opacity-25" />
+                                      <circle cx={coords.x} cy={coords.y} r="3" fill="#10b981" stroke="#fff" strokeWidth="1" />
+                                      <text x={coords.x} y={coords.y - 6} fill="#1e293b" fontSize="7" fontWeight="black" textAnchor="middle" className="pointer-events-none">
+                                        {c.city}
+                                      </text>
+                                    </g>
+                                  );
+                                })}
+                              </svg>
+                            </div>
+                          </div>
+
+                          <div className="flex-1">
+                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+                              {lang === "es" ? "Ciudades (España)" : "Cities (Spain)"}
+                            </h4>
+                            <div className="divide-y divide-slate-150 max-h-48 overflow-y-auto">
+                              {spainCitiesList.map((c, idx) => (
+                                <div key={idx} className="flex justify-between items-center py-2 text-xs font-bold text-slate-700">
+                                  <span>{c.city}</span>
+                                  <span className="font-mono text-slate-900 bg-slate-100 px-2 py-0.5 rounded">{c.count}</span>
                                 </div>
-                                <div className="h-1.5 bg-slate-100 border border-slate-200/50 rounded-full overflow-hidden">
-                                  <div style={{ width: `${widthPct}%` }} className="h-full bg-brand-green rounded-full"></div>
-                                </div>
-                              </div>
-                            );
-                          })}
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                      )}
-                    </div>
+                      );
+                    })()}
                   </div>
 
-                  {/* Countries & Systems Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Countries */}
-                    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-                      <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">{t.analyticsGeo}</h3>
-                      {analyticsData.countries.length === 0 ? (
-                        <p className="text-xs text-slate-450 py-6 text-center">No location metrics logged.</p>
-                      ) : (
-                        <div className="divide-y divide-slate-150">
-                          {analyticsData.countries.map((c, idx) => (
-                            <div key={idx} className="flex justify-between items-center py-2.5 text-xs font-semibold text-slate-750">
-                              <span className="text-slate-700">{c.country}</span>
-                              <span className="bg-slate-100 border border-slate-200 font-mono text-slate-950 px-2 py-0.5 rounded">
-                                {c.count} sessions
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                  {/* Pizzas / Circle Donut Charts Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+                    {/* Pages circle */}
+                    <div className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm flex flex-col justify-between">
+                      <h4 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider text-center pt-2">
+                        {lang === "es" ? "Páginas más visitadas" : "Top Visited Pages"}
+                      </h4>
+                      <DonutChart data={analyticsData.topPages.map(p => ({ name: p.page_url, count: p.count }))} />
                     </div>
 
-                    {/* Devices, Browsers & OS Tabular Summary */}
-                    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col gap-6">
-                      {/* Devices */}
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wide">{t.analyticsDevices}</h4>
-                        <div className="flex gap-2 flex-wrap">
-                          {analyticsData.devices.map((d, idx) => (
-                            <span key={idx} className="bg-slate-50 border border-slate-200 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-800">
-                              {d.device_type}: <span className="font-mono text-brand-blue">{d.count}</span>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+                    {/* Operating Systems circle */}
+                    <div className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm flex flex-col justify-between">
+                      <h4 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider text-center pt-2">
+                        {lang === "es" ? "Sistemas Operativos" : "Operating Systems"}
+                      </h4>
+                      <DonutChart data={analyticsData.os.map(o => ({ name: o.os, count: o.count }))} />
+                    </div>
 
-                      {/* Browsers */}
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wide">{t.analyticsBrowsers}</h4>
-                        <div className="flex gap-2 flex-wrap">
-                          {analyticsData.browsers.map((b, idx) => (
-                            <span key={idx} className="bg-slate-50 border border-slate-200 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-800">
-                              {b.browser}: <span className="font-mono text-brand-green">{b.count}</span>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+                    {/* Devices circle */}
+                    <div className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm flex flex-col justify-between">
+                      <h4 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider text-center pt-2">
+                        {lang === "es" ? "Dispositivos" : "Devices"}
+                      </h4>
+                      <DonutChart data={analyticsData.devices.map(d => ({ name: d.device_type, count: d.count }))} />
+                    </div>
 
-                      {/* Operating Systems */}
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wide">{t.analyticsOs}</h4>
-                        <div className="flex gap-2 flex-wrap">
-                          {analyticsData.os.map((o, idx) => (
-                            <span key={idx} className="bg-slate-50 border border-slate-200 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-800">
-                              {o.os}: <span className="font-mono text-amber-500">{o.count}</span>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+                    {/* Browsers circle */}
+                    <div className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm flex flex-col justify-between">
+                      <h4 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider text-center pt-2">
+                        {lang === "es" ? "Navegadores" : "Browsers"}
+                      </h4>
+                      <DonutChart data={analyticsData.browsers.map(b => ({ name: b.browser, count: b.count }))} />
                     </div>
                   </div>
 
                   {/* Conversions Table */}
-                  <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                  <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm w-full">
                     <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">{t.analyticsEvents}</h3>
                     {analyticsData.conversions.length === 0 ? (
                       <p className="text-xs text-slate-450 py-6 text-center">No conversions logged.</p>
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
                         {analyticsData.conversions.map((conv, idx) => {
                           let label = conv.event_type;
                           let color = "text-slate-950";
@@ -918,8 +1346,8 @@ export default function DashboardClient({
                             color = "text-red-500";
                           }
                           return (
-                            <div key={idx} className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-center shadow-sm">
-                              <span className="text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wide">{label}</span>
+                            <div key={idx} className="bg-slate-55 border border-slate-200 p-4 rounded-xl text-center shadow-sm">
+                              <span className="text-xs text-slate-550 font-bold block mb-1 uppercase tracking-wide">{label}</span>
                               <span className={`text-2xl font-black font-mono ${color}`}>{conv.count}</span>
                             </div>
                           );
@@ -932,35 +1360,114 @@ export default function DashboardClient({
             </div>
           )}
 
-          {/* TAB: OVERVIEW (RESUMEN) */}
           {activeTab === "overview" && (
-            <div className="space-y-6 animate-fade-in">
+            <div className="space-y-8 animate-fade-in w-full">
               {/* Header stats */}
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm w-full">
                 <div>
                   <span className="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider font-mono">
                     {currentWebsite.domain}
                   </span>
                   <h2 className="text-2xl font-black mt-3 text-slate-950">{t.overviewTitle}</h2>
-                  <p className="text-slate-500 text-sm mt-1">{t.overviewActiveSince} {currentWebsite.registeredAt ? new Date(currentWebsite.registeredAt).toLocaleDateString() : new Date(currentWebsite.createdAt).toLocaleDateString()}</p>
+                  <p className="text-slate-550 text-sm mt-1">{t.overviewActiveSince} {currentWebsite.registeredAt ? new Date(currentWebsite.registeredAt).toLocaleDateString() : new Date(currentWebsite.createdAt).toLocaleDateString()}</p>
                 </div>
 
-                <div className="flex gap-4">
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 min-w-[120px]">
-                    <span className="text-xs text-slate-500 font-bold block mb-1">{t.overviewTotalContacts}</span>
-                    <span className="text-2xl font-black font-mono text-slate-900">{contactForms.length}</span>
+                <div className="flex gap-4 shrink-0">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 min-w-[130px] text-center shadow-sm">
+                    <span className="text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wide">{t.overviewTotalContacts}</span>
+                    <span className="text-3xl font-black font-mono text-slate-900">{contactForms.length}</span>
                   </div>
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 min-w-[120px]">
-                    <span className="text-xs text-slate-500 font-bold block mb-1">{t.overviewTotalBookings}</span>
-                    <span className="text-2xl font-black font-mono text-brand-green">{bookings.length}</span>
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 min-w-[130px] text-center shadow-sm">
+                    <span className="text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wide">{t.overviewTotalBookings}</span>
+                    <span className="text-3xl font-black font-mono text-brand-green">{bookings.length}</span>
                   </div>
                 </div>
               </div>
 
+              {/* Alert Center / Novedades y Acciones Pendientes */}
+              {(() => {
+                const pendingBookingsCount = bookings.filter(b => b.status === "PENDING").length;
+                const recentContactsCount = contactForms.filter(c => {
+                  const created = new Date(c.createdAt).getTime();
+                  return Date.now() - created < 48 * 60 * 60 * 1000;
+                }).length;
+                const announcementsCount = announcementsList.length;
+
+                return (
+                  <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm w-full">
+                    <h3 className="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+                      <span className="flex h-2.5 w-2.5 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-blue opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-blue"></span>
+                      </span>
+                      {lang === "es" ? "Panel de Novedades y Alertas" : "Updates & Alert Center"}
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                      {/* Alert: Bookings */}
+                      <div className={`p-5 rounded-2xl border transition-all flex items-center gap-4 ${
+                        pendingBookingsCount > 0 
+                          ? "bg-amber-50/60 border-amber-250/70 text-amber-900" 
+                          : "bg-slate-50 border-slate-200 text-slate-800"
+                      }`}>
+                        <div className="text-2xl">📅</div>
+                        <div>
+                          <span className="text-xs font-bold uppercase tracking-wider block opacity-75">
+                            {lang === "es" ? "Reservas Pendientes" : "Pending Bookings"}
+                          </span>
+                          <span className="text-lg font-black block mt-0.5">
+                            {pendingBookingsCount > 0 
+                              ? (lang === "es" ? `${pendingBookingsCount} por confirmar` : `${pendingBookingsCount} to confirm`)
+                              : (lang === "es" ? "Todo al día" : "All caught up")
+                            }
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Alert: Contact forms */}
+                      <div className={`p-5 rounded-2xl border transition-all flex items-center gap-4 ${
+                        recentContactsCount > 0 
+                          ? "bg-brand-blue/5 border-brand-blue/20 text-brand-blue" 
+                          : "bg-slate-50 border-slate-200 text-slate-800"
+                      }`}>
+                        <div className="text-2xl">✉️</div>
+                        <div>
+                          <span className="text-xs font-bold uppercase tracking-wider block opacity-75">
+                            {lang === "es" ? "Mensajes Nuevos (48h)" : "New Messages (48h)"}
+                          </span>
+                          <span className="text-lg font-black block mt-0.5">
+                            {recentContactsCount > 0 
+                              ? (lang === "es" ? `${recentContactsCount} mensajes nuevos` : `${recentContactsCount} new messages`)
+                              : (lang === "es" ? "Sin mensajes nuevos" : "No new messages")
+                            }
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Alert: Announcements */}
+                      <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 flex items-center gap-4">
+                        <div className="text-2xl">📢</div>
+                        <div>
+                          <span className="text-xs font-bold uppercase tracking-wider block opacity-75">
+                            {lang === "es" ? "Comunicados de SPP Labs" : "SPP Labs Announcements"}
+                          </span>
+                          <span className="text-lg font-black block mt-0.5">
+                            {announcementsCount > 0 
+                              ? (lang === "es" ? `${announcementsCount} publicados` : `${announcementsCount} published`)
+                              : (lang === "es" ? "Sin comunicados" : "No announcements")
+                            }
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Data Lists Briefs */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
                 {/* Contact List Box */}
-                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm w-full">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="font-bold text-base text-slate-900">{t.clientesContactForms}</h3>
                     <button
@@ -978,7 +1485,7 @@ export default function DashboardClient({
                   ) : (
                     <div className="space-y-4">
                       {contactForms.slice(0, 3).map((form) => (
-                        <div key={form.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm">
+                        <div key={form.id} className="bg-slate-55 border border-slate-200 rounded-xl p-4 text-sm">
                           <div className="flex justify-between items-start mb-2">
                             <span className="font-bold text-slate-900">{form.name}</span>
                             <span className="text-[10px] text-slate-500 font-mono">
@@ -996,7 +1503,7 @@ export default function DashboardClient({
                 </div>
 
                 {/* Booking List Box */}
-                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm w-full">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="font-bold text-base text-slate-900">{t.clientesBookings}</h3>
                     <button
@@ -1021,7 +1528,7 @@ export default function DashboardClient({
                           badgeColor = "bg-rose-50 border-rose-200 text-rose-700";
                         }
                         return (
-                          <div key={booking.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm">
+                          <div key={booking.id} className="bg-slate-55 border border-slate-200 rounded-xl p-4 text-sm">
                             <div className="flex justify-between items-start mb-2">
                               <span className="font-bold text-slate-900">{booking.name}</span>
                               <span className={`font-bold text-[10px] px-2 py-0.5 rounded border ${badgeColor}`}>
@@ -1032,7 +1539,7 @@ export default function DashboardClient({
                               <span>📅 {new Date(booking.date).toLocaleDateString()}</span>
                               <span>⏰ {booking.time}</span>
                             </div>
-                            <p className="text-slate-650 text-xs line-clamp-1 italic">
+                            <p className="text-slate-655 text-xs line-clamp-1 italic">
                               "{booking.message}"
                             </p>
                           </div>
@@ -1040,28 +1547,6 @@ export default function DashboardClient({
                       })}
                     </div>
                   )}
-                </div>
-              </div>
-
-              {/* API Configuration Card */}
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-                <h3 className="font-bold text-base mb-4 text-slate-900">{t.overviewDomainSettings}</h3>
-                <p className="text-sm text-slate-500 mb-6">
-                  {t.overviewBriefDesc}
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">{t.overviewEndpoint}</span>
-                    <span className="text-sm font-semibold text-slate-900 font-mono">api.spplabs.es</span>
-                  </div>
-
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">{t.overviewTotalKeys}</span>
-                    <span className="text-sm font-semibold text-slate-900">
-                      {apiKeys.length} linked key(s)
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -1135,86 +1620,14 @@ export default function DashboardClient({
                     {t.clientesNoBookings}
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {bookings.map((booking) => {
-                      let badgeColor = "bg-amber-50 border-amber-200 text-amber-700";
-                      if (booking.status === "CONFIRMED") {
-                        badgeColor = "bg-emerald-50 border-emerald-200 text-emerald-700";
-                      } else if (booking.status === "CANCELLED") {
-                        badgeColor = "bg-rose-50 border-rose-200 text-rose-700";
-                      }
-                      return (
-                        <div key={booking.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
-                          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4">
-                            <div>
-                              <span className="font-bold text-lg text-slate-900 block">{booking.name}</span>
-                              <span className="text-xs text-brand-green font-semibold">{booking.email}</span>
-                            </div>
-                            <div>
-                              <span className={`font-bold text-xs px-3 py-1 rounded-full border ${badgeColor}`}>
-                                {booking.status === "CONFIRMED" ? t.clientesAccept : booking.status === "CANCELLED" ? t.clientesReject : "PENDIENTE"}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs mb-4 border-y border-slate-200 py-4">
-                            <div>
-                              <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">{t.clientesDate}</span>
-                              <span className="text-slate-900 font-mono font-bold text-sm">
-                                {new Date(booking.date).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">{t.clientesTime}</span>
-                              <span className="text-slate-900 font-mono font-bold text-sm">{booking.time}</span>
-                            </div>
-                            <div>
-                              <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">{t.clientesPhone}</span>
-                              <span className="text-slate-700 font-mono">{booking.phone || "N/A"}</span>
-                            </div>
-                            <div>
-                              <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">{t.clientesSubmitted}</span>
-                              <span className="text-slate-750 font-mono">
-                                {new Date(booking.createdAt).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="mb-4">
-                            <span className="text-slate-500 font-bold block uppercase tracking-wider text-[10px] mb-2">Mensaje del Cliente</span>
-                            <div className="bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-650 italic">
-                              "{booking.message || "Sin comentarios adicionales."}"
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 pt-3 border-t border-slate-200">
-                            {booking.status === "PENDING" && (
-                              <>
-                                <button
-                                  onClick={() => handleUpdateBookingStatus(booking.id, "CONFIRMED")}
-                                  className="px-3.5 py-1.5 bg-brand-green hover:bg-brand-green-dark text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
-                                >
-                                  {t.clientesAccept}
-                                </button>
-                                <button
-                                  onClick={() => handleUpdateBookingStatus(booking.id, "CANCELLED")}
-                                  className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
-                                >
-                                  {t.clientesReject}
-                                </button>
-                              </>
-                            )}
-                            <button
-                              onClick={() => handleDeleteBooking(booking.id)}
-                              className="ml-auto px-3.5 py-1.5 border border-red-200 hover:bg-red-50 text-red-650 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                            >
-                              {t.clientesDelete}
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <BookingsCalendar
+                    bookings={bookings}
+                    lang={lang}
+                    onAccept={handleUpdateBookingStatus}
+                    onReject={handleUpdateBookingStatus}
+                    onDelete={handleDeleteBooking}
+                    t={t}
+                  />
                 )}
               </div>
             </div>

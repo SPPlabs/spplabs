@@ -36,9 +36,66 @@ export async function GET(request) {
 
     if (!website) {
       return NextResponse.json({ error: "NotFound", message: "Domain not registered" }, { status: 404 });
+    }    // 2. Resolve query timeframe and build trend query
+    const timeframe = url.searchParams.get("timeframe") || "week";
+    let trendQuery = "";
+    if (timeframe === "day") {
+      trendQuery = `
+        SELECT 
+          toHour(event_time) as hour,
+          count() as count
+        FROM analytics_events
+        WHERE website_id = {website_id: String}
+        AND event_time >= now() - interval 24 hour
+        GROUP BY hour
+        ORDER BY hour ASC
+      `;
+    } else if (timeframe === "week") {
+      trendQuery = `
+        SELECT 
+          formatDateTime(event_time, '%Y-%m-%d') as date,
+          count() as count
+        FROM analytics_events
+        WHERE website_id = {website_id: String}
+        AND event_time >= now() - interval 7 day
+        GROUP BY date
+        ORDER BY date ASC
+      `;
+    } else if (timeframe === "month") {
+      trendQuery = `
+        SELECT 
+          formatDateTime(event_time, '%Y-%m-%d') as date,
+          count() as count
+        FROM analytics_events
+        WHERE website_id = {website_id: String}
+        AND event_time >= now() - interval 30 day
+        GROUP BY date
+        ORDER BY date ASC
+      `;
+    } else if (timeframe === "year") {
+      trendQuery = `
+        SELECT 
+          formatDateTime(event_time, '%Y-%m') as date,
+          count() as count
+        FROM analytics_events
+        WHERE website_id = {website_id: String}
+        AND event_time >= now() - interval 12 month
+        GROUP BY date
+        ORDER BY date ASC
+      `;
+    } else {
+      // all time
+      trendQuery = `
+        SELECT 
+          formatDateTime(event_time, '%Y-%m') as date,
+          count() as count
+        FROM analytics_events
+        WHERE website_id = {website_id: String}
+        GROUP BY date
+        ORDER BY date ASC
+      `;
     }
 
-    // 2. Fetch ClickHouse Analytics
     // Execute all queries in parallel to maximize performance
     const [
       overview,
@@ -51,6 +108,7 @@ export async function GET(request) {
       countries,
       conversions,
       trends,
+      spainCities,
     ] = await Promise.all([
       // A. Overview Cards
       clickhouseQuery(
@@ -138,16 +196,17 @@ export async function GET(request) {
          GROUP BY event_type`,
         { website_id: targetDomain }
       ),
-      // J. Trends (Daily views for last 7 days)
+      // J. Dynamic Trends
+      clickhouseQuery(trendQuery, { website_id: targetDomain }),
+      // K. Spain Cities
       clickhouseQuery(
-        `SELECT 
-          formatDateTime(event_time, '%Y-%m-%d') as date,
-          count() as count
+        `SELECT city, count() as count
          FROM analytics_events
          WHERE website_id = {website_id: String}
-         AND event_time >= now() - interval 7 day
-         GROUP BY date
-         ORDER BY date ASC`,
+         AND (country = 'Spain' OR country = 'ES')
+         GROUP BY city
+         ORDER BY count DESC
+         LIMIT 10`,
         { website_id: targetDomain }
       ),
     ]);
@@ -196,7 +255,11 @@ export async function GET(request) {
         os,
         countries,
         conversions,
-        trends,
+        trends: trends.map(t => ({
+          date: t.date || (t.hour !== undefined ? `${t.hour}:00` : "Unknown"),
+          count: Number(t.count)
+        })),
+        spainCities,
       },
     });
   } catch (error) {

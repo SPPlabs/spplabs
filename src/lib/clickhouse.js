@@ -276,51 +276,133 @@ function mockQueryHandler(sql, params) {
     return Object.entries(typeCounts).map(([event_type, count]) => ({ event_type, count }));
   }
 
-  // 9. Traffic trends over time (Daily)
-  if (query.includes("toyyyy-mm-dd")) {
+  // 8b. Spain Cities Query
+  if ((query.includes("country = 'spain'") || query.includes("country = 'es'")) && query.includes("city")) {
+    const cityCounts = {};
+    activeEvents.filter(e => e.country === "Spain" || e.country === "ES").forEach(e => {
+      const city = e.city || "Madrid";
+      cityCounts[city] = (cityCounts[city] || 0) + 1;
+    });
+    return Object.entries(cityCounts)
+      .map(([city, count]) => ({ city, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  }
+
+  // 9. Traffic trends over time (Hourly/Daily/Monthly depending on query/timeframe)
+  if (query.includes("tohour") || query.includes("interval 1 day") || query.includes("interval 24 hour")) {
+    const hours = {};
+    for (let i = 0; i < 24; i++) {
+      hours[`${String(i).padStart(2, '0')}:00`] = 0;
+    }
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    activeEvents.filter(e => e.event_time >= oneDayAgo).forEach(e => {
+      const hr = `${String(e.event_time.getHours()).padStart(2, '0')}:00`;
+      hours[hr]++;
+    });
+    return Object.entries(hours).map(([date, count]) => ({ date, count }));
+  }
+
+  if (query.includes("interval 30 day")) {
     const days = {};
-    for (let i = 6; i >= 0; i--) {
+    for (let i = 29; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split("T")[0];
       days[dateStr] = 0;
     }
-
-    activeEvents.forEach(e => {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    activeEvents.filter(e => e.event_time >= thirtyDaysAgo).forEach(e => {
       const dateStr = e.event_time.toISOString().split("T")[0];
       if (dateStr in days) {
         days[dateStr]++;
       }
     });
-
-    return Object.entries(days).map(([date, count]) => ({ date, count }));
+    return Object.entries(days).map(([date, count]) => ({ date, count })).sort((a,b) => a.date.localeCompare(b.date));
   }
 
-  return [];
+  if (query.includes("interval 12 month") || query.includes("interval 1 year") || query.includes("interval 365 day")) {
+    const months = {};
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const mStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      months[mStr] = 0;
+    }
+    const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
+    activeEvents.filter(e => e.event_time >= oneYearAgo).forEach(e => {
+      const mStr = `${e.event_time.getFullYear()}-${String(e.event_time.getMonth() + 1).padStart(2, '0')}`;
+      if (mStr in months) {
+        months[mStr]++;
+      }
+    });
+    return Object.entries(months).map(([date, count]) => ({ date, count })).sort((a,b) => a.date.localeCompare(b.date));
+  }
+
+  // All time trend (monthly grouping over the last 12 months)
+  if (query.includes("all-time") || query.includes("all time") || (!query.includes("interval 1 day") && !query.includes("interval 7 day") && !query.includes("interval 30 day"))) {
+    const months = {};
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const mStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      months[mStr] = 0;
+    }
+    activeEvents.forEach(e => {
+      const mStr = `${e.event_time.getFullYear()}-${String(e.event_time.getMonth() + 1).padStart(2, '0')}`;
+      if (mStr in months) {
+        months[mStr]++;
+      }
+    });
+    return Object.entries(months).map(([date, count]) => ({ date, count })).sort((a,b) => a.date.localeCompare(b.date));
+  }
+
+  // Default to 7-day trend
+  const days = {};
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split("T")[0];
+    days[dateStr] = 0;
+  }
+
+  activeEvents.forEach(e => {
+    const dateStr = e.event_time.toISOString().split("T")[0];
+    if (dateStr in days) {
+      days[dateStr]++;
+    }
+  });
+
+  return Object.entries(days).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date));
 }
 
 // Generate pre-populated metrics data to simulate dashboard history instantly
 function generateMockSeedEvents(website_id) {
   const seeds = [];
-  const visitorIds = Array.from({ length: 42 }, () => crypto.randomUUID());
-  const sessionIds = Array.from({ length: 80 }, () => crypto.randomUUID());
+  const visitorIds = Array.from({ length: 150 }, () => crypto.randomUUID());
+  const sessionIds = Array.from({ length: 300 }, () => crypto.randomUUID());
   
   const pages = ["/", "/services", "/bookings", "/contacts", "/pricing", "/about"];
   const referrers = ["Direct / None", "https://google.com", "https://github.com", "https://twitter.com", "https://linkedin.com"];
   const browsers = ["Chrome", "Safari", "Firefox", "Edge"];
   const devices = ["Desktop", "Mobile", "Tablet"];
-  const countries = ["Spain", "United States", "United Kingdom", "Germany", "France", "Italy"];
+  const countries = ["Spain", "Spain", "United States", "United Kingdom", "Germany", "France", "Italy"];
+  const spainCities = ["Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza", "Málaga", "Murcia", "Palma", "Bilbao", "Alicante"];
   const utms = ["google", "linkedin", "newsletter", "twitter"];
 
   const now = Date.now();
 
-  for (let i = 0; i < 250; i++) {
+  // Seed 1000 events spread over the last 365 days
+  for (let i = 0; i < 1000; i++) {
     const visitor_id = visitorIds[Math.floor(Math.random() * visitorIds.length)];
     const session_id = sessionIds[Math.floor(Math.random() * sessionIds.length)];
     
-    // Distribute events over the last 7 days
-    const eventTime = new Date(now - Math.random() * 7 * 24 * 60 * 60 * 1000);
+    // Distribute events over the last 365 days
+    const eventTime = new Date(now - Math.random() * 365 * 24 * 60 * 60 * 1000);
     const eventType = Math.random() > 0.3 ? "page_view" : (Math.random() > 0.5 ? "button_click" : "form_submit");
+    const country = countries[Math.floor(Math.random() * countries.length)];
+    const isSpain = country === "Spain";
+    const city = isSpain ? spainCities[Math.floor(Math.random() * spainCities.length)] : "New York";
 
     seeds.push({
       website_id,
@@ -336,9 +418,9 @@ function generateMockSeedEvents(website_id) {
       utm_campaign: Math.random() > 0.7 ? "promo_2026" : "",
       utm_term: "",
       utm_content: "",
-      country: countries[Math.floor(Math.random() * countries.length)],
-      region: "Madrid",
-      city: "Madrid",
+      country,
+      region: isSpain ? "Spain Region" : "NY State",
+      city,
       device_type: devices[Math.floor(Math.random() * devices.length)],
       browser: browsers[Math.floor(Math.random() * browsers.length)],
       os: Math.random() > 0.5 ? "Windows" : "macOS",
