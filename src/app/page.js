@@ -1,10 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Script from "next/script";
+import { translations } from "@/lib/translations";
 
 export default function Home() {
+  const [lang, setLang] = useState("es");
   const [activeTab, setActiveTab] = useState("throughput");
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem("spp_lang");
+    if (savedLang) {
+      setLang(savedLang);
+    }
+  }, []);
+
+  const changeLanguage = (newLang) => {
+    setLang(newLang);
+    localStorage.setItem("spp_lang", newLang);
+  };
+
+  const t = translations[lang] || translations.es;
 
   // Contact Form State
   const [contactName, setContactName] = useState("");
@@ -101,7 +117,7 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || data.error || "Failed to submit");
 
-      setContactResult({ success: true, message: "Thank you! Your message was submitted successfully." });
+      setContactResult({ success: true, message: lang === "es" ? "¡Gracias! Su mensaje fue enviado con éxito." : "Thank you! Your message was submitted successfully." });
       setContactName("");
       setContactEmail("");
       setContactPhone("");
@@ -142,7 +158,7 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || data.error || "Failed to book");
 
-      setBookingResult({ success: true, message: "Appointment requested! We will confirm shortly." });
+      setBookingResult({ success: true, message: lang === "es" ? "¡Cita solicitada! La confirmaremos en breve." : "Appointment requested! We will confirm shortly." });
       setBookingName("");
       setBookingEmail("");
       setBookingPhone("");
@@ -159,9 +175,9 @@ export default function Home() {
   // Simulated metrics for the interactive dashboard mockup
   const metrics = {
     throughput: {
-      title: "Network Throughput",
+      title: lang === "es" ? "Rendimiento de Red" : "Network Throughput",
       value: "1,248.4 Mb/s",
-      change: "+14.2% from last hour",
+      change: lang === "es" ? "+14.2% desde la última hora" : "+14.2% from last hour",
       isPositive: true,
       color: "blue",
       svgPath: (
@@ -181,9 +197,9 @@ export default function Home() {
       )
     },
     cpu: {
-      title: "CPU Utilization",
+      title: lang === "es" ? "Uso de CPU" : "CPU Utilization",
       value: "42.8%",
-      change: "-5.3% from last hour",
+      change: lang === "es" ? "-5.3% desde la última hora" : "-5.3% from last hour",
       isPositive: true,
       color: "green",
       svgPath: (
@@ -202,9 +218,9 @@ export default function Home() {
       )
     },
     latency: {
-      title: "API Response Time",
+      title: lang === "es" ? "Tiempo de Respuesta API" : "API Response Time",
       value: "14ms",
-      change: "+0.4% from last hour",
+      change: lang === "es" ? "+0.4% desde la última hora" : "+0.4% from last hour",
       isPositive: false,
       color: "black",
       svgPath: (
@@ -237,25 +253,42 @@ export default function Home() {
           </a>
 
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm font-medium text-zinc-600 hover:text-black transition-colors" id="nav-link-features">Features</a>
-            <a href="#demo" className="text-sm font-medium text-zinc-600 hover:text-black transition-colors" id="nav-link-demo">Demo Telemetry</a>
-            <a href="#pricing" className="text-sm font-medium text-zinc-600 hover:text-black transition-colors" id="nav-link-pricing">Pricing</a>
+            <a href="#features" className="text-sm font-medium text-zinc-600 hover:text-black transition-colors" id="nav-link-features">{t.navPrecios === "Precios" ? "Características" : "Features"}</a>
+            <a href="#demo" className="text-sm font-medium text-zinc-600 hover:text-black transition-colors" id="nav-link-demo">{t.navPrecios === "Precios" ? "Demostración" : "Demo Telemetry"}</a>
+            <a href="#pricing" className="text-sm font-medium text-zinc-600 hover:text-black transition-colors" id="nav-link-pricing">{t.navPrecios}</a>
           </nav>
 
           <div className="flex items-center gap-4">
+            {/* Language Switcher Link */}
+            <div className="flex gap-2 text-xs font-bold mr-2 bg-zinc-50 border border-zinc-200 px-2.5 py-1.5 rounded-xl shadow-sm">
+              <button
+                onClick={() => changeLanguage("es")}
+                className={`hover:text-brand-blue cursor-pointer transition-colors ${lang === "es" ? "text-brand-blue font-black" : "text-zinc-400"}`}
+              >
+                ES
+              </button>
+              <span className="text-zinc-200">|</span>
+              <button
+                onClick={() => changeLanguage("en")}
+                className={`hover:text-brand-blue cursor-pointer transition-colors ${lang === "en" ? "text-brand-blue font-black" : "text-zinc-400"}`}
+              >
+                EN
+              </button>
+            </div>
+
             <a
               href="/signup"
               className="text-sm font-semibold text-zinc-600 hover:text-black transition-colors"
               id="nav-signup-link"
             >
-              Sign Up
+              {t.loginRegisterLink}
             </a>
             <a
               href="/login"
               className="inline-flex items-center justify-center px-5 h-10 text-sm font-bold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 shadow-sm hover:shadow-md cursor-pointer"
               id="nav-cta"
             >
-              Dashboard Login
+              {t.navLogin}
             </a>
           </div>
         </div>
@@ -270,18 +303,18 @@ export default function Home() {
               <div className="md:col-span-7 flex flex-col items-start text-left">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-200 text-xs font-semibold text-zinc-700 bg-white mb-6">
                   <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse"></span>
-                  <span>Version 4.0 is live</span>
+                  <span>{t.navPrecios === "Precios" ? "La versión 4.0 está activa" : "Version 4.0 is live"}</span>
                 </div>
                 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-black leading-[1.1] mb-8">
-                  Operations & Analytics, <br />
+                  {t.navPrecios === "Precios" ? "Operaciones y Analíticas," : "Operations & Analytics,"} <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-black to-brand-green">
-                    engineered for scale.
+                    {t.navPrecios === "Precios" ? "diseñadas para escalar." : "engineered for scale."}
                   </span>
                 </h1>
                 
                 <p className="text-lg text-zinc-600 max-w-xl leading-relaxed mb-10">
-                  Deploy, analyze, and optimize your systems in real-time. A unified developer workspace designed to streamline infrastructure telemetry and engineering workflows.
+                  {t.navPrecios === "Precios" ? "Despliegue, analice y optimice sus sistemas en tiempo real. Un espacio de trabajo unificado diseñado para simplificar la telemetría." : "Deploy, analyze, and optimize your systems in real-time. A unified developer workspace designed to streamline infrastructure telemetry and engineering workflows."}
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -290,21 +323,21 @@ export default function Home() {
                     className="inline-flex items-center justify-center px-8 h-13 text-base font-semibold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 shadow-lg hover:shadow-xl cursor-pointer"
                     id="hero-primary-cta"
                   >
-                    Dashboard Portal
+                    {t.navDashboard}
                   </a>
                   <a
                     href="/signup"
                     className="inline-flex items-center justify-center px-8 h-13 text-base font-semibold bg-white text-black border border-zinc-300 rounded-lg hover:border-black transition-colors duration-300 cursor-pointer"
                     id="hero-secondary-cta"
                   >
-                    Register Tenant
+                    {t.loginRegisterLink}
                   </a>
                 </div>
 
                 <div className="mt-12 flex items-center gap-8 text-zinc-500 text-xs font-semibold tracking-wider uppercase">
-                  <span>No credit card required</span>
+                  <span>{t.navPrecios === "Precios" ? "Sin tarjeta de crédito" : "No credit card required"}</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-zinc-300"></span>
-                  <span>14-day free trial</span>
+                  <span>{t.navPrecios === "Precios" ? "Prueba gratuita de 14 días" : "14-day free trial"}</span>
                 </div>
               </div>
 
@@ -338,7 +371,7 @@ export default function Home() {
 
                     <div className="border border-zinc-100 rounded-xl p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs text-zinc-500 font-medium">Memory Load</span>
+                        <span className="text-xs text-zinc-500 font-medium">{lang === "es" ? "Carga de Memoria" : "Memory Load"}</span>
                         <span className="text-xs font-bold text-brand-blue font-mono">31.2%</span>
                       </div>
                       <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
@@ -348,8 +381,8 @@ export default function Home() {
 
                     <div className="border border-zinc-100 rounded-xl p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs text-zinc-500 font-medium">Network IO</span>
-                        <span className="text-xs font-bold text-brand-green font-mono">Normal</span>
+                        <span className="text-xs text-zinc-500 font-medium">{lang === "es" ? "Red E/S" : "Network IO"}</span>
+                        <span className="text-xs font-bold text-brand-green font-mono">{lang === "es" ? "Normal" : "Normal"}</span>
                       </div>
                       <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
                         <div className="bg-brand-green h-full rounded-full" style={{ width: "65%" }}></div>
@@ -366,9 +399,9 @@ export default function Home() {
         <section id="features" className="py-24 bg-white border-b border-zinc-100 scroll-mt-20">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-20">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-brand-blue mb-4">Core Infrastructure</h2>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-brand-blue mb-4">{lang === "es" ? "Infraestructura Central" : "Core Infrastructure"}</h2>
               <p className="text-3xl sm:text-4xl font-bold tracking-tight text-black">
-                Everything you need to orchestrate telemetry at scale.
+                {lang === "es" ? "Todo lo que necesita para orquestar telemetría a escala." : "Everything you need to orchestrate telemetry at scale."}
               </p>
             </div>
 
@@ -380,9 +413,9 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-black mb-3">Instant Telemetry</h3>
+                <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Telemetría Instantánea" : "Instant Telemetry"}</h3>
                 <p className="text-zinc-600 leading-relaxed text-sm">
-                  Query and visual infrastructure events in real-time. Gather sub-millisecond telemetry from edge devices and containerized APIs with native visual dashboards.
+                  {lang === "es" ? "Consulte y visualice eventos de infraestructura en tiempo real. Reúna telemetría sub-milisegundo desde dispositivos perimetrales y APIs containerizadas con tableros nativos." : "Query and visual infrastructure events in real-time. Gather sub-millisecond telemetry from edge devices and containerized APIs with native visual dashboards."}
                 </p>
               </div>
 
@@ -393,9 +426,9 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-black mb-3">Workflows & Triggers</h3>
+                <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Flujos y Disparadores" : "Workflows & Triggers"}</h3>
                 <p className="text-zinc-600 leading-relaxed text-sm">
-                  Automate standard operational procedures. Bind actions directly to metric triggers to automatically scale containers, purge caches, or rerun deployments.
+                  {lang === "es" ? "Automatice procedimientos operativos estándar. Vincule acciones directamente a activadores métricos para escalar contenedores automáticamente, purgar cachés o relanzar despliegues." : "Automate standard operational procedures. Bind actions directly to metric triggers to automatically scale containers, purge caches, or rerun deployments."}
                 </p>
               </div>
 
@@ -406,9 +439,9 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-black mb-3">Secure Perimeter</h3>
+                <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Perímetro Seguro" : "Secure Perimeter"}</h3>
                 <p className="text-zinc-600 leading-relaxed text-sm">
-                  Leverage end-to-end transport encryption, isolated query namespaces, and hardware key attestation. Compliance-ready posture standard out of the box.
+                  {lang === "es" ? "Aproveche el cifrado de transporte de extremo a extremo, espacios de nombres aislados para consultas y atestación de claves por hardware. Listo para cumplimiento normativo." : "Leverage end-to-end transport encryption, isolated query namespaces, and hardware key attestation. Compliance-ready posture standard out of the box."}
                 </p>
               </div>
             </div>
@@ -420,12 +453,12 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid lg:grid-cols-12 gap-16 items-center">
               <div className="lg:col-span-5">
-                <span className="text-xs font-bold uppercase tracking-widest text-brand-green mb-4 block">Interactive Telemetry</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-brand-green mb-4 block">{lang === "es" ? "Telemetría Interactiva" : "Interactive Telemetry"}</span>
                 <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black mb-6">
-                  Monitor your infrastructure metrics interactively.
+                  {lang === "es" ? "Supervise métricas de infraestructura interactivamente." : "Monitor your infrastructure metrics interactively."}
                 </h2>
                 <p className="text-zinc-600 mb-8 leading-relaxed">
-                  Toggle through the metrics panels to inspect real-time platform updates. SPP Labs isolates event data to give you high-fidelity insights immediately.
+                  {lang === "es" ? "Alterne entre los paneles de métricas para inspeccionar las actualizaciones de la plataforma en tiempo real. SPP Labs aísla los datos del evento de inmediato." : "Toggle through the metrics panels to inspect real-time platform updates. SPP Labs isolates event data to give you high-fidelity insights immediately."}
                 </p>
 
                 {/* Tab Controls */}
@@ -483,7 +516,7 @@ export default function Home() {
                       activeTab === "throughput" ? "bg-brand-blue" : activeTab === "cpu" ? "bg-brand-green" : "bg-black"
                     } animate-pulse`}></span>
                     <span className="font-bold text-sm text-black">
-                      {metrics[activeTab].title} Live Monitor
+                      {metrics[activeTab].title} {lang === "es" ? "en Vivo" : "Live Monitor"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 bg-zinc-50 px-3 py-1.5 rounded-md border border-zinc-150">
@@ -496,7 +529,7 @@ export default function Home() {
                     {metrics[activeTab].value}
                   </div>
                   <div className="text-xs text-zinc-500 mt-1">
-                    Telemetry updated 2 seconds ago
+                    {lang === "es" ? "Telemetría actualizada hace 2 segundos" : "Telemetry updated 2 seconds ago"}
                   </div>
                 </div>
 
@@ -512,9 +545,9 @@ export default function Home() {
         <section id="pricing" className="py-24 bg-white border-b border-zinc-100 scroll-mt-20">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-20">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-brand-green mb-4">Pricing Plans</h2>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-brand-green mb-4">{lang === "es" ? "Planes de Precios" : "Pricing Plans"}</h2>
               <p className="text-3xl sm:text-4xl font-bold tracking-tight text-black">
-                Simple, transparent tiers built for telemetry operations.
+                {lang === "es" ? "Planes simples y transparentes creados para operaciones de telemetría." : "Simple, transparent tiers built for telemetry operations."}
               </p>
             </div>
 
@@ -522,119 +555,119 @@ export default function Home() {
               {/* Pricing 1 */}
               <div className="border border-zinc-200 bg-white rounded-2xl p-8 flex flex-col justify-between hover:shadow-md transition-shadow">
                 <div>
-                  <h3 className="text-lg font-bold text-black mb-2">Developer</h3>
-                  <p className="text-zinc-500 text-sm mb-6">Great for individual apps and personal research.</p>
+                  <h3 className="text-lg font-bold text-black mb-2">{lang === "es" ? "Desarrollador" : "Developer"}</h3>
+                  <p className="text-zinc-500 text-sm mb-6">{lang === "es" ? "Excelente para aplicaciones individuales e investigación personal." : "Great for individual apps and personal research."}</p>
                   <div className="flex items-baseline gap-1 mb-8">
                     <span className="text-4xl font-black text-black font-mono">$0</span>
-                    <span className="text-zinc-500 text-sm">/ month</span>
+                    <span className="text-zinc-500 text-sm">/ {lang === "es" ? "mes" : "month"}</span>
                   </div>
                   <ul className="space-y-4 border-t border-zinc-100 pt-6">
                     <li className="flex items-center gap-3 text-sm text-zinc-700">
                       <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>1 Million data points / mo</span>
+                      <span>{lang === "es" ? "1 Millón de puntos de datos / mes" : "1 Million data points / mo"}</span>
                     </li>
                     <li className="flex items-center gap-3 text-sm text-zinc-700">
                       <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>3 Day log retention</span>
+                      <span>{lang === "es" ? "Retención de logs de 3 días" : "3 Day log retention"}</span>
                     </li>
                     <li className="flex items-center gap-3 text-sm text-zinc-700">
                       <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>1 Connected application</span>
+                      <span>{lang === "es" ? "1 Aplicación conectada" : "1 Connected application"}</span>
                     </li>
                   </ul>
                 </div>
                 <button className="mt-8 w-full py-3 px-4 bg-zinc-50 hover:bg-zinc-100 text-black border border-zinc-200 rounded-lg text-sm font-semibold transition-colors duration-200">
-                  Deploy Free Cluster
+                  {lang === "es" ? "Desplegar Clúster Gratis" : "Deploy Free Cluster"}
                 </button>
               </div>
 
               {/* Pricing 2 */}
               <div className="border-2 border-black bg-white rounded-2xl p-8 flex flex-col justify-between relative shadow-lg">
                 <div className="absolute top-0 right-8 transform -translate-y-1/2 bg-brand-green text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  Popular
+                  {lang === "es" ? "Popular" : "Popular"}
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-black mb-2">Scale</h3>
-                  <p className="text-zinc-500 text-sm mb-6">Designed for expanding workloads and small teams.</p>
+                  <h3 className="text-lg font-bold text-black mb-2">{lang === "es" ? "Escala" : "Scale"}</h3>
+                  <p className="text-zinc-500 text-sm mb-6">{lang === "es" ? "Diseñado para cargas de trabajo en expansión y equipos pequeños." : "Designed for expanding workloads and small teams."}</p>
                   <div className="flex items-baseline gap-1 mb-8">
                     <span className="text-4xl font-black text-black font-mono">$49</span>
-                    <span className="text-zinc-500 text-sm">/ month</span>
+                    <span className="text-zinc-500 text-sm">/ {lang === "es" ? "mes" : "month"}</span>
                   </div>
                   <ul className="space-y-4 border-t border-zinc-100 pt-6">
                     <li className="flex items-center gap-3 text-sm text-zinc-700">
                       <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>50 Million data points / mo</span>
+                      <span>{lang === "es" ? "50 Millones de puntos de datos / mes" : "50 Million data points / mo"}</span>
                     </li>
                     <li className="flex items-center gap-3 text-sm text-zinc-700">
                       <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>30 Day log retention</span>
+                      <span>{lang === "es" ? "Retención de logs de 30 días" : "30 Day log retention"}</span>
                     </li>
                     <li className="flex items-center gap-3 text-sm text-zinc-700">
                       <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>10 Connected applications</span>
+                      <span>{lang === "es" ? "10 Aplicaciones conectadas" : "10 Connected applications"}</span>
                     </li>
                     <li className="flex items-center gap-3 text-sm text-zinc-700">
                       <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>Slack & Webhook alerting</span>
+                      <span>{lang === "es" ? "Alertas en Slack y Webhooks" : "Slack & Webhook alerting"}</span>
                     </li>
                   </ul>
                 </div>
                 <button className="mt-8 w-full py-3 px-4 bg-brand-blue hover:bg-brand-blue-dark text-white rounded-lg text-sm font-semibold transition-colors duration-200 shadow-md">
-                  Get Started
+                  {lang === "es" ? "Comenzar" : "Get Started"}
                 </button>
               </div>
 
               {/* Pricing 3 */}
               <div className="border border-zinc-200 bg-white rounded-2xl p-8 flex flex-col justify-between hover:shadow-md transition-shadow">
                 <div>
-                  <h3 className="text-lg font-bold text-black mb-2">Enterprise</h3>
-                  <p className="text-zinc-500 text-sm mb-6">Tailored for complex environments needing custom SLA.</p>
+                  <h3 className="text-lg font-bold text-black mb-2">{lang === "es" ? "Empresarial" : "Enterprise"}</h3>
+                  <p className="text-zinc-500 text-sm mb-6">{lang === "es" ? "Adaptado para entornos complejos que necesitan SLA personalizado." : "Tailored for complex environments needing custom SLA."}</p>
                   <div className="flex items-baseline gap-1 mb-8">
-                    <span className="text-4xl font-black text-black font-mono">Custom</span>
+                    <span className="text-4xl font-black text-black font-mono">{lang === "es" ? "Personalizado" : "Custom"}</span>
                   </div>
                   <ul className="space-y-4 border-t border-zinc-100 pt-6">
                     <li className="flex items-center gap-3 text-sm text-zinc-700">
                       <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>Unlimited data ingestion</span>
+                      <span>{lang === "es" ? "Ingesta de datos ilimitada" : "Unlimited data ingestion"}</span>
                     </li>
                     <li className="flex items-center gap-3 text-sm text-zinc-700">
                       <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>Custom log retention schema</span>
+                      <span>{lang === "es" ? "Esquema de retención de logs a medida" : "Custom log retention schema"}</span>
                     </li>
                     <li className="flex items-center gap-3 text-sm text-zinc-700">
                       <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>Dedicated query cluster</span>
+                      <span>{lang === "es" ? "Clúster de consultas dedicado" : "Dedicated query cluster"}</span>
                     </li>
                     <li className="flex items-center gap-3 text-sm text-zinc-700">
                       <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>24/7 Phone & Slack support</span>
+                      <span>{lang === "es" ? "Soporte 24/7 por teléfono y Slack" : "24/7 Phone & Slack support"}</span>
                     </li>
                   </ul>
                 </div>
                 <button className="mt-8 w-full py-3 px-4 bg-black hover:bg-zinc-800 text-white rounded-lg text-sm font-semibold transition-colors duration-200">
-                  Talk to Sales
+                  {lang === "es" ? "Hablar con Ventas" : "Talk to Sales"}
                 </button>
               </div>
             </div>
@@ -645,12 +678,12 @@ export default function Home() {
         <section id="contact-bookings" className="py-24 bg-zinc-50 border-y border-zinc-100 scroll-mt-20">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="text-xs font-bold uppercase tracking-widest text-brand-blue mb-4 block">Get in Touch</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-brand-blue mb-4 block">{lang === "es" ? "Póngase en Contacto" : "Get in Touch"}</span>
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black">
-                Connect with our team or book a consultation
+                {lang === "es" ? "Conéctese con nuestro equipo o reserve una consulta" : "Connect with our team or book a consultation"}
               </h2>
               <p className="text-zinc-600 mt-4 text-sm leading-relaxed">
-                Submit a general inquiry or select a convenient date and time to reserve a consulting call directly into our operations database.
+                {lang === "es" ? "Envíe una consulta general o seleccione una fecha y hora convenientes para reservar una llamada de consultoría directamente en nuestra base de datos." : "Submit a general inquiry or select a convenient date and time to reserve a consulting call directly into our operations database."}
               </p>
             </div>
 
@@ -663,10 +696,10 @@ export default function Home() {
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-bold text-black">Send a Message</h3>
+                    <h3 className="text-lg font-bold text-black">{lang === "es" ? "Enviar un Mensaje" : "Send a Message"}</h3>
                   </div>
 
                   {contactResult && (
@@ -692,7 +725,7 @@ export default function Home() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Email</label>
+                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Correo Electrónico" : "Email"}</label>
                         <input
                           type="email"
                           required
@@ -703,7 +736,7 @@ export default function Home() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Phone (Optional)</label>
+                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Teléfono (Opcional)" : "Phone (Optional)"}</label>
                         <input
                           type="text"
                           value={contactPhone}
@@ -715,12 +748,12 @@ export default function Home() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Message</label>
+                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Mensaje" : "Message"}</label>
                       <textarea
                         required
                         value={contactMessage}
                         onChange={(e) => setContactMessage(e.target.value)}
-                        placeholder="Tell us about your project requirements..."
+                        placeholder={lang === "es" ? "Cuéntenos sobre los requisitos de su proyecto..." : "Tell us about your project requirements..."}
                         className="w-full h-28 border border-zinc-200 bg-zinc-50 rounded-xl p-4 text-sm focus:outline-none focus:border-brand-blue focus:bg-white text-black transition-all resize-none"
                       />
                     </div>
@@ -733,7 +766,7 @@ export default function Home() {
                       {contactLoading ? (
                         <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                       ) : (
-                        "Submit Query"
+                        lang === "es" ? "Enviar Consulta" : "Submit Query"
                       )}
                     </button>
                   </form>
@@ -750,7 +783,7 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-bold text-black">Schedule Consultation</h3>
+                    <h3 className="text-lg font-bold text-black">{lang === "es" ? "Programar Consulta" : "Schedule Consultation"}</h3>
                   </div>
 
                   {bookingResult && (
@@ -763,7 +796,7 @@ export default function Home() {
 
                   <form onSubmit={handleBookingSubmit} className="space-y-4">
                     <div>
-                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Name</label>
+                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Nombre" : "Name"}</label>
                       <input
                         type="text"
                         required
@@ -776,7 +809,7 @@ export default function Home() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Email</label>
+                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Correo Electrónico" : "Email"}</label>
                         <input
                           type="email"
                           required
@@ -787,7 +820,7 @@ export default function Home() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Phone</label>
+                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Teléfono" : "Phone"}</label>
                         <input
                           type="text"
                           required
@@ -803,7 +836,7 @@ export default function Home() {
                     <div className="border border-zinc-200 rounded-2xl p-4 bg-zinc-50 space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-zinc-700 uppercase tracking-wider">
-                          Select Date & Time
+                          {lang === "es" ? "Seleccione Fecha y Hora" : "Select Date & Time"}
                         </span>
                         <div className="flex gap-2">
                           <button
@@ -818,7 +851,7 @@ export default function Home() {
                             ‹
                           </button>
                           <span className="text-xs font-bold text-zinc-850">
-                            {currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                            {currentMonth.toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { month: "long", year: "numeric" })}
                           </span>
                           <button
                             type="button"
@@ -836,7 +869,11 @@ export default function Home() {
 
                       {/* Day Grid Header */}
                       <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-zinc-400 uppercase">
-                        <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+                        {lang === "es" ? (
+                          <><div>Do</div><div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sa</div></>
+                        ) : (
+                          <><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></>
+                        )}
                       </div>
                       
                       {/* Days Grid */}
@@ -848,7 +885,7 @@ export default function Home() {
                       {bookingDate ? (
                         <div className="space-y-2.5 pt-2 border-t border-zinc-200/60">
                           <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
-                            Slots for {new Date(bookingDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}:
+                            {lang === "es" ? "Horas disponibles para" : "Slots for"} {new Date(bookingDate).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { weekday: "short", month: "short", day: "numeric" })}:
                           </span>
                           <div className="grid grid-cols-4 gap-1.5">
                             {["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"].map((t) => (
@@ -872,18 +909,18 @@ export default function Home() {
                         </div>
                       ) : (
                         <p className="text-[10px] text-zinc-400 italic text-center pt-2 border-t border-zinc-200/60">
-                          Please select a date from the calendar to check hours.
+                          {lang === "es" ? "Por favor, seleccione una fecha del calendario para ver las horas." : "Please select a date from the calendar to check hours."}
                         </p>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Inquiry / Note</label>
+                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Consulta / Nota" : "Inquiry / Note"}</label>
                       <input
                         type="text"
                         value={bookingMessage}
                         onChange={(e) => setBookingMessage(e.target.value)}
-                        placeholder="Inquiry focus (e.g., SEO, Frontend consulting)"
+                        placeholder={lang === "es" ? "Tema de consulta (ej: SEO, consultoría frontend)" : "Inquiry focus (e.g., SEO, Frontend consulting)"}
                         className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
                       />
                     </div>
@@ -896,7 +933,7 @@ export default function Home() {
                       {bookingLoading ? (
                         <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                       ) : (
-                        "Request Booking"
+                        lang === "es" ? "Solicitar Cita" : "Request Booking"
                       )}
                     </button>
                   </form>
@@ -914,10 +951,10 @@ export default function Home() {
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-brand-green/5 rounded-tr-full"></div>
             
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black mb-6">
-              Orchestrate your operations today.
+              {lang === "es" ? "Organice sus operaciones hoy mismo." : "Orchestrate your operations today."}
             </h2>
             <p className="text-zinc-600 max-w-lg mx-auto mb-10 text-sm leading-relaxed">
-              Unlock millisecond query execution, automated scaling rules, and structured workflows. Try SPP Labs for 14 days free.
+              {lang === "es" ? "Desbloquee ejecución de consultas en milisegundos, reglas de escalado automático y flujos estructurados. Pruebe SPP Labs gratis por 14 días." : "Unlock millisecond query execution, automated scaling rules, and structured workflows. Try SPP Labs for 14 days free."}
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <a
@@ -925,14 +962,14 @@ export default function Home() {
                 className="inline-flex items-center justify-center px-8 h-12 text-sm font-bold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 cursor-pointer"
                 id="footer-banner-cta-primary"
               >
-                Access Dashboard
+                {t.navDashboard}
               </a>
               <a
                 href="/signup"
                 className="inline-flex items-center justify-center px-8 h-12 text-sm font-bold bg-white text-black border border-zinc-300 rounded-lg hover:border-black transition-colors duration-300 cursor-pointer"
                 id="footer-banner-cta-secondary"
               >
-                Register Account
+                {t.loginRegisterLink}
               </a>
             </div>
           </div>
@@ -947,13 +984,13 @@ export default function Home() {
             <span className="font-bold text-xl tracking-tight">
               SPP <span className="text-zinc-500 font-medium">labs</span>
             </span>
-            <span className="text-xs text-zinc-400">| © 2026 SPP Labs Inc. All rights reserved.</span>
+            <span className="text-xs text-zinc-400">{lang === "es" ? "| © 2026 SPP Labs Inc. Todos los derechos reservados." : "| © 2026 SPP Labs Inc. All rights reserved."}</span>
           </div>
 
           <div className="flex items-center gap-8 text-xs font-semibold text-zinc-500">
-            <a href="#" className="hover:text-black transition-colors" id="footer-link-status">Status</a>
-            <a href="#" className="hover:text-black transition-colors" id="footer-link-privacy">Privacy Policy</a>
-            <a href="#" className="hover:text-black transition-colors" id="footer-link-terms">Terms of Service</a>
+            <a href="#" className="hover:text-black transition-colors" id="footer-link-status">{lang === "es" ? "Estado" : "Status"}</a>
+            <a href="#" className="hover:text-black transition-colors" id="footer-link-privacy">{lang === "es" ? "Política de Privacidad" : "Privacy Policy"}</a>
+            <a href="#" className="hover:text-black transition-colors" id="footer-link-terms">{lang === "es" ? "Términos de Servicio" : "Terms of Service"}</a>
           </div>
         </div>
       </footer>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { translations } from "@/lib/translations";
 
 export default function LoginPage() {
   const [domain, setDomain] = useState("");
@@ -9,6 +10,22 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  // Language selection logic matching dashboard clients
+  const [lang, setLang] = useState("es");
+  useEffect(() => {
+    const savedLang = localStorage.getItem("spp_lang");
+    if (savedLang) {
+      setLang(savedLang);
+    }
+  }, []);
+
+  const changeLanguage = (newLang) => {
+    setLang(newLang);
+    localStorage.setItem("spp_lang", newLang);
+  };
+
+  const t = translations[lang] || translations.es;
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -40,6 +57,23 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-center items-center relative overflow-hidden px-4 selection:bg-brand-blue selection:text-white">
+      {/* Language Switcher in Auth Screens */}
+      <div className="absolute top-6 right-6 flex gap-3 text-xs font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm z-30">
+        <button
+          onClick={() => changeLanguage("es")}
+          className={`hover:text-brand-blue cursor-pointer transition-colors ${lang === "es" ? "text-brand-blue font-black" : "text-slate-400"}`}
+        >
+          ES
+        </button>
+        <span className="text-slate-200">|</span>
+        <button
+          onClick={() => changeLanguage("en")}
+          className={`hover:text-brand-blue cursor-pointer transition-colors ${lang === "en" ? "text-brand-blue font-black" : "text-slate-400"}`}
+        >
+          EN
+        </button>
+      </div>
+
       {/* Background Gradients */}
       <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-brand-blue/5 blur-[120px] -z-10 animate-pulse"></div>
       <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-brand-green/5 blur-[120px] -z-10"></div>
@@ -49,10 +83,10 @@ export default function LoginPage() {
         href="/"
         className="absolute top-6 left-6 text-sm font-semibold text-slate-500 hover:text-black transition-colors duration-200 flex items-center gap-2"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+        <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        Back to Home
+        {t.authBack}
       </a>
 
       {/* Main card */}
@@ -63,7 +97,7 @@ export default function LoginPage() {
           <h2 className="text-2xl font-black tracking-tight text-slate-950">
             SPP <span className="text-slate-500 font-medium">labs</span>
           </h2>
-          <p className="text-slate-500 text-sm mt-1">Access your client dashboard</p>
+          <p className="text-slate-500 text-sm mt-1">{t.loginSubtitle}</p>
         </div>
 
         {error && (
@@ -78,7 +112,7 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-              Website Domain
+              {t.loginDomain}
             </label>
             <div className="relative">
               <input
@@ -99,7 +133,7 @@ export default function LoginPage() {
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-              Password
+              {t.loginPassword}
             </label>
             <div className="relative">
               <input
@@ -126,15 +160,15 @@ export default function LoginPage() {
             {loading ? (
               <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
             ) : (
-              "Sign In"
+              t.loginButton
             )}
           </button>
         </form>
 
         <div className="border-t border-slate-100 mt-6 pt-6 text-center text-sm text-slate-500">
-          First time?{" "}
+          {t.loginNoAccount}{" "}
           <a href="/signup" className="text-brand-blue hover:text-brand-green font-semibold transition-colors duration-200">
-            Sign up with token
+            {t.loginRegisterLink}
           </a>
         </div>
       </div>

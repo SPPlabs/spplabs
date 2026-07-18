@@ -1,0 +1,57 @@
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
+import { verifyJWT } from "@/lib/jwt";
+
+export async function POST(request) {
+  try {
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("spp_session")?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const session = await verifyJWT(sessionToken);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    let body = {};
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    }
+
+    const { message, domain } = body;
+    if (!message || !domain) {
+      return NextResponse.json({ error: "Invalid parameters" }, { status: 400 });
+    }
+
+    // Security: Only website owner (or Admin) can submit requests for that domain
+    if (session.role !== "ADMIN" && session.domain !== domain) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const targetWebsite = await prisma.website.findUnique({
+      where: { domain: domain.trim().toLowerCase() },
+    });
+
+    if (!targetWebsite) {
+      return NextResponse.json({ error: "Website not found" }, { status: 404 });
+    }
+
+    const supportRequest = await prisma.supportRequest.create({
+      data: {
+        websiteId: targetWebsite.id,
+        title: "Petición del cliente",
+        message: message.trim(),
+      },
+    });
+
+    return NextResponse.json({ success: true, supportRequest });
+  } catch (error) {
+    console.error("Support request creation error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}

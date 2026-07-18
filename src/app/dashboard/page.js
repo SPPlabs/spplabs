@@ -79,8 +79,44 @@ export default async function DashboardPage(props) {
     });
   }
 
-  // Serialize BigInt or Date types if needed, though Next.js Server Components serialize Dates well.
-  // Standard Dates are serialized cleanly. We don't have BigInts in this payload.
+  // Fetch Chatbot Knowledge
+  const chatbotKnowledge = await prisma.chatbotKnowledge.findUnique({
+    where: { websiteId: currentWebsite.id },
+  });
+
+  // Fetch AI Usage Monthly
+  const aiUsageRaw = await prisma.aiUsageMonthly.findMany({
+    where: { websiteId: currentWebsite.id },
+    orderBy: [
+      { year: "desc" },
+      { month: "desc" }
+    ],
+  });
+  const aiUsage = aiUsageRaw.map(u => ({
+    id: u.id,
+    year: u.year,
+    month: u.month,
+    promptTokens: Number(u.promptTokens),
+    completionTokens: Number(u.completionTokens),
+    totalTokens: Number(u.totalTokens),
+  }));
+
+  // Fetch Notifications (Global announcements OR domain-specific notices)
+  const notifications = await prisma.notification.findMany({
+    where: {
+      OR: [
+        { websiteId: null },
+        { websiteId: currentWebsite.id }
+      ]
+    },
+    orderBy: { createdAt: "desc" }
+  });
+
+  // Fetch Support Requests (petitions sent by this user)
+  const supportRequests = await prisma.supportRequest.findMany({
+    where: { websiteId: currentWebsite.id },
+    orderBy: { createdAt: "desc" }
+  });
 
   return (
     <DashboardClient
@@ -90,6 +126,10 @@ export default async function DashboardPage(props) {
       contactForms={contactForms}
       bookings={bookings}
       apiKeys={apiKeys}
+      chatbotKnowledge={chatbotKnowledge}
+      aiUsage={aiUsage}
+      notifications={notifications}
+      supportRequests={supportRequests}
     />
   );
 }
