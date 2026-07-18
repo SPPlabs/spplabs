@@ -45,16 +45,6 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copy Prisma schema + migrations for runtime migration deployment
-COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=deps /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=deps /app/node_modules/prisma ./node_modules/prisma
-COPY --chown=nextjs:nodejs prisma ./prisma
-
-# Copy the entrypoint script that runs migrations before starting the server
-COPY --chown=nextjs:nodejs docker-entrypoint.sh ./docker-entrypoint.sh
-RUN chmod +x ./docker-entrypoint.sh
-
 USER nextjs
 
 EXPOSE 3000
@@ -62,5 +52,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Run migrations then start the server
-ENTRYPOINT ["./docker-entrypoint.sh"]
+# server.js is created by next build when output: 'standalone' is enabled
+CMD ["node", "server.js"]
