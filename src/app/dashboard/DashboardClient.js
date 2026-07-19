@@ -1412,6 +1412,9 @@ export default function DashboardClient({
                         "Palma": { x: 178, y: 80 },
                         "Bilbao": { x: 95, y: 25 },
                         "Alicante": { x: 132, y: 96 },
+                        "Vigo": { x: 35, y: 38 },
+                        "A Coruña": { x: 38, y: 22 },
+                        "Santiago de Compostela": { x: 39, y: 30 },
                       };
 
                       return (

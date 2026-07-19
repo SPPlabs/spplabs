@@ -437,7 +437,7 @@ function generateMockSeedEvents(website_id) {
   const browsers = ["Chrome", "Safari", "Firefox", "Edge"];
   const devices = ["Desktop", "Mobile", "Tablet"];
   const countries = ["Spain", "Spain", "United States", "United Kingdom", "Germany", "France", "Italy"];
-  const spainCities = ["Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza", "Málaga", "Murcia", "Palma", "Bilbao", "Alicante"];
+  const spainCities = ["Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza", "Málaga", "Murcia", "Palma", "Bilbao", "Alicante", "Vigo", "A Coruña", "Santiago de Compostela"];
   const utms = ["google", "linkedin", "newsletter", "twitter"];
 
   const now = Date.now();

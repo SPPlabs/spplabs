@@ -103,9 +103,38 @@ export async function POST(request) {
     const ipHash = crypto.createHash("sha256").update(cleanIp).digest("hex");
 
     // 4. Resolve Geo headers (standard for Vercel/proxies or fallback)
-    const country = request.headers.get("x-vercel-ip-country") || body.country || "Spain";
-    const region = request.headers.get("x-vercel-ip-country-region") || body.region || "Madrid";
-    const city = request.headers.get("x-vercel-ip-city") || body.city || "Madrid";
+    let country = request.headers.get("x-vercel-ip-country") || body.country;
+    let region = request.headers.get("x-vercel-ip-country-region") || body.region;
+    let city = request.headers.get("x-vercel-ip-city") || body.city;
+
+    // Fallback: If geo headers are missing, query a free geolocation API using the client IP.
+    // If the request comes from localhost/loopback, query without IP to geolocate the server's public IP.
+    if (!city) {
+      try {
+        const queryIp = (cleanIp && cleanIp !== "127.0.0.1" && cleanIp !== "::1") ? cleanIp : "";
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1000); // 1s timeout to keep it fast
+        const geoRes = await fetch(`http://ip-api.com/json/${queryIp}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (geoRes.ok) {
+          const geoData = await geoRes.json();
+          if (geoData && geoData.status === "success") {
+            country = geoData.country || country;
+            region = geoData.regionName || region;
+            city = geoData.city || city;
+          }
+        }
+      } catch (err) {
+        console.error("Local IP-based geo fallback lookup failed:", err);
+      }
+    }
+
+    // Default fallbacks if everything else fails
+    country = country || "Spain";
+    region = region || "Madrid";
+    city = city || "Madrid";
+
 
     // 5. Structure ClickHouse Row values
     const eventTime = body.timestamp ? new Date(body.timestamp) : new Date();
