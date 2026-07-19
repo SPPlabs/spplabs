@@ -36,6 +36,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN groupadd --system --gid 1001 nodejs
 RUN useradd --system --uid 1001 -g nodejs nextjs
 
+# Pre-create model cache directories and set permissions for nextjs process
+RUN mkdir -p /app/.cache/transformers && chown -R nextjs:nodejs /app/.cache
+
 COPY --from=builder /app/public ./public
 
 # Set the correct permission for prerender cache
