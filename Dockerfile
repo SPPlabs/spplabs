@@ -47,6 +47,9 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Manually copy the entire onnxruntime-node package to prevent dynamic loading errors for native libraries
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/onnxruntime-node ./node_modules/onnxruntime-node
+
 USER nextjs
 
 EXPOSE 3000
