@@ -6,6 +6,7 @@ dotenv.config();
 let parsedConfig: {
   ai: {
     vllmUrl: string;
+    vllmModel: string;
     qdrantUrl: string;
     collectionName: string;
     embeddingModel: string;
@@ -19,6 +20,14 @@ function getRequiredEnv(key: string): string {
   const value = process.env[key];
   if (!value || value.trim() === "") {
     throw new Error(`CRITICAL CONFIGURATION ERROR: Required environment variable "${key}" is missing or empty.`);
+  }
+  return value.trim();
+}
+
+function getOptionalEnv(key: string, defaultValue: string): string {
+  const value = process.env[key];
+  if (!value || value.trim() === "") {
+    return defaultValue;
   }
   return value.trim();
 }
@@ -42,6 +51,7 @@ export function validateConfig(): void {
     parsedConfig = {
       ai: {
         vllmUrl: getRequiredEnv("AI_VLLM_URL"),
+        vllmModel: getOptionalEnv("VLLM_MODEL", "qwen3-4b"),
         qdrantUrl: getRequiredEnv("AI_QDRANT_URL"),
         collectionName: getRequiredEnv("AI_COLLECTION_NAME"),
         embeddingModel: getRequiredEnv("EMBEDDING_MODEL"),
@@ -55,6 +65,7 @@ export function validateConfig(): void {
     throw error;
   }
 }
+
 
 /**
  * Global configuration object accessing parsed environment values.

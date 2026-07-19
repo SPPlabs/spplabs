@@ -4,6 +4,9 @@ export const aiConfig = {
   get vllmUrl(): string {
     return config.ai.vllmUrl;
   },
+  get vllmModel(): string {
+    return config.ai.vllmModel;
+  },
   get qdrantUrl(): string {
     return config.ai.qdrantUrl;
   },

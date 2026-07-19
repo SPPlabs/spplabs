@@ -48,7 +48,7 @@ export async function generateChatCompletion(
   // while satisfying strict TypeScript static type checks.
   const body: any = {
     ...params,
-    model: params.model || "Qwen/Qwen3-4B-AWQ",
+    model: params.model || aiConfig.vllmModel,
     chat_template_kwargs: {
       enable_thinking: false,
     },
