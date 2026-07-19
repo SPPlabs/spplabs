@@ -26,7 +26,10 @@ export class BgeM3Embeddings extends Embeddings {
    */
   public static getInstance(modelName: string = aiConfig.embeddingModel): BgeM3Embeddings {
     if (!BgeM3Embeddings.instance) {
-      BgeM3Embeddings.instance = new BgeM3Embeddings(modelName);
+      // Map BAAI/bge-m3 to Xenova/bge-m3 to download the official pre-converted ONNX files.
+      // BAAI/bge-m3 repository contains PyTorch weights, whereas Xenova/bge-m3 contains the required ONNX files.
+      const mappedModelName = modelName === "BAAI/bge-m3" ? "Xenova/bge-m3" : modelName;
+      BgeM3Embeddings.instance = new BgeM3Embeddings(mappedModelName);
     }
     return BgeM3Embeddings.instance;
   }
