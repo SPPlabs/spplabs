@@ -4,7 +4,7 @@ import { verifyApiKey } from "@/lib/crypto";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, x-api-key, x-website-domain",
 };
 
@@ -150,3 +150,56 @@ export async function POST(request) {
     );
   }
 }
+
+export async function GET(request) {
+  try {
+    const url = new URL(request.url);
+    const domain = (url.searchParams.get("domain") || request.headers.get("x-website-domain") || "").trim().toLowerCase();
+
+    if (!domain) {
+      return jsonResponse(
+        { error: "Bad Request", message: "Website domain is required" },
+        { status: 400 }
+      );
+    }
+
+    const website = await prisma.website.findUnique({
+      where: { domain },
+    });
+
+    if (!website) {
+      return jsonResponse(
+        { error: "NotFound", message: "Domain is not registered" },
+        { status: 404 }
+      );
+    }
+
+    const bookings = await prisma.booking.findMany({
+      where: {
+        websiteId: website.id,
+        status: { in: ["PENDING", "CONFIRMED"] },
+      },
+      select: {
+        date: true,
+        time: true,
+      },
+    });
+
+    const occupied = bookings.map((b) => ({
+      date: b.date.toISOString().split("T")[0],
+      time: b.time,
+    }));
+
+    return jsonResponse({
+      success: true,
+      occupied,
+    });
+  } catch (error) {
+    console.error("GET bookings occupied slots error:", error);
+    return jsonResponse(
+      { error: "Internal Server Error", message: "Failed to retrieve bookings" },
+      { status: 500 }
+    );
+  }
+}
+

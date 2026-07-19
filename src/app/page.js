@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Script from "next/script";
 import { translations } from "@/lib/translations";
+import { SppLabsLogo } from "@/components/SppLabsLogo";
+import { InlineChatbot } from "@/components/chatbot/InlineChatbot";
 
 export default function Home() {
   const [lang, setLang] = useState("es");
@@ -42,6 +44,27 @@ export default function Home() {
 
   // Calendar states
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [occupiedSlots, setOccupiedSlots] = useState([]);
+
+  const fetchOccupiedSlots = async () => {
+    try {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "https://api.spplabs.es";
+      const res = await fetch(`${apiBase}/bookings?domain=spplabs.es`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setOccupiedSlots(data.occupied || []);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch occupied slots:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchOccupiedSlots();
+  }, []);
+
 
   const renderCalendarDays = () => {
     const year = currentMonth.getFullYear();
@@ -65,11 +88,14 @@ export default function Home() {
       const isPast = dateObj < today;
       const isSelected = bookingDate === dateStr;
 
+      const occupiedForDay = occupiedSlots.filter((slot) => slot.date === dateStr);
+      const isFullyBooked = occupiedForDay.length >= 9;
+
       days.push(
         <button
           key={day}
           type="button"
-          disabled={isPast}
+          disabled={isPast || isFullyBooked}
           onClick={() => {
             setBookingDate(dateStr);
             setBookingTime(""); // reset time when date changes
@@ -79,8 +105,11 @@ export default function Home() {
               ? "bg-brand-green text-white shadow-md font-extrabold"
               : isPast
               ? "text-zinc-300 cursor-not-allowed"
+              : isFullyBooked
+              ? "bg-zinc-55 text-zinc-300 border border-zinc-150/60 cursor-not-allowed line-through"
               : "hover:bg-zinc-200 hover:text-black text-zinc-800 bg-white border border-zinc-100"
           }`}
+          title={isFullyBooked ? (lang === "es" ? "Completo" : "Fully booked") : ""}
         >
           {day}
         </button>
@@ -88,6 +117,7 @@ export default function Home() {
     }
     return days;
   };
+
 
   // Submit handlers
   const handleContactSubmit = async (e) => {
@@ -165,6 +195,7 @@ export default function Home() {
       setBookingDate("");
       setBookingTime("");
       setBookingMessage("");
+      fetchOccupiedSlots();
     } catch (err) {
       setBookingResult({ success: false, message: err.message });
     } finally {
@@ -247,9 +278,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <a href="#" className="flex items-center gap-3 group" id="nav-logo">
             <img src="/logo.webp" alt="SPP Labs Logo" className="w-8 h-8 object-contain" />
-            <span className="font-bold text-xl tracking-tight">
-              SPP <span className="text-zinc-500 font-medium">labs</span>
-            </span>
+            <SppLabsLogo inline={true} className="text-black" />
           </a>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -392,6 +421,13 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Inline Chatbot Section */}
+        <section className="py-20 bg-zinc-50 border-b border-zinc-100">
+          <div className="max-w-7xl mx-auto px-6">
+            <InlineChatbot />
           </div>
         </section>
 
@@ -888,20 +924,27 @@ export default function Home() {
                             {lang === "es" ? "Horas disponibles para" : "Slots for"} {new Date(bookingDate).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { weekday: "short", month: "short", day: "numeric" })}:
                           </span>
                           <div className="grid grid-cols-4 gap-1.5">
-                            {["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"].map((t) => (
-                              <button
-                                key={t}
-                                type="button"
-                                onClick={() => setBookingTime(t)}
-                                className={`py-1.5 rounded-lg text-xs font-bold font-mono transition-all text-center border cursor-pointer ${
-                                  bookingTime === t
-                                    ? "bg-brand-green border-brand-green text-white shadow-sm"
-                                    : "bg-white border-zinc-200 text-zinc-800 hover:border-brand-green hover:bg-brand-green/5"
-                                }`}
-                              >
-                                {t}
-                              </button>
-                            ))}
+                            {["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"].map((t) => {
+                              const isOccupied = occupiedSlots.some((slot) => slot.date === bookingDate && slot.time === t);
+                              return (
+                                <button
+                                  key={t}
+                                  type="button"
+                                  disabled={isOccupied}
+                                  onClick={() => setBookingTime(t)}
+                                  className={`py-1.5 rounded-lg text-xs font-bold font-mono transition-all text-center border cursor-pointer ${
+                                    isOccupied
+                                      ? "bg-zinc-50 border-zinc-200 text-zinc-300 line-through cursor-not-allowed"
+                                      : bookingTime === t
+                                      ? "bg-brand-green border-brand-green text-white shadow-sm"
+                                      : "bg-white border-zinc-200 text-zinc-800 hover:border-brand-green hover:bg-brand-green/5"
+                                  }`}
+                                  title={isOccupied ? (lang === "es" ? "Ocupado" : "Occupied") : ""}
+                                >
+                                  {t}
+                                </button>
+                              );
+                            })}
                           </div>
                           {/* Hidden inputs to make HTML5 required validator trigger if submit is clicked without selections */}
                           <input type="hidden" name="booking_date" required value={bookingDate} />
@@ -981,9 +1024,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
             <img src="/logo.webp" alt="SPP Labs Logo" className="w-6 h-6 object-contain" />
-            <span className="font-bold text-xl tracking-tight">
-              SPP <span className="text-zinc-500 font-medium">labs</span>
-            </span>
+            <SppLabsLogo inline={true} className="text-black" />
             <span className="text-xs text-zinc-400">{lang === "es" ? "| © 2026 SPP Labs Inc. Todos los derechos reservados." : "| © 2026 SPP Labs Inc. All rights reserved."}</span>
           </div>
 

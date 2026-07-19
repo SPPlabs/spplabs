@@ -30,8 +30,8 @@ export const Message: React.FC<MessageProps> = ({ message, accentColor }) => {
           <div
             className={`px-4 py-2.5 rounded-2xl text-xs leading-relaxed ${
               isUser
-                ? `${accentColor} text-white rounded-br-none`
-                : "bg-slate-800 text-slate-200 rounded-bl-none border border-slate-700/60"
+                ? "bg-[#e3e3e2] text-zinc-900 rounded-tr-none border border-zinc-300/20 shadow-sm"
+                : "text-zinc-850 px-1 py-1"
             }`}
           >
             {renderMarkdown(message.content)}
@@ -41,11 +41,11 @@ export const Message: React.FC<MessageProps> = ({ message, accentColor }) => {
           {!isUser && message.content && (
             <button
               onClick={handleCopy}
-              className="absolute -right-8 top-1 p-1 bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 rounded-md text-slate-400 hover:text-slate-200 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 shadow-md cursor-pointer"
+              className="absolute -right-8 top-1 p-1 bg-white hover:bg-zinc-50 border border-zinc-200 rounded-md text-zinc-400 hover:text-zinc-650 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 shadow-sm cursor-pointer"
               title="Copy response"
             >
               {copied ? (
-                <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                 </svg>
               ) : (
@@ -58,7 +58,7 @@ export const Message: React.FC<MessageProps> = ({ message, accentColor }) => {
         </div>
 
         {/* Timestamp */}
-        <span className="text-[9px] text-slate-500 mt-1 font-medium select-none px-1">
+        <span className="text-[9px] text-zinc-400 mt-1 font-medium select-none px-1">
           {message.timestamp}
         </span>
       </div>

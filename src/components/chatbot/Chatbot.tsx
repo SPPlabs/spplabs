@@ -12,13 +12,13 @@ export const Chatbot: React.FC<ChatbotProps> = ({
   logo,
   welcomeMessage = "Hi! 👋 How can I help you today?",
   placeholder = "Ask me anything...",
-  primaryColor = "bg-slate-900",
-  accentColor = "bg-indigo-600",
+  primaryColor = "bg-white",
+  accentColor = "bg-slate-900",
   launcherIcon,
   suggestedQuestions = ["Services", "Pricing", "AI Chatbots", "Contact"],
-  position = "bottom-right",
+  position = "bottom-left",
   width = 380,
-  height = 520,
+  height = 620,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);

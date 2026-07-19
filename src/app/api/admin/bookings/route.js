@@ -107,3 +107,70 @@ export async function DELETE(request) {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
+
+// POST: Create a new Booking/Event from dashboard
+export async function POST(request) {
+  try {
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("spp_session")?.value;
+
+    if (!sessionToken) {
+      return NextResponse.json({ error: "Unauthorized", message: "No active session" }, { status: 401 });
+    }
+
+    const session = await verifyJWT(sessionToken);
+    if (!session || !session.domain) {
+      return NextResponse.json({ error: "Unauthorized", message: "Invalid session" }, { status: 401 });
+    }
+
+    let body = {};
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    }
+
+    const { date, time, name, phone, email, message, status, targetWebsiteDomain } = body;
+    if (!date || !time || !name || !email) {
+      return NextResponse.json({ error: "Bad Request", message: "date, time, name, and email are required" }, { status: 400 });
+    }
+
+    // Resolve target website
+    let targetDomain = session.domain;
+    if (session.role === "ADMIN" && targetWebsiteDomain) {
+      targetDomain = targetWebsiteDomain.trim().toLowerCase();
+    }
+
+    const website = await prisma.website.findUnique({
+      where: { domain: targetDomain },
+    });
+
+    if (!website) {
+      return NextResponse.json({ error: "NotFound", message: "Website not found" }, { status: 404 });
+    }
+
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      return NextResponse.json({ error: "Bad Request", message: "Invalid date format. Use YYYY-MM-DD" }, { status: 400 });
+    }
+
+    const newBooking = await prisma.booking.create({
+      data: {
+        websiteId: website.id,
+        date: parsedDate,
+        time: time.trim(),
+        name: name.trim(),
+        phone: (phone || "").trim(),
+        email: email.trim().toLowerCase(),
+        message: (message || "").trim(),
+        status: status || "CONFIRMED",
+      },
+    });
+
+    return NextResponse.json({ success: true, data: newBooking });
+  } catch (error) {
+    console.error("POST booking error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+

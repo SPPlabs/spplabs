@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { translations } from "@/lib/translations";
+import { SppLabsLogo } from "@/components/SppLabsLogo";
 
 export default function LoginPage() {
   const [domain, setDomain] = useState("");
@@ -94,10 +95,8 @@ export default function LoginPage() {
         {/* SPP Labs Logo */}
         <div className="flex flex-col items-center mb-8">
           <img src="/logo.webp" alt="SPP Labs Logo" className="w-16 h-16 object-contain mb-3" />
-          <h2 className="text-2xl font-black tracking-tight text-slate-950">
-            SPP <span className="text-slate-500 font-medium">labs</span>
-          </h2>
-          <p className="text-slate-500 text-sm mt-1">{t.loginSubtitle}</p>
+          <SppLabsLogo inline={true} className="text-slate-950" style={{ fontSize: "1.75rem" }} />
+          <p className="text-slate-500 text-sm mt-3">{t.loginSubtitle}</p>
         </div>
 
         {error && (
