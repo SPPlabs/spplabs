@@ -98,10 +98,11 @@ export async function POST(request) {
     const uaInfo = parseUserAgent(userAgent);
 
     // 3. Get IP Address and Hash it
-    console.log("=== ANALYTICS HEADERS ===");
-    console.log(Object.fromEntries(request.headers.entries()));
-    console.log("=========================");
-    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "127.0.0.1";
+    const ip =
+      request.headers.get("cf-connecting-ip") ||
+      request.headers.get("x-forwarded-for") ||
+      request.headers.get("x-real-ip") ||
+      "127.0.0.1";
     const cleanIp = ip.split(",")[0].trim();
     const ipHash = crypto.createHash("sha256").update(cleanIp).digest("hex");
 
@@ -134,9 +135,9 @@ export async function POST(request) {
     }
 
     // Default fallbacks if everything else fails
-    country = country || "Spain";
-    region = region || "Madrid";
-    city = city || (country !== "Spain" && country !== "ES" ? country : "Madrid");
+    country = country || "Unknown";
+    region = region || "Unknown";
+    city = city || "Unknown";
 
 
     // 5. Structure ClickHouse Row values
