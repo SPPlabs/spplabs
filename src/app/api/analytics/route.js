@@ -133,7 +133,7 @@ export async function POST(request) {
     // Default fallbacks if everything else fails
     country = country || "Spain";
     region = region || "Madrid";
-    city = city || "Madrid";
+    city = city || (country !== "Spain" && country !== "ES" ? country : "Madrid");
 
 
     // 5. Structure ClickHouse Row values

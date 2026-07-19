@@ -1415,6 +1415,18 @@ export default function DashboardClient({
                         "Vigo": { x: 35, y: 38 },
                         "A Coruña": { x: 38, y: 22 },
                         "Santiago de Compostela": { x: 39, y: 30 },
+                        "Granada": { x: 92, y: 118 },
+                        "Córdoba": { x: 80, y: 104 },
+                        "Valladolid": { x: 80, y: 48 },
+                        "Oviedo": { x: 68, y: 22 },
+                        "Santander": { x: 85, y: 22 },
+                        "San Sebastián": { x: 110, y: 24 },
+                        "Pamplona": { x: 120, y: 32 },
+                        "Toledo": { x: 92, y: 78 },
+                        "Salamanca": { x: 72, y: 58 },
+                        "Burgos": { x: 95, y: 38 },
+                        "Cádiz": { x: 68, y: 128 },
+                        "Badajoz": { x: 55, y: 92 },
                       };
 
                       return (

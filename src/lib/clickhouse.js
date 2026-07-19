@@ -437,7 +437,11 @@ function generateMockSeedEvents(website_id) {
   const browsers = ["Chrome", "Safari", "Firefox", "Edge"];
   const devices = ["Desktop", "Mobile", "Tablet"];
   const countries = ["Spain", "Spain", "United States", "United Kingdom", "Germany", "France", "Italy"];
-  const spainCities = ["Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza", "Málaga", "Murcia", "Palma", "Bilbao", "Alicante", "Vigo", "A Coruña", "Santiago de Compostela"];
+  const spainCities = [
+    "Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza", "Málaga", "Murcia", "Palma", "Bilbao", "Alicante",
+    "Vigo", "A Coruña", "Santiago de Compostela", "Granada", "Córdoba", "Valladolid", "Oviedo", "Santander",
+    "San Sebastián", "Pamplona", "Toledo", "Salamanca", "Burgos", "Cádiz", "Badajoz"
+  ];
   const utms = ["google", "linkedin", "newsletter", "twitter"];
 
   const now = Date.now();
@@ -452,7 +456,8 @@ function generateMockSeedEvents(website_id) {
     const eventType = Math.random() > 0.3 ? "page_view" : (Math.random() > 0.5 ? "button_click" : "form_submit");
     const country = countries[Math.floor(Math.random() * countries.length)];
     const isSpain = country === "Spain";
-    const city = isSpain ? spainCities[Math.floor(Math.random() * spainCities.length)] : "New York";
+    const city = isSpain ? spainCities[Math.floor(Math.random() * spainCities.length)] : country;
+
 
     seeds.push({
       website_id,
