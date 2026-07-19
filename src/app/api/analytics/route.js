@@ -98,6 +98,9 @@ export async function POST(request) {
     const uaInfo = parseUserAgent(userAgent);
 
     // 3. Get IP Address and Hash it
+    console.log("=== ANALYTICS HEADERS ===");
+    console.log(Object.fromEntries(request.headers.entries()));
+    console.log("=========================");
     const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "127.0.0.1";
     const cleanIp = ip.split(",")[0].trim();
     const ipHash = crypto.createHash("sha256").update(cleanIp).digest("hex");
