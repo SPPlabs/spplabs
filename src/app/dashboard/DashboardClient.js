@@ -211,10 +211,14 @@ export default function DashboardClient({
         body: JSON.stringify({ content: chatbotContent, domain: currentWebsite.domain }),
       });
       if (res.ok) {
-        setIaSaved(true);
-        setTimeout(() => setIaSaved(false), 3000);
-      } else {
         const data = await res.json();
+        if (data.warning) {
+          alert(data.warning);
+        } else {
+          setIaSaved(true);
+          setTimeout(() => setIaSaved(false), 3000);
+        }
+      } else {
         alert(data.error || "Failed to update chatbot knowledge");
       }
     } catch (err) {

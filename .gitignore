@@ -42,3 +42,8 @@ next-env.d.ts
 
 # screenshots
 *.png
+
+# cache and logs
+/.cache/
+/logs/
+
