@@ -25,3 +25,469 @@ body {
   font-family: var(--font-geist-sans), sans-serif;
 }
 
+/* ==========================================================================
+   Interactive 3D Hover Phone Mockup Component
+   ========================================================================== */
+.phone-card-container {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.phone-device {
+  position: relative;
+  perspective: 1000px;
+  width: 170px;
+  height: 290px;
+  transform-style: preserve-3d;
+  transform: rotateX(70deg) rotateY(0deg) rotateZ(35deg);
+  transition: all 1s ease-out;
+}
+
+.phone-card-container:hover .phone-device {
+  transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.3);
+}
+
+.phone-face {
+  position: absolute;
+  border-radius: 14px;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(24, 23, 24);
+  top: 50%;
+  left: 50%;
+}
+
+.phone-face.front {
+  width: 100%;
+  height: 100%;
+  border: solid 5px rgb(0, 0, 0);
+  border-radius: 14px;
+  border-top: 18px solid #000;
+  border-bottom: 18px solid #000;
+  padding: 0.5rem;
+  text-align: center;
+  transform: translate(-50%, -50%) translateZ(5px);
+  background: radial-gradient(
+      circle,
+      rgb(170, 162, 162),
+      rgb(44, 8, 102) 30%,
+      rgba(26, 78, 189, 0.226) 0%
+    ),
+    radial-gradient(
+      circle at 40px 40px,
+      rgb(233, 228, 228),
+      rgb(41, 35, 49) 30%,
+      rgba(88, 84, 84, 0) 0%
+    );
+}
+
+.phone-face.back {
+  transform: translate(-50%, -50%) rotateY(180deg) translateZ(5px);
+}
+.phone-face.left {
+  transform: translate(-50%, -50%) rotateY(-90deg) translateZ(85px);
+  height: 290px;
+  width: 10px;
+}
+.phone-face.right {
+  transform: translate(-50%, -50%) rotateY(90deg) translateZ(85px);
+  height: 290px;
+  width: 10px;
+}
+.phone-face.top {
+  transform: translate(-50%, -50%) rotateX(90deg) translateZ(145px);
+  width: 170px;
+  height: 10px;
+}
+.phone-face.bottom {
+  transform: translate(-50%, -50%) rotateX(-90deg) translateZ(145px);
+  width: 170px;
+  height: 10px;
+}
+
+.phone-face.bottom .elements {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.phone-face.bottom .elements .headphone {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #333;
+}
+
+.phone-face.bottom .elements .microphone {
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background-color: #333;
+}
+
+.phone-face.bottom .elements .charge {
+  display: inline-block;
+  width: 20px;
+  height: 6px;
+  position: relative;
+  border-radius: 3px 3px 10px 10px;
+  background-color: #333;
+}
+
+.charge::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 2px;
+  position: absolute;
+  border-radius: 3px 3px 10px 10px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgb(26, 25, 25);
+}
+
+.phone-face.bottom .elements .speaker {
+  display: inline-block;
+  width: 30px;
+  height: 0;
+  border-top: #333 dotted 5px;
+}
+
+.front-camera {
+  width: 10px;
+  height: 10px;
+  background-color: rgb(26, 25, 25);
+  border-radius: 50%;
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.front-camera::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  display: inline-block;
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  height: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle at 6px 2px,
+    rgba(255, 255, 255, 0.726),
+    rgb(0, 0, 0)
+  );
+}
+
+.front-camera::before {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  display: inline-block;
+  top: 50%;
+  left: 50%;
+  width: 25%;
+  height: 25%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  background-color: #212121;
+}
+
+.front .head {
+  font-size: 6px;
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: -12px;
+  height: 10px;
+  display: flex;
+  justify-content: space-between;
+  color: white;
+  padding: 0 4px;
+}
+
+.front .head .h-right {
+  display: flex;
+  align-items: center;
+}
+
+.front .head .h-right span {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 0 1px;
+}
+
+.logo-head {
+  width: 100%;
+  height: 100%;
+}
+
+.front .search {
+  position: relative;
+  margin-top: 0.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.logo-google {
+  position: absolute;
+  width: 10px;
+  left: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.search-google {
+  width: 100%;
+  border-radius: 20px;
+  padding: 0.3rem;
+  padding-left: 1.2rem;
+  font-size: 8px;
+  height: 1.2rem;
+  border: none;
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.front .date {
+  color: white;
+  position: relative;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.front .date .hour {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.front .date * {
+  display: inline-block;
+}
+
+.front .date .period,
+.front .date .day {
+  font-size: 8px;
+  line-height: 8px;
+  margin-left: 2px;
+}
+
+.front .bullet {
+  display: inline-block;
+  width: 30%;
+  height: 0;
+  border-bottom: 3px dotted rgba(255, 255, 255, 0.65);
+  margin-bottom: 0.5rem;
+}
+
+.front .home {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 0.5rem;
+}
+
+.front .home .app {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 30%;
+  text-align: center;
+  position: relative;
+}
+
+.front .home .app .logo-app {
+  width: 70%;
+  height: 70%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.full-logo {
+  background-color: transparent !important;
+}
+
+.full-logo .logo-app {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.phone-app-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   Service Card Component
+   ========================================================================== */
+.service-card {
+  width: 190px;
+  height: 254px;
+  background-image: linear-gradient(163deg, #00ff75 0%, #3700ff 100%);
+  border-radius: 20px;
+  transition: all .3s;
+}
+
+.service-card-inner {
+  width: 100%;
+  height: 100%;
+  background-color: #1a1a1a;
+  border-radius: 20px;
+  transition: all .2s;
+}
+
+.service-card-inner:hover {
+  transform: scale(0.98);
+  border-radius: 20px;
+}
+
+.service-card:hover {
+  box-shadow: 0px 0px 30px 1px rgba(0, 255, 117, 0.30);
+}
+
+/* ==========================================================================
+   Floating Numbers Component (card-6)
+   ========================================================================== */
+.card-6 {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 900px;
+  margin: 15px 0;
+}
+
+.card-6__holo {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  border-radius: 26px;
+  transform-style: preserve-3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: card6-wobble 6.2s ease-in-out infinite;
+}
+
+@keyframes card6-wobble {
+  0% {
+    transform: rotateX(16deg) rotateY(-18deg);
+  }
+  50% {
+    transform: rotateX(18deg) rotateY(18deg);
+  }
+  100% {
+    transform: rotateX(16deg) rotateY(-18deg);
+  }
+}
+
+.card-6__layer {
+  position: absolute;
+  font-weight: 900;
+  font-size: 88px;
+  letter-spacing: -6px;
+  line-height: 1;
+
+  -webkit-text-stroke: 1px rgba(0, 123, 255, 0.7);
+
+  background: linear-gradient(
+    90deg,
+    rgba(0, 123, 255, 0.18) 0%,
+    rgba(0, 123, 255, 0.92) 35%,
+    rgba(0, 180, 255, 0.7) 60%,
+    rgba(0, 123, 255, 0.22) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.55));
+  opacity: 0.95;
+  transform-style: preserve-3d;
+}
+
+.card-6__layer--back {
+  opacity: 0.18;
+  filter: blur(1px);
+  transform: translateZ(-50px);
+  -webkit-text-stroke: 1px rgba(0, 123, 255, 0.45);
+}
+.card-6__layer--mid {
+  opacity: 0.42;
+  filter: blur(0.4px);
+  transform: translateZ(-25px);
+  -webkit-text-stroke: 1px rgba(0, 123, 255, 0.55);
+}
+.card-6__layer--front {
+  opacity: 0.98;
+  transform: translateZ(0px);
+  -webkit-text-stroke: 1px rgba(0, 123, 255, 0.78);
+}
+
+.card-6__holo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 26px;
+  background: radial-gradient(
+    circle at 40% 35%,
+    rgba(0, 123, 255, 0.14),
+    rgba(0, 0, 0, 0) 62%
+  );
+  filter: blur(8px);
+  opacity: 0.9;
+  transform: translateZ(-60px);
+}
+
+.card-6__holo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 26px;
+  border: 1px solid rgba(0, 123, 255, 0.16);
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.01) 45%,
+    rgba(0, 0, 0, 0)
+  );
+  opacity: 0.55;
+  transform: translateZ(-35px);
+}
+
+@media (max-width: 600px) {
+  .card-6__holo {
+    width: 90px;
+    height: 90px;
+    border-radius: 24px;
+  }
+  .card-6__layer {
+    font-size: 72px;
+    letter-spacing: -5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-6__holo {
+    animation: none !important;
+  }
+}
