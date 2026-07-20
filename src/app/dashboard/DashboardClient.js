@@ -41,6 +41,10 @@ export default function DashboardClient({
     } else {
       document.documentElement.classList.remove("dark");
     }
+
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
   }, []);
 
   const toggleTheme = () => {
@@ -64,6 +68,13 @@ export default function DashboardClient({
   // Active navigation tab state
   const defaultTab = session.role === "ADMIN" && !searchParams.get("domain") ? "admin" : "overview";
   const [activeTab, setActiveTab] = useState(defaultTab);
+
+  const handleNavigate = (tab) => {
+    setActiveTab(tab);
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  };
 
   // Form states for creating a new client (admin only)
   const [newDomain, setNewDomain] = useState("");
@@ -855,8 +866,16 @@ export default function DashboardClient({
   return (
     <div className="h-screen w-screen bg-slate-50 flex overflow-hidden font-sans selection:bg-brand-blue selection:text-white text-slate-900">
       
+      {/* Backdrop overlay for mobile sidebar */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/40 z-30 md:hidden animate-fade-in"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* LEFT FIXED SIDEBAR */}
-      <aside className={`h-full bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0 relative z-20 shadow-sm transition-all duration-300 ease-in-out ${
+      <aside className={`h-full bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0 fixed inset-y-0 left-0 z-40 md:relative md:z-20 shadow-sm transition-all duration-300 ease-in-out ${
         sidebarOpen ? "w-72 p-6" : "w-0 p-0 overflow-hidden border-r-0"
       }`}>
         <div className="flex flex-col gap-8">
@@ -871,7 +890,7 @@ export default function DashboardClient({
             {/* Show "Usuarios" only if logged in as admin AND NOT impersonating another client */}
             {session.role === "ADMIN" && !isImpersonating && (
               <button
-                onClick={() => setActiveTab("admin")}
+                onClick={() => handleNavigate("admin")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
                   activeTab === "admin"
                     ? "bg-slate-900 text-white shadow-sm"
@@ -886,7 +905,7 @@ export default function DashboardClient({
             )}
 
             <button
-              onClick={() => setActiveTab("overview")}
+              onClick={() => handleNavigate("overview")}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
                 activeTab === "overview"
                   ? "bg-slate-900 text-white shadow-sm"
@@ -900,7 +919,7 @@ export default function DashboardClient({
             </button>
 
             <button
-              onClick={() => setActiveTab("analytics")}
+              onClick={() => handleNavigate("analytics")}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
                 activeTab === "analytics"
                   ? "bg-slate-900 text-white shadow-sm"
@@ -914,7 +933,7 @@ export default function DashboardClient({
             </button>
 
             <button
-              onClick={() => setActiveTab("clientes")}
+              onClick={() => handleNavigate("clientes")}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
                 activeTab === "clientes"
                   ? "bg-slate-900 text-white shadow-sm"
@@ -933,7 +952,7 @@ export default function DashboardClient({
             </button>
 
             <button
-              onClick={() => setActiveTab("ia")}
+              onClick={() => handleNavigate("ia")}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
                 activeTab === "ia"
                   ? "bg-slate-900 text-white shadow-sm"
@@ -947,7 +966,7 @@ export default function DashboardClient({
             </button>
 
             <button
-              onClick={() => setActiveTab("notificaciones")}
+              onClick={() => handleNavigate("notificaciones")}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
                 activeTab === "notificaciones"
                   ? "bg-slate-900 text-white shadow-sm"

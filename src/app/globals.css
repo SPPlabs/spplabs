@@ -52,6 +52,15 @@ body {
   transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.3);
 }
 
+@media (max-width: 640px) {
+  .phone-device {
+    transform: rotateX(70deg) rotateY(0deg) rotateZ(35deg) scale(0.8);
+  }
+  .phone-card-container:hover .phone-device {
+    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.05);
+  }
+}
+
 .phone-face {
   position: absolute;
   border-radius: 14px;

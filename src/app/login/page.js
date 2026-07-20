@@ -57,38 +57,41 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-center items-center relative overflow-hidden px-4 selection:bg-brand-blue selection:text-white">
-      {/* Language Switcher in Auth Screens */}
-      <div className="absolute top-6 right-6 flex gap-3 text-xs font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm z-30">
-        <button
-          onClick={() => changeLanguage("es")}
-          className={`hover:text-brand-blue cursor-pointer transition-colors ${lang === "es" ? "text-brand-blue font-black" : "text-slate-400"}`}
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-center items-center overflow-y-auto py-12 px-4 selection:bg-brand-blue selection:text-white">
+      {/* Top Header Navigation for Auth pages */}
+      <div className="w-full max-w-md flex items-center justify-between mb-8">
+        {/* Back to Home Link */}
+        <a
+          href="/"
+          className="text-sm font-semibold text-slate-500 hover:text-black transition-colors duration-200 flex items-center gap-2 cursor-pointer"
         >
-          ES
-        </button>
-        <span className="text-slate-200">|</span>
-        <button
-          onClick={() => changeLanguage("en")}
-          className={`hover:text-brand-blue cursor-pointer transition-colors ${lang === "en" ? "text-brand-blue font-black" : "text-slate-400"}`}
-        >
-          EN
-        </button>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          {t.authBack}
+        </a>
+
+        {/* Language Switcher in Auth Screens */}
+        <div className="flex gap-3 text-xs font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm">
+          <button
+            onClick={() => changeLanguage("es")}
+            className={`hover:text-brand-blue cursor-pointer transition-colors ${lang === "es" ? "text-brand-blue font-black" : "text-slate-400"}`}
+          >
+            ES
+          </button>
+          <span className="text-slate-200">|</span>
+          <button
+            onClick={() => changeLanguage("en")}
+            className={`hover:text-brand-blue cursor-pointer transition-colors ${lang === "en" ? "text-brand-blue font-black" : "text-slate-400"}`}
+          >
+            EN
+          </button>
+        </div>
       </div>
 
       {/* Background Gradients */}
       <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-brand-blue/5 blur-[120px] -z-10 animate-pulse"></div>
       <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-brand-green/5 blur-[120px] -z-10"></div>
-
-      {/* Back to Home Link */}
-      <a
-        href="/"
-        className="absolute top-6 left-6 text-sm font-semibold text-slate-500 hover:text-black transition-colors duration-200 flex items-center gap-2"
-      >
-        <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        {t.authBack}
-      </a>
 
       {/* Main card */}
       <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-xl relative">

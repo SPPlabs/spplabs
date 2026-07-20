@@ -10,6 +10,7 @@ export default function Home() {
   const [lang, setLang] = useState("es");
   const [activeTab, setActiveTab] = useState("throughput");
   const [activePage, setActivePage] = useState("inicio");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const savedLang = localStorage.getItem("spp_lang");
@@ -345,31 +346,104 @@ export default function Home() {
             >
               {t.navLogin}
             </a>
+
+            {/* Mobile Hamburger Toggle Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="flex md:hidden p-2 text-zinc-600 hover:text-black hover:bg-zinc-100 rounded-xl transition-all cursor-pointer border border-zinc-250"
+              aria-label="Toggle Mobile Menu"
+            >
+              {mobileMenuOpen ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
 
-        {/* Mobile Navigation - Horizontal Pill Row */}
-        <div className="flex md:hidden border-t border-zinc-100 bg-white/90 overflow-x-auto scrollbar-none px-4 py-2.5 justify-start border-b border-zinc-150/40">
-          <div className="flex bg-zinc-100/70 border border-zinc-200/40 p-0.5 rounded-full whitespace-nowrap gap-0.5">
-            {navItems.map((item) => {
-              const active = activePage === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActivePage(item.id)}
-                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-205 cursor-pointer hover:scale-[1.02] ${
-                    active
-                      ? "bg-gradient-to-r from-brand-blue to-brand-green text-white shadow-sm shadow-brand-blue/20"
-                      : "text-zinc-550 hover:text-black hover:bg-zinc-200/50"
-                  }`}
-                  id={`nav-mobile-${item.id}`}
+        {/* Mobile Navigation Drawer Overlay */}
+        {mobileMenuOpen && (
+          <div className="md:hidden fixed inset-0 top-20 z-40 bg-zinc-950/20 backdrop-blur-xs animate-fade-in" onClick={() => setMobileMenuOpen(false)}>
+            <div 
+              className="bg-white border-b border-zinc-200 shadow-xl px-6 py-8 flex flex-col gap-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Navigation Items */}
+              <nav className="flex flex-col gap-2">
+                {navItems.map((item) => {
+                  const active = activePage === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActivePage(item.id);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-5 py-3.5 rounded-2xl text-sm font-extrabold tracking-wide transition-all cursor-pointer ${
+                        active
+                          ? "bg-gradient-to-r from-brand-blue to-brand-green text-white shadow-sm shadow-brand-blue/15"
+                          : "text-zinc-650 hover:text-black hover:bg-zinc-50"
+                      }`}
+                      id={`nav-menu-link-${item.id}`}
+                    >
+                      {lang === "es" ? item.labelEs : item.labelEn}
+                    </button>
+                  );
+                })}
+              </nav>
+
+              <hr className="border-zinc-100" />
+
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-3">
+                <a
+                  href="/signup"
+                  className="w-full inline-flex items-center justify-center h-12 text-sm font-bold text-zinc-700 hover:text-black hover:bg-zinc-50 border border-zinc-250 rounded-2xl transition-all cursor-pointer"
+                  id="nav-menu-signup"
                 >
-                  {lang === "es" ? item.labelEs : item.labelEn}
-                </button>
-              );
-            })}
+                  {t.loginRegisterLink}
+                </a>
+                <a
+                  href="/login"
+                  className="w-full inline-flex items-center justify-center h-12 text-sm font-bold bg-gradient-to-r from-brand-blue to-brand-green text-white rounded-2xl transition-all shadow-sm cursor-pointer"
+                  id="nav-menu-cta"
+                >
+                  {t.navLogin}
+                </a>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Mobile Navigation - Horizontal Pill Row (Visible only when drawer is closed) */}
+        {!mobileMenuOpen && (
+          <div className="flex md:hidden border-t border-zinc-100 bg-white/90 overflow-x-auto scrollbar-none px-4 py-2.5 justify-start border-b border-zinc-150/40">
+            <div className="flex bg-zinc-100/70 border border-zinc-200/40 p-0.5 rounded-full whitespace-nowrap gap-0.5">
+              {navItems.map((item) => {
+                const active = activePage === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActivePage(item.id)}
+                    className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-205 cursor-pointer hover:scale-[1.02] ${
+                      active
+                        ? "bg-gradient-to-r from-brand-blue to-brand-green text-white shadow-sm shadow-brand-blue/20"
+                        : "text-zinc-550 hover:text-black hover:bg-zinc-200/50"
+                    }`}
+                    id={`nav-mobile-${item.id}`}
+                  >
+                    {lang === "es" ? item.labelEs : item.labelEn}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="flex-1 bg-white">
