@@ -4,7 +4,6 @@ import { TypingIndicator } from "./TypingIndicator";
 import { SuggestedQuestions } from "./SuggestedQuestions";
 import { ChatbotProps } from "./types";
 import { UseChatReturn } from "./useChat";
-import { SppLabsLogo } from "../SppLabsLogo";
 
 interface ChatWindowProps extends Omit<ChatbotProps, "websiteId" | "apiKey"> {
   chat: UseChatReturn;
