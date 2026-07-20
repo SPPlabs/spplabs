@@ -20,8 +20,8 @@ export function SppLabsLogo({ inline = false, className = "", style = {} }) {
         style={{ height: "1.25em", width: "auto", ...style }}
         aria-label="SPP Labs"
       >
-        {/* SPP (Thinner and wider custom rounded paths) */}
-        <g stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+        {/* SPP (Thick custom rounded paths matching the reference image) */}
+        <g stroke="currentColor" strokeWidth="5.8" strokeLinecap="round" strokeLinejoin="round">
           {/* S */}
           <path d="M 38 4 L 18 4 A 6 6 0 0 0 12 10 A 6 6 0 0 0 18 16 L 28 16 A 6 6 0 0 1 34 22 A 6 6 0 0 1 28 28 L 8 28" />
           {/* P1 */}
@@ -30,8 +30,8 @@ export function SppLabsLogo({ inline = false, className = "", style = {} }) {
           <path d="M 76 28 L 76 4 L 92 4 A 6 6 0 0 1 98 10 A 6 6 0 0 1 92 16 L 76 16" />
         </g>
 
-        {/* LABS (Individual letter colors and clean monospace-styled paths) */}
-        <g strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        {/* LABS (Thick individual letter colors and clean monospace-styled paths) */}
+        <g strokeWidth="4.2" strokeLinecap="round" strokeLinejoin="round">
           {/* L - Blue */}
           <path d="M 112 8 L 112 24 L 120 24" stroke="#0055ff" />
           {/* A - Cyan */}
@@ -55,8 +55,8 @@ export function SppLabsLogo({ inline = false, className = "", style = {} }) {
       style={{ height: "2.5em", width: "auto", ...style }}
       aria-label="SPP Labs"
     >
-      {/* SPP (Thinner and wider custom rounded paths) */}
-      <g stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round">
+      {/* SPP (Thick custom rounded paths matching the reference image) */}
+      <g stroke="currentColor" strokeWidth="6.5" strokeLinecap="round" strokeLinejoin="round">
         {/* S */}
         <path d="M 38 4 L 18 4 A 7 7 0 0 0 11 11 A 7 7 0 0 0 18 18 L 28 18 A 7 7 0 0 1 35 25 A 7 7 0 0 1 28 32 L 8 32" />
         {/* P1 */}
@@ -65,8 +65,8 @@ export function SppLabsLogo({ inline = false, className = "", style = {} }) {
         <path d="M 78 32 L 78 4 L 94 4 A 7 7 0 0 1 101 11 A 7 7 0 0 1 94 18 L 78 18" />
       </g>
 
-      {/* LABS (Individual letter colors and clean monospace-styled paths) */}
-      <g strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      {/* LABS (Thick individual letter colors and clean monospace-styled paths) */}
+      <g strokeWidth="4.8" strokeLinecap="round" strokeLinejoin="round">
         {/* L - Blue */}
         <path d="M 12 40 L 12 50 L 18 50" stroke="#0055ff" />
         {/* A - Cyan */}
