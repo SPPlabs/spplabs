@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyJWT } from "@/lib/jwt";
-import { prisma } from "@/lib/prisma";
+import { prisma, withRLS } from "@/lib/prisma";
 
 // DELETE: Hard Delete Contact Form Submission
 export async function DELETE(request) {
@@ -25,7 +25,9 @@ export async function DELETE(request) {
       return NextResponse.json({ error: "Bad Request", message: "Contact ID is required" }, { status: 400 });
     }
 
-    const contact = await prisma.contactForm.findUnique({
+    const db = session.role === "ADMIN" ? prisma : withRLS(session.id);
+
+    const contact = await db.contactForm.findUnique({
       where: { id },
       include: { website: true },
     });
@@ -39,7 +41,7 @@ export async function DELETE(request) {
       return NextResponse.json({ error: "Forbidden", message: "Access denied" }, { status: 403 });
     }
 
-    await prisma.contactForm.delete({
+    await db.contactForm.delete({
       where: { id },
     });
 

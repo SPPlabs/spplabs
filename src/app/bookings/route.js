@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { verifyApiKey } from "@/lib/crypto";
+import { prisma, withRLS } from "@/lib/prisma";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -116,7 +116,9 @@ export async function POST(request) {
       );
     }
 
-    const booking = await prisma.booking.create({
+    const db = withRLS(website.id);
+
+    const booking = await db.booking.create({
       data: {
         websiteId: website.id,
         date: parsedDate,
@@ -174,7 +176,9 @@ export async function GET(request) {
       );
     }
 
-    const bookings = await prisma.booking.findMany({
+    const db = withRLS(website.id);
+
+    const bookings = await db.booking.findMany({
       where: {
         websiteId: website.id,
         status: { in: ["PENDING", "CONFIRMED"] },

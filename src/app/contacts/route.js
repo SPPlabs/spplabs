@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { verifyApiKey } from "@/lib/crypto";
+import { prisma, withRLS } from "@/lib/prisma";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -106,8 +106,10 @@ export async function POST(request) {
       );
     }
 
+    const db = withRLS(website.id);
+
     // 4. Save contact form submission
-    const submission = await prisma.contactForm.create({
+    const submission = await db.contactForm.create({
       data: {
         websiteId: website.id,
         name: name.trim(),

@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, withRLS } from "@/lib/prisma";
 import { verifyApiKey } from "@/lib/crypto";
 import { retrieveContext, buildContext, generateChatCompletion, ragPromptTemplate } from "@/core/services/ai";
 import { logger } from "@/core/logger";
@@ -46,7 +46,8 @@ async function saveTokenUsage(
   const totalTokens = promptTokens + completionTokens;
 
   try {
-    await prisma.aiUsageMonthly.upsert({
+    const db = withRLS(websiteId);
+    await db.aiUsageMonthly.upsert({
       where: {
         websiteId_year_month: {
           websiteId,
@@ -175,7 +176,8 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
 
     // Update API Key lastUsedAt asynchronously
-    prisma.websiteApiKey
+    const db = withRLS(website.id);
+    db.websiteApiKey
       .update({
         where: { id: authenticatedKeyRecord.id },
         data: { lastUsedAt: new Date() },

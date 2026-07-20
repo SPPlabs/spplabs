@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { prisma } from "@/lib/prisma";
+import { prisma, withRLS } from "@/lib/prisma";
 import { verifyJWT } from "@/lib/jwt";
 import { syncWebsiteKnowledge } from "@/core/services/ai";
 
@@ -49,8 +49,10 @@ export async function POST(request) {
       return NextResponse.json({ error: "Website not found" }, { status: 404 });
     }
 
+    const db = session.role === "ADMIN" ? prisma : withRLS(session.id);
+
     // 5. Update ChatbotKnowledge record in PostgreSQL (Database is single source of truth)
-    const kb = await prisma.chatbotKnowledge.upsert({
+    const kb = await db.chatbotKnowledge.upsert({
       where: { websiteId: targetWebsite.id },
       update: { content: content },
       create: { websiteId: targetWebsite.id, content: content },
@@ -61,7 +63,7 @@ export async function POST(request) {
       await syncWebsiteKnowledge(targetWebsite.id, content);
       
       // Update lastSyncedAt timestamp ONLY upon successful Qdrant ingestion
-      const updatedKb = await prisma.chatbotKnowledge.update({
+      const updatedKb = await db.chatbotKnowledge.update({
         where: { id: kb.id },
         data: { lastSyncedAt: new Date() },
       });

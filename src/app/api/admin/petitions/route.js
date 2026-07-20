@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { prisma } from "@/lib/prisma";
+import { prisma, withRLS } from "@/lib/prisma";
 import { verifyJWT } from "@/lib/jwt";
 
 export async function POST(request) {
@@ -41,7 +41,9 @@ export async function POST(request) {
       return NextResponse.json({ error: "Website not found" }, { status: 404 });
     }
 
-    const supportRequest = await prisma.supportRequest.create({
+    const db = session.role === "ADMIN" ? prisma : withRLS(session.id);
+
+    const supportRequest = await db.supportRequest.create({
       data: {
         websiteId: targetWebsite.id,
         title: "Petición del cliente",
@@ -76,7 +78,9 @@ export async function DELETE(request) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
-    const requestToMsg = await prisma.supportRequest.findUnique({
+    const db = session.role === "ADMIN" ? prisma : withRLS(session.id);
+
+    const requestToMsg = await db.supportRequest.findUnique({
       where: { id },
       include: { website: true }
     });
@@ -90,7 +94,7 @@ export async function DELETE(request) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    await prisma.supportRequest.delete({
+    await db.supportRequest.delete({
       where: { id },
     });
 

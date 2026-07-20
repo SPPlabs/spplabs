@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isRateLimited } from "./lib/rateLimiter";
 
 export async function proxy(request) {
   const url = request.nextUrl;
@@ -10,6 +11,42 @@ export async function proxy(request) {
 
   const path = url.pathname;
 
+  // 0. IP-Based Rate Limiting for API Requests
+  const isApiRequest = path.startsWith("/api/") || path === "/contacts" || path === "/bookings";
+  if (isApiRequest) {
+    const ip = request.headers.get("cf-connecting-ip") ||
+               request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+               request.headers.get("x-real-ip") ||
+               "127.0.0.1";
+
+    let limit = 60;
+    if (path === "/api/chat") {
+      limit = 15;
+    } else if (path.startsWith("/api/admin/")) {
+      limit = 200;
+    }
+
+    const key = `${ip}:${path}`;
+
+    if (isRateLimited(key, limit)) {
+      const message = path === "/api/chat"
+        ? "Has enviado demasiados mensajes. Por favor, espera un momento antes de volver a intentarlo."
+        : "Demasiadas peticiones. Por favor, inténtelo de nuevo más tarde.";
+
+      return new NextResponse(
+        JSON.stringify({
+          success: false,
+          error: "Too Many Requests",
+          message,
+        }),
+        {
+          status: 429,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+  }
+
   // 1. API Domain Enforcements (e.g. api.spplabs.es)
   if (isApiDomain) {
     // Permit contacts, bookings, analytics POST requests, and the public tracker script
@@ -17,6 +54,7 @@ export async function proxy(request) {
       path === "/contacts" ||
       path === "/bookings" ||
       path === "/api/analytics" ||
+      path === "/api/chat" ||
       path === "/tracker.js"
     ) {
       return NextResponse.next();

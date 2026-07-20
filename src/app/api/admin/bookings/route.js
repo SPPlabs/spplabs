@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyJWT } from "@/lib/jwt";
-import { prisma } from "@/lib/prisma";
+import { prisma, withRLS } from "@/lib/prisma";
 
 // PATCH: Accept/Reject Booking
 export async function PATCH(request) {
@@ -34,8 +34,10 @@ export async function PATCH(request) {
       return NextResponse.json({ error: "Bad Request", message: "Invalid status value" }, { status: 400 });
     }
 
+    const db = session.role === "ADMIN" ? prisma : withRLS(session.id);
+
     // Lookup booking and ensure the tenant owns it
-    const booking = await prisma.booking.findUnique({
+    const booking = await db.booking.findUnique({
       where: { id: bookingId },
       include: { website: true },
     });
@@ -49,7 +51,7 @@ export async function PATCH(request) {
       return NextResponse.json({ error: "Forbidden", message: "Access denied" }, { status: 403 });
     }
 
-    const updatedBooking = await prisma.booking.update({
+    const updatedBooking = await db.booking.update({
       where: { id: bookingId },
       data: { status },
     });
@@ -83,7 +85,9 @@ export async function DELETE(request) {
       return NextResponse.json({ error: "Bad Request", message: "Booking ID is required" }, { status: 400 });
     }
 
-    const booking = await prisma.booking.findUnique({
+    const db = session.role === "ADMIN" ? prisma : withRLS(session.id);
+
+    const booking = await db.booking.findUnique({
       where: { id },
       include: { website: true },
     });
@@ -97,7 +101,7 @@ export async function DELETE(request) {
       return NextResponse.json({ error: "Forbidden", message: "Access denied" }, { status: 403 });
     }
 
-    await prisma.booking.delete({
+    await db.booking.delete({
       where: { id },
     });
 
@@ -154,7 +158,9 @@ export async function POST(request) {
       return NextResponse.json({ error: "Bad Request", message: "Invalid date format. Use YYYY-MM-DD" }, { status: 400 });
     }
 
-    const newBooking = await prisma.booking.create({
+    const db = session.role === "ADMIN" ? prisma : withRLS(session.id);
+
+    const newBooking = await db.booking.create({
       data: {
         websiteId: website.id,
         date: parsedDate,
