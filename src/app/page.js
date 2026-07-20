@@ -9,6 +9,7 @@ import { InlineChatbot } from "@/components/chatbot/InlineChatbot";
 export default function Home() {
   const [lang, setLang] = useState("es");
   const [activeTab, setActiveTab] = useState("throughput");
+  const [activePage, setActivePage] = useState("inicio");
 
   useEffect(() => {
     const savedLang = localStorage.getItem("spp_lang");
@@ -65,7 +66,6 @@ export default function Home() {
     fetchOccupiedSlots();
   }, []);
 
-
   const renderCalendarDays = () => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
@@ -104,7 +104,7 @@ export default function Home() {
             isSelected
               ? "bg-brand-green text-white shadow-md font-extrabold"
               : isPast
-              ? "text-zinc-300 cursor-not-allowed"
+              ? "text-zinc-350 cursor-not-allowed"
               : isFullyBooked
               ? "bg-zinc-55 text-zinc-300 border border-zinc-150/60 cursor-not-allowed line-through"
               : "hover:bg-zinc-200 hover:text-black text-zinc-800 bg-white border border-zinc-100"
@@ -117,7 +117,6 @@ export default function Home() {
     }
     return days;
   };
-
 
   // Submit handlers
   const handleContactSubmit = async (e) => {
@@ -221,7 +220,6 @@ export default function Home() {
           </defs>
           <path d="M0,100 L50,110 L100,85 L150,90 L200,60 L250,75 L300,45 L350,55 L400,30 L450,42 L500,20" />
           <path d="M0,100 L50,110 L100,85 L150,90 L200,60 L250,75 L300,45 L350,55 L400,30 L450,42 L500,20 L500,150 L0,150 Z" fill="url(#blueGrad)" stroke="none" />
-          {/* Pulsing indicator */}
           <circle cx="500" cy="20" r="6" fill="#2563eb" className="animate-ping" />
           <circle cx="500" cy="20" r="4" fill="#2563eb" />
         </svg>
@@ -271,25 +269,53 @@ export default function Home() {
     }
   };
 
+  const navItems = [
+    { id: "inicio", labelEs: "Inicio", labelEn: "Inicio" },
+    { id: "servicios", labelEs: "Servicios", labelEn: "Servicios" },
+    { id: "tecnologia", labelEs: "Tecnología", labelEn: "Tecnología" },
+    { id: "nosotros", labelEs: "Nosotros", labelEn: "Nosotros" },
+    { id: "contacto", labelEs: "Contacto", labelEn: "Contacto" }
+  ];
+
   return (
     <div className="bg-white min-h-screen text-black flex flex-col font-sans selection:bg-brand-blue selection:text-white">
       {/* Navigation */}
-      <header className="border-b border-zinc-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <a href="#" className="flex items-center gap-3 group" id="nav-logo">
+      <header className="border-b border-zinc-150/70 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-[94rem] mx-auto px-4 sm:px-8 md:px-12 h-20 flex items-center justify-between gap-4">
+          <a 
+            href="#" 
+            onClick={(e) => { e.preventDefault(); setActivePage("inicio"); }}
+            className="flex items-center gap-3 group shrink-0 transition-transform hover:scale-[1.01]" 
+            id="nav-logo"
+          >
             <img src="/logo.webp" alt="SPP Labs Logo" className="w-8 h-8 object-contain" />
             <SppLabsLogo inline={true} className="text-black" />
           </a>
 
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm font-medium text-zinc-600 hover:text-black transition-colors" id="nav-link-features">{t.navPrecios === "Precios" ? "Características" : "Features"}</a>
-            <a href="#demo" className="text-sm font-medium text-zinc-600 hover:text-black transition-colors" id="nav-link-demo">{t.navPrecios === "Precios" ? "Demostración" : "Demo Telemetry"}</a>
-            <a href="#pricing" className="text-sm font-medium text-zinc-600 hover:text-black transition-colors" id="nav-link-pricing">{t.navPrecios}</a>
+          {/* Desktop Navigation - Pill Box */}
+          <nav className="hidden md:flex items-center bg-zinc-100/80 border border-zinc-200/60 p-1 rounded-full shadow-sm gap-0.5">
+            {navItems.map((item) => {
+              const active = activePage === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActivePage(item.id)}
+                  className={`px-5 py-2 rounded-full text-xs font-bold tracking-wide transition-all duration-300 ease-out cursor-pointer hover:scale-[1.03] active:scale-[0.97] ${
+                    active
+                      ? "bg-black text-white shadow-sm"
+                      : "text-zinc-600 hover:text-black hover:bg-zinc-200/50"
+                  }`}
+                  id={`nav-link-${item.id}`}
+                >
+                  {lang === "es" ? item.labelEs : item.labelEn}
+                </button>
+              );
+            })}
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 shrink-0">
             {/* Language Switcher Link */}
-            <div className="flex gap-2 text-xs font-bold mr-2 bg-zinc-50 border border-zinc-200 px-2.5 py-1.5 rounded-xl shadow-sm">
+            <div className="flex gap-2 text-xs font-bold bg-zinc-50 border border-zinc-200 px-2.5 py-1.5 rounded-xl shadow-sm">
               <button
                 onClick={() => changeLanguage("es")}
                 className={`hover:text-brand-blue cursor-pointer transition-colors ${lang === "es" ? "text-brand-blue font-black" : "text-zinc-400"}`}
@@ -307,7 +333,7 @@ export default function Home() {
 
             <a
               href="/signup"
-              className="text-sm font-semibold text-zinc-600 hover:text-black transition-colors"
+              className="text-sm font-semibold text-zinc-650 hover:text-black transition-colors hidden sm:inline-block"
               id="nav-signup-link"
             >
               {t.loginRegisterLink}
@@ -321,445 +347,1147 @@ export default function Home() {
             </a>
           </div>
         </div>
+
+        {/* Mobile Navigation - Horizontal Pill Row */}
+        <div className="flex md:hidden border-t border-zinc-100 bg-white/90 overflow-x-auto scrollbar-none px-4 py-2.5 justify-start border-b border-zinc-150/40">
+          <div className="flex bg-zinc-100/70 border border-zinc-200/40 p-0.5 rounded-full whitespace-nowrap gap-0.5">
+            {navItems.map((item) => {
+              const active = activePage === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActivePage(item.id)}
+                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-205 cursor-pointer ${
+                    active
+                      ? "bg-black text-white shadow-sm"
+                      : "text-zinc-550 hover:text-black hover:bg-zinc-200/50"
+                  }`}
+                  id={`nav-mobile-${item.id}`}
+                >
+                  {lang === "es" ? item.labelEs : item.labelEn}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </header>
 
       <main className="flex-1 bg-white">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden pt-12 pb-24 md:py-32 border-b border-zinc-100">
-          <div className="max-w-7xl mx-auto px-6 relative z-10">
-            <div className="grid md:grid-cols-12 gap-16 items-center">
-              {/* Hero Copy */}
-              <div className="md:col-span-7 flex flex-col items-start text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-200 text-xs font-semibold text-zinc-700 bg-white mb-6">
-                  <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse"></span>
-                  <span>{t.navPrecios === "Precios" ? "La versión 4.0 está activa" : "Version 4.0 is live"}</span>
-                </div>
-                
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-black leading-[1.1] mb-8">
-                  {t.navPrecios === "Precios" ? "Operaciones y Analíticas," : "Operations & Analytics,"} <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-black to-brand-green">
-                    {t.navPrecios === "Precios" ? "diseñadas para escalar." : "engineered for scale."}
-                  </span>
-                </h1>
-                
-                <p className="text-lg text-zinc-600 max-w-xl leading-relaxed mb-10">
-                  {t.navPrecios === "Precios" ? "Despliegue, analice y optimice sus sistemas en tiempo real. Un espacio de trabajo unificado diseñado para simplificar la telemetría." : "Deploy, analyze, and optimize your systems in real-time. A unified developer workspace designed to streamline infrastructure telemetry and engineering workflows."}
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                  <a
-                    href="/login"
-                    className="inline-flex items-center justify-center px-8 h-13 text-base font-semibold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 shadow-lg hover:shadow-xl cursor-pointer"
-                    id="hero-primary-cta"
-                  >
-                    {t.navDashboard}
-                  </a>
-                  <a
-                    href="/signup"
-                    className="inline-flex items-center justify-center px-8 h-13 text-base font-semibold bg-white text-black border border-zinc-300 rounded-lg hover:border-black transition-colors duration-300 cursor-pointer"
-                    id="hero-secondary-cta"
-                  >
-                    {t.loginRegisterLink}
-                  </a>
-                </div>
-
-                <div className="mt-12 flex items-center gap-8 text-zinc-500 text-xs font-semibold tracking-wider uppercase">
-                  <span>{t.navPrecios === "Precios" ? "Sin tarjeta de crédito" : "No credit card required"}</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-300"></span>
-                  <span>{t.navPrecios === "Precios" ? "Prueba gratuita de 14 días" : "14-day free trial"}</span>
-                </div>
-              </div>
-
-              {/* Hero Visual Mockup */}
-              <div className="md:col-span-5 relative w-full">
-                <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/10 via-transparent to-brand-green/10 rounded-3xl blur-3xl -z-10"></div>
-                <div className="border border-zinc-200 bg-white rounded-2xl p-6 shadow-xl relative">
-                  <div className="flex items-center justify-between border-b border-zinc-100 pb-4 mb-6">
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full bg-zinc-200"></span>
-                      <span className="w-3 h-3 rounded-full bg-zinc-200"></span>
-                      <span className="w-3 h-3 rounded-full bg-zinc-200"></span>
+        
+        {/* ================= INICIO ================= */}
+        {activePage === "inicio" && (
+          <>
+            {/* Hero Section */}
+            <section className="relative overflow-hidden pt-12 pb-24 md:py-32 border-b border-zinc-100">
+              <div className="max-w-7xl mx-auto px-6 relative z-10">
+                <div className="grid md:grid-cols-12 gap-16 items-center">
+                  {/* Hero Copy */}
+                  <div className="md:col-span-7 flex flex-col items-start text-left">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-200 text-xs font-semibold text-zinc-700 bg-white mb-6">
+                      <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse"></span>
+                      <span>{t.navPrecios === "Precios" ? "La versión 4.0 está activa" : "Version 4.0 is live"}</span>
                     </div>
-                    <span className="text-xs font-mono text-zinc-400">spplabs-cluster-01</span>
-                  </div>
+                    
+                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-black leading-[1.1] mb-8">
+                      {t.navPrecios === "Precios" ? "Operaciones y Analíticas," : "Operations & Analytics,"} <br />
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-black to-brand-green">
+                        {t.navPrecios === "Precios" ? "diseñadas para escalar." : "engineered for scale."}
+                      </span>
+                    </h1>
+                    
+                    <p className="text-lg text-zinc-650 max-w-xl leading-relaxed mb-10">
+                      {t.navPrecios === "Precios" ? "Despliegue, analice y optimice sus sistemas en tiempo real. Un espacio de trabajo unificado diseñado para simplificar la telemetría." : "Deploy, analyze, and optimize your systems in real-time. A unified developer workspace designed to streamline infrastructure telemetry and engineering workflows."}
+                    </p>
 
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="border border-zinc-100 rounded-xl p-4">
-                        <span className="text-xs text-zinc-500 font-medium block mb-1">Status</span>
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-brand-green"></span>
-                          <span className="text-sm font-bold">Operational</span>
-                        </div>
-                      </div>
-                      <div className="border border-zinc-100 rounded-xl p-4">
-                        <span className="text-xs text-zinc-500 font-medium block mb-1">Uptime</span>
-                        <span className="text-sm font-bold font-mono">99.998%</span>
-                      </div>
-                    </div>
-
-                    <div className="border border-zinc-100 rounded-xl p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs text-zinc-500 font-medium">{lang === "es" ? "Carga de Memoria" : "Memory Load"}</span>
-                        <span className="text-xs font-bold text-brand-blue font-mono">31.2%</span>
-                      </div>
-                      <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
-                        <div className="bg-brand-blue h-full rounded-full" style={{ width: "31.2%" }}></div>
-                      </div>
-                    </div>
-
-                    <div className="border border-zinc-100 rounded-xl p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs text-zinc-500 font-medium">{lang === "es" ? "Red E/S" : "Network IO"}</span>
-                        <span className="text-xs font-bold text-brand-green font-mono">{lang === "es" ? "Normal" : "Normal"}</span>
-                      </div>
-                      <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
-                        <div className="bg-brand-green h-full rounded-full" style={{ width: "65%" }}></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Inline Chatbot Section */}
-        <section className="py-20 bg-zinc-50 border-b border-zinc-100">
-          <div className="max-w-7xl mx-auto px-6">
-            <InlineChatbot />
-          </div>
-        </section>
-
-        {/* Feature Grid Section */}
-        <section id="features" className="py-24 bg-white border-b border-zinc-100 scroll-mt-20">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center max-w-2xl mx-auto mb-20">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-brand-blue mb-4">{lang === "es" ? "Infraestructura Central" : "Core Infrastructure"}</h2>
-              <p className="text-3xl sm:text-4xl font-bold tracking-tight text-black">
-                {lang === "es" ? "Todo lo que necesita para orquestar telemetría a escala." : "Everything you need to orchestrate telemetry at scale."}
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {/* Feature 1 */}
-              <div className="border border-zinc-200 bg-white rounded-2xl p-8 hover:border-brand-blue transition-all duration-300 group hover:shadow-lg">
-                <div className="w-12 h-12 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Telemetría Instantánea" : "Instant Telemetry"}</h3>
-                <p className="text-zinc-600 leading-relaxed text-sm">
-                  {lang === "es" ? "Consulte y visualice eventos de infraestructura en tiempo real. Reúna telemetría sub-milisegundo desde dispositivos perimetrales y APIs containerizadas con tableros nativos." : "Query and visual infrastructure events in real-time. Gather sub-millisecond telemetry from edge devices and containerized APIs with native visual dashboards."}
-                </p>
-              </div>
-
-              {/* Feature 2 */}
-              <div className="border border-zinc-200 bg-white rounded-2xl p-8 hover:border-brand-green transition-all duration-300 group hover:shadow-lg">
-                <div className="w-12 h-12 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Flujos y Disparadores" : "Workflows & Triggers"}</h3>
-                <p className="text-zinc-600 leading-relaxed text-sm">
-                  {lang === "es" ? "Automatice procedimientos operativos estándar. Vincule acciones directamente a activadores métricos para escalar contenedores automáticamente, purgar cachés o relanzar despliegues." : "Automate standard operational procedures. Bind actions directly to metric triggers to automatically scale containers, purge caches, or rerun deployments."}
-                </p>
-              </div>
-
-              {/* Feature 3 */}
-              <div className="border border-zinc-200 bg-white rounded-2xl p-8 hover:border-black transition-all duration-300 group hover:shadow-lg">
-                <div className="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center text-black mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Perímetro Seguro" : "Secure Perimeter"}</h3>
-                <p className="text-zinc-600 leading-relaxed text-sm">
-                  {lang === "es" ? "Aproveche el cifrado de transporte de extremo a extremo, espacios de nombres aislados para consultas y atestación de claves por hardware. Listo para cumplimiento normativo." : "Leverage end-to-end transport encryption, isolated query namespaces, and hardware key attestation. Compliance-ready posture standard out of the box."}
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Interactive Showcase Section */}
-        <section id="demo" className="py-24 bg-white border-b border-zinc-100 scroll-mt-20">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid lg:grid-cols-12 gap-16 items-center">
-              <div className="lg:col-span-5">
-                <span className="text-xs font-bold uppercase tracking-widest text-brand-green mb-4 block">{lang === "es" ? "Telemetría Interactiva" : "Interactive Telemetry"}</span>
-                <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black mb-6">
-                  {lang === "es" ? "Supervise métricas de infraestructura interactivamente." : "Monitor your infrastructure metrics interactively."}
-                </h2>
-                <p className="text-zinc-600 mb-8 leading-relaxed">
-                  {lang === "es" ? "Alterne entre los paneles de métricas para inspeccionar las actualizaciones de la plataforma en tiempo real. SPP Labs aísla los datos del evento de inmediato." : "Toggle through the metrics panels to inspect real-time platform updates. SPP Labs isolates event data to give you high-fidelity insights immediately."}
-                </p>
-
-                {/* Tab Controls */}
-                <div className="space-y-3">
-                  {Object.keys(metrics).map((tabKey) => {
-                    const isActive = activeTab === tabKey;
-                    return (
-                      <button
-                        key={tabKey}
-                        onClick={() => setActiveTab(tabKey)}
-                        className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${
-                          isActive
-                            ? "border-black bg-zinc-50 shadow-sm"
-                            : "border-zinc-200 hover:border-zinc-400 bg-white"
-                        }`}
-                        id={`tab-control-${tabKey}`}
+                    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                      <a
+                        href="/login"
+                        className="inline-flex items-center justify-center px-8 h-13 text-base font-semibold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 shadow-lg hover:shadow-xl cursor-pointer"
+                        id="hero-primary-cta"
                       >
-                        <div>
-                          <span className={`text-xs font-bold uppercase tracking-wider ${
-                            isActive
-                              ? tabKey === "throughput"
-                                ? "text-brand-blue"
-                                : tabKey === "cpu"
-                                ? "text-brand-green"
-                                : "text-black"
-                              : "text-zinc-400"
-                          }`}>
-                            {metrics[tabKey].title}
-                          </span>
-                          <span className="block text-lg font-bold text-black mt-1">
-                            {metrics[tabKey].value}
-                          </span>
-                        </div>
+                        {t.navDashboard}
+                      </a>
+                      <button
+                        onClick={() => setActivePage("servicios")}
+                        className="inline-flex items-center justify-center px-8 h-13 text-base font-semibold bg-white text-black border border-zinc-300 rounded-lg hover:border-black transition-colors duration-300 cursor-pointer"
+                        id="hero-secondary-cta"
+                      >
+                        {lang === "es" ? "Nuestros Servicios" : "Our Services"}
+                      </button>
+                    </div>
+
+                    <div className="mt-12 flex items-center gap-8 text-zinc-500 text-xs font-semibold tracking-wider uppercase">
+                      <span>{t.navPrecios === "Precios" ? "Sin tarjeta de crédito" : "No credit card required"}</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-300"></span>
+                      <span>{t.navPrecios === "Precios" ? "Prueba gratuita de 14 días" : "14-day free trial"}</span>
+                    </div>
+                  </div>
+
+                  {/* Hero Visual Mockup */}
+                  <div className="md:col-span-5 relative w-full">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/10 via-transparent to-brand-green/10 rounded-3xl blur-3xl -z-10"></div>
+                    <div className="border border-zinc-200 bg-white rounded-2xl p-6 shadow-xl relative">
+                      <div className="flex items-center justify-between border-b border-zinc-100 pb-4 mb-6">
                         <div className="flex items-center gap-2">
-                          <span className={`text-xs font-semibold ${
-                            metrics[tabKey].isPositive ? "text-brand-green" : "text-brand-blue"
-                          }`}>
-                            {metrics[tabKey].change}
-                          </span>
-                          <svg className={`w-4 h-4 ${isActive ? "text-black" : "text-zinc-400"}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                          <span className="w-3 h-3 rounded-full bg-zinc-200"></span>
+                          <span className="w-3 h-3 rounded-full bg-zinc-200"></span>
+                          <span className="w-3 h-3 rounded-full bg-zinc-200"></span>
+                        </div>
+                        <span className="text-xs font-mono text-zinc-400">spplabs-cluster-01</span>
+                      </div>
+
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="border border-zinc-100 rounded-xl p-4">
+                            <span className="text-xs text-zinc-500 font-medium block mb-1">Status</span>
+                            <div className="flex items-center gap-2">
+                              <span className="w-2.5 h-2.5 rounded-full bg-brand-green"></span>
+                              <span className="text-sm font-bold">Operational</span>
+                            </div>
+                          </div>
+                          <div className="border border-zinc-100 rounded-xl p-4">
+                            <span className="text-xs text-zinc-500 font-medium block mb-1">Uptime</span>
+                            <span className="text-sm font-bold font-mono">99.998%</span>
+                          </div>
+                        </div>
+
+                        <div className="border border-zinc-100 rounded-xl p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs text-zinc-500 font-medium">{lang === "es" ? "Carga de Memoria" : "Memory Load"}</span>
+                            <span className="text-xs font-bold text-brand-blue font-mono">31.2%</span>
+                          </div>
+                          <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
+                            <div className="bg-brand-blue h-full rounded-full" style={{ width: "31.2%" }}></div>
+                          </div>
+                        </div>
+
+                        <div className="border border-zinc-100 rounded-xl p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs text-zinc-500 font-medium">{lang === "es" ? "Red E/S" : "Network IO"}</span>
+                            <span className="text-xs font-bold text-brand-green font-mono">Normal</span>
+                          </div>
+                          <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
+                            <div className="bg-brand-green h-full rounded-full" style={{ width: "65%" }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Inline Chatbot Section */}
+            <section className="py-20 bg-zinc-50 border-b border-zinc-100">
+              <div className="max-w-7xl mx-auto px-6">
+                <InlineChatbot />
+              </div>
+            </section>
+
+            {/* Feature Grid Section */}
+            <section id="features" className="py-24 bg-white border-b border-zinc-100 scroll-mt-20">
+              <div className="max-w-7xl mx-auto px-6">
+                <div className="text-center max-w-2xl mx-auto mb-20">
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-brand-blue mb-4">{lang === "es" ? "Infraestructura Central" : "Core Infrastructure"}</h2>
+                  <p className="text-3xl sm:text-4xl font-bold tracking-tight text-black">
+                    {lang === "es" ? "Todo lo que necesita para orquestar telemetría a escala." : "Everything you need to orchestrate telemetry at scale."}
+                  </p>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-8">
+                  {/* Feature 1 */}
+                  <div className="border border-zinc-200 bg-white rounded-2xl p-8 hover:border-brand-blue transition-all duration-300 group hover:shadow-lg">
+                    <div className="w-12 h-12 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue mb-6 group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Telemetría Instantánea" : "Instant Telemetry"}</h3>
+                    <p className="text-zinc-650 leading-relaxed text-sm">
+                      {lang === "es" ? "Consulte y visualice eventos de infraestructura en tiempo real. Reúna telemetría sub-milisegundo desde dispositivos perimetrales y APIs containerizadas con tableros nativos." : "Query and visual infrastructure events in real-time. Gather sub-millisecond telemetry from edge devices and containerized APIs with native visual dashboards."}
+                    </p>
+                  </div>
+
+                  {/* Feature 2 */}
+                  <div className="border border-zinc-200 bg-white rounded-2xl p-8 hover:border-brand-green transition-all duration-300 group hover:shadow-lg">
+                    <div className="w-12 h-12 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green mb-6 group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Flujos y Disparadores" : "Workflows & Triggers"}</h3>
+                    <p className="text-zinc-650 leading-relaxed text-sm">
+                      {lang === "es" ? "Automatice procedimientos operativos estándar. Vincule acciones directamente a activadores métricos para escalar contenedores automáticamente, purgar cachés o relanzar despliegues." : "Automate standard operational procedures. Bind actions directly to metric triggers to automatically scale containers, purge caches, or rerun deployments."}
+                    </p>
+                  </div>
+
+                  {/* Feature 3 */}
+                  <div className="border border-zinc-200 bg-white rounded-2xl p-8 hover:border-black transition-all duration-300 group hover:shadow-lg">
+                    <div className="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center text-black mb-6 group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Perímetro Seguro" : "Secure Perimeter"}</h3>
+                    <p className="text-zinc-650 leading-relaxed text-sm">
+                      {lang === "es" ? "Aproveche el cifrado de transporte de extremo a extremo, espacios de nombres aislados para consultas y atestación de claves por hardware. Listo para cumplimiento normativo." : "Leverage end-to-end transport encryption, isolated query namespaces, and hardware key attestation. Compliance-ready posture standard out of the box."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Interactive Showcase Section */}
+            <section id="demo" className="py-24 bg-white border-b border-zinc-100 scroll-mt-20">
+              <div className="max-w-7xl mx-auto px-6">
+                <div className="grid lg:grid-cols-12 gap-16 items-center">
+                  <div className="lg:col-span-5">
+                    <span className="text-xs font-bold uppercase tracking-widest text-brand-green mb-4 block">{lang === "es" ? "Telemetría Interactiva" : "Interactive Telemetry"}</span>
+                    <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black mb-6">
+                      {lang === "es" ? "Supervise métricas de infraestructura interactivamente." : "Monitor your infrastructure metrics interactively."}
+                    </h2>
+                    <p className="text-zinc-650 mb-8 leading-relaxed">
+                      {lang === "es" ? "Alterne entre los paneles de métricas para inspeccionar las actualizaciones de la plataforma en tiempo real. SPP Labs aísla los datos del evento de inmediato." : "Toggle through the metrics panels to inspect real-time platform updates. SPP Labs isolates event data to give you high-fidelity insights immediately."}
+                    </p>
+
+                    {/* Tab Controls */}
+                    <div className="space-y-3">
+                      {Object.keys(metrics).map((tabKey) => {
+                        const isActive = activeTab === tabKey;
+                        return (
+                          <button
+                            key={tabKey}
+                            onClick={() => setActiveTab(tabKey)}
+                            className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-205 cursor-pointer ${
+                              isActive
+                                ? "border-black bg-zinc-50 shadow-sm"
+                                : "border-zinc-200 hover:border-zinc-400 bg-white"
+                            }`}
+                            id={`tab-control-${tabKey}`}
+                          >
+                            <div>
+                              <span className={`text-xs font-bold uppercase tracking-wider ${
+                                isActive
+                                  ? tabKey === "throughput"
+                                    ? "text-brand-blue"
+                                    : tabKey === "cpu"
+                                    ? "text-brand-green"
+                                    : "text-black"
+                                  : "text-zinc-400"
+                              }`}>
+                                {metrics[tabKey].title}
+                              </span>
+                              <span className="block text-lg font-bold text-black mt-1">
+                                {metrics[tabKey].value}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-xs font-semibold ${
+                                metrics[tabKey].isPositive ? "text-brand-green" : "text-brand-blue"
+                              }`}>
+                                {metrics[tabKey].change}
+                              </span>
+                              <svg className={`w-4 h-4 ${isActive ? "text-black" : "text-zinc-400"}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                              </svg>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Metric Graph Render Display */}
+                  <div className="lg:col-span-7 border border-zinc-200 bg-white rounded-2xl p-6 shadow-lg">
+                    <div className="flex items-center justify-between border-b border-zinc-100 pb-4 mb-8">
+                      <div className="flex items-center gap-4">
+                        <span className={`w-2.5 h-2.5 rounded-full ${
+                          activeTab === "throughput" ? "bg-brand-blue" : activeTab === "cpu" ? "bg-brand-green" : "bg-black"
+                        } animate-pulse`}></span>
+                        <span className="font-bold text-sm text-black">
+                          {metrics[activeTab].title} {lang === "es" ? "en Vivo" : "Live Monitor"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 bg-zinc-50 px-3 py-1.5 rounded-md border border-zinc-150">
+                        <span>Source: US-East-1</span>
+                      </div>
+                    </div>
+
+                    <div className="mb-6">
+                      <div className="text-3xl font-black tracking-tight text-black font-mono">
+                        {metrics[activeTab].value}
+                      </div>
+                      <div className="text-xs text-zinc-500 mt-1">
+                        {lang === "es" ? "Telemetría actualizada hace 2 segundos" : "Telemetry updated 2 seconds ago"}
+                      </div>
+                    </div>
+
+                    <div className="bg-zinc-50 border border-zinc-100 rounded-xl p-4">
+                      {metrics[activeTab].svgPath}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Simple Pricing Section */}
+            <section id="pricing" className="py-24 bg-white border-b border-zinc-100 scroll-mt-20">
+              <div className="max-w-7xl mx-auto px-6">
+                <div className="text-center max-w-2xl mx-auto mb-20">
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-brand-green mb-4">{lang === "es" ? "Planes de Precios" : "Pricing Plans"}</h2>
+                  <p className="text-3xl sm:text-4xl font-bold tracking-tight text-black">
+                    {lang === "es" ? "Planes simples y transparentes creados para operaciones de telemetría." : "Simple, transparent tiers built for telemetry operations."}
+                  </p>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-8">
+                  {/* Pricing 1 */}
+                  <div className="border border-zinc-200 bg-white rounded-2xl p-8 flex flex-col justify-between hover:shadow-md transition-shadow">
+                    <div>
+                      <h3 className="text-lg font-bold text-black mb-2">{lang === "es" ? "Desarrollador" : "Developer"}</h3>
+                      <p className="text-zinc-500 text-sm mb-6">{lang === "es" ? "Excelente para aplicaciones individuales e investigación personal." : "Great for individual apps and personal research."}</p>
+                      <div className="flex items-baseline gap-1 mb-8">
+                        <span className="text-4xl font-black text-black font-mono">$0</span>
+                        <span className="text-zinc-500 text-sm">/ {lang === "es" ? "mes" : "month"}</span>
+                      </div>
+                      <ul className="space-y-4 border-t border-zinc-100 pt-6">
+                        <li className="flex items-center gap-3 text-sm text-zinc-700">
+                          <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{lang === "es" ? "1 Millón de puntos de datos / mes" : "1 Million data points / mo"}</span>
+                        </li>
+                        <li className="flex items-center gap-3 text-sm text-zinc-700">
+                          <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{lang === "es" ? "Retención de logs de 3 días" : "3 Day log retention"}</span>
+                        </li>
+                        <li className="flex items-center gap-3 text-sm text-zinc-700">
+                          <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{lang === "es" ? "1 Aplicación conectada" : "1 Connected application"}</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <button className="mt-8 w-full py-3 px-4 bg-zinc-50 hover:bg-zinc-100 text-black border border-zinc-200 rounded-lg text-sm font-semibold transition-colors duration-200 cursor-pointer">
+                      {lang === "es" ? "Desplegar Clúster Gratis" : "Deploy Free Cluster"}
+                    </button>
+                  </div>
+
+                  {/* Pricing 2 */}
+                  <div className="border-2 border-black bg-white rounded-2xl p-8 flex flex-col justify-between relative shadow-lg">
+                    <div className="absolute top-0 right-8 transform -translate-y-1/2 bg-brand-green text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                      {lang === "es" ? "Popular" : "Popular"}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-black mb-2">{lang === "es" ? "Escala" : "Scale"}</h3>
+                      <p className="text-zinc-500 text-sm mb-6">{lang === "es" ? "Diseñado para cargas de trabajo en expansión y equipos pequeños." : "Designed for expanding workloads and small teams."}</p>
+                      <div className="flex items-baseline gap-1 mb-8">
+                        <span className="text-4xl font-black text-black font-mono">$49</span>
+                        <span className="text-zinc-500 text-sm">/ {lang === "es" ? "mes" : "month"}</span>
+                      </div>
+                      <ul className="space-y-4 border-t border-zinc-100 pt-6">
+                        <li className="flex items-center gap-3 text-sm text-zinc-700">
+                          <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{lang === "es" ? "50 Millones de puntos de datos / mes" : "50 Million data points / mo"}</span>
+                        </li>
+                        <li className="flex items-center gap-3 text-sm text-zinc-700">
+                          <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{lang === "es" ? "Retención de logs de 30 días" : "30 Day log retention"}</span>
+                        </li>
+                        <li className="flex items-center gap-3 text-sm text-zinc-700">
+                          <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{lang === "es" ? "10 Aplicaciones conectadas" : "10 Connected applications"}</span>
+                        </li>
+                        <li className="flex items-center gap-3 text-sm text-zinc-700">
+                          <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{lang === "es" ? "Alertas en Slack y Webhooks" : "Slack & Webhook alerting"}</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <button className="mt-8 w-full py-3 px-4 bg-brand-blue hover:bg-brand-blue-dark text-white rounded-lg text-sm font-semibold transition-colors duration-200 shadow-md cursor-pointer">
+                      {lang === "es" ? "Comenzar" : "Get Started"}
+                    </button>
+                  </div>
+
+                  {/* Pricing 3 */}
+                  <div className="border border-zinc-200 bg-white rounded-2xl p-8 flex flex-col justify-between hover:shadow-md transition-shadow">
+                    <div>
+                      <h3 className="text-lg font-bold text-black mb-2">{lang === "es" ? "Empresarial" : "Enterprise"}</h3>
+                      <p className="text-zinc-500 text-sm mb-6">{lang === "es" ? "Adaptado para entornos complejos que necesitan SLA personalizado." : "Tailored for complex environments needing custom SLA."}</p>
+                      <div className="flex items-baseline gap-1 mb-8">
+                        <span className="text-4xl font-black text-black font-mono">{lang === "es" ? "Personalizado" : "Custom"}</span>
+                      </div>
+                      <ul className="space-y-4 border-t border-zinc-100 pt-6">
+                        <li className="flex items-center gap-3 text-sm text-zinc-700">
+                          <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{lang === "es" ? "Ingesta de datos ilimitada" : "Unlimited data ingestion"}</span>
+                        </li>
+                        <li className="flex items-center gap-3 text-sm text-zinc-700">
+                          <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{lang === "es" ? "Esquema de retención de logs a medida" : "Custom log retention schema"}</span>
+                        </li>
+                        <li className="flex items-center gap-3 text-sm text-zinc-700">
+                          <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{lang === "es" ? "Clúster de consultas dedicado" : "Dedicated query cluster"}</span>
+                        </li>
+                        <li className="flex items-center gap-3 text-sm text-zinc-700">
+                          <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{lang === "es" ? "Soporte 24/7 por teléfono y Slack" : "24/7 Phone & Slack support"}</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <button className="mt-8 w-full py-3 px-4 bg-black hover:bg-zinc-800 text-white rounded-lg text-sm font-semibold transition-colors duration-200 cursor-pointer">
+                      {lang === "es" ? "Hablar con Ventas" : "Talk to Sales"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </>
+        )}
+
+        {/* ================= SERVICIOS ================= */}
+        {activePage === "servicios" && (
+          <section className="py-16 md:py-24 bg-white border-b border-zinc-100">
+            <div className="max-w-7xl mx-auto px-6">
+              <div className="text-center max-w-3xl mx-auto mb-20">
+                <span className="text-xs font-bold uppercase tracking-widest text-brand-blue bg-brand-blue/5 border border-brand-blue/10 px-3.5 py-1.5 rounded-full mb-4 inline-block">
+                  {lang === "es" ? "Soluciones de Ingeniería" : "Engineering Solutions"}
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-black mt-3 leading-tight">
+                  {lang === "es" ? "Servicios Tecnológicos de Alto Rendimiento" : "High-Performance Tech Services"}
+                </h2>
+                <p className="text-zinc-650 mt-4 text-base md:text-lg leading-relaxed">
+                  {lang === "es" 
+                    ? "Diseñamos aplicaciones web, arquitecturas analíticas y sistemas de soporte inteligente que aceleran y aseguran la operación digital de su negocio." 
+                    : "We engineer customized web applications, data analytics layers, and smart AI agents designed to secure and accelerate your business operations."}
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {/* Service 1: Premium Web Development */}
+                <div className="border border-zinc-200 bg-zinc-50/20 rounded-2xl p-8 hover:border-brand-blue transition-all duration-300 group hover:shadow-lg flex flex-col justify-between">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue mb-6 group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Desarrollo Web Premium" : "Premium Web Development"}</h3>
+                    <p className="text-zinc-600 leading-relaxed text-sm">
+                      {lang === "es" 
+                        ? "Aplicaciones a medida desarrolladas con Next.js y React. Entregamos plataformas rápidas, seguras, completamente adaptativas y listas para conectarse a sus bases de datos en tiempo real." 
+                        : "Custom applications built with Next.js and React. We deliver blazing-fast, secure, fully responsive platforms connected to live transactional operations."}
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-brand-blue mt-6 block uppercase tracking-wider">React • Next.js • SSR</span>
+                </div>
+
+                {/* Service 2: SEO */}
+                <div className="border border-zinc-200 bg-zinc-50/20 rounded-2xl p-8 hover:border-brand-green transition-all duration-300 group hover:shadow-lg flex flex-col justify-between">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green mb-6 group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Posicionamiento SEO" : "SEO Optimization"}</h3>
+                    <p className="text-zinc-600 leading-relaxed text-sm">
+                      {lang === "es" 
+                        ? "Optimización avanzada para buscadores tradicionales. Estructura semántica, velocidad de carga óptima en móviles, indexación limpia de URLs y estructuración de meta tags para mejorar el alcance orgánico de su negocio." 
+                        : "Advanced index tuning for search engines. Semantic code design, fast mobile load speeds, clean URL maps, and optimized meta configurations to lift your brand’s organic reach."}
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-brand-green mt-6 block uppercase tracking-wider">Semantic HTML • Speed • Crawlability</span>
+                </div>
+
+                {/* Service 3: GEO */}
+                <div className="border border-zinc-200 bg-zinc-50/20 rounded-2xl p-8 hover:border-black transition-all duration-300 group hover:shadow-lg flex flex-col justify-between">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center text-black mb-6 group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Optimización GEO (Generative Engine Optimization)" : "Generative Engine Optimization (GEO)"}</h3>
+                    <p className="text-zinc-600 leading-relaxed text-sm">
+                      {lang === "es" 
+                        ? "El SEO del futuro. Preparamos sus datos, artículos y documentación web para ser correctamente citados y leídos por motores de búsqueda de IA como ChatGPT Search, Gemini y Perplexity, aumentando su relevancia en IA." 
+                        : "SEO built for the AI era. We format, schema, and reference your business databases so large AI systems (Gemini, Perplexity, ChatGPT) extract and display your brand as the primary reference."}
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-black mt-6 block uppercase tracking-wider">AI Engines • LLM Citations • Schema</span>
+                </div>
+
+                {/* Service 4: CRM */}
+                <div className="border border-zinc-200 bg-zinc-50/20 rounded-2xl p-8 hover:border-brand-blue transition-all duration-300 group hover:shadow-lg flex flex-col justify-between">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue mb-6 group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 005.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Sistemas CRM" : "CRM System Integrations"}</h3>
+                    <p className="text-zinc-600 leading-relaxed text-sm">
+                      {lang === "es" 
+                        ? "Conectamos formularios, reservas e historiales de clientes directamente en bases de datos PostgreSQL o ClickHouse, accesibles desde un panel administrativo privado para optimizar su embudo comercial." 
+                        : "Centralize customer forms, scheduler slots, and support history directly into optimized databases, queryable from your custom secure operations panel."}
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-brand-blue mt-6 block uppercase tracking-wider">PostgreSQL • Admin Panel • Pipelines</span>
+                </div>
+
+                {/* Service 5: AI Chatbot */}
+                <div className="border border-zinc-200 bg-zinc-50/20 rounded-2xl p-8 hover:border-brand-green transition-all duration-300 group hover:shadow-lg flex flex-col justify-between">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green mb-6 group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Chatbot de IA 24/7" : "24/7 Custom AI Chatbot"}</h3>
+                    <p className="text-zinc-600 leading-relaxed text-sm">
+                      {lang === "es" 
+                        ? "Un asistente de inteligencia artificial entrenado con los datos de su empresa (PDFs, manuales, catálogos) para contestar al instante cualquier consulta técnica o comercial, integrado de manera local." 
+                        : "Deploy dynamic chat agents trained on your documentation, operating hours, and service booklets, resolving support tickets instantly 24 hours a day."}
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-brand-green mt-6 block uppercase tracking-wider">RAG Systems • Local GPU Inference • vLLM</span>
+                </div>
+
+                {/* Service 6: Booking System */}
+                <div className="border border-zinc-200 bg-zinc-50/20 rounded-2xl p-8 hover:border-black transition-all duration-300 group hover:shadow-lg flex flex-col justify-between">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center text-black mb-6 group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Sistema de Reservas y Contacto" : "Contact & Booking Scheduler"}</h3>
+                    <p className="text-zinc-600 leading-relaxed text-sm">
+                      {lang === "es" 
+                        ? "Agendador interactivo de reuniones y llamadas comerciales. Bloquea dinámicamente horas ocupadas, envía correos de confirmación y sincroniza eventos de forma segura con sus calendarios internos." 
+                        : "An interactive call scheduling platform. Disables fully booked days, synchronizes with email notifications, and streams scheduled calls directly to your support logs."}
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-black mt-6 block uppercase tracking-wider">Web Calendar • Dynamic Slots • Email API</span>
+                </div>
+              </div>
+
+              {/* services cta */}
+              <div className="mt-20 border border-zinc-200 rounded-3xl p-12 text-center bg-zinc-50/50 max-w-4xl mx-auto shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-brand-blue/5 rounded-bl-full"></div>
+                <h3 className="text-2xl font-black text-black mb-3">{lang === "es" ? "¿Listo para escalar su infraestructura?" : "Ready to scale your digital workflow?"}</h3>
+                <p className="text-sm text-zinc-650 mb-8 max-w-xl mx-auto">
+                  {lang === "es"
+                    ? "Hable con nuestros ingenieros para diseñar y cotizar un proyecto adaptado a las métricas y objetivos de su empresa."
+                    : "Schedule a session with our engineering founders to map out a technical implementation plan for your site."}
+                </p>
+                <button
+                  onClick={() => setActivePage("contacto")}
+                  className="inline-flex items-center justify-center px-8 h-12 text-sm font-bold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 cursor-pointer shadow-md"
+                >
+                  {lang === "es" ? "Programar Consulta" : "Book Consultation Now"}
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ================= TECNOLOGÍA ================= */}
+        {activePage === "tecnologia" && (
+          <section className="py-16 md:py-24 bg-white border-b border-zinc-100">
+            <div className="max-w-7xl mx-auto px-6">
+              <div className="text-center max-w-3xl mx-auto mb-16">
+                <span className="text-xs font-bold uppercase tracking-widest text-brand-green bg-brand-green/5 border border-brand-green/10 px-3.5 py-1.5 rounded-full mb-4 inline-block">
+                  {lang === "es" ? "Soberanía de Datos" : "Data Sovereignty"}
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-black mt-3 leading-tight">
+                  {lang === "es" ? "Infraestructura Bare-Metal Local" : "Local Bare-Metal Infrastructure"}
+                </h2>
+                <p className="text-zinc-650 mt-4 text-base md:text-lg leading-relaxed">
+                  {lang === "es"
+                    ? "Alojamientos físicos propios. Bases de datos, código web y motores de inteligencia artificial se ejecutan localmente sin depender de la nube pública."
+                    : "Physical servers under our control. Your web applications, database instances, and AI logic execute inside local hardware racks."}
+                </p>
+              </div>
+
+              {/* High-tech server representation */}
+              <div className="my-16">
+                <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden font-mono max-w-4xl mx-auto">
+                  {/* Front plate of the server */}
+                  <div className="flex items-center justify-between border-b border-zinc-850 pb-4 mb-6">
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full bg-brand-green animate-pulse"></span>
+                      <span className="text-zinc-400 text-xs uppercase tracking-wider font-bold">Node-01 // Bare-Metal Online</span>
+                    </div>
+                    <span className="text-zinc-500 text-xs font-bold">AMD EPYC + NVIDIA H100 Inf.</span>
+                  </div>
+                  
+                  {/* Server drive bays */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="border border-zinc-850 bg-zinc-900/50 rounded-xl p-5 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-zinc-400 text-sm font-black">CPU Compute</span>
+                        <span className="text-brand-blue font-bold text-xs uppercase">AMD EPYC Architecture</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                        <div className="bg-brand-blue h-full w-[38%] rounded-full animate-pulse"></div>
+                      </div>
+                      <p className="text-[11px] text-zinc-550 font-sans leading-relaxed">
+                        {lang === "es"
+                          ? "Servidores multiprocesador de alto conteo de núcleos para la base de datos relacional ClickHouse y almacenamiento local PostgreSQL, garantizando latencias ultra bajas."
+                          : "Multi-processor high core-count servers hosting ClickHouse analytics and PostgreSQL local storage, delivering ultra-low transactional latency."}
+                      </p>
+                    </div>
+                    
+                    <div className="border border-zinc-850 bg-zinc-900/50 rounded-xl p-5 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-zinc-400 text-sm font-black">AI Acceleration</span>
+                        <span className="text-brand-green font-bold text-xs uppercase">NVIDIA Tensor Cores</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                        <div className="bg-brand-green h-full w-[54%] rounded-full animate-pulse"></div>
+                      </div>
+                      <p className="text-[11px] text-zinc-555 font-sans leading-relaxed">
+                        {lang === "es"
+                          ? "Aceleración de hardware local para inferencia con modelos vLLM. Sus datos nunca salen de nuestra infraestructura física."
+                          : "Local hardware acceleration for inference with vLLM models. Your corporate data never leaves our physical infrastructure boundaries."}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* LED Lights panel representation */}
+                  <div className="mt-8 pt-4 border-t border-zinc-800/80 flex items-center justify-between text-[10px] text-zinc-555">
+                    <div className="flex gap-4">
+                      <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-brand-green"></span> FAN 1 OK</span>
+                      <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-brand-green"></span> FAN 2 OK</span>
+                      <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-brand-blue animate-pulse"></span> DB SYNC</span>
+                      <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-brand-green"></span> TEMP 34°C</span>
+                    </div>
+                    <span className="hidden sm:inline">SPP-OS v4.11.2</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Technological Stack details */}
+              <div className="mt-20">
+                <div className="text-center max-w-2xl mx-auto mb-12">
+                  <h3 className="text-2xl font-bold text-black">{lang === "es" ? "Nuestro Stack de Desarrollo" : "Our Technology Stack"}</h3>
+                  <p className="text-zinc-650 text-sm mt-2">{lang === "es" ? "Tecnologías optimizadas para velocidad analítica y procesamiento de datos." : "An architecture optimized for analytics performance and vector queries."}</p>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {/* Tech 1: Next.js */}
+                  <div className="border border-zinc-200 rounded-xl p-6 hover:shadow-md transition-shadow bg-zinc-50/30">
+                    <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">Frontend</span>
+                    <h4 className="text-base font-bold text-black mt-2">Next.js</h4>
+                    <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                      {lang === "es" ? "Renderizado híbrido en servidor para cargas ultra-rápidas." : "Hybrid server-side rendering for instant page speed."}
+                    </p>
+                  </div>
+
+                  {/* Tech 2: Tailwind */}
+                  <div className="border border-zinc-200 rounded-xl p-6 hover:shadow-md transition-shadow bg-zinc-50/30">
+                    <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">Styling</span>
+                    <h4 className="text-base font-bold text-black mt-2">Tailwind CSS</h4>
+                    <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                      {lang === "es" ? "Clases utilitarias eficientes para estilos limpios y compactos." : "Utility css classes supporting fast style builds."}
+                    </p>
+                  </div>
+
+                  {/* Tech 3: PostgreSQL */}
+                  <div className="border border-zinc-200 rounded-xl p-6 hover:shadow-md transition-shadow bg-zinc-50/30">
+                    <span className="text-xs font-bold text-brand-green uppercase tracking-wider">Database</span>
+                    <h4 className="text-base font-bold text-black mt-2">PostgreSQL</h4>
+                    <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                      {lang === "es" ? "Base de datos ACID para configuraciones y registros transaccionales." : "ACID primary storage for user and settings tables."}
+                    </p>
+                  </div>
+
+                  {/* Tech 4: ClickHouse */}
+                  <div className="border border-zinc-200 rounded-xl p-6 hover:shadow-md transition-shadow bg-zinc-50/30">
+                    <span className="text-xs font-bold text-brand-green uppercase tracking-wider">Analytics</span>
+                    <h4 className="text-base font-bold text-black mt-2">ClickHouse DB</h4>
+                    <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                      {lang === "es" ? "Base columnar para ingesta y análisis de tráfico en milisegundos." : "Columnar database ingestion for millisecond traffic logs."}
+                    </p>
+                  </div>
+
+                  {/* Tech 5: vLLM */}
+                  <div className="border border-zinc-200 rounded-xl p-6 hover:shadow-md transition-shadow bg-zinc-50/30">
+                    <span className="text-xs font-bold text-purple-600 uppercase tracking-wider">AI Inference</span>
+                    <h4 className="text-base font-bold text-black mt-2">vLLM Engine</h4>
+                    <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                      {lang === "es" ? "Servidor de modelos LLM local de altísimo rendimiento." : "High-throughput local LLM execution runtime."}
+                    </p>
+                  </div>
+
+                  {/* Tech 6: Qdrant */}
+                  <div className="border border-zinc-200 rounded-xl p-6 hover:shadow-md transition-shadow bg-zinc-50/30">
+                    <span className="text-xs font-bold text-purple-600 uppercase tracking-wider">Vector DB</span>
+                    <h4 className="text-base font-bold text-black mt-2">Qdrant</h4>
+                    <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                      {lang === "es" ? "Base de vectores rápida para los sistemas de búsqueda semántica RAG." : "Vector storage providing context maps for support RAG."}
+                    </p>
+                  </div>
+
+                  {/* Tech 7: HuggingFace */}
+                  <div className="border border-zinc-200 rounded-xl p-6 hover:shadow-md transition-shadow bg-zinc-50/30">
+                    <span className="text-xs font-bold text-purple-600 uppercase tracking-wider">Models</span>
+                    <h4 className="text-base font-bold text-black mt-2">Hugging Face</h4>
+                    <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                      {lang === "es" ? "Acceso local a los pesos de modelos lingüísticos abiertos." : "Local pipeline access to open language model weights."}
+                    </p>
+                  </div>
+
+                  {/* Tech 8: LangChain */}
+                  <div className="border border-zinc-200 rounded-xl p-6 hover:shadow-md transition-shadow bg-zinc-50/30">
+                    <span className="text-xs font-bold text-purple-600 uppercase tracking-wider">Agents</span>
+                    <h4 className="text-base font-bold text-black mt-2">LangChain</h4>
+                    <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                      {lang === "es" ? "Orquestación de llamadas y recuperación de documentos RAG." : "SDK orchestration layer for chatbot RAG calls."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ================= NOSOTROS ================= */}
+        {activePage === "nosotros" && (
+          <section className="py-16 md:py-24 bg-white border-b border-zinc-100">
+            <div className="max-w-7xl mx-auto px-6">
+              
+              {/* Section 1: About us */}
+              <div className="grid md:grid-cols-12 gap-12 items-center mb-24">
+                <div className="md:col-span-7 space-y-6">
+                  <span className="text-xs font-bold uppercase tracking-widest text-brand-blue bg-brand-blue/5 border border-brand-blue/10 px-3.5 py-1.5 rounded-full inline-block">
+                    {lang === "es" ? "Fundadores de SPP Labs" : "SPP Labs Founders"}
+                  </span>
+                  <h2 className="text-3xl sm:text-5xl font-black text-black tracking-tight leading-tight">
+                    {lang === "es" ? "Conozca a los Hermanos SPP" : "Meet the Hermanos SPP"}
+                  </h2>
+                  <p className="text-zinc-650 text-base md:text-lg leading-relaxed">
+                    {lang === "es"
+                      ? "SPP Labs es un laboratorio de ingeniería de software e infraestructura digital fundado por los hermanos SPP. Nos apasiona construir arquitecturas web ultra rápidas, alojar datos de forma segura en servidores bare-metal dedicados y diseñar inteligencias artificiales locales útiles para el día a día empresarial."
+                      : "SPP Labs is a hardware-integrated software development studio founded by the SPP brothers. Focused on data autonomy, we build hybrid web dashboards, set up local database nodes, and structure local AI chatbot pipelines."}
+                  </p>
+                  <p className="text-zinc-500 text-sm">
+                    {lang === "es"
+                      ? "Creemos firmemente en la descentralización del cómputo y en dar a las empresas el control absoluto de sus datos analíticos y modelos de lenguaje sin depender de servicios de terceros."
+                      : "We strongly advocate for computation sovereignty, giving businesses complete governance over their analytic events and model inferences without SaaS dependencies."}
+                  </p>
+                </div>
+
+                <div className="md:col-span-5 border border-zinc-200 rounded-3xl p-8 bg-zinc-50/50 shadow-md relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-brand-blue/5 rounded-bl-full"></div>
+                  <h3 className="text-lg font-bold text-black mb-4">{lang === "es" ? "Nuestros Pilares" : "Our Core Ethos"}</h3>
+                  <ul className="space-y-4">
+                    <li className="flex gap-3">
+                      <span className="w-5 h-5 rounded-full bg-brand-blue/10 text-brand-blue font-black flex items-center justify-center shrink-0 text-xs">✓</span>
+                      <div>
+                        <span className="text-sm font-bold text-black block">{lang === "es" ? "Velocidad Sub-Milisegundo" : "Sub-Millisecond Performance"}</span>
+                        <span className="text-xs text-zinc-500 block">{lang === "es" ? "Analíticas impulsadas por ClickHouse." : "Analytics powered directly by ClickHouse nodes."}</span>
+                      </div>
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="w-5 h-5 rounded-full bg-brand-green/10 text-brand-green font-black flex items-center justify-center shrink-0 text-xs">✓</span>
+                      <div>
+                        <span className="text-sm font-bold text-black block">{lang === "es" ? "Modelos de IA Locales" : "Local AI Architectures"}</span>
+                        <span className="text-xs text-zinc-500 block">{lang === "es" ? "Inferencia en GPUs propias." : "vLLM model hosting inside our server rack."}</span>
+                      </div>
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="w-5 h-5 rounded-full bg-zinc-200 text-black font-black flex items-center justify-center shrink-0 text-xs">✓</span>
+                      <div>
+                        <span className="text-sm font-bold text-black block">{lang === "es" ? "Soberanía Hardware" : "In-House Server Nodes"}</span>
+                        <span className="text-xs text-zinc-500 block">{lang === "es" ? "Sin silos de nubes externas." : "Completely free from external SaaS clouds."}</span>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Section 2: Casos de éxito */}
+              <div className="border-t border-zinc-150 pt-20 mb-24">
+                <div className="text-center max-w-2xl mx-auto mb-16">
+                  <span className="text-xs font-bold uppercase tracking-widest text-brand-green bg-brand-green/5 border border-brand-green/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
+                    {lang === "es" ? "Testimonios" : "Client Success Stories"}
+                  </span>
+                  <h3 className="text-2xl sm:text-4xl font-black text-black">{lang === "es" ? "Casos de Éxito y Reseñas" : "Reviews & Client Feedback"}</h3>
+                  <p className="text-zinc-500 text-sm mt-2">{lang === "es" ? "Lo que opinan las empresas que han migrado su infraestructura a SPP Labs." : "Feedback from organizations that run their dashboards on SPP Labs."}</p>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-8">
+                  {/* Review 1 */}
+                  <div className="border border-zinc-200 bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+                    <div className="flex text-amber-500 gap-1 mb-4">
+                      <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <p className="text-zinc-650 text-xs leading-relaxed italic mb-6">
+                      {lang === "es"
+                        ? "\"Nuestras consultas de analítica web tardaban hasta 4 segundos con el proveedor anterior. Tras migrar la base de datos a ClickHouse con SPP Labs, los informes cargan al instante en 14ms. Un cambio radical.\""
+                        : "\"Web analytics queries took over 4 seconds with our old dashboard. After switching to ClickHouse with SPP Labs, records render in 14ms. Our dashboard efficiency went through the roof.\""}
+                    </p>
+                    <div className="border-t border-zinc-100 pt-4 flex items-center justify-between">
+                      <span className="text-xs font-bold text-black">Carlos Mendoza</span>
+                      <span className="text-[10px] text-zinc-400 font-mono">CTO, Logística Express</span>
+                    </div>
+                  </div>
+
+                  {/* Review 2 */}
+                  <div className="border border-zinc-200 bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+                    <div className="flex text-amber-500 gap-1 mb-4">
+                      <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <p className="text-zinc-650 text-xs leading-relaxed italic mb-6">
+                      {lang === "es"
+                        ? "\"El chatbot de IA configurado de forma local resuelve el 75% de las dudas habituales de soporte sobre envíos y tarifas. Ahorramos decenas de horas semanales y las respuestas son ultra-rápidas.\""
+                        : "\"The custom AI chatbot resolving tickets from our data documents handles 75% of routine questions. Saving hours of human support and giving clients instant answers.\""}
+                    </p>
+                    <div className="border-t border-zinc-100 pt-4 flex items-center justify-between">
+                      <span className="text-xs font-bold text-black">Marta G.</span>
+                      <span className="text-[10px] text-zinc-400 font-mono">COO, E-Commerce Soluciones</span>
+                    </div>
+                  </div>
+
+                  {/* Review 3 */}
+                  <div className="border border-zinc-200 bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+                    <div className="flex text-amber-500 gap-1 mb-4">
+                      <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <p className="text-zinc-650 text-xs leading-relaxed italic mb-6">
+                      {lang === "es"
+                        ? "\"Hacer optimización de motores de búsqueda y de motores de IA (GEO) nos posicionó de primeros en las búsquedas sugeridas de ChatGPT y Gemini en nuestro sector. Las ventas orgánicas subieron un 35%.\""
+                        : "\"Implementing generative engine optimization (GEO) alongside SEO put our store on top of recommended vendors by Gemini and ChatGPT Search. Direct sales increased by 35%.\""}
+                    </p>
+                    <div className="border-t border-zinc-100 pt-4 flex items-center justify-between">
+                      <span className="text-xs font-bold text-black">Daniel Santos</span>
+                      <span className="text-[10px] text-zinc-400 font-mono">Founder, Clinica Dental Sol</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Comunidad */}
+              <div className="border-t border-zinc-150 pt-20">
+                <div className="bg-gradient-to-r from-zinc-950 to-zinc-900 border border-zinc-800 rounded-3xl p-12 text-center text-white relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/10 rounded-bl-full"></div>
+                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand-blue/10 rounded-tr-full"></div>
+
+                  <span className="text-xs font-bold text-brand-green uppercase tracking-wider block mb-4">
+                    {lang === "es" ? "Únase a Nosotros" : "Join Our Networks"}
+                  </span>
+                  
+                  <div className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-white to-brand-green font-mono tracking-tight mb-4">
+                    30,000+
+                  </div>
+                  
+                  <h4 className="text-xl font-bold mb-4">
+                    {lang === "es" ? "Miembros Activos en Redes Sociales" : "Active Community Members"}
+                  </h4>
+                  
+                  <p className="text-zinc-400 max-w-xl mx-auto text-sm leading-relaxed mb-8">
+                    {lang === "es"
+                      ? "Nuestros canales de desarrollo, GitHub repos e infraestructura libre agrupan a más de 30,000 ingenieros e interesados. ¡Hablemos de código, servidores e IA!"
+                      : "Our open source developer circles, code repos, and community chats connect more than 30,000 builders. Connect with us to talk hardware optimization, clickhouse, and LLMs."}
+                  </p>
+
+                  <div className="flex flex-wrap justify-center gap-4 text-xs font-bold">
+                    <a href="#" className="px-6 py-3 bg-zinc-800 hover:bg-zinc-750 text-white rounded-xl transition-all flex items-center gap-2 border border-zinc-700">
+                      GitHub
+                    </a>
+                    <a href="#" className="px-6 py-3 bg-brand-blue hover:bg-brand-blue-dark text-white rounded-xl transition-all flex items-center gap-2">
+                      Discord
+                    </a>
+                    <a href="#" className="px-6 py-3 bg-zinc-900 hover:bg-black text-white rounded-xl transition-all flex items-center gap-2 border border-zinc-800">
+                      Twitter / X
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+        )}
+
+        {/* ================= CONTACTO ================= */}
+        {activePage === "contacto" && (
+          <section id="contact-bookings" className="py-16 md:py-24 bg-white border-b border-zinc-100">
+            <div className="max-w-7xl mx-auto px-6">
+              
+              <div className="text-center max-w-2xl mx-auto mb-16">
+                <span className="text-xs font-bold uppercase tracking-widest text-brand-blue bg-brand-blue/5 border border-brand-blue/10 px-3.5 py-1.5 rounded-full mb-4 inline-block">
+                  {lang === "es" ? "Contacto Directo" : "Contact Center"}
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-black mt-2 leading-tight">
+                  {lang === "es" ? "Agende su Cita o Envíenos un Mensaje" : "Request a Meeting or Message Us"}
+                </h2>
+                <p className="text-zinc-650 mt-4 text-sm leading-relaxed">
+                  {lang === "es"
+                    ? "Seleccione una fecha disponible para una videollamada de consultoría, o escríbanos sus requerimientos técnicos directamente."
+                    : "Pick a consultation date using our database scheduler below, or write your system integration inquiries to our team."}
+                </p>
+              </div>
+
+              <div className="grid lg:grid-cols-12 gap-12 items-start">
+                
+                {/* Left Column: Contact details + Booking calendar */}
+                <div className="lg:col-span-7 space-y-8">
+                  
+                  {/* Fake Contact Information card */}
+                  <div className="bg-zinc-50 border border-zinc-200 rounded-3xl p-8 shadow-sm">
+                    <h3 className="text-lg font-bold text-black mb-6">{lang === "es" ? "Detalles de Contacto" : "Contact Details"}</h3>
+                    <div className="grid sm:grid-cols-2 gap-6 text-sm">
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 block">{lang === "es" ? "Teléfono" : "Phone"}</span>
+                        <a href="tel:+34910000000" className="text-zinc-800 hover:text-brand-blue font-bold font-mono transition-colors block">+34 910 000 000</a>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 block">{lang === "es" ? "Correo Electrónico" : "Email"}</span>
+                        <a href="mailto:info@spplabs.es" className="text-zinc-800 hover:text-brand-blue font-bold font-mono transition-colors block">info@spplabs.es</a>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 block">{lang === "es" ? "Dirección" : "Office"}</span>
+                        <span className="text-zinc-700 font-bold block">Calle Gran Vía 12, 28013 Madrid, España</span>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 block">{lang === "es" ? "Horario" : "Working Hours"}</span>
+                        <span className="text-zinc-700 font-bold block">{lang === "es" ? "Lunes - Viernes: 09:00 - 18:00" : "Monday - Friday: 09:00 - 18:00"}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Calendar component */}
+                  <div className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-brand-green/5 rounded-bl-full pointer-events-none"></div>
+                    <div>
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
                         </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                        <h3 className="text-lg font-bold text-black">{lang === "es" ? "Programar Consulta" : "Schedule Consultation"}</h3>
+                      </div>
 
-              {/* Metric Graph Render Display */}
-              <div className="lg:col-span-7 border border-zinc-200 bg-white rounded-2xl p-6 shadow-lg">
-                <div className="flex items-center justify-between border-b border-zinc-100 pb-4 mb-8">
-                  <div className="flex items-center gap-4">
-                    <span className={`w-2.5 h-2.5 rounded-full ${
-                      activeTab === "throughput" ? "bg-brand-blue" : activeTab === "cpu" ? "bg-brand-green" : "bg-black"
-                    } animate-pulse`}></span>
-                    <span className="font-bold text-sm text-black">
-                      {metrics[activeTab].title} {lang === "es" ? "en Vivo" : "Live Monitor"}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 bg-zinc-50 px-3 py-1.5 rounded-md border border-zinc-150">
-                    <span>Source: US-East-1</span>
-                  </div>
-                </div>
+                      {bookingResult && (
+                        <div className={`p-4 rounded-xl text-sm mb-6 ${
+                          bookingResult.success ? "bg-emerald-50 border border-emerald-200 text-emerald-800" : "bg-red-50 border border-red-200 text-red-800"
+                        }`}>
+                          {bookingResult.message}
+                        </div>
+                      )}
 
-                <div className="mb-6">
-                  <div className="text-3xl font-black tracking-tight text-black font-mono">
-                    {metrics[activeTab].value}
-                  </div>
-                  <div className="text-xs text-zinc-500 mt-1">
-                    {lang === "es" ? "Telemetría actualizada hace 2 segundos" : "Telemetry updated 2 seconds ago"}
-                  </div>
-                </div>
+                      <form onSubmit={handleBookingSubmit} className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Nombre" : "Name"}</label>
+                          <input
+                            type="text"
+                            required
+                            value={bookingName}
+                            onChange={(e) => setBookingName(e.target.value)}
+                            placeholder="Jane Smith"
+                            className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
+                          />
+                        </div>
 
-                <div className="bg-zinc-50 border border-zinc-100 rounded-xl p-4">
-                  {metrics[activeTab].svgPath}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Correo Electrónico" : "Email"}</label>
+                            <input
+                              type="email"
+                              required
+                              value={bookingEmail}
+                              onChange={(e) => setBookingEmail(e.target.value)}
+                              placeholder="jane@example.com"
+                              className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Teléfono" : "Phone"}  </label>
+                            <input
+                              type="text"
+                              required
+                              value={bookingPhone}
+                              onChange={(e) => setBookingPhone(e.target.value)}
+                              placeholder="+34 611 111 111"
+                              className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
+                            />
+                          </div>
+                        </div>
 
-        {/* Simple Pricing Section */}
-        <section id="pricing" className="py-24 bg-white border-b border-zinc-100 scroll-mt-20">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center max-w-2xl mx-auto mb-20">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-brand-green mb-4">{lang === "es" ? "Planes de Precios" : "Pricing Plans"}</h2>
-              <p className="text-3xl sm:text-4xl font-bold tracking-tight text-black">
-                {lang === "es" ? "Planes simples y transparentes creados para operaciones de telemetría." : "Simple, transparent tiers built for telemetry operations."}
-              </p>
-            </div>
+                        {/* Interactive Calendar Component */}
+                        <div className="border border-zinc-200 rounded-2xl p-4 bg-zinc-50 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-zinc-700 uppercase tracking-wider">
+                              {lang === "es" ? "Seleccione Fecha y Hora" : "Select Date & Time"}
+                            </span>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const prev = new Date(currentMonth);
+                                  prev.setMonth(prev.getMonth() - 1);
+                                  setCurrentMonth(prev);
+                                }}
+                                className="p-1.5 hover:bg-zinc-200 text-zinc-600 rounded-lg transition-all cursor-pointer"
+                              >
+                                ‹
+                              </button>
+                              <span className="text-xs font-bold text-zinc-850">
+                                {currentMonth.toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { month: "long", year: "numeric" })}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const next = new Date(currentMonth);
+                                  next.setMonth(next.getMonth() + 1);
+                                  setCurrentMonth(next);
+                                }}
+                                className="p-1.5 hover:bg-zinc-200 text-zinc-600 rounded-lg transition-all cursor-pointer"
+                              >
+                                ›
+                              </button>
+                            </div>
+                          </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              {/* Pricing 1 */}
-              <div className="border border-zinc-200 bg-white rounded-2xl p-8 flex flex-col justify-between hover:shadow-md transition-shadow">
-                <div>
-                  <h3 className="text-lg font-bold text-black mb-2">{lang === "es" ? "Desarrollador" : "Developer"}</h3>
-                  <p className="text-zinc-500 text-sm mb-6">{lang === "es" ? "Excelente para aplicaciones individuales e investigación personal." : "Great for individual apps and personal research."}</p>
-                  <div className="flex items-baseline gap-1 mb-8">
-                    <span className="text-4xl font-black text-black font-mono">$0</span>
-                    <span className="text-zinc-500 text-sm">/ {lang === "es" ? "mes" : "month"}</span>
-                  </div>
-                  <ul className="space-y-4 border-t border-zinc-100 pt-6">
-                    <li className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "1 Millón de puntos de datos / mes" : "1 Million data points / mo"}</span>
-                    </li>
-                    <li className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "Retención de logs de 3 días" : "3 Day log retention"}</span>
-                    </li>
-                    <li className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "1 Aplicación conectada" : "1 Connected application"}</span>
-                    </li>
-                  </ul>
-                </div>
-                <button className="mt-8 w-full py-3 px-4 bg-zinc-50 hover:bg-zinc-100 text-black border border-zinc-200 rounded-lg text-sm font-semibold transition-colors duration-200">
-                  {lang === "es" ? "Desplegar Clúster Gratis" : "Deploy Free Cluster"}
-                </button>
-              </div>
+                          {/* Day Grid Header */}
+                          <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-zinc-400 uppercase">
+                            {lang === "es" ? (
+                              <><div>Do</div><div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sa</div></>
+                            ) : (
+                              <><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></>
+                            )}
+                          </div>
+                          
+                          {/* Days Grid */}
+                          <div className="grid grid-cols-7 gap-1">
+                            {renderCalendarDays()}
+                          </div>
 
-              {/* Pricing 2 */}
-              <div className="border-2 border-black bg-white rounded-2xl p-8 flex flex-col justify-between relative shadow-lg">
-                <div className="absolute top-0 right-8 transform -translate-y-1/2 bg-brand-green text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  {lang === "es" ? "Popular" : "Popular"}
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-black mb-2">{lang === "es" ? "Escala" : "Scale"}</h3>
-                  <p className="text-zinc-500 text-sm mb-6">{lang === "es" ? "Diseñado para cargas de trabajo en expansión y equipos pequeños." : "Designed for expanding workloads and small teams."}</p>
-                  <div className="flex items-baseline gap-1 mb-8">
-                    <span className="text-4xl font-black text-black font-mono">$49</span>
-                    <span className="text-zinc-500 text-sm">/ {lang === "es" ? "mes" : "month"}</span>
-                  </div>
-                  <ul className="space-y-4 border-t border-zinc-100 pt-6">
-                    <li className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "50 Millones de puntos de datos / mes" : "50 Million data points / mo"}</span>
-                    </li>
-                    <li className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "Retención de logs de 30 días" : "30 Day log retention"}</span>
-                    </li>
-                    <li className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "10 Aplicaciones conectadas" : "10 Connected applications"}</span>
-                    </li>
-                    <li className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "Alertas en Slack y Webhooks" : "Slack & Webhook alerting"}</span>
-                    </li>
-                  </ul>
-                </div>
-                <button className="mt-8 w-full py-3 px-4 bg-brand-blue hover:bg-brand-blue-dark text-white rounded-lg text-sm font-semibold transition-colors duration-200 shadow-md">
-                  {lang === "es" ? "Comenzar" : "Get Started"}
-                </button>
-              </div>
+                          {/* Hourly slots grid */}
+                          {bookingDate ? (
+                            <div className="space-y-2.5 pt-2 border-t border-zinc-200/60">
+                              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
+                                {lang === "es" ? "Horas disponibles para" : "Slots for"} {new Date(bookingDate).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { weekday: "short", month: "short", day: "numeric" })}:
+                              </span>
+                              <div className="grid grid-cols-4 gap-1.5">
+                                {["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"].map((t) => {
+                                  const isOccupied = occupiedSlots.some((slot) => slot.date === bookingDate && slot.time === t);
+                                  return (
+                                    <button
+                                      key={t}
+                                      type="button"
+                                      disabled={isOccupied}
+                                      onClick={() => setBookingTime(t)}
+                                      className={`py-1.5 rounded-lg text-xs font-bold font-mono transition-all text-center border cursor-pointer ${
+                                        isOccupied
+                                          ? "bg-zinc-50 border-zinc-200 text-zinc-300 line-through cursor-not-allowed"
+                                          : bookingTime === t
+                                          ? "bg-brand-green border-brand-green text-white shadow-sm"
+                                          : "bg-white border-zinc-200 text-zinc-800 hover:border-brand-green hover:bg-brand-green/5"
+                                      }`}
+                                      title={isOccupied ? (lang === "es" ? "Ocupado" : "Occupied") : ""}
+                                    >
+                                      {t}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              <input type="hidden" name="booking_date" required value={bookingDate} />
+                              <input type="hidden" name="booking_time" required value={bookingTime} />
+                            </div>
+                          ) : (
+                            <p className="text-[10px] text-zinc-400 italic text-center pt-2 border-t border-zinc-200/60">
+                              {lang === "es" ? "Por favor, seleccione una fecha del calendario para ver las horas." : "Please select a date from the calendar to check hours."}
+                            </p>
+                          )}
+                        </div>
 
-              {/* Pricing 3 */}
-              <div className="border border-zinc-200 bg-white rounded-2xl p-8 flex flex-col justify-between hover:shadow-md transition-shadow">
-                <div>
-                  <h3 className="text-lg font-bold text-black mb-2">{lang === "es" ? "Empresarial" : "Enterprise"}</h3>
-                  <p className="text-zinc-500 text-sm mb-6">{lang === "es" ? "Adaptado para entornos complejos que necesitan SLA personalizado." : "Tailored for complex environments needing custom SLA."}</p>
-                  <div className="flex items-baseline gap-1 mb-8">
-                    <span className="text-4xl font-black text-black font-mono">{lang === "es" ? "Personalizado" : "Custom"}</span>
-                  </div>
-                  <ul className="space-y-4 border-t border-zinc-100 pt-6">
-                    <li className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "Ingesta de datos ilimitada" : "Unlimited data ingestion"}</span>
-                    </li>
-                    <li className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "Esquema de retención de logs a medida" : "Custom log retention schema"}</span>
-                    </li>
-                    <li className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "Clúster de consultas dedicado" : "Dedicated query cluster"}</span>
-                    </li>
-                    <li className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "Soporte 24/7 por teléfono y Slack" : "24/7 Phone & Slack support"}</span>
-                    </li>
-                  </ul>
-                </div>
-                <button className="mt-8 w-full py-3 px-4 bg-black hover:bg-zinc-800 text-white rounded-lg text-sm font-semibold transition-colors duration-200">
-                  {lang === "es" ? "Hablar con Ventas" : "Talk to Sales"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+                        <div>
+                          <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Consulta / Nota" : "Inquiry / Note"}</label>
+                          <input
+                            type="text"
+                            value={bookingMessage}
+                            onChange={(e) => setBookingMessage(e.target.value)}
+                            placeholder={lang === "es" ? "Tema de consulta (ej: SEO, consultoría frontend)" : "Inquiry focus (e.g., SEO, Frontend consulting)"}
+                            className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
+                          />
+                        </div>
 
-        {/* Contact & Bookings Section */}
-        <section id="contact-bookings" className="py-24 bg-zinc-50 border-y border-zinc-100 scroll-mt-20">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="text-xs font-bold uppercase tracking-widest text-brand-blue mb-4 block">{lang === "es" ? "Póngase en Contacto" : "Get in Touch"}</span>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black">
-                {lang === "es" ? "Conéctese con nuestro equipo o reserve una consulta" : "Connect with our team or book a consultation"}
-              </h2>
-              <p className="text-zinc-600 mt-4 text-sm leading-relaxed">
-                {lang === "es" ? "Envíe una consulta general o seleccione una fecha y hora convenientes para reservar una llamada de consultoría directamente en nuestra base de datos." : "Submit a general inquiry or select a convenient date and time to reserve a consulting call directly into our operations database."}
-              </p>
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-12 items-stretch">
-              
-              {/* Card 1: Contact Form */}
-              <div className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-20 h-20 bg-brand-blue/5 rounded-bl-full pointer-events-none"></div>
-                <div>
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
+                        <button
+                          type="submit"
+                          disabled={bookingLoading}
+                          className="w-full h-11 bg-black hover:bg-brand-green text-white rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow duration-200 cursor-pointer disabled:opacity-50 flex items-center justify-center"
+                        >
+                          {bookingLoading ? (
+                            <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                          ) : (
+                            lang === "es" ? "Solicitar Cita" : "Request Booking"
+                          )}
+                        </button>
+                      </form>
                     </div>
-                    <h3 className="text-lg font-bold text-black">{lang === "es" ? "Enviar un Mensaje" : "Send a Message"}</h3>
                   </div>
 
-                  {contactResult && (
-                    <div className={`p-4 rounded-xl text-sm mb-6 ${
-                      contactResult.success ? "bg-emerald-50 border border-emerald-200 text-emerald-800" : "bg-red-50 border border-red-200 text-red-800"
-                    }`}>
-                      {contactResult.message}
-                    </div>
-                  )}
+                </div>
 
-                  <form onSubmit={handleContactSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Name</label>
-                      <input
-                        type="text"
-                        required
-                        value={contactName}
-                        onChange={(e) => setContactName(e.target.value)}
-                        placeholder="John Doe"
-                        className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-blue focus:bg-white text-black transition-all"
-                      />
+                {/* Right Column: Contact Message Form */}
+                <div className="lg:col-span-5 bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-brand-blue/5 rounded-bl-full pointer-events-none"></div>
+                  <div>
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-10 h-10 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-bold text-black">{lang === "es" ? "Enviar un Mensaje" : "Send a Message"}</h3>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {contactResult && (
+                      <div className={`p-4 rounded-xl text-sm mb-6 ${
+                        contactResult.success ? "bg-emerald-50 border border-emerald-200 text-emerald-800" : "bg-red-50 border border-red-200 text-red-800"
+                      }`}>
+                        {contactResult.message}
+                      </div>
+                    )}
+
+                    <form onSubmit={handleContactSubmit} className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Name</label>
+                        <input
+                          type="text"
+                          required
+                          value={contactName}
+                          onChange={(e) => setContactName(e.target.value)}
+                          placeholder="John Doe"
+                          className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-blue focus:bg-white text-black transition-all"
+                        />
+                      </div>
+
                       <div>
                         <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Correo Electrónico" : "Email"}</label>
                         <input
@@ -771,6 +1499,7 @@ export default function Home() {
                           className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-blue focus:bg-white text-black transition-all"
                         />
                       </div>
+
                       <div>
                         <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Teléfono (Opcional)" : "Phone (Optional)"}</label>
                         <input
@@ -781,248 +1510,79 @@ export default function Home() {
                           className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-blue focus:bg-white text-black transition-all"
                         />
                       </div>
-                    </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Mensaje" : "Message"}</label>
-                      <textarea
-                        required
-                        value={contactMessage}
-                        onChange={(e) => setContactMessage(e.target.value)}
-                        placeholder={lang === "es" ? "Cuéntenos sobre los requisitos de su proyecto..." : "Tell us about your project requirements..."}
-                        className="w-full h-28 border border-zinc-200 bg-zinc-50 rounded-xl p-4 text-sm focus:outline-none focus:border-brand-blue focus:bg-white text-black transition-all resize-none"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={contactLoading}
-                      className="w-full h-11 bg-black hover:bg-brand-blue text-white rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow duration-200 cursor-pointer disabled:opacity-50 flex items-center justify-center"
-                    >
-                      {contactLoading ? (
-                        <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                      ) : (
-                        lang === "es" ? "Enviar Consulta" : "Submit Query"
-                      )}
-                    </button>
-                  </form>
-                </div>
-              </div>
-
-              {/* Card 2: Booking Form */}
-              <div className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-20 h-20 bg-brand-green/5 rounded-bl-full pointer-events-none"></div>
-                <div>
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-bold text-black">{lang === "es" ? "Programar Consulta" : "Schedule Consultation"}</h3>
-                  </div>
-
-                  {bookingResult && (
-                    <div className={`p-4 rounded-xl text-sm mb-6 ${
-                      bookingResult.success ? "bg-emerald-50 border border-emerald-200 text-emerald-800" : "bg-red-50 border border-red-200 text-red-800"
-                    }`}>
-                      {bookingResult.message}
-                    </div>
-                  )}
-
-                  <form onSubmit={handleBookingSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Nombre" : "Name"}</label>
-                      <input
-                        type="text"
-                        required
-                        value={bookingName}
-                        onChange={(e) => setBookingName(e.target.value)}
-                        placeholder="Jane Smith"
-                        className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Correo Electrónico" : "Email"}</label>
-                        <input
-                          type="email"
+                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Mensaje" : "Message"}</label>
+                        <textarea
                           required
-                          value={bookingEmail}
-                          onChange={(e) => setBookingEmail(e.target.value)}
-                          placeholder="jane@example.com"
-                          className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
+                          value={contactMessage}
+                          onChange={(e) => setContactMessage(e.target.value)}
+                          placeholder={lang === "es" ? "Cuéntenos sobre los requisitos de su proyecto..." : "Tell us about your project requirements..."}
+                          className="w-full h-28 border border-zinc-200 bg-zinc-50 rounded-xl p-4 text-sm focus:outline-none focus:border-brand-blue focus:bg-white text-black transition-all resize-none"
                         />
                       </div>
-                      <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Teléfono" : "Phone"}</label>
-                        <input
-                          type="text"
-                          required
-                          value={bookingPhone}
-                          onChange={(e) => setBookingPhone(e.target.value)}
-                          placeholder="+34 611 111 111"
-                          className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
-                        />
-                      </div>
-                    </div>
 
-                    {/* Interactive Calendar Component */}
-                    <div className="border border-zinc-200 rounded-2xl p-4 bg-zinc-50 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-zinc-700 uppercase tracking-wider">
-                          {lang === "es" ? "Seleccione Fecha y Hora" : "Select Date & Time"}
-                        </span>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const prev = new Date(currentMonth);
-                              prev.setMonth(prev.getMonth() - 1);
-                              setCurrentMonth(prev);
-                            }}
-                            className="p-1.5 hover:bg-zinc-200 text-zinc-600 rounded-lg transition-all cursor-pointer"
-                          >
-                            ‹
-                          </button>
-                          <span className="text-xs font-bold text-zinc-850">
-                            {currentMonth.toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { month: "long", year: "numeric" })}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const next = new Date(currentMonth);
-                              next.setMonth(next.getMonth() + 1);
-                              setCurrentMonth(next);
-                            }}
-                            className="p-1.5 hover:bg-zinc-200 text-zinc-600 rounded-lg transition-all cursor-pointer"
-                          >
-                            ›
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Day Grid Header */}
-                      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-zinc-400 uppercase">
-                        {lang === "es" ? (
-                          <><div>Do</div><div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sa</div></>
+                      <button
+                        type="submit"
+                        disabled={contactLoading}
+                        className="w-full h-11 bg-black hover:bg-brand-blue text-white rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow duration-200 cursor-pointer disabled:opacity-50 flex items-center justify-center"
+                      >
+                        {contactLoading ? (
+                          <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                         ) : (
-                          <><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></>
+                          lang === "es" ? "Enviar Consulta" : "Submit Query"
                         )}
-                      </div>
-                      
-                      {/* Days Grid */}
-                      <div className="grid grid-cols-7 gap-1">
-                        {renderCalendarDays()}
-                      </div>
-
-                      {/* Hourly slots grid */}
-                      {bookingDate ? (
-                        <div className="space-y-2.5 pt-2 border-t border-zinc-200/60">
-                          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
-                            {lang === "es" ? "Horas disponibles para" : "Slots for"} {new Date(bookingDate).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { weekday: "short", month: "short", day: "numeric" })}:
-                          </span>
-                          <div className="grid grid-cols-4 gap-1.5">
-                            {["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"].map((t) => {
-                              const isOccupied = occupiedSlots.some((slot) => slot.date === bookingDate && slot.time === t);
-                              return (
-                                <button
-                                  key={t}
-                                  type="button"
-                                  disabled={isOccupied}
-                                  onClick={() => setBookingTime(t)}
-                                  className={`py-1.5 rounded-lg text-xs font-bold font-mono transition-all text-center border cursor-pointer ${
-                                    isOccupied
-                                      ? "bg-zinc-50 border-zinc-200 text-zinc-300 line-through cursor-not-allowed"
-                                      : bookingTime === t
-                                      ? "bg-brand-green border-brand-green text-white shadow-sm"
-                                      : "bg-white border-zinc-200 text-zinc-800 hover:border-brand-green hover:bg-brand-green/5"
-                                  }`}
-                                  title={isOccupied ? (lang === "es" ? "Ocupado" : "Occupied") : ""}
-                                >
-                                  {t}
-                                </button>
-                              );
-                            })}
-                          </div>
-                          {/* Hidden inputs to make HTML5 required validator trigger if submit is clicked without selections */}
-                          <input type="hidden" name="booking_date" required value={bookingDate} />
-                          <input type="hidden" name="booking_time" required value={bookingTime} />
-                        </div>
-                      ) : (
-                        <p className="text-[10px] text-zinc-400 italic text-center pt-2 border-t border-zinc-200/60">
-                          {lang === "es" ? "Por favor, seleccione una fecha del calendario para ver las horas." : "Please select a date from the calendar to check hours."}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Consulta / Nota" : "Inquiry / Note"}</label>
-                      <input
-                        type="text"
-                        value={bookingMessage}
-                        onChange={(e) => setBookingMessage(e.target.value)}
-                        placeholder={lang === "es" ? "Tema de consulta (ej: SEO, consultoría frontend)" : "Inquiry focus (e.g., SEO, Frontend consulting)"}
-                        className="w-full h-11 border border-zinc-200 bg-zinc-50 rounded-xl px-4 text-sm focus:outline-none focus:border-brand-green focus:bg-white text-black transition-all"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={bookingLoading}
-                      className="w-full h-11 bg-black hover:bg-brand-green text-white rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow duration-200 cursor-pointer disabled:opacity-50 flex items-center justify-center"
-                    >
-                      {bookingLoading ? (
-                        <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                      ) : (
-                        lang === "es" ? "Solicitar Cita" : "Request Booking"
-                      )}
-                    </button>
-                  </form>
+                      </button>
+                    </form>
+                  </div>
                 </div>
+
               </div>
-
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
-        {/* Clean Call To Action Banner */}
-        <section className="py-24 bg-white">
-          <div className="max-w-4xl mx-auto px-6 text-center border border-zinc-200 rounded-3xl p-16 shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-brand-blue/5 rounded-bl-full"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-brand-green/5 rounded-tr-full"></div>
-            
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black mb-6">
-              {lang === "es" ? "Organice sus operaciones hoy mismo." : "Orchestrate your operations today."}
-            </h2>
-            <p className="text-zinc-600 max-w-lg mx-auto mb-10 text-sm leading-relaxed">
-              {lang === "es" ? "Desbloquee ejecución de consultas en milisegundos, reglas de escalado automático y flujos estructurados. Pruebe SPP Labs gratis por 14 días." : "Unlock millisecond query execution, automated scaling rules, and structured workflows. Try SPP Labs for 14 days free."}
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <a
-                href="/login"
-                className="inline-flex items-center justify-center px-8 h-12 text-sm font-bold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 cursor-pointer"
-                id="footer-banner-cta-primary"
-              >
-                {t.navDashboard}
-              </a>
-              <a
-                href="/signup"
-                className="inline-flex items-center justify-center px-8 h-12 text-sm font-bold bg-white text-black border border-zinc-300 rounded-lg hover:border-black transition-colors duration-300 cursor-pointer"
-                id="footer-banner-cta-secondary"
-              >
-                {t.loginRegisterLink}
-              </a>
+        {/* Global CTA Banner (shown on all pages except Contacto) */}
+        {activePage !== "contacto" && (
+          <section className="py-24 bg-white">
+            <div className="max-w-4xl mx-auto px-6 text-center border border-zinc-200 rounded-3xl p-16 shadow-lg relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-brand-blue/5 rounded-bl-full"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-brand-green/5 rounded-tr-full"></div>
+              
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black mb-6">
+                {lang === "es" ? "Organice sus operaciones hoy mismo." : "Orchestrate your operations today."}
+              </h2>
+              <p className="text-zinc-650 max-w-lg mx-auto mb-10 text-sm leading-relaxed">
+                {lang === "es" ? "Desbloquee ejecución de consultas en milisegundos, reglas de escalado automático y flujos estructurados. Pruebe SPP Labs gratis por 14 días." : "Unlock millisecond query execution, automated scaling rules, and structured workflows. Try SPP Labs for 14 days free."}
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <a
+                  href="/login"
+                  className="inline-flex items-center justify-center px-8 h-12 text-sm font-bold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 cursor-pointer"
+                  id="footer-banner-cta-primary"
+                >
+                  {t.navDashboard}
+                </a>
+                <button
+                  onClick={() => setActivePage("contacto")}
+                  className="inline-flex items-center justify-center px-8 h-12 text-sm font-bold bg-white text-black border border-zinc-300 rounded-lg hover:border-black transition-colors duration-300 cursor-pointer"
+                  id="footer-banner-cta-secondary"
+                >
+                  {lang === "es" ? "Programar Consulta" : "Book Free Call"}
+                </button>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
       </main>
 
       {/* Footer */}
       <footer className="bg-white border-t border-zinc-100 py-12 mt-auto">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
+        <div className="max-w-[94rem] mx-auto px-4 md:px-12 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div 
+            onClick={() => setActivePage("inicio")}
+            className="flex items-center gap-3 cursor-pointer"
+          >
             <img src="/logo.webp" alt="SPP Labs Logo" className="w-6 h-6 object-contain" />
             <SppLabsLogo inline={true} className="text-black" />
             <span className="text-xs text-zinc-400">{lang === "es" ? "| © 2026 SPP Labs Inc. Todos los derechos reservados." : "| © 2026 SPP Labs Inc. All rights reserved."}</span>
