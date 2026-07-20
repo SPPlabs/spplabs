@@ -23,6 +23,8 @@ export default function DashboardClient({
   // Language state initialized from localStorage
   const [lang, setLang] = useState("es");
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [theme, setTheme] = useState("light");
 
   useEffect(() => {
     const savedLang = localStorage.getItem("spp_lang");
@@ -31,7 +33,26 @@ export default function DashboardClient({
     } else {
       localStorage.setItem("spp_lang", "es");
     }
+
+    const savedTheme = localStorage.getItem("spp_theme") || "light";
+    setTheme(savedTheme);
+    if (savedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+    localStorage.setItem("spp_theme", nextTheme);
+    if (nextTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
 
   const changeLanguage = (newLang) => {
     setLang(newLang);
@@ -835,7 +856,9 @@ export default function DashboardClient({
     <div className="h-screen w-screen bg-slate-50 flex overflow-hidden font-sans selection:bg-brand-blue selection:text-white text-slate-900">
       
       {/* LEFT FIXED SIDEBAR */}
-      <aside className="w-72 h-full bg-white border-r border-slate-200/80 flex flex-col justify-between p-6 shrink-0 relative z-20 shadow-sm">
+      <aside className={`h-full bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0 relative z-20 shadow-sm transition-all duration-300 ease-in-out ${
+        sidebarOpen ? "w-72 p-6" : "w-0 p-0 overflow-hidden border-r-0"
+      }`}>
         <div className="flex flex-col gap-8">
           {/* Logo Section */}
           <div className="flex items-center gap-3 px-2">
@@ -1007,7 +1030,16 @@ export default function DashboardClient({
 
         {/* Minimal Top Header info panel */}
         <header className="h-16 border-b border-slate-200/80 bg-white flex items-center justify-between px-8 shrink-0 shadow-sm">
-          <div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-1.5 hover:bg-slate-100 text-slate-500 hover:text-slate-800 rounded-xl transition-all cursor-pointer border border-slate-200/60"
+              title={sidebarOpen ? (lang === "es" ? "Ocultar panel" : "Hide sidebar") : (lang === "es" ? "Mostrar panel" : "Show sidebar")}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+              </svg>
+            </button>
             <span className="text-xs font-bold text-slate-400 font-mono">
               {currentWebsite.domain}
             </span>
@@ -2108,6 +2140,30 @@ export default function DashboardClient({
                   </svg>
                 )}
               </button>
+            </div>
+
+            <div className="border-t border-slate-100 pt-6 mt-6">
+              <label className="block text-sm font-bold text-slate-900 mb-3">
+                {lang === "es" ? "Tema del Dashboard" : "Dashboard Theme"}
+              </label>
+              <div className="flex items-center justify-between bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
+                <span className="text-sm text-slate-700 font-semibold">
+                  {theme === "light" 
+                    ? (lang === "es" ? "Modo Claro" : "Light Mode") 
+                    : (lang === "es" ? "Modo Oscuro" : "Dark Mode")}
+                </span>
+                <div className="toggle-switch scale-75 origin-right">
+                  <label className="switch-label">
+                    <input 
+                      type="checkbox" 
+                      className="checkbox" 
+                      checked={theme === "dark"} 
+                      onChange={toggleTheme}
+                    />
+                    <span className="slider" />
+                  </label>
+                </div>
+              </div>
             </div>
 
             <div className="mt-8 flex justify-end gap-3">
