@@ -302,7 +302,7 @@ export default function Home() {
                   onClick={() => setActivePage(item.id)}
                   className={`px-5 py-2 rounded-full text-xs font-bold tracking-wide transition-all duration-300 ease-out cursor-pointer hover:scale-[1.03] active:scale-[0.97] ${
                     active
-                      ? "bg-black text-white shadow-sm"
+                      ? "bg-gradient-to-r from-brand-blue to-brand-green text-white shadow-sm shadow-brand-blue/20 hover:shadow-[0_0_12px_rgba(37,99,235,0.35)]"
                       : "text-zinc-600 hover:text-black hover:bg-zinc-200/50"
                   }`}
                   id={`nav-link-${item.id}`}
@@ -340,7 +340,7 @@ export default function Home() {
             </a>
             <a
               href="/login"
-              className="inline-flex items-center justify-center px-5 h-10 text-sm font-bold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 shadow-sm hover:shadow-md cursor-pointer"
+              className="inline-flex items-center justify-center px-5 h-10 text-sm font-bold bg-gradient-to-r from-brand-blue to-brand-green text-white rounded-lg hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 shadow-sm shadow-brand-blue/15 hover:shadow-lg hover:shadow-brand-green/20 cursor-pointer"
               id="nav-cta"
             >
               {t.navLogin}
@@ -357,9 +357,9 @@ export default function Home() {
                 <button
                   key={item.id}
                   onClick={() => setActivePage(item.id)}
-                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-205 cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-205 cursor-pointer hover:scale-[1.02] ${
                     active
-                      ? "bg-black text-white shadow-sm"
+                      ? "bg-gradient-to-r from-brand-blue to-brand-green text-white shadow-sm shadow-brand-blue/20"
                       : "text-zinc-550 hover:text-black hover:bg-zinc-200/50"
                   }`}
                   id={`nav-mobile-${item.id}`}
