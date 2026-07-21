@@ -346,195 +346,85 @@ export default function DashboardClient({
   // HELPER VISUAL COMPONENTS FOR ANALYTICS, MAPS & BOOKINGS
   // ========================================================
   
-  function SlantedBarChart({ data }) {
-    const bars = [
-      { label: "6K", height: "45%", color: "from-sky-400 to-cyan-400" },
-      { label: "11K", height: "70%", color: "from-sky-400 to-cyan-400" },
-      { label: "18K", height: "95%", color: "from-blue-500 to-cyan-400" },
-      { label: "10K", height: "65%", color: "from-sky-400 to-cyan-400" },
-      { label: "15K", height: "85%", color: "from-blue-500 to-cyan-400" },
-      { label: "5K", height: "40%", color: "from-sky-400 to-cyan-400" },
-      { label: "7K", height: "55%", color: "from-sky-400 to-cyan-400" }
-    ];
+  function WorldChoroplethMap({ countries = [] }) {
+    // Real ClickHouse visitor count mapping for countries
+    const maxCount = Math.max(...countries.map(c => Number(c.count || 0)), 1);
 
-    return (
-      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-full">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Capacidad & Producción</h3>
-            <p className="text-xs text-slate-400 font-medium">Volumen mensual en tiempo real</p>
-          </div>
-          <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span> Next Level
-          </div>
-        </div>
+    // Dynamic color scale helper based on real ClickHouse counts (Light Blue -> Dark Blue)
+    const getCountryColor = (count) => {
+      if (!count || count === 0) return "#f1f5f9"; // Neutral light slate
+      const ratio = count / maxCount;
+      if (ratio > 0.75) return "#1e3a8a"; // Dark blue
+      if (ratio > 0.50) return "#0284c7"; // Deep blue
+      if (ratio > 0.25) return "#38bdf8"; // Medium blue
+      return "#bae6fd"; // Light blue
+    };
 
-        <div className="flex items-end justify-around h-44 py-2 border-b border-slate-100 px-2 gap-2">
-          {bars.map((bar, idx) => (
-            <div key={idx} className="flex flex-col items-center gap-2 group h-full justify-end">
-              <div 
-                className={`w-5 sm:w-7 rounded-full bg-gradient-to-t ${bar.color} shadow-md transform -rotate-12 group-hover:rotate-0 group-hover:scale-115 transition-all duration-300 animate-slanted-bar cursor-pointer`}
-                style={{ height: bar.height }}
-                title={`${bar.label} eventos`}
-              />
-              <span className="text-[11px] font-black font-mono text-slate-800 tracking-tight group-hover:text-cyan-500 transition-colors">
-                {bar.label}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex justify-around pt-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-          <span>Capacidad</span>
-          <span>Inferencia</span>
-          <span>Análisis</span>
-        </div>
-      </div>
-    );
-  }
-
-  function ArcSpeedGauge({ speed = "90c / 25c", label = "Velocidad Sub-ms" }) {
-    return (
-      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-full">
-        <div className="w-full flex items-center justify-between mb-2">
-          <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Rendimiento Activo</h3>
-          <span className="text-[10px] font-mono font-bold bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full border border-purple-200">
-            OPTIMIZED
-          </span>
-        </div>
-
-        <div className="relative w-48 h-28 flex items-end justify-center my-2">
-          <svg viewBox="0 0 100 55" className="w-full h-full">
-            {/* Background Track Arc */}
-            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e2e8f0" strokeWidth="10" strokeLinecap="round" />
-            {/* Segment 1: Violet Arc */}
-            <path d="M 10 50 A 40 40 0 0 1 45 12" fill="none" stroke="#8b5cf6" strokeWidth="10" strokeLinecap="round" />
-            {/* Segment 2: Cyan Arc */}
-            <path d="M 45 12 A 40 40 0 0 1 78 24" fill="none" stroke="#38bdf8" strokeWidth="10" strokeLinecap="round" />
-            {/* Segment 3: Rose Arc */}
-            <path d="M 78 24 A 40 40 0 0 1 90 50" fill="none" stroke="#fb7185" strokeWidth="10" strokeLinecap="round" />
-          </svg>
-          <div className="absolute bottom-1 flex flex-col items-center">
-            <span className="text-xl font-black font-mono text-slate-900 tracking-tight">{speed}</span>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</span>
-          </div>
-        </div>
-
-        <div className="flex justify-center gap-4 text-[10px] font-bold text-slate-500 pt-2 border-t border-slate-100 w-full">
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-500"></span> Acc 1</span>
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-sky-400"></span> Acc 2</span>
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-rose-400"></span> Acc 3</span>
-        </div>
-      </div>
-    );
-  }
-
-  function HorizontalPillGauges() {
-    const items = [
-      { name: "Canal Orgánico", percent: "5%", color: "bg-emerald-400" },
-      { name: "Motor de Búsqueda", percent: "16%", color: "bg-emerald-400" },
-      { name: "Ref. Directas", percent: "34%", color: "bg-emerald-400" },
-      { name: "Campañas / Ads", percent: "45%", color: "bg-emerald-400" }
-    ];
-
-    return (
-      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-full">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Marketing & Canales</h3>
-          <span className="text-xs font-bold text-slate-400">Semanal ▼</span>
-        </div>
-
-        <div className="space-y-4">
-          {items.map((item, idx) => (
-            <div key={idx} className="flex items-center justify-between gap-4">
-              <span className="text-xs font-bold text-slate-700 w-28 shrink-0">{item.name}</span>
-              <div className="flex-1 bg-slate-100 h-8 rounded-full overflow-hidden p-1 flex items-center relative border border-slate-200/60 shadow-inner">
-                <div 
-                  className={`h-full rounded-full ${item.color} flex items-center justify-end px-3 font-mono font-black text-xs text-slate-950 transition-all duration-700 shadow-sm`}
-                  style={{ width: `${Math.max(parseFloat(item.percent), 15)}%` }}
-                >
-                  {item.percent}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  function ConcentricTargetRings() {
-    return (
-      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-full">
-        <div className="w-full flex items-center justify-between mb-2">
-          <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Transacciones & Niveles</h3>
-          <span className="text-xs font-bold text-slate-400">KPI Target</span>
-        </div>
-
-        <div className="relative w-36 h-36 flex items-center justify-center my-2">
-          <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
-            {/* Outer Ring: Level 1 */}
-            <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9" strokeWidth="8" />
-            <circle cx="50" cy="50" r="42" fill="none" stroke="#a855f7" strokeWidth="8" strokeDasharray="210 50" strokeLinecap="round" />
-            
-            {/* Middle Ring: Level 2 */}
-            <circle cx="50" cy="50" r="30" fill="none" stroke="#f1f5f9" strokeWidth="8" />
-            <circle cx="50" cy="50" r="30" fill="none" stroke="#38bdf8" strokeWidth="8" strokeDasharray="130 50" strokeLinecap="round" />
-
-            {/* Inner Ring: Level 3 */}
-            <circle cx="50" cy="50" r="18" fill="none" stroke="#f1f5f9" strokeWidth="8" />
-            <circle cx="50" cy="50" r="18" fill="none" stroke="#fb7185" strokeWidth="8" strokeDasharray="70 40" strokeLinecap="round" />
-          </svg>
-          <div className="absolute flex items-center gap-1 font-mono font-black text-sm text-slate-900">
-            <span>2</span>
-            <span>5</span>
-            <span>9</span>
-          </div>
-        </div>
-
-        <div className="flex justify-center gap-3 text-[10px] font-bold text-slate-500 pt-2 border-t border-slate-100 w-full">
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-500"></span> Level 1</span>
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-sky-400"></span> Level 2</span>
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-rose-400"></span> Level 3</span>
-        </div>
-      </div>
-    );
-  }
-
-  function WorldMapSVG({ countries = [] }) {
-    const worldNodes = [
-      { name: "España / Europa", x: 48, y: 35, count: "48%" },
-      { name: "Norteamérica", x: 25, y: 32, count: "24%" },
-      { name: "Sudamérica", x: 34, y: 68, count: "12%" },
-      { name: "Asia Pacual", x: 78, y: 40, count: "10%" },
-      { name: "Oceanía", x: 86, y: 78, count: "6%" }
-    ];
+    // Country coordinates map for rendering markers on real countries
+    const countryCoords = {
+      "Spain": { x: 480, y: 175, code: "ES", flag: "🇪🇸" },
+      "España": { x: 480, y: 175, code: "ES", flag: "🇪🇸" },
+      "ES": { x: 480, y: 175, code: "ES", flag: "🇪🇸" },
+      "United States": { x: 240, y: 160, code: "US", flag: "🇺🇸" },
+      "USA": { x: 240, y: 160, code: "US", flag: "🇺🇸" },
+      "US": { x: 240, y: 160, code: "US", flag: "🇺🇸" },
+      "Germany": { x: 510, y: 145, code: "DE", flag: "🇩🇪" },
+      "Alemania": { x: 510, y: 145, code: "DE", flag: "🇩🇪" },
+      "DE": { x: 510, y: 145, code: "DE", flag: "🇩🇪" },
+      "United Kingdom": { x: 475, y: 140, code: "GB", flag: "🇬🇧" },
+      "Reino Unido": { x: 475, y: 140, code: "GB", flag: "🇬🇧" },
+      "GB": { x: 475, y: 140, code: "GB", flag: "🇬🇧" },
+      "France": { x: 490, y: 160, code: "FR", flag: "🇫🇷" },
+      "Francia": { x: 490, y: 160, code: "FR", flag: "🇫🇷" },
+      "FR": { x: 490, y: 160, code: "FR", flag: "🇫🇷" },
+      "Italy": { x: 520, y: 170, code: "IT", flag: "🇮🇹" },
+      "Italia": { x: 520, y: 170, code: "IT", flag: "🇮🇹" },
+      "IT": { x: 520, y: 170, code: "IT", flag: "🇮🇹" },
+      "Japan": { x: 860, y: 180, code: "JP", flag: "🇯🇵" },
+      "Japón": { x: 860, y: 180, code: "JP", flag: "🇯🇵" },
+      "JP": { x: 860, y: 180, code: "JP", flag: "🇯🇵" },
+      "Brazil": { x: 340, y: 320, code: "BR", flag: "🇧🇷" },
+      "Brasil": { x: 340, y: 320, code: "BR", flag: "🇧🇷" },
+      "BR": { x: 340, y: 320, code: "BR", flag: "🇧🇷" },
+      "Mexico": { x: 210, y: 210, code: "MX", flag: "🇲🇽" },
+      "México": { x: 210, y: 210, code: "MX", flag: "🇲🇽" },
+      "MX": { x: 210, y: 210, code: "MX", flag: "🇲🇽" },
+      "Argentina": { x: 310, y: 390, code: "AR", flag: "🇦🇷" },
+      "AR": { x: 310, y: 390, code: "AR", flag: "🇦🇷" },
+      "Canada": { x: 230, y: 110, code: "CA", flag: "🇨🇦" },
+      "Canadá": { x: 230, y: 110, code: "CA", flag: "🇨🇦" },
+      "CA": { x: 230, y: 110, code: "CA", flag: "🇨🇦" },
+      "Australia": { x: 850, y: 370, code: "AU", flag: "🇦🇺" },
+      "AU": { x: 850, y: 370, code: "AU", flag: "🇦🇺" },
+    };
 
     return (
       <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm flex flex-col lg:flex-row gap-8 w-full">
-        {/* Vector World Map Box */}
+        {/* World Choropleth SVG */}
         <div className="w-full lg:w-3/5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="text-base font-extrabold text-slate-900 tracking-tight">Mapa Mundial de Tráfico</h4>
-              <p className="text-xs text-slate-400 font-medium">Distribución geográfica global de visitas</p>
+              <h4 className="text-base font-extrabold text-slate-900 tracking-tight">Mapa Mundial de Visitas (ClickHouse)</h4>
+              <p className="text-xs text-slate-400 font-medium">Gradiente Azul: De azul claro (menos visitas) a azul oscuro (más visitas)</p>
             </div>
-            <span className="bg-emerald-50 text-emerald-700 text-xs px-3 py-1 rounded-full font-bold border border-emerald-200">
-              GLOBAL LIVE
-            </span>
+            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 font-mono">
+              <span className="w-3 h-3 rounded bg-[#bae6fd]"></span> Bajo
+              <span className="w-3 h-3 rounded bg-[#38bdf8]"></span> Medio
+              <span className="w-3 h-3 rounded bg-[#0284c7]"></span> Alto
+              <span className="w-3 h-3 rounded bg-[#1e3a8a]"></span> Máximo
+            </div>
           </div>
 
-          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden min-h-[220px]">
-            {/* World Grid Lines */}
-            <svg viewBox="0 0 1000 500" className="w-full h-48 overflow-visible opacity-90">
+          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden min-h-[240px]">
+            <svg viewBox="0 0 1000 500" className="w-full h-52 overflow-visible">
               <defs>
-                <pattern id="worldGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
+                <pattern id="worldGridLines" width="50" height="50" patternUnits="userSpaceOnUse">
+                  <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1"/>
                 </pattern>
               </defs>
-              <rect width="1000" height="500" fill="url(#worldGrid)" />
+              <rect width="1000" height="500" fill="url(#worldGridLines)" />
 
-              {/* Simplified Vector Continents outlines */}
+              {/* Vector Continents with Dynamic Real Color Fill based on ClickHouse data */}
               {/* North America */}
               <path d="M 120 100 Q 180 80, 240 110 T 320 180 T 220 260 T 140 180 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
               {/* South America */}
@@ -546,134 +436,185 @@ export default function DashboardClient({
               {/* Australia */}
               <path d="M 780 340 Q 860 330, 890 380 T 820 440 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
 
-              {/* Glowing Pulsing Radar Nodes */}
-              {worldNodes.map((node, idx) => (
-                <g key={idx} className="group cursor-pointer">
-                  <circle cx={node.x * 10} cy={node.y * 5} r="14" fill="#10b981" className="animate-ping opacity-30" />
-                  <circle cx={node.x * 10} cy={node.y * 5} r="5" fill="#10b981" stroke="#ffffff" strokeWidth="2" className="group-hover:scale-125 transition-transform" />
-                  <g className="opacity-0 group-hover:opacity-100 transition-all pointer-events-none">
-                    <rect x={node.x * 10 - 45} y={node.y * 5 - 32} width="90" height="22" rx="6" fill="#0f172a" stroke="#334155" />
-                    <text x={node.x * 10} y={node.y * 5 - 18} fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
-                      {node.name}: {node.count}
-                    </text>
+              {/* Render ONLY real visitor nodes from ClickHouse */}
+              {countries.map((c, idx) => {
+                const info = countryCoords[c.country] || { x: 500, y: 250, flag: "🌍" };
+                const count = Number(c.count || 0);
+                const color = getCountryColor(count);
+
+                return (
+                  <g key={idx} className="group cursor-pointer">
+                    <circle cx={info.x} cy={info.y} r="16" fill={color} opacity="0.4" className="animate-ping" />
+                    <circle cx={info.x} cy={info.y} r="7" fill={color} stroke="#ffffff" strokeWidth="2" className="group-hover:scale-125 transition-transform" />
+                    <g className="opacity-0 group-hover:opacity-100 transition-all pointer-events-none">
+                      <rect x={info.x - 55} y={info.y - 34} width="110" height="24" rx="6" fill="#0f172a" stroke="#38bdf8" strokeWidth="1" />
+                      <text x={info.x} y={info.y - 18} fill="#ffffff" fontSize="10" fontWeight="900" textAnchor="middle">
+                        {info.flag || "🌍"} {c.country}: {count} visitas
+                      </text>
+                    </g>
                   </g>
-                </g>
-              ))}
+                );
+              })}
+
+              {countries.length === 0 && (
+                <text x="500" y="250" fill="#94a3b8" fontSize="14" fontWeight="bold" textAnchor="middle">
+                  Sin registros de tráfico internacional en ClickHouse aún
+                </text>
+              )}
             </svg>
           </div>
         </div>
 
-        {/* Country Breakdown List */}
+        {/* Real Country List from ClickHouse */}
         <div className="w-full lg:w-2/5 space-y-3 flex flex-col justify-between">
           <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            Países Principales
+            Países de Origen (Datos Reales ClickHouse)
           </h4>
-          <div className="divide-y divide-slate-100 max-h-52 overflow-y-auto space-y-1">
-            {(countries.length > 0 ? countries : [
-              { country: "España 🇪🇸", count: 480 },
-              { country: "Estados Unidos 🇺🇸", count: 240 },
-              { country: "Alemania 🇩🇪", count: 120 },
-              { country: "Reino Unido 🇬🇧", count: 95 },
-              { country: "Francia 🇫🇷", count: 70 }
-            ]).map((c, idx) => (
-              <div key={idx} className="flex justify-between items-center py-2 text-xs font-bold text-slate-700">
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span>{c.country}</span>
-                </span>
-                <span className="font-mono text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">{c.count}</span>
-              </div>
-            ))}
-          </div>
+          {countries.length === 0 ? (
+            <p className="text-xs text-slate-400 py-8 text-center font-medium">No se han registrado visitas por país en el periodo seleccionado.</p>
+          ) : (
+            <div className="divide-y divide-slate-100 max-h-56 overflow-y-auto space-y-1">
+              {countries.map((c, idx) => {
+                const count = Number(c.count || 0);
+                const color = getCountryColor(count);
+                const flag = countryCoords[c.country]?.flag || "🌍";
+
+                return (
+                  <div key={idx} className="flex justify-between items-center py-2.5 text-xs font-bold text-slate-700">
+                    <span className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: color }}></span>
+                      <span className="text-sm">{flag}</span>
+                      <span>{c.country}</span>
+                    </span>
+                    <span className="font-mono text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                      {count} {count === 1 ? "visita" : "visitas"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
-  function SpainMapSVG({ spainCities = [] }) {
-    const spainMarkers = [
-      { name: "Madrid", x: 95, y: 72, count: "42%" },
-      { name: "Barcelona", x: 168, y: 42, count: "28%" },
-      { name: "Valencia", x: 138, y: 84, count: "14%" },
-      { name: "Sevilla", x: 72, y: 115, count: "8%" },
-      { name: "Bilbao", x: 96, y: 22, count: "5%" },
-      { name: "Málaga", x: 84, y: 128, count: "3%" }
-    ];
+  function SpainCitiesHeatmap({ spainCities = [] }) {
+    // Real ClickHouse coordinates mapping for Spanish cities
+    const cityCoords = {
+      "Madrid": { x: 98, y: 72 },
+      "Barcelona": { x: 168, y: 44 },
+      "Valencia": { x: 138, y: 84 },
+      "Sevilla": { x: 72, y: 118 },
+      "Zaragoza": { x: 130, y: 48 },
+      "Málaga": { x: 84, y: 128 },
+      "Murcia": { x: 124, y: 104 },
+      "Palma": { x: 176, y: 78 },
+      "Bilbao": { x: 96, y: 22 },
+      "Alicante": { x: 134, y: 94 },
+      "Vigo": { x: 38, y: 38 },
+      "A Coruña": { x: 39, y: 22 },
+      "Santiago de Compostela": { x: 39, y: 30 },
+      "Granada": { x: 92, y: 118 },
+      "Córdoba": { x: 80, y: 104 },
+      "Valladolid": { x: 80, y: 48 },
+      "Oviedo": { x: 68, y: 22 },
+      "Santander": { x: 85, y: 22 },
+      "San Sebastián": { x: 110, y: 24 },
+      "Pamplona": { x: 120, y: 32 },
+      "Toledo": { x: 92, y: 78 },
+      "Salamanca": { x: 72, y: 58 },
+      "Burgos": { x: 95, y: 38 },
+      "Cádiz": { x: 68, y: 128 },
+      "Badajoz": { x: 55, y: 92 },
+    };
+
+    const maxCityCount = Math.max(...spainCities.map(c => Number(c.count || 0)), 1);
 
     return (
       <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm flex flex-col lg:flex-row gap-8 w-full">
-        {/* Vector Spain Map Component */}
+        {/* Spain Map SVG */}
         <div className="w-full lg:w-3/5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="text-base font-extrabold text-slate-900 tracking-tight">Mapa de Tráfico en España</h4>
-              <p className="text-xs text-slate-400 font-medium">Inferencia y consultas por Comunidad Autónoma</p>
+              <h4 className="text-base font-extrabold text-slate-900 tracking-tight">Mapa de Ciudades en España (Datos Reales)</h4>
+              <p className="text-xs text-slate-400 font-medium">Ubicación exacta donde los usuarios han accedido</p>
             </div>
-            <span className="bg-blue-50 text-blue-700 text-xs px-3 py-1 rounded-full font-bold border border-blue-200">
-              NODO NACIONAL
+            <span className="bg-sky-50 text-sky-700 text-xs px-3 py-1 rounded-full font-bold border border-sky-200">
+              NODO ESPAÑA
             </span>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden min-h-[220px]">
-            <svg viewBox="0 0 200 150" className="w-full h-48 overflow-visible">
-              {/* Detailed Peninsular Spain outline */}
+          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden min-h-[240px]">
+            <svg viewBox="0 0 200 150" className="w-full h-52 overflow-visible">
+              {/* Detailed Peninsular Spain Vector shape */}
               <path 
                 d="M 32 30 Q 70 18, 115 22 T 145 28 T 175 42 T 165 75 T 142 98 T 120 132 T 78 128 T 62 135 T 45 105 T 32 80 Z" 
                 fill="#ffffff" 
-                stroke="#94a3b8" 
-                strokeWidth="2" 
+                stroke="#cbd5e1" 
+                strokeWidth="1.8" 
                 className="shadow-sm"
               />
-              {/* Portugal border inner division line */}
-              <path d="M 32 80 Q 42 70, 48 55 T 45 35" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="3 3" />
+              {/* Portugal border line */}
+              <path d="M 32 80 Q 42 70, 48 55 T 45 35" fill="none" stroke="#e2e8f0" strokeWidth="1.5" strokeDasharray="3 3" />
               
               {/* Balearic Islands Inset */}
-              <path d="M 175 75 Q 182 72, 186 78 Z" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1.5" />
-              <path d="M 166 85 Q 172 82, 175 88 Z" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1.5" />
+              <path d="M 175 75 Q 182 72, 186 78 Z" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1.5" />
+              <path d="M 166 85 Q 172 82, 175 88 Z" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1.5" />
 
               {/* Canary Islands Inset Box */}
-              <rect x="8" y="112" width="45" height="32" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" rx="4" strokeDasharray="2 2" />
+              <rect x="8" y="112" width="45" height="32" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" rx="4" strokeDasharray="2 2" />
               <text x="12" y="122" fill="#94a3b8" fontSize="6" fontWeight="bold">CANARIAS</text>
-              <circle cx="20" cy="132" r="2.5" fill="#3b82f6" />
-              <circle cx="34" cy="130" r="2.5" fill="#3b82f6" />
 
-              {/* City Pulse Location Nodes */}
-              {spainMarkers.map((city, idx) => (
-                <g key={idx} className="group cursor-pointer">
-                  <circle cx={city.x} cy={city.y} r="8" fill="#3b82f6" className="animate-ping opacity-30" />
-                  <circle cx={city.x} cy={city.y} r="3.5" fill="#3b82f6" stroke="#ffffff" strokeWidth="1.5" className="group-hover:scale-125 transition-transform" />
-                  <text x={city.x} y={city.y - 6} fill="#0f172a" fontSize="7" fontWeight="900" textAnchor="middle" className="pointer-events-none">
-                    {city.name}
-                  </text>
-                </g>
-              ))}
+              {/* Render ONLY real city nodes from ClickHouse */}
+              {spainCities.map((c, idx) => {
+                const coords = cityCoords[c.city];
+                if (!coords) return null;
+                const count = Number(c.count || 0);
+                const radius = 3 + (count / maxCityCount) * 5;
+
+                return (
+                  <g key={idx} className="group cursor-pointer">
+                    <circle cx={coords.x} cy={coords.y} r={radius * 2} fill="#0284c7" className="animate-ping opacity-30" />
+                    <circle cx={coords.x} cy={coords.y} r={radius} fill="#0284c7" stroke="#ffffff" strokeWidth="1.5" className="group-hover:scale-125 transition-transform" />
+                    <text x={coords.x} y={coords.y - 6} fill="#0f172a" fontSize="7" fontWeight="900" textAnchor="middle" className="pointer-events-none">
+                      {c.city} ({count})
+                    </text>
+                  </g>
+                );
+              })}
+
+              {spainCities.length === 0 && (
+                <text x="100" y="75" fill="#94a3b8" fontSize="9" fontWeight="bold" textAnchor="middle">
+                  Sin accesos desde España en ClickHouse aún
+                </text>
+              )}
             </svg>
           </div>
         </div>
 
-        {/* Spain Cities List */}
+        {/* Real Spain Cities List from ClickHouse */}
         <div className="w-full lg:w-2/5 space-y-3 flex flex-col justify-between">
           <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            Ciudades con Mayor Tráfico
+            Ciudades (Datos Reales ClickHouse)
           </h4>
-          <div className="divide-y divide-slate-100 max-h-52 overflow-y-auto space-y-1">
-            {(spainCities.length > 0 ? spainCities : [
-              { city: "Madrid", count: 210 },
-              { city: "Barcelona", count: 145 },
-              { city: "Valencia", count: 72 },
-              { city: "Sevilla", count: 48 },
-              { city: "Bilbao", count: 34 },
-              { city: "Málaga", count: 22 }
-            ]).map((c, idx) => (
-              <div key={idx} className="flex justify-between items-center py-2 text-xs font-bold text-slate-700">
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                  <span>{c.city}</span>
-                </span>
-                <span className="font-mono text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">{c.count}</span>
-              </div>
-            ))}
-          </div>
+          {spainCities.length === 0 ? (
+            <p className="text-xs text-slate-400 py-8 text-center font-medium">No hay ciudades de España registradas en este periodo.</p>
+          ) : (
+            <div className="divide-y divide-slate-100 max-h-56 overflow-y-auto space-y-1">
+              {spainCities.map((c, idx) => (
+                <div key={idx} className="flex justify-between items-center py-2.5 text-xs font-bold text-slate-700">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+                    <span>{c.city}</span>
+                  </span>
+                  <span className="font-mono text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                    {c.count} {Number(c.count) === 1 ? "visita" : "visitas"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -1720,30 +1661,7 @@ export default function DashboardClient({
                     </div>
                   </div>
 
-                  {/* HIGH-IMPACT VIBRANT DASHBOARD GRID INSPIRED BY REFERENCE DESIGN */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
-                    {/* Block 1: Slanted 3D Bar Chart */}
-                    <div className="h-full min-h-[300px]">
-                      <SlantedBarChart data={analyticsData.trends} />
-                    </div>
-
-                    {/* Block 2: 180° Speedometer Arc Gauge */}
-                    <div className="h-full min-h-[300px]">
-                      <ArcSpeedGauge speed="90c / 25c" label="Velocidad Sub-ms" />
-                    </div>
-
-                    {/* Block 3: Horizontal Pill Progress Gauges */}
-                    <div className="h-full min-h-[300px]">
-                      <HorizontalPillGauges />
-                    </div>
-
-                    {/* Block 4: Concentric Target Rings */}
-                    <div className="h-full min-h-[300px]">
-                      <ConcentricTargetRings />
-                    </div>
-                  </div>
-
-                  {/* Hourly/Daily Traffic Trend Line Chart */}
+                  {/* Real ClickHouse Hourly/Daily Traffic Trend Line Chart */}
                   <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm w-full relative overflow-hidden">
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center gap-3">
@@ -1753,8 +1671,8 @@ export default function DashboardClient({
                           </svg>
                         </div>
                         <div>
-                          <h3 className="text-base font-black text-slate-950 uppercase tracking-wider">{t.analyticsTrafficVolume}</h3>
-                          <p className="text-xs text-slate-400 font-medium">Volumen de tráfico e interacciones</p>
+                          <h3 className="text-base font-black text-slate-950 uppercase tracking-wider">{t.analyticsTrafficVolume} (ClickHouse)</h3>
+                          <p className="text-xs text-slate-400 font-medium">Histórico real de peticiones de la base de datos</p>
                         </div>
                       </div>
                       <span className="bg-slate-100 text-slate-800 text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider font-mono border border-slate-200">
@@ -1763,7 +1681,7 @@ export default function DashboardClient({
                     </div>
                     
                     {analyticsData.trends.length === 0 ? (
-                      <p className="text-sm text-slate-400 py-12 text-center font-medium">No hay registros de tendencia en este rango.</p>
+                      <p className="text-sm text-slate-400 py-12 text-center font-medium">No hay registros de tendencia en este rango de tiempo en ClickHouse.</p>
                     ) : (
                       <div className="w-full">
                         {(() => {
@@ -1789,52 +1707,41 @@ export default function DashboardClient({
                                 <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-52 overflow-visible">
                                   <defs>
                                     <linearGradient id="areaGradVibrant" x1="0" y1="0" x2="0" y2="1">
-                                      <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.3"/>
-                                      <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0"/>
+                                      <stop offset="0%" stopColor="#0284c7" stopOpacity="0.25"/>
+                                      <stop offset="100%" stopColor="#0284c7" stopOpacity="0.0"/>
                                     </linearGradient>
-                                    <filter id="glowVibrant" x="-20%" y="-20%" width="140%" height="140%">
-                                      <feGaussianBlur stdDeviation="3" result="blur" />
-                                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                                    </filter>
                                   </defs>
-                                  {/* Background Grid Lines */}
                                   <line x1="0" y1={height - 15} x2={width} y2={height - 15} stroke="#f1f5f9" strokeWidth="1.5" />
                                   <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke="#f1f5f9" strokeWidth="1.5" strokeDasharray="6 6" />
                                   <line x1="0" y1="15" x2={width} y2="15" stroke="#f1f5f9" strokeWidth="1.5" strokeDasharray="6 6" />
                                   
-                                  {/* Gradient Area Fill */}
                                   {areaPts && <polygon points={areaPts} fill="url(#areaGradVibrant)" />}
                                   
-                                  {/* Motion Graphic Stroke Line */}
                                   {pts && (
                                     <polyline 
                                       points={pts} 
                                       fill="none" 
                                       stroke="#0284c7" 
-                                      strokeWidth="4" 
+                                      strokeWidth="3.5" 
                                       strokeLinecap="round" 
                                       strokeLinejoin="round" 
-                                      filter="url(#glowVibrant)"
-                                      className="animate-chart-line"
                                     />
                                   )}
                                   
-                                  {/* Interactive Animated Points */}
                                   {trendPoints.map((t, idx) => {
                                     const x = idx * spacing;
                                     const y = height - (Number(t.count || 0) / maxVal) * (height - 30) - 15;
                                     return (
                                       <g key={idx} className="group cursor-pointer">
-                                        <circle cx={x} cy={y} r="8" fill="#0284c7" opacity="0.2" className="group-hover:scale-150 transition-transform" />
-                                        <circle cx={x} cy={y} r="5" fill="#0284c7" stroke="#ffffff" strokeWidth="2.5" className="transition-all group-hover:scale-125" />
+                                        <circle cx={x} cy={y} r="6" fill="#0284c7" stroke="#ffffff" strokeWidth="2" className="transition-all group-hover:scale-150" />
                                         <g className="opacity-0 group-hover:opacity-100 transition-all transform group-hover:-translate-y-1 pointer-events-none">
-                                          <rect x={x - 24} y={y - 32} width="48" height="22" rx="6" fill="#0f172a" />
+                                          <rect x={x - 30} y={y - 32} width="60" height="22" rx="6" fill="#0f172a" />
                                           <text x={x} y={y - 18} fill="#ffffff" fontSize="9" fontWeight="900" textAnchor="middle" className="font-mono">
-                                            {t.count}
+                                            {t.count} peticiones
                                           </text>
                                         </g>
                                         <text x={x} y={height + 15} fill="#64748b" fontSize="9" fontWeight="bold" textAnchor="middle" className="pointer-events-none font-mono">
-                                          {t.date.split("-").slice(1).join("/")}
+                                          {t.date ? t.date.split("-").slice(1).join("/") : t.hour + "h"}
                                         </text>
                                       </g>
                                     );
@@ -1851,13 +1758,13 @@ export default function DashboardClient({
                   {/* Funnel of Traffic Referrers */}
                   <ReferralFunnel data={analyticsData.referrers} />
 
-                  {/* GEOGRAPHICAL MAPS: VECTOR WORLD MAP + ACCURATE VECTOR SPAIN MAP */}
+                  {/* GEOGRAPHICAL MAPS: VECTOR WORLD MAP + ACCURATE VECTOR SPAIN MAP (REAL CLICKHOUSE DATA ONLY) */}
                   <div className="space-y-8 w-full">
-                    {/* World Map Section */}
-                    <WorldMapSVG countries={analyticsData.countries} />
+                    {/* World Map Section with Light Blue -> Dark Blue intensity */}
+                    <WorldChoroplethMap countries={analyticsData.countries} />
 
-                    {/* Spain Map Section */}
-                    <SpainMapSVG spainCities={analyticsData.spainCities} />
+                    {/* Spain Map Section with Real City Nodes */}
+                    <SpainCitiesHeatmap spainCities={analyticsData.spainCities} />
                   </div>
 
                   {/* Category Donut Charts Grid */}
