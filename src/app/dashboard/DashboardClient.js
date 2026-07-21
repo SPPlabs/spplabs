@@ -1716,27 +1716,32 @@ export default function DashboardClient({
                     <div className="bg-white border-t-4 border-t-purple-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md">
                       <span className="text-[11px] font-extrabold text-purple-600 uppercase tracking-wider block mb-1.5">{t.analyticsTotalHits}</span>
                       <span className="text-3xl font-black font-mono text-slate-950 tracking-tight">{analyticsData.overview.visitors}</span>
-                      <span className="text-[10px] text-emerald-600 font-bold block mt-1">↑ +14.2% este mes</span>
+                      <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.visitors_growth?.startsWith("↓") ? "text-rose-600" : "text-emerald-600"}`}>
+                        {analyticsData.overview.visitors_growth} {analyticsData.overview.period_label || "vs anterior"}
+                      </span>
                     </div>
                     <div className="bg-white border-t-4 border-t-sky-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md">
                       <span className="text-[11px] font-extrabold text-sky-600 uppercase tracking-wider block mb-1.5">{t.analyticsUniques}</span>
                       <span className="text-3xl font-black font-mono text-sky-600 tracking-tight">{analyticsData.overview.unique_visitors}</span>
-                      <span className="text-[10px] text-emerald-600 font-bold block mt-1">↑ +8.5% usuarios</span>
+                      <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.unique_growth?.startsWith("↓") ? "text-rose-600" : "text-sky-600"}`}>
+                        {analyticsData.overview.unique_growth} {analyticsData.overview.period_label || "vs anterior"}
+                      </span>
                     </div>
                     <div className="bg-white border-t-4 border-t-emerald-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md">
                       <span className="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider block mb-1.5">{t.analyticsSessions}</span>
                       <span className="text-3xl font-black font-mono text-emerald-600 tracking-tight">{analyticsData.overview.sessions}</span>
-                      <span className="text-[10px] text-emerald-600 font-bold block mt-1">↑ +12.0% activas</span>
+                      <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.sessions_growth?.startsWith("↓") ? "text-rose-600" : "text-emerald-600"}`}>
+                        {analyticsData.overview.sessions_growth} {analyticsData.overview.period_label || "vs anterior"}
+                      </span>
                     </div>
                     <div className="bg-white border-t-4 border-t-amber-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md">
                       <span className="text-[11px] font-extrabold text-amber-600 uppercase tracking-wider block mb-1.5">{t.analyticsDuration}</span>
                       <span className="text-3xl font-black font-mono text-slate-900 tracking-tight">{analyticsData.overview.avg_duration}s</span>
                       <span className="text-[10px] text-slate-500 font-bold block mt-1">Promedio por sesión</span>
                     </div>
-                    <div className="bg-white border-t-4 border-t-rose-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm glass-card-hover hover:shadow-md">
+                    <div className="bg-white border-t-4 border-t-rose-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm glass-card-hover hover:shadow-md flex flex-col justify-center items-center">
                       <span className="text-[11px] font-extrabold text-rose-500 uppercase tracking-wider block mb-1.5">{t.analyticsBounce}</span>
                       <span className="text-3xl font-black font-mono text-rose-500 tracking-tight">{analyticsData.overview.bounce_rate}%</span>
-                      <span className="text-[10px] text-slate-400 font-bold block mt-1">Baja tasa de rebote</span>
                     </div>
                   </div>
 

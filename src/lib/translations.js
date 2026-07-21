@@ -55,7 +55,7 @@ export const translations = {
     
     // Analiticas Tab
     analyticsTitle: "Analíticas de Tráfico",
-    analyticsSubtitle: "Métricas de visitas ingeridas en tiempo real desde ClickHouse",
+    analyticsSubtitle: "Métricas de visitas e interacción ingeridas en tiempo real",
     analyticsActiveUsers: "usuarios activos (últimos 5 min)",
     analyticsTotalHits: "Total Impresiones",
     analyticsUniques: "Visitantes Únicos",
