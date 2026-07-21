@@ -147,6 +147,28 @@ export default function DashboardClient({
     }
   };
 
+  // AI Token Usage Graph State & Timeframe
+  const [aiTimeframe, setAiTimeframe] = useState("month");
+  const [aiUsageSummary, setAiUsageSummary] = useState(null);
+  const [aiTrends, setAiTrends] = useState([]);
+  const [aiTrendsLoading, setAiTrendsLoading] = useState(false);
+
+  const fetchAiUsageTrends = async (timeframeParam = aiTimeframe) => {
+    setAiTrendsLoading(true);
+    try {
+      const res = await fetch(`/api/admin/ai-usage?domain=${currentWebsite.domain}&timeframe=${timeframeParam}`);
+      const result = await res.json();
+      if (result.success) {
+        setAiUsageSummary(result.summary);
+        setAiTrends(result.trends || []);
+      }
+    } catch (err) {
+      console.error("Error fetching AI usage trends:", err);
+    } finally {
+      setAiTrendsLoading(false);
+    }
+  };
+
   // Re-sync all domain-specific local states whenever currentWebsite or domain changes (e.g. impersonation)
   useEffect(() => {
     setChatbotContent(chatbotKnowledge?.content || "");
@@ -154,8 +176,13 @@ export default function DashboardClient({
     setAnnouncementsList(notifications || []);
     setAnalyticsData(null);
     setVisitorsTrends([]);
+    setAiTrends([]);
+    setAiUsageSummary(null);
     if (activeTab === "analytics") {
       fetchAnalytics(analyticsTimeframe);
+    }
+    if (activeTab === "ia") {
+      fetchAiUsageTrends(aiTimeframe);
     }
   }, [currentWebsite.domain, chatbotKnowledge?.content, supportRequests, notifications]);
 
@@ -163,7 +190,10 @@ export default function DashboardClient({
     if (activeTab === "analytics" && !analyticsData && !analyticsLoading) {
       fetchAnalytics(analyticsTimeframe);
     }
-  }, [activeTab, analyticsTimeframe]);
+    if (activeTab === "ia" && aiTrends.length === 0 && !aiTrendsLoading) {
+      fetchAiUsageTrends(aiTimeframe);
+    }
+  }, [activeTab, analyticsTimeframe, aiTimeframe]);
 
   // Handle Update Booking Status
   const handleUpdateBookingStatus = async (bookingId, status) => {
@@ -2238,52 +2268,190 @@ export default function DashboardClient({
                   </span>
                 </div>
 
-                {/* Token Usage Stats */}
-                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 mb-8">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-xs font-black text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                      <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                      </svg>
-                      {t.iaTokenUsage}
-                    </h4>
-                  </div>
-                  {aiUsage.length === 0 ? (
-                    <p className="text-xs text-slate-400 italic py-4 text-center font-medium">{t.iaNoUsage}</p>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {(() => {
-                        const promptSum = aiUsage.reduce((acc, u) => acc + u.promptTokens, 0);
-                        const completionSum = aiUsage.reduce((acc, u) => acc + u.completionTokens, 0);
-                        const totalSum = aiUsage.reduce((acc, u) => acc + u.totalTokens, 0);
-                        return (
-                          <>
-                            <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs text-center glass-card-hover">
-                              <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaPromptTokens}</span>
-                              <span className="text-2xl font-black font-mono text-slate-900 block">{promptSum.toLocaleString()}</span>
-                              <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                <div className="bg-slate-700 h-full rounded-full" style={{ width: totalSum > 0 ? `${(promptSum / totalSum) * 100}%` : '0%' }}></div>
-                              </div>
-                            </div>
-                            <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs text-center glass-card-hover">
-                              <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaCompletionTokens}</span>
-                              <span className="text-2xl font-black font-mono text-slate-900 block">{completionSum.toLocaleString()}</span>
-                              <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                <div className="bg-slate-900 h-full rounded-full" style={{ width: totalSum > 0 ? `${(completionSum / totalSum) * 100}%` : '0%' }}></div>
-                              </div>
-                            </div>
-                            <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs text-center glass-card-hover">
-                              <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaTotalTokens}</span>
-                              <span className="text-2xl font-black font-mono text-slate-950 block">{totalSum.toLocaleString()}</span>
-                              <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                <div className="bg-blue-600 h-full rounded-full w-full"></div>
-                              </div>
-                            </div>
-                          </>
-                        );
-                      })()}
+                {/* Token Usage Stats & Interactive Graph Component */}
+                <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 mb-8 shadow-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                        ⚡
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">{t.iaTokenUsage}</h4>
+                        <p className="text-[11px] text-slate-500 font-medium">Consumo de tokens de IA para {currentWebsite.domain}</p>
+                      </div>
                     </div>
-                  )}
+
+                    {/* Timeframe selector: Día, Semana, Mes, Año, Todo */}
+                    <div className="flex items-center gap-1 bg-white border border-slate-200/80 p-1 rounded-2xl shadow-2xs">
+                      {[
+                        { key: "day", label: lang === "es" ? "Día" : "Day" },
+                        { key: "week", label: lang === "es" ? "Semana" : "Week" },
+                        { key: "month", label: lang === "es" ? "Mes" : "Month" },
+                        { key: "year", label: lang === "es" ? "Año" : "Year" },
+                        { key: "all", label: lang === "es" ? "Todo" : "All" }
+                      ].map(opt => (
+                        <button
+                          key={opt.key}
+                          type="button"
+                          onClick={() => {
+                            setAiTimeframe(opt.key);
+                            fetchAiUsageTrends(opt.key);
+                          }}
+                          disabled={aiTrendsLoading}
+                          className={`text-center py-1.5 px-3 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                            aiTimeframe === opt.key 
+                              ? "bg-slate-950 text-white shadow-xs scale-105" 
+                              : "text-slate-500 hover:text-slate-900"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Dynamic KPI Cards for AI Tokens */}
+                  {(() => {
+                    const pSum = aiUsageSummary ? aiUsageSummary.promptTokens : aiUsage.reduce((acc, u) => acc + u.promptTokens, 0);
+                    const cSum = aiUsageSummary ? aiUsageSummary.completionTokens : aiUsage.reduce((acc, u) => acc + u.completionTokens, 0);
+                    const tSum = aiUsageSummary ? aiUsageSummary.totalTokens : aiUsage.reduce((acc, u) => acc + u.totalTokens, 0);
+
+                    return (
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-2xs text-center glass-card-hover">
+                            <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaPromptTokens}</span>
+                            <span className="text-2xl font-black font-mono text-slate-900 block">{pSum.toLocaleString()}</span>
+                            <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                              <div className="bg-slate-700 h-full rounded-full" style={{ width: tSum > 0 ? `${(pSum / tSum) * 100}%` : '0%' }}></div>
+                            </div>
+                          </div>
+
+                          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-2xs text-center glass-card-hover">
+                            <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaCompletionTokens}</span>
+                            <span className="text-2xl font-black font-mono text-slate-900 block">{cSum.toLocaleString()}</span>
+                            <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                              <div className="bg-slate-950 h-full rounded-full" style={{ width: tSum > 0 ? `${(cSum / tSum) * 100}%` : '0%' }}></div>
+                            </div>
+                          </div>
+
+                          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-2xs text-center glass-card-hover">
+                            <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaTotalTokens}</span>
+                            <span className="text-2xl font-black font-mono text-slate-950 block">{tSum.toLocaleString()}</span>
+                            <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                              <div className="bg-blue-600 h-full rounded-full w-full"></div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Interactive Token Usage Line Chart */}
+                        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                              <span>📈</span>
+                              {lang === "es" ? "Gráfica de Consumo de Tokens" : "Token Usage Chart"}
+                            </h5>
+                            <span className="text-[10px] font-mono text-slate-400 font-bold">
+                              {aiTrends.length} {lang === "es" ? "registros" : "records"}
+                            </span>
+                          </div>
+
+                          {aiTrends.length === 0 ? (
+                            <p className="text-xs text-slate-400 italic py-8 text-center font-medium">
+                              {lang === "es" ? "No hay registros de consumo en este periodo." : "No token usage recorded in this period."}
+                            </p>
+                          ) : (
+                            <div className="w-full">
+                              {(() => {
+                                const maxVal = Math.max(...aiTrends.map(t => Number(t.totalTokens || 0)), 1);
+                                const width = 750;
+                                const height = 160;
+                                const spacing = aiTrends.length > 1 ? width / (aiTrends.length - 1) : width;
+
+                                const pts = aiTrends.map((t, idx) => {
+                                  const x = idx * spacing;
+                                  const y = height - (Number(t.totalTokens || 0) / maxVal) * (height - 30) - 15;
+                                  return `${x},${y}`;
+                                }).join(" ");
+
+                                const areaPts = aiTrends.length > 0
+                                  ? `0,${height} ${pts} ${width},${height}`
+                                  : "";
+
+                                return (
+                                  <div className="relative w-full">
+                                    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-44 overflow-visible">
+                                      <defs>
+                                        <linearGradient id="aiTokenGradient" x1="0" y1="0" x2="0" y2="1">
+                                          <stop offset="0%" stopColor="#2563eb" stopOpacity="0.25" />
+                                          <stop offset="100%" stopColor="#2563eb" stopOpacity="0.0" />
+                                        </linearGradient>
+                                      </defs>
+
+                                      {/* Grid lines */}
+                                      {[0.25, 0.5, 0.75].map((ratio) => (
+                                        <line
+                                          key={ratio}
+                                          x1="0"
+                                          y1={height * ratio}
+                                          x2={width}
+                                          y2={height * ratio}
+                                          stroke="#f1f5f9"
+                                          strokeDasharray="4 4"
+                                          strokeWidth="1"
+                                        />
+                                      ))}
+
+                                      {/* Area fill */}
+                                      <polygon points={areaPts} fill="url(#aiTokenGradient)" />
+
+                                      {/* Line path */}
+                                      <polyline points={pts} fill="none" stroke="#2563eb" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+
+                                      {/* Interactive Data points */}
+                                      {aiTrends.map((t, idx) => {
+                                        const x = idx * spacing;
+                                        const y = height - (Number(t.totalTokens || 0) / maxVal) * (height - 30) - 15;
+                                        return (
+                                          <g key={idx} className="group cursor-pointer">
+                                            {/* Hit target */}
+                                            <circle cx={x} cy={y} r="14" fill="transparent" />
+                                            {/* Visible dot */}
+                                            <circle cx={x} cy={y} r="5" className="fill-blue-600 stroke-white stroke-2 group-hover:scale-150 transition-all origin-center" />
+                                            
+                                            {/* Tooltip on hover */}
+                                            <foreignObject
+                                              x={Math.max(0, Math.min(width - 130, x - 65))}
+                                              y={Math.max(0, y - 55)}
+                                              width="130"
+                                              height="50"
+                                              className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30"
+                                            >
+                                              <div className="bg-slate-950 text-white text-[10px] p-2 rounded-xl shadow-xl text-center font-mono border border-slate-700">
+                                                <div className="text-slate-400 font-sans text-[9px] mb-0.5">{t.date}</div>
+                                                <div className="font-bold text-blue-400">{t.totalTokens.toLocaleString()} tokens</div>
+                                              </div>
+                                            </foreignObject>
+                                          </g>
+                                        );
+                                      })}
+                                    </svg>
+
+                                    {/* X-Axis labels */}
+                                    <div className="flex justify-between mt-3 text-[10px] font-mono text-slate-400 px-1 border-t border-slate-100 pt-2">
+                                      <span>{aiTrends[0]?.date}</span>
+                                      {aiTrends.length > 2 && <span>{aiTrends[Math.floor(aiTrends.length / 2)]?.date}</span>}
+                                      <span>{aiTrends[aiTrends.length - 1]?.date}</span>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Chatbot RAG Editor Form */}

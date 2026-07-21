@@ -35,8 +35,11 @@ function isValidUuid(val: string): boolean {
  * Persists and updates the monthly AI token usage aggregation in PostgreSQL.
  * Aggregates all completions in a single row per website/client/month.
  */
+import { clickhouseInsert } from "@/lib/clickhouse";
+
 async function saveTokenUsage(
   websiteId: string,
+  domain: string,
   promptTokens: number,
   completionTokens: number
 ): Promise<void> {
@@ -69,6 +72,39 @@ async function saveTokenUsage(
         totalTokens: BigInt(totalTokens),
       },
     });
+
+    // Also record event to ClickHouse for timeframe queries
+    await clickhouseInsert("analytics_events", [{
+      website_id: domain,
+      event_time: now.toISOString().replace("T", " ").replace("Z", ""),
+      visitor_id: globalThis.crypto ? globalThis.crypto.randomUUID() : require("crypto").randomUUID(),
+      session_id: globalThis.crypto ? globalThis.crypto.randomUUID() : require("crypto").randomUUID(),
+      event_type: "ai_chat_token",
+      page_url: "/api/chat",
+      page_title: "RAG Chatbot Execution",
+      referrer: "Internal AI Engine",
+      utm_source: "",
+      utm_medium: "",
+      utm_campaign: "",
+      utm_term: "",
+      utm_content: "",
+      country: "System",
+      region: "Internal",
+      city: "Server",
+      device_type: "API",
+      browser: "Node",
+      os: "Server",
+      screen_width: promptTokens,
+      screen_height: completionTokens,
+      duration_ms: promptTokens,
+      scroll_percent: completionTokens,
+      button_name: "chat_completion",
+      form_name: "rag_chatbot",
+      booking_id: "",
+      conversion: totalTokens,
+      ip_hash: "system_ai_execution",
+    }]).catch(err => logger.error("ClickHouse ai_chat_token insert warning:", err));
+
   } catch (error) {
     logger.error(`Failed to update AiUsageMonthly for websiteId: ${websiteId}`, error);
   }
@@ -307,8 +343,8 @@ export async function POST(request: NextRequest): Promise<Response> {
               }
             }
 
-            // Persist token usage in monthly aggregate database
-            await saveTokenUsage(website.id, promptTokens, completionTokens);
+            // Persist token usage in monthly aggregate database & ClickHouse
+            await saveTokenUsage(website.id, website.domain, promptTokens, completionTokens);
 
             const duration = Date.now() - startTime;
             logger.info(`Chat endpoint success for websiteId: ${website.id} (prompt_tokens: ${promptTokens}, completion_tokens: ${completionTokens}, source: ${usageSource}, duration: ${duration}ms)`);
