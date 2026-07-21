@@ -70,19 +70,6 @@ export async function POST(request) {
       where: { id: signupToken.id },
     });
 
-    // Log Signup Activity Notification in Prisma
-    try {
-      await prisma.notification.create({
-        data: {
-          title: "Nuevo Registro de Usuario",
-          message: `Alta y registro completado para ${updatedWebsite.displayName} (${updatedWebsite.domain})`,
-          websiteId: updatedWebsite.id,
-        },
-      });
-    } catch (notifErr) {
-      console.error("Failed to log signup notification:", notifErr);
-    }
-
     // 6. Log the client in automatically
     const sessionToken = await signJWT({
       id: updatedWebsite.id,

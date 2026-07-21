@@ -47,19 +47,6 @@ export async function POST(request) {
       role: website.role,
     });
 
-    // Log Login Activity Notification in Prisma
-    try {
-      await prisma.notification.create({
-        data: {
-          title: website.role === "ADMIN" ? "Inicio de Sesión Admin" : "Inicio de Sesión Usuario",
-          message: `Acceso al panel registrado para ${website.displayName} (${website.domain})`,
-          websiteId: website.id,
-        },
-      });
-    } catch (notifErr) {
-      console.error("Failed to log login notification:", notifErr);
-    }
-
     // Set cookie (HttpOnly, Secure, SameSite=Lax)
     const cookieStore = await cookies();
     cookieStore.set("spp_session", token, {

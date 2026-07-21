@@ -2068,52 +2068,6 @@ export default function DashboardClient({
                 );
               })()}
 
-              {/* Login & Signup Activity Feed Box */}
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm w-full">
-                <div className="flex justify-between items-center mb-5">
-                  <div>
-                    <h3 className="font-black text-base text-slate-950 flex items-center gap-2">
-                      <span className="text-lg">🔐</span>
-                      {lang === "es" ? "Inicios de Sesión y Registros Recientes" : "Recent Logins & User Activity"}
-                    </h3>
-                    <p className="text-xs text-slate-500 font-medium mt-0.5">
-                      {lang === "es" ? "Histórico de accesos y nuevos usuarios registrados en la plataforma" : "Logins and newly registered accounts"}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab("notificaciones")}
-                    className="text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 cursor-pointer transition-all"
-                  >
-                    {lang === "es" ? "Ver todas las notificaciones" : "View all notifications"}
-                  </button>
-                </div>
-                
-                {announcementsList.length === 0 ? (
-                  <p className="text-xs text-slate-400 italic py-6 text-center font-medium">No hay actividad de inicio de sesión registrada aún.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {announcementsList.slice(0, 5).map((ann) => (
-                      <div key={ann.id} className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 shadow-xs ${
-                            ann.title.includes("Admin") ? "bg-purple-100 text-purple-700" : ann.title.includes("Registro") ? "bg-emerald-100 text-emerald-700" : "bg-sky-100 text-sky-700"
-                          }`}>
-                            {ann.title.includes("Admin") ? "👑" : ann.title.includes("Registro") ? "✨" : "🔑"}
-                          </div>
-                          <div>
-                            <span className="font-extrabold text-slate-900 block">{ann.title}</span>
-                            <span className="text-slate-600 font-medium">{ann.message}</span>
-                          </div>
-                        </div>
-                        <span className="text-[10px] text-slate-400 font-mono font-bold shrink-0 self-start sm:self-center">
-                          {new Date(ann.createdAt).toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
               {/* Data Lists Briefs */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
                 {/* Contact List Box */}
