@@ -109,6 +109,11 @@ export default function DashboardClient({
   const [analyticsError, setAnalyticsError] = useState("");
   const [analyticsTimeframe, setAnalyticsTimeframe] = useState("week");
 
+  // Independent Visitors Line Chart State & Timeframe
+  const [visitorsTimeframe, setVisitorsTimeframe] = useState("week");
+  const [visitorsTrends, setVisitorsTrends] = useState([]);
+  const [visitorsTrendsLoading, setVisitorsTrendsLoading] = useState(false);
+
   const fetchAnalytics = async (timeframeParam = analyticsTimeframe) => {
     setAnalyticsLoading(true);
     setAnalyticsError("");
@@ -117,10 +122,28 @@ export default function DashboardClient({
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || "Failed to load analytics");
       setAnalyticsData(result.data);
+      if (result?.data?.trends && (visitorsTrends.length === 0 || visitorsTimeframe === timeframeParam)) {
+        setVisitorsTrends(result.data.trends);
+      }
     } catch (err) {
       setAnalyticsError(err.message);
     } finally {
       setAnalyticsLoading(false);
+    }
+  };
+
+  const fetchVisitorsTrends = async (timeframeParam) => {
+    setVisitorsTrendsLoading(true);
+    try {
+      const res = await fetch(`/api/admin/analytics?domain=${currentWebsite.domain}&timeframe=${timeframeParam}`);
+      const result = await res.json();
+      if (result?.data?.trends) {
+        setVisitorsTrends(result.data.trends);
+      }
+    } catch (err) {
+      console.error("Error fetching visitor trends:", err);
+    } finally {
+      setVisitorsTrendsLoading(false);
     }
   };
 
@@ -1617,10 +1640,16 @@ export default function DashboardClient({
                 </div>
               </div>
 
+              {/* Skeleton loading animation - ONLY rendered if data is truly loading for the first time */}
               {analyticsLoading && !analyticsData && (
-                <div className="flex flex-col items-center justify-center py-20 gap-4">
-                  <div className="w-12 h-12 border-4 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-sm text-slate-500 font-extrabold tracking-wide">Cargando métricas de ClickHouse...</span>
+                <div className="space-y-6 animate-pulse w-full">
+                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="h-24 bg-slate-100/90 rounded-2xl border border-slate-200/60"></div>
+                    ))}
+                  </div>
+                  <div className="h-64 bg-slate-100/90 rounded-3xl border border-slate-200/60"></div>
+                  <div className="h-64 bg-slate-100/90 rounded-3xl border border-slate-200/60"></div>
                 </div>
               )}
 
@@ -1661,9 +1690,9 @@ export default function DashboardClient({
                     </div>
                   </div>
 
-                  {/* Real ClickHouse Hourly/Daily Traffic Trend Line Chart */}
+                  {/* Independent Traffic Trend Line Chart */}
                   <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm w-full relative overflow-hidden">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-2xl bg-slate-950 text-white flex items-center justify-center font-bold shadow-md">
                           <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -1671,21 +1700,39 @@ export default function DashboardClient({
                           </svg>
                         </div>
                         <div>
-                          <h3 className="text-base font-black text-slate-950 uppercase tracking-wider">{t.analyticsTrafficVolume} (ClickHouse)</h3>
-                          <p className="text-xs text-slate-400 font-medium">Histórico real de peticiones de la base de datos</p>
+                          <h3 className="text-base font-black text-slate-950 uppercase tracking-wider">{t.analyticsTrafficVolume}</h3>
+                          <p className="text-xs text-slate-400 font-medium">Histórico de visitas e interacción</p>
                         </div>
                       </div>
-                      <span className="bg-slate-100 text-slate-800 text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider font-mono border border-slate-200">
-                        {analyticsTimeframe}
-                      </span>
+
+                      {/* Independent Timeframe Dropdown Select for Visitors Chart */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:inline-block">Periodo Gráfica:</span>
+                        <select
+                          value={visitorsTimeframe}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setVisitorsTimeframe(val);
+                            fetchVisitorsTrends(val);
+                          }}
+                          disabled={visitorsTrendsLoading}
+                          className="bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs px-3.5 py-1.5 rounded-xl font-bold border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-400 cursor-pointer transition-all shadow-xs"
+                        >
+                          <option value="day">{lang === "es" ? "Día" : "Day"}</option>
+                          <option value="week">{lang === "es" ? "Semana" : "Week"}</option>
+                          <option value="month">{lang === "es" ? "Mes" : "Month"}</option>
+                          <option value="year">{lang === "es" ? "Año" : "Year"}</option>
+                          <option value="all">{lang === "es" ? "Todo" : "All"}</option>
+                        </select>
+                      </div>
                     </div>
                     
-                    {analyticsData.trends.length === 0 ? (
-                      <p className="text-sm text-slate-400 py-12 text-center font-medium">No hay registros de tendencia en este rango de tiempo en ClickHouse.</p>
+                    {(visitorsTrends.length > 0 ? visitorsTrends : analyticsData.trends).length === 0 ? (
+                      <p className="text-sm text-slate-400 py-12 text-center font-medium">No hay registros de tendencia en este periodo.</p>
                     ) : (
                       <div className="w-full">
                         {(() => {
-                          const trendPoints = analyticsData.trends;
+                          const trendPoints = visitorsTrends.length > 0 ? visitorsTrends : analyticsData.trends;
                           const maxVal = Math.max(...trendPoints.map(t => Number(t.count || 0)), 1);
                           const width = 800;
                           const height = 200;
@@ -1728,20 +1775,37 @@ export default function DashboardClient({
                                     />
                                   )}
                                   
+                                  {/* Glitch-free, Lag-free Hover Points */}
                                   {trendPoints.map((t, idx) => {
                                     const x = idx * spacing;
                                     const y = height - (Number(t.count || 0) / maxVal) * (height - 30) - 15;
                                     return (
                                       <g key={idx} className="group cursor-pointer">
-                                        <circle cx={x} cy={y} r="6" fill="#0284c7" stroke="#ffffff" strokeWidth="2" className="transition-all group-hover:scale-150" />
-                                        <g className="opacity-0 group-hover:opacity-100 transition-all transform group-hover:-translate-y-1 pointer-events-none">
+                                        {/* Transparent Fixed Mouse Hit Area to prevent hover flicker */}
+                                        <circle cx={x} cy={y} r="14" fill="transparent" />
+
+                                        {/* Visible Animated Dot Circle */}
+                                        <circle 
+                                          cx={x} 
+                                          cy={y} 
+                                          r="5" 
+                                          fill="#0284c7" 
+                                          stroke="#ffffff" 
+                                          strokeWidth="2.5" 
+                                          className="pointer-events-none transition-transform duration-150 group-hover:scale-150" 
+                                        />
+
+                                        {/* Hover Tooltip Group */}
+                                        <g className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
                                           <rect x={x - 30} y={y - 32} width="60" height="22" rx="6" fill="#0f172a" />
                                           <text x={x} y={y - 18} fill="#ffffff" fontSize="9" fontWeight="900" textAnchor="middle" className="font-mono">
                                             {t.count} peticiones
                                           </text>
                                         </g>
+
+                                        {/* Date / Hour Label */}
                                         <text x={x} y={height + 15} fill="#64748b" fontSize="9" fontWeight="bold" textAnchor="middle" className="pointer-events-none font-mono">
-                                          {t.date ? t.date.split("-").slice(1).join("/") : t.hour + "h"}
+                                          {t.date ? t.date.split("-").slice(1).join("/") : (t.hour !== undefined ? t.hour + "h" : "")}
                                         </text>
                                       </g>
                                     );

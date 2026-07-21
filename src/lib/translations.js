@@ -200,14 +200,14 @@ export const translations = {
     
     // Analiticas Tab
     analyticsTitle: "Traffic Analytics",
-    analyticsSubtitle: "Real-time visitor metrics ingested from ClickHouse",
+    analyticsSubtitle: "Real-time visitor metrics",
     analyticsActiveUsers: "active users (last 5 min)",
     analyticsTotalHits: "Total Hits",
     analyticsUniques: "Unique Visitors",
     analyticsSessions: "Sessions",
     analyticsDuration: "Avg Session Duration",
     analyticsBounce: "Bounce Rate",
-    analyticsTrafficVolume: "Traffic Volume (Last 7 Days)",
+    analyticsTrafficVolume: "Traffic Volume",
     analyticsTopPages: "Top Visited Pages",
     analyticsReferrers: "Traffic Sources",
     analyticsGeo: "Geographic Origin",
