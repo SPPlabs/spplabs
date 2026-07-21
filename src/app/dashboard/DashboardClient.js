@@ -1431,22 +1431,6 @@ export default function DashboardClient({
       {/* RIGHT MAIN VIEWPORT */}
       <div className="flex-1 h-full flex flex-col overflow-hidden bg-slate-50 relative z-10">
 
-        {/* Minimal Top Header info panel */}
-        <header className="h-16 border-b border-slate-200/80 bg-white flex items-center justify-between px-8 shrink-0 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-xl font-mono border border-slate-200/60 shadow-xs flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              {currentWebsite.domain}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-slate-700 bg-slate-100/80 border border-slate-200 px-3 py-1 rounded-xl font-mono shadow-xs">
-              {session.domain}
-            </span>
-          </div>
-        </header>
-
         {/* Tab content viewport window */}
         <main className="flex-1 overflow-y-auto p-8 w-full max-w-full">
           {/* TAB: ADMIN PANEL (USUARIOS) */}
