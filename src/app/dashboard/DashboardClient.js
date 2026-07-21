@@ -1093,22 +1093,14 @@ export default function DashboardClient({
         {/* Minimal Top Header info panel */}
         <header className="h-16 border-b border-slate-200/80 bg-white flex items-center justify-between px-8 shrink-0 shadow-sm">
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 hover:bg-slate-100 text-slate-500 hover:text-slate-800 rounded-xl transition-all cursor-pointer border border-slate-200/60"
-              title={sidebarOpen ? (lang === "es" ? "Ocultar panel" : "Hide sidebar") : (lang === "es" ? "Mostrar panel" : "Show sidebar")}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
-              </svg>
-            </button>
-            <span className="text-xs font-bold text-slate-400 font-mono">
+            <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-xl font-mono border border-slate-200/60 shadow-xs flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               {currentWebsite.domain}
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg font-mono">
+            <span className="text-xs font-bold text-slate-700 bg-slate-100/80 border border-slate-200 px-3 py-1 rounded-xl font-mono shadow-xs">
               {session.domain}
             </span>
           </div>
@@ -1297,18 +1289,19 @@ export default function DashboardClient({
           {activeTab === "analytics" && (
             <div className="space-y-8 animate-fade-in w-full">
               {/* Header stats */}
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm w-full">
-                <div>
-                  <span className="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider font-mono">
+              <div className="bg-white border border-slate-200/80 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm w-full">
+                <div className="relative z-10">
+                  <span className="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider font-mono border border-slate-200/60 inline-flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
                     {currentWebsite.domain}
                   </span>
-                  <h2 className="text-2xl font-black mt-3 text-slate-950">{t.analyticsTitle}</h2>
-                  <p className="text-slate-500 text-sm mt-1">{t.analyticsSubtitle}</p>
+                  <h2 className="text-3xl font-black mt-3 text-slate-950 tracking-tight">{t.analyticsTitle}</h2>
+                  <p className="text-slate-500 text-sm mt-1 font-medium">{t.analyticsSubtitle}</p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4 relative z-10">
                   {/* Timeframe Buttons Switcher */}
-                  <div className="flex bg-slate-100 rounded-xl p-1 border border-slate-200/60 max-w-sm shrink-0">
+                  <div className="flex bg-slate-100/90 rounded-2xl p-1.5 border border-slate-200/80 max-w-sm shrink-0 shadow-inner">
                     {[
                       { key: "day", label: lang === "es" ? "Día" : "Day" },
                       { key: "week", label: lang === "es" ? "Semana" : "Week" },
@@ -1322,10 +1315,10 @@ export default function DashboardClient({
                           setAnalyticsTimeframe(opt.key);
                           fetchAnalytics(opt.key);
                         }}
-                        className={`text-center py-1.5 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        className={`text-center py-1.5 px-3.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                           analyticsTimeframe === opt.key 
-                            ? "bg-white text-slate-900 shadow-sm" 
-                            : "text-slate-500 hover:text-slate-800"
+                            ? "bg-white text-slate-900 shadow-md scale-105" 
+                            : "text-slate-500 hover:text-slate-900"
                         }`}
                       >
                         {opt.label}
@@ -1335,20 +1328,21 @@ export default function DashboardClient({
 
                   <div className="flex items-center gap-3">
                     {/* Real-time indicator */}
-                    <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2 text-brand-green font-bold text-xs">
-                      <span className="relative flex h-2 w-2">
+                    <div className="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200/80 rounded-2xl px-4 py-2 text-emerald-700 font-extrabold text-xs shadow-xs">
+                      <span className="relative flex h-2.5 w-2.5">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                       </span>
                       {(analyticsData?.overview?.active_visitors || 0) + " " + t.analyticsActiveUsers}
                     </div>
                     <button
                       onClick={() => fetchAnalytics(analyticsTimeframe)}
                       disabled={analyticsLoading}
-                      className="p-2.5 bg-slate-100 hover:bg-slate-250 border border-slate-200 text-slate-650 hover:text-slate-900 rounded-xl transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                      className="p-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-xs"
+                      title={lang === "es" ? "Actualizar analíticas" : "Refresh analytics"}
                     >
-                      <svg className={`w-5 h-5 ${analyticsLoading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3" />
+                      <svg className={`w-5 h-5 ${analyticsLoading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                       </svg>
                     </button>
                   </div>
@@ -1357,13 +1351,13 @@ export default function DashboardClient({
 
               {analyticsLoading && !analyticsData && (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
-                  <div className="w-10 h-10 border-4 border-brand-blue border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-sm text-slate-500 font-bold">Querying ClickHouse tables...</span>
+                  <div className="w-12 h-12 border-4 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-sm text-slate-500 font-extrabold tracking-wide">Cargando métricas de ClickHouse...</span>
                 </div>
               )}
 
               {analyticsError && (
-                <div className="bg-red-50 border border-red-200 text-red-800 text-sm p-4 rounded-xl">
+                <div className="bg-rose-50 border border-rose-200 text-rose-800 text-sm p-5 rounded-2xl font-semibold shadow-sm">
                   {analyticsError}
                 </div>
               )}
@@ -1372,51 +1366,61 @@ export default function DashboardClient({
                 <div className="space-y-8 w-full">
                   {/* Overview aggregate counters */}
                   <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 w-full">
-                    <div className="bg-slate-55 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
-                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">{t.analyticsTotalHits}</span>
-                      <span className="text-2xl font-black font-mono text-slate-900">{analyticsData.overview.visitors}</span>
+                    <div className="bg-white border border-slate-200/80 rounded-2xl p-5 text-center shadow-xs glass-card-hover hover:border-slate-400">
+                      <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1.5">{t.analyticsTotalHits}</span>
+                      <span className="text-3xl font-black font-mono text-slate-950 tracking-tight">{analyticsData.overview.visitors}</span>
                     </div>
-                    <div className="bg-slate-55 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
-                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">{t.analyticsUniques}</span>
-                      <span className="text-2xl font-black font-mono text-brand-blue">{analyticsData.overview.unique_visitors}</span>
+                    <div className="bg-white border border-slate-200/80 rounded-2xl p-5 text-center shadow-xs glass-card-hover hover:border-blue-400">
+                      <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1.5">{t.analyticsUniques}</span>
+                      <span className="text-3xl font-black font-mono text-blue-600 tracking-tight">{analyticsData.overview.unique_visitors}</span>
                     </div>
-                    <div className="bg-slate-55 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
-                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">{t.analyticsSessions}</span>
-                      <span className="text-2xl font-black font-mono text-brand-green">{analyticsData.overview.sessions}</span>
+                    <div className="bg-white border border-slate-200/80 rounded-2xl p-5 text-center shadow-xs glass-card-hover hover:border-emerald-400">
+                      <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1.5">{t.analyticsSessions}</span>
+                      <span className="text-3xl font-black font-mono text-emerald-600 tracking-tight">{analyticsData.overview.sessions}</span>
                     </div>
-                    <div className="bg-slate-55 border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
-                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">{t.analyticsDuration}</span>
-                      <span className="text-2xl font-black font-mono text-slate-900">{analyticsData.overview.avg_duration}s</span>
+                    <div className="bg-white border border-slate-200/80 rounded-2xl p-5 text-center shadow-xs glass-card-hover hover:border-indigo-400">
+                      <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1.5">{t.analyticsDuration}</span>
+                      <span className="text-3xl font-black font-mono text-slate-900 tracking-tight">{analyticsData.overview.avg_duration}s</span>
                     </div>
-                    <div className="bg-slate-55 border border-slate-200 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm">
-                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">{t.analyticsBounce}</span>
-                      <span className="text-2xl font-black font-mono text-red-500">{analyticsData.overview.bounce_rate}%</span>
+                    <div className="bg-white border border-slate-200/80 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-xs glass-card-hover hover:border-rose-400">
+                      <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1.5">{t.analyticsBounce}</span>
+                      <span className="text-3xl font-black font-mono text-rose-500 tracking-tight">{analyticsData.overview.bounce_rate}%</span>
                     </div>
                   </div>
 
-                  {/* Hourly/Daily Traffic Trend Line Chart (custom SVG line area chart) */}
-                  <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm w-full">
+                  {/* Hourly/Daily Traffic Trend Line Chart with Motion Graphics */}
+                  <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm w-full relative overflow-hidden">
                     <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">{t.analyticsTrafficVolume}</h3>
-                      <span className="bg-brand-blue/10 text-brand-blue text-xs px-3 py-0.5 rounded-full font-bold uppercase tracking-wider font-mono">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold shadow-md">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 005.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-base font-black text-slate-950 uppercase tracking-wider">{t.analyticsTrafficVolume}</h3>
+                          <p className="text-xs text-slate-400 font-medium">Volumen de tráfico y picos de interacción</p>
+                        </div>
+                      </div>
+                      <span className="bg-slate-100 text-slate-800 text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider font-mono border border-slate-200">
                         {analyticsTimeframe}
                       </span>
                     </div>
                     
                     {analyticsData.trends.length === 0 ? (
-                      <p className="text-sm text-slate-450 py-10 text-center">No trend data logged yet.</p>
+                      <p className="text-sm text-slate-400 py-12 text-center font-medium">No hay registros de tendencia en este rango.</p>
                     ) : (
                       <div className="w-full">
                         {(() => {
                           const trendPoints = analyticsData.trends;
                           const maxVal = Math.max(...trendPoints.map(t => Number(t.count || 0)), 1);
                           const width = 800;
-                          const height = 180;
+                          const height = 200;
                           const spacing = trendPoints.length > 1 ? width / (trendPoints.length - 1) : width;
                           
                           const pts = trendPoints.map((t, idx) => {
                             const x = idx * spacing;
-                            const y = height - (Number(t.count || 0) / maxVal) * (height - 20) - 10;
+                            const y = height - (Number(t.count || 0) / maxVal) * (height - 30) - 15;
                             return `${x},${y}`;
                           }).join(" ");
 
@@ -1426,35 +1430,55 @@ export default function DashboardClient({
 
                           return (
                             <div className="w-full overflow-x-auto">
-                              <div className="min-w-[600px] p-4">
-                                <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-48 overflow-visible">
+                              <div className="min-w-[650px] p-2">
+                                <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-52 overflow-visible">
                                   <defs>
-                                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                                      <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4"/>
-                                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0"/>
+                                    <linearGradient id="areaGradEnhanced" x1="0" y1="0" x2="0" y2="1">
+                                      <stop offset="0%" stopColor="#0f172a" stopOpacity="0.25"/>
+                                      <stop offset="100%" stopColor="#0f172a" stopOpacity="0.0"/>
                                     </linearGradient>
+                                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                      <feGaussianBlur stdDeviation="3" result="blur" />
+                                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                    </filter>
                                   </defs>
-                                  {/* Area Fill */}
-                                  {areaPts && <polygon points={areaPts} fill="url(#areaGrad)" />}
-                                  {/* Grid Lines */}
-                                  <line x1="0" y1={height - 10} x2={width} y2={height - 10} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 4" />
-                                  <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 4" />
-                                  <line x1="0" y1="10" x2={width} y2="10" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 4" />
+                                  {/* Background Grid Lines */}
+                                  <line x1="0" y1={height - 15} x2={width} y2={height - 15} stroke="#f1f5f9" strokeWidth="1.5" />
+                                  <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke="#f1f5f9" strokeWidth="1.5" strokeDasharray="6 6" />
+                                  <line x1="0" y1="15" x2={width} y2="15" stroke="#f1f5f9" strokeWidth="1.5" strokeDasharray="6 6" />
                                   
-                                  {/* Stroke Line */}
-                                  {pts && <polyline points={pts} fill="none" stroke="#3b82f6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />}
+                                  {/* Gradient Area Fill */}
+                                  {areaPts && <polygon points={areaPts} fill="url(#areaGradEnhanced)" />}
                                   
-                                  {/* Interactive Points */}
+                                  {/* Motion Graphic Stroke Line */}
+                                  {pts && (
+                                    <polyline 
+                                      points={pts} 
+                                      fill="none" 
+                                      stroke="#0f172a" 
+                                      strokeWidth="4" 
+                                      strokeLinecap="round" 
+                                      strokeLinejoin="round" 
+                                      filter="url(#glow)"
+                                      className="animate-chart-line"
+                                    />
+                                  )}
+                                  
+                                  {/* Interactive Animated Points */}
                                   {trendPoints.map((t, idx) => {
                                     const x = idx * spacing;
-                                    const y = height - (Number(t.count || 0) / maxVal) * (height - 20) - 10;
+                                    const y = height - (Number(t.count || 0) / maxVal) * (height - 30) - 15;
                                     return (
-                                      <g key={idx} className="group">
-                                        <circle cx={x} cy={y} r="5.5" fill="#3b82f6" stroke="#fff" strokeWidth="2.5" className="cursor-pointer transition-all group-hover:scale-125" />
-                                        <text x={x} y={y - 12} fill="#1e293b" fontSize="8" fontWeight="black" textAnchor="middle" className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none font-mono">
-                                          {t.count}
-                                        </text>
-                                        <text x={x} y={height + 10} fill="#94a3b8" fontSize="8" fontWeight="bold" textAnchor="middle" className="pointer-events-none">
+                                      <g key={idx} className="group cursor-pointer">
+                                        <circle cx={x} cy={y} r="8" fill="#0f172a" opacity="0.15" className="group-hover:scale-150 transition-transform" />
+                                        <circle cx={x} cy={y} r="5" fill="#0f172a" stroke="#ffffff" strokeWidth="2.5" className="transition-all group-hover:scale-125" />
+                                        <g className="opacity-0 group-hover:opacity-100 transition-all transform group-hover:-translate-y-1 pointer-events-none">
+                                          <rect x={x - 24} y={y - 32} width="48" height="22" rx="6" fill="#0f172a" />
+                                          <text x={x} y={y - 18} fill="#ffffff" fontSize="9" fontWeight="900" textAnchor="middle" className="font-mono">
+                                            {t.count}
+                                          </text>
+                                        </g>
+                                        <text x={x} y={height + 15} fill="#64748b" fontSize="9" fontWeight="bold" textAnchor="middle" className="pointer-events-none font-mono">
                                           {t.date.split("-").slice(1).join("/")}
                                         </text>
                                       </g>
@@ -1921,67 +1945,128 @@ export default function DashboardClient({
 
           {/* TAB: IA (CHATBOT CONFIG & METRICS) */}
           {activeTab === "ia" && (
-            <div className="space-y-8 animate-fade-in">
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-                <h3 className="text-lg font-bold mb-1 text-slate-900">{t.iaTitle}</h3>
-                <p className="text-sm text-slate-500 mb-6">{t.iaSubtitle}</p>
+            <div className="space-y-8 animate-fade-in w-full">
+              <div className="bg-white border border-slate-200/80 rounded-3xl p-6 md:p-8 shadow-sm">
+                {/* Section Header */}
+                <div className="flex items-start justify-between gap-4 mb-6 pb-6 border-b border-slate-100">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md shrink-0">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5a2.25 2.25 0 01.659 1.591v3.159a2.25 2.25 0 01-2.25 2.25H6.591A2.25 2.25 0 014.34 19.34v-3.159c0-.597.237-1.17.659-1.591L9.75 9.5" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-slate-950 tracking-tight">{t.iaTitle}</h3>
+                      <p className="text-sm text-slate-500 font-medium mt-0.5">{t.iaSubtitle}</p>
+                    </div>
+                  </div>
+                  <span className="bg-slate-100 text-slate-800 text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider font-mono border border-slate-200 shrink-0">
+                    RAG v2.0
+                  </span>
+                </div>
 
                 {/* Token Usage Stats */}
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-8">
-                  <h4 className="text-xs font-bold text-slate-500 mb-4 uppercase tracking-wide">{t.iaTokenUsage}</h4>
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 mb-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-xs font-black text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                      <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                      </svg>
+                      {t.iaTokenUsage}
+                    </h4>
+                  </div>
                   {aiUsage.length === 0 ? (
-                    <p className="text-xs text-slate-450 italic py-4">{t.iaNoUsage}</p>
+                    <p className="text-xs text-slate-400 italic py-4 text-center font-medium">{t.iaNoUsage}</p>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="bg-white border border-slate-250/60 p-4 rounded-xl shadow-sm text-center">
-                        <span className="text-slate-500 text-[10px] font-bold block uppercase tracking-wider mb-1">{t.iaPromptTokens}</span>
-                        <span className="text-xl font-black font-mono text-slate-900">{aiUsage.reduce((acc, u) => acc + u.promptTokens, 0)}</span>
-                      </div>
-                      <div className="bg-white border border-slate-250/60 p-4 rounded-xl shadow-sm text-center">
-                        <span className="text-slate-500 text-[10px] font-bold block uppercase tracking-wider mb-1">{t.iaCompletionTokens}</span>
-                        <span className="text-xl font-black font-mono text-slate-900">{aiUsage.reduce((acc, u) => acc + u.completionTokens, 0)}</span>
-                      </div>
-                      <div className="bg-white border border-slate-250/60 p-4 rounded-xl shadow-sm text-center">
-                        <span className="text-slate-500 text-[10px] font-bold block uppercase tracking-wider mb-1">{t.iaTotalTokens}</span>
-                        <span className="text-xl font-black font-mono text-brand-blue">{aiUsage.reduce((acc, u) => acc + u.totalTokens, 0)}</span>
-                      </div>
+                      {(() => {
+                        const promptSum = aiUsage.reduce((acc, u) => acc + u.promptTokens, 0);
+                        const completionSum = aiUsage.reduce((acc, u) => acc + u.completionTokens, 0);
+                        const totalSum = aiUsage.reduce((acc, u) => acc + u.totalTokens, 0);
+                        return (
+                          <>
+                            <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs text-center glass-card-hover">
+                              <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaPromptTokens}</span>
+                              <span className="text-2xl font-black font-mono text-slate-900 block">{promptSum.toLocaleString()}</span>
+                              <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                <div className="bg-slate-700 h-full rounded-full" style={{ width: totalSum > 0 ? `${(promptSum / totalSum) * 100}%` : '0%' }}></div>
+                              </div>
+                            </div>
+                            <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs text-center glass-card-hover">
+                              <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaCompletionTokens}</span>
+                              <span className="text-2xl font-black font-mono text-slate-900 block">{completionSum.toLocaleString()}</span>
+                              <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                <div className="bg-slate-900 h-full rounded-full" style={{ width: totalSum > 0 ? `${(completionSum / totalSum) * 100}%` : '0%' }}></div>
+                              </div>
+                            </div>
+                            <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs text-center glass-card-hover">
+                              <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaTotalTokens}</span>
+                              <span className="text-2xl font-black font-mono text-slate-950 block">{totalSum.toLocaleString()}</span>
+                              <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                <div className="bg-blue-600 h-full rounded-full w-full"></div>
+                              </div>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   )}
                 </div>
 
-                {/* Chatbot Knowledge Plain Text Box Form */}
+                {/* Chatbot RAG Editor Form */}
                 <form onSubmit={handleUpdateChatbotKnowledge} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-bold text-slate-800 mb-1">{t.iaRagContent}</label>
-                    <p className="text-xs text-slate-500 mb-3">{t.iaRagDesc}</p>
-                    <textarea
-                      value={chatbotContent}
-                      onChange={(e) => setChatbotContent(e.target.value)}
-                      placeholder={t.iaPlaceholder}
-                      className="w-full h-64 bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm text-slate-800 placeholder-slate-400 font-sans focus:outline-none focus:border-brand-blue focus:bg-white transition-all shadow-inner resize-y"
-                    />
+                  <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
+                    <div className="bg-slate-100 px-5 py-3 border-b border-slate-200/80 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full bg-rose-400 inline-block"></span>
+                        <span className="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
+                        <span className="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span>
+                        <span className="text-xs font-mono font-bold text-slate-600 ml-2">knowledge_base.txt</span>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold text-slate-400">
+                        {chatbotContent.length} chars
+                      </span>
+                    </div>
+
+                    <div className="p-4">
+                      <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">{t.iaRagContent}</label>
+                      <p className="text-xs text-slate-400 mb-3">{t.iaRagDesc}</p>
+                      <textarea
+                        value={chatbotContent}
+                        onChange={(e) => setChatbotContent(e.target.value)}
+                        placeholder={t.iaPlaceholder}
+                        className="w-full h-72 bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-800 placeholder-slate-400 font-mono focus:outline-none focus:border-slate-900 focus:bg-white transition-all resize-y leading-relaxed"
+                      />
+                    </div>
                   </div>
 
                   {iaSaved && (
-                    <div className="text-xs text-brand-green font-bold flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 p-3 rounded-lg animate-fade-in">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <div className="text-xs text-emerald-800 font-extrabold flex items-center gap-2 bg-emerald-50 border border-emerald-200 p-4 rounded-xl animate-fade-in shadow-xs">
+                      <svg className="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       {t.iaSavedSuccess}
                     </div>
                   )}
 
-                  <button
-                    type="submit"
-                    disabled={iaSaving}
-                    className="h-11 px-6 bg-slate-900 hover:bg-slate-850 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 flex items-center justify-center cursor-pointer"
-                  >
-                    {iaSaving ? (
-                      <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    ) : (
-                      t.iaSave
-                    )}
-                  </button>
+                  <div className="flex justify-end pt-2">
+                    <button
+                      type="submit"
+                      disabled={iaSaving}
+                      className="h-11 px-8 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-black shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 flex items-center justify-center cursor-pointer gap-2"
+                    >
+                      {iaSaving ? (
+                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                          </svg>
+                          {t.iaSave}
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </form>
               </div>
             </div>
