@@ -147,6 +147,39 @@ export default function DashboardClient({
     }
   };
 
+  // Chatbot Conversations State
+  const [conversationsList, setConversationsList] = useState([]);
+  const [conversationsLoading, setConversationsLoading] = useState(false);
+  const [selectedConversation, setSelectedConversation] = useState(null);
+
+  const fetchConversations = async () => {
+    setConversationsLoading(true);
+    try {
+      const res = await fetch(`/api/admin/conversations?domain=${currentWebsite.domain}`);
+      const data = await res.json();
+      if (data.success) {
+        setConversationsList(data.conversations || []);
+      }
+    } catch (err) {
+      console.error("Fetch conversations error:", err);
+    } finally {
+      setConversationsLoading(false);
+    }
+  };
+
+  const handleDeleteConversation = async (convId) => {
+    if (!confirm("¿Está seguro de que desea eliminar este registro de conversación?")) return;
+    try {
+      const res = await fetch(`/api/admin/conversations?id=${convId}`, { method: "DELETE" });
+      if (res.ok) {
+        setConversationsList(prev => prev.filter(c => c.id !== convId));
+        if (selectedConversation?.id === convId) setSelectedConversation(null);
+      }
+    } catch (err) {
+      console.error("Delete conversation error:", err);
+    }
+  };
+
   // Re-sync all domain-specific local states whenever currentWebsite or domain changes (e.g. impersonation)
   useEffect(() => {
     setChatbotContent(chatbotKnowledge?.content || "");
@@ -154,14 +187,22 @@ export default function DashboardClient({
     setAnnouncementsList(notifications || []);
     setAnalyticsData(null);
     setVisitorsTrends([]);
+    setConversationsList([]);
+    setSelectedConversation(null);
     if (activeTab === "analytics") {
       fetchAnalytics(analyticsTimeframe);
+    }
+    if (activeTab === "ia") {
+      fetchConversations();
     }
   }, [currentWebsite.domain, chatbotKnowledge?.content, supportRequests, notifications]);
 
   useEffect(() => {
     if (activeTab === "analytics" && !analyticsData && !analyticsLoading) {
       fetchAnalytics(analyticsTimeframe);
+    }
+    if (activeTab === "ia" && conversationsList.length === 0 && !conversationsLoading) {
+      fetchConversations();
     }
   }, [activeTab, analyticsTimeframe]);
 
@@ -2288,6 +2329,139 @@ export default function DashboardClient({
                     </div>
                   )}
                 </div>
+
+                {/* Visitor Chat Conversations History */}
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 mb-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.596.596 0 01-.744-.555c0-.125.034-.249.098-.35a6.046 6.046 0 00.865-2.222A8.134 8.134 0 013 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                        </svg>
+                        Historial de Conversaciones de Visitantes
+                      </h4>
+                      <p className="text-[11px] text-slate-500 font-medium mt-0.5">Registro de chats atendidos por la IA para {currentWebsite.domain}</p>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
+                      {conversationsList.length} chats
+                    </span>
+                  </div>
+
+                  {conversationsLoading ? (
+                    <div className="py-8 text-center text-xs text-slate-400 font-medium animate-pulse">
+                      Cargando conversaciones...
+                    </div>
+                  ) : conversationsList.length === 0 ? (
+                    <div className="bg-white border border-slate-200/80 rounded-xl p-8 text-center">
+                      <p className="text-xs text-slate-400 italic font-medium">No se han registrado conversaciones de visitantes aún.</p>
+                      <p className="text-[11px] text-slate-400 mt-1">Los diálogos entre visitantes y el chatbot de IA se guardarán automáticamente aquí.</p>
+                    </div>
+                  ) : (
+                    <div className="bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-2xs divide-y divide-slate-100">
+                      {conversationsList.map((conv) => (
+                        <div key={conv.id} className="p-4 hover:bg-slate-50/80 transition-all flex items-center justify-between gap-4">
+                          <div className="min-w-0 flex-1 cursor-pointer" onClick={() => setSelectedConversation(conv)}>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs font-black text-slate-900 font-mono">
+                                👤 {conv.visitorName || conv.visitorId}
+                              </span>
+                              <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">
+                                {conv.messageCount} msgs
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-mono ml-auto">
+                                {new Date(conv.lastMessageAt).toLocaleString("es-ES")}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-600 truncate font-medium">
+                              "{conv.firstMessageSnippet}"
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedConversation(conv)}
+                              className="px-3 py-1.5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-2xs transition-all cursor-pointer"
+                            >
+                              Ver Transcript
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteConversation(conv.id)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
+                              title="Eliminar conversación"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Conversation Transcript Modal */}
+                {selectedConversation && (
+                  <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+                    <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-fade-in flex flex-col max-h-[85vh]">
+                      <div className="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                        <div>
+                          <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                            <span>💬</span> Transcripción de la Conversación
+                          </h3>
+                          <p className="text-xs text-slate-500 font-mono mt-0.5">
+                            Visitante: {selectedConversation.visitorName || selectedConversation.visitorId} • {new Date(selectedConversation.startedAt).toLocaleString("es-ES")}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedConversation(null)}
+                          className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-bold text-xs transition-all cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      <div className="p-6 overflow-y-auto flex-1 space-y-4 bg-slate-100/50">
+                        {selectedConversation.messages?.map((msg, idx) => (
+                          <div
+                            key={msg.id || idx}
+                            className={`flex flex-col ${msg.sender === "VISITOR" ? "items-start" : "items-end"}`}
+                          >
+                            <div className="flex items-center gap-1.5 mb-1 px-1">
+                              <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">
+                                {msg.sender === "VISITOR" ? `Visitante (${selectedConversation.visitorId})` : "Asistente IA SPP"}
+                              </span>
+                              <span className="text-[9px] text-slate-300">
+                                {new Date(msg.createdAt).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
+                              </span>
+                            </div>
+                            <div
+                              className={`p-4 rounded-2xl max-w-[85%] text-xs leading-relaxed shadow-2xs font-medium whitespace-pre-wrap ${
+                                msg.sender === "VISITOR"
+                                  ? "bg-white text-slate-900 border border-slate-200/80 rounded-tl-none"
+                                  : "bg-slate-950 text-white rounded-tr-none"
+                              }`}
+                            >
+                              {msg.content}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="p-4 border-t border-slate-200 bg-white flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedConversation(null)}
+                          className="px-5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+                        >
+                          Cerrar Transcripción
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Chatbot RAG Editor Form */}
                 <form onSubmit={handleUpdateChatbotKnowledge} className="space-y-4">

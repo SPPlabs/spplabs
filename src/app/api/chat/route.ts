@@ -254,10 +254,57 @@ export async function POST(request: NextRequest): Promise<Response> {
     // TODO: [Future Rate Limiting Insertion Point]
     // Insert rate limiting execution here utilizing the authenticated website.id.
     // Order: Authentication -> Rate Limiting -> RAG Retrieval -> LLM Generation -> Token Tracking.
-
     // 8. RAG context retrieval (strictly isolated by the validated website.id)
     const rawContexts = await retrieveContext(website.id, message);
     const context = buildContext(rawContexts);
+
+    // Record Visitor Message into PostgreSQL using withRLS
+    let conversationId = body.conversation_id || body.conversationId;
+    const visitorId = body.visitor_id || body.visitorId || "visitor_" + Date.now();
+    const rlsDb = withRLS(website.id);
+
+    let activeConversation = null;
+    if (conversationId && isValidUuid(conversationId)) {
+      try {
+        activeConversation = await rlsDb.chatConversation.findUnique({
+          where: { id: conversationId },
+        });
+      } catch (e) {
+        logger.warn("Conversation lookup warning:", e);
+      }
+    }
+
+    if (!activeConversation) {
+      try {
+        activeConversation = await rlsDb.chatConversation.create({
+          data: {
+            websiteId: website.id,
+            visitorId: visitorId,
+            visitorName: body.visitor_name || body.visitorName || null,
+            visitorEmail: body.visitor_email || body.visitorEmail || null,
+            status: "ACTIVE",
+          },
+        });
+        conversationId = activeConversation.id;
+      } catch (e) {
+        logger.error("Failed to create ChatConversation:", e);
+      }
+    }
+
+    if (activeConversation) {
+      try {
+        await rlsDb.chatMessage.create({
+          data: {
+            conversationId: activeConversation.id,
+            sender: "VISITOR",
+            content: message.trim(),
+            tokens: 0,
+          },
+        });
+      } catch (e) {
+        logger.error("Failed to save VISITOR message:", e);
+      }
+    }
 
     // 9. Prompt formatting
     const formattedPrompt = await ragPromptTemplate.formatMessages({
@@ -343,6 +390,23 @@ export async function POST(request: NextRequest): Promise<Response> {
               }
             }
 
+            // Persist AI Response Message in ChatConversation
+            if (activeConversation && fullCompletionText.trim()) {
+              await rlsDb.chatMessage.create({
+                data: {
+                  conversationId: activeConversation.id,
+                  sender: "BOT",
+                  content: fullCompletionText.trim(),
+                  tokens: promptTokens + completionTokens,
+                },
+              }).catch((e: unknown) => logger.error("Failed to save BOT message:", e));
+
+              await rlsDb.chatConversation.update({
+                where: { id: activeConversation.id },
+                data: { lastMessageAt: new Date() },
+              }).catch((e: unknown) => logger.error("Failed to update lastMessageAt:", e));
+            }
+
             // Persist token usage in monthly aggregate database & ClickHouse
             await saveTokenUsage(website.id, website.domain, promptTokens, completionTokens);
 
@@ -368,7 +432,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     });
 
   } catch (error) {
-    logger.error("Chatbot API endpoint failure:", error);
-    return jsonResponse({ error: "Internal Server Error", message: "Failed to generate chat response." }, 500, corsHeaders);
+    logger.error("Chat endpoint error:", error);
+    return jsonResponse({ error: "Internal Server Error", message: "Failed to process chat request." }, 500, corsHeaders);
   }
 }
