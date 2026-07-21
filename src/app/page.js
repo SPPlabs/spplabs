@@ -1763,38 +1763,7 @@ export default function Home() {
           </section>
         )}
 
-        {/* Global CTA Banner (shown on all pages except Contacto) */}
-        {activePage !== "contacto" && (
-          <section className="py-24 bg-white">
-            <div className="max-w-4xl mx-auto px-6 text-center border border-zinc-200 rounded-3xl p-16 shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-brand-blue/5 rounded-bl-full"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-brand-green/5 rounded-tr-full"></div>
-              
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black mb-6">
-                {lang === "es" ? "Organice sus operaciones hoy mismo." : "Orchestrate your operations today."}
-              </h2>
-              <p className="text-zinc-650 max-w-lg mx-auto mb-10 text-sm leading-relaxed">
-                {lang === "es" ? "Desbloquee ejecución de consultas en milisegundos, reglas de escalado automático y flujos estructurados. Pruebe SPP Labs gratis por 14 días." : "Unlock millisecond query execution, automated scaling rules, and structured workflows. Try SPP Labs for 14 days free."}
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <a
-                  href="/login"
-                  className="inline-flex items-center justify-center px-8 h-12 text-sm font-bold bg-black text-white rounded-lg hover:bg-brand-blue transition-colors duration-300 cursor-pointer"
-                  id="footer-banner-cta-primary"
-                >
-                  {t.navDashboard}
-                </a>
-                <button
-                  onClick={() => setActivePage("contacto")}
-                  className="inline-flex items-center justify-center px-8 h-12 text-sm font-bold bg-white text-black border border-zinc-300 rounded-lg hover:border-black transition-colors duration-300 cursor-pointer"
-                  id="footer-banner-cta-secondary"
-                >
-                  {lang === "es" ? "Programar Consulta" : "Book Free Call"}
-                </button>
-              </div>
-            </div>
-          </section>
-        )}
+
       </main>
 
       {/* Footer */}
