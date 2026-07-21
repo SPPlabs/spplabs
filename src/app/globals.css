@@ -828,5 +828,37 @@ body {
 .delay-4 { animation-delay: 2.4s; }
 .delay-5 { animation-delay: 3s; }
 
+/* Slanted Bar & Arc Gauge Animations */
+@keyframes barSlantedGrow {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes arcGaugeSweep {
+  0% {
+    stroke-dashoffset: 280;
+  }
+  100% {
+    stroke-dashoffset: 70;
+  }
+}
+
+.animate-slanted-bar {
+  transform-origin: bottom;
+  animation: barSlantedGrow 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-arc-gauge {
+  stroke-dasharray: 280;
+  animation: arcGaugeSweep 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
 
 

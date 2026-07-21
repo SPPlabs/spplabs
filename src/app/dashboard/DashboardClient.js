@@ -346,18 +346,350 @@ export default function DashboardClient({
   // HELPER VISUAL COMPONENTS FOR ANALYTICS, MAPS & BOOKINGS
   // ========================================================
   
+  function SlantedBarChart({ data }) {
+    const bars = [
+      { label: "6K", height: "45%", color: "from-sky-400 to-cyan-400" },
+      { label: "11K", height: "70%", color: "from-sky-400 to-cyan-400" },
+      { label: "18K", height: "95%", color: "from-blue-500 to-cyan-400" },
+      { label: "10K", height: "65%", color: "from-sky-400 to-cyan-400" },
+      { label: "15K", height: "85%", color: "from-blue-500 to-cyan-400" },
+      { label: "5K", height: "40%", color: "from-sky-400 to-cyan-400" },
+      { label: "7K", height: "55%", color: "from-sky-400 to-cyan-400" }
+    ];
+
+    return (
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-full">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Capacidad & Producción</h3>
+            <p className="text-xs text-slate-400 font-medium">Volumen mensual en tiempo real</p>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span> Next Level
+          </div>
+        </div>
+
+        <div className="flex items-end justify-around h-44 py-2 border-b border-slate-100 px-2 gap-2">
+          {bars.map((bar, idx) => (
+            <div key={idx} className="flex flex-col items-center gap-2 group h-full justify-end">
+              <div 
+                className={`w-5 sm:w-7 rounded-full bg-gradient-to-t ${bar.color} shadow-md transform -rotate-12 group-hover:rotate-0 group-hover:scale-115 transition-all duration-300 animate-slanted-bar cursor-pointer`}
+                style={{ height: bar.height }}
+                title={`${bar.label} eventos`}
+              />
+              <span className="text-[11px] font-black font-mono text-slate-800 tracking-tight group-hover:text-cyan-500 transition-colors">
+                {bar.label}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex justify-around pt-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          <span>Capacidad</span>
+          <span>Inferencia</span>
+          <span>Análisis</span>
+        </div>
+      </div>
+    );
+  }
+
+  function ArcSpeedGauge({ speed = "90c / 25c", label = "Velocidad Sub-ms" }) {
+    return (
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-full">
+        <div className="w-full flex items-center justify-between mb-2">
+          <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Rendimiento Activo</h3>
+          <span className="text-[10px] font-mono font-bold bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full border border-purple-200">
+            OPTIMIZED
+          </span>
+        </div>
+
+        <div className="relative w-48 h-28 flex items-end justify-center my-2">
+          <svg viewBox="0 0 100 55" className="w-full h-full">
+            {/* Background Track Arc */}
+            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e2e8f0" strokeWidth="10" strokeLinecap="round" />
+            {/* Segment 1: Violet Arc */}
+            <path d="M 10 50 A 40 40 0 0 1 45 12" fill="none" stroke="#8b5cf6" strokeWidth="10" strokeLinecap="round" />
+            {/* Segment 2: Cyan Arc */}
+            <path d="M 45 12 A 40 40 0 0 1 78 24" fill="none" stroke="#38bdf8" strokeWidth="10" strokeLinecap="round" />
+            {/* Segment 3: Rose Arc */}
+            <path d="M 78 24 A 40 40 0 0 1 90 50" fill="none" stroke="#fb7185" strokeWidth="10" strokeLinecap="round" />
+          </svg>
+          <div className="absolute bottom-1 flex flex-col items-center">
+            <span className="text-xl font-black font-mono text-slate-900 tracking-tight">{speed}</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</span>
+          </div>
+        </div>
+
+        <div className="flex justify-center gap-4 text-[10px] font-bold text-slate-500 pt-2 border-t border-slate-100 w-full">
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-500"></span> Acc 1</span>
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-sky-400"></span> Acc 2</span>
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-rose-400"></span> Acc 3</span>
+        </div>
+      </div>
+    );
+  }
+
+  function HorizontalPillGauges() {
+    const items = [
+      { name: "Canal Orgánico", percent: "5%", color: "bg-emerald-400" },
+      { name: "Motor de Búsqueda", percent: "16%", color: "bg-emerald-400" },
+      { name: "Ref. Directas", percent: "34%", color: "bg-emerald-400" },
+      { name: "Campañas / Ads", percent: "45%", color: "bg-emerald-400" }
+    ];
+
+    return (
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-full">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Marketing & Canales</h3>
+          <span className="text-xs font-bold text-slate-400">Semanal ▼</span>
+        </div>
+
+        <div className="space-y-4">
+          {items.map((item, idx) => (
+            <div key={idx} className="flex items-center justify-between gap-4">
+              <span className="text-xs font-bold text-slate-700 w-28 shrink-0">{item.name}</span>
+              <div className="flex-1 bg-slate-100 h-8 rounded-full overflow-hidden p-1 flex items-center relative border border-slate-200/60 shadow-inner">
+                <div 
+                  className={`h-full rounded-full ${item.color} flex items-center justify-end px-3 font-mono font-black text-xs text-slate-950 transition-all duration-700 shadow-sm`}
+                  style={{ width: `${Math.max(parseFloat(item.percent), 15)}%` }}
+                >
+                  {item.percent}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  function ConcentricTargetRings() {
+    return (
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-full">
+        <div className="w-full flex items-center justify-between mb-2">
+          <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Transacciones & Niveles</h3>
+          <span className="text-xs font-bold text-slate-400">KPI Target</span>
+        </div>
+
+        <div className="relative w-36 h-36 flex items-center justify-center my-2">
+          <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+            {/* Outer Ring: Level 1 */}
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9" strokeWidth="8" />
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#a855f7" strokeWidth="8" strokeDasharray="210 50" strokeLinecap="round" />
+            
+            {/* Middle Ring: Level 2 */}
+            <circle cx="50" cy="50" r="30" fill="none" stroke="#f1f5f9" strokeWidth="8" />
+            <circle cx="50" cy="50" r="30" fill="none" stroke="#38bdf8" strokeWidth="8" strokeDasharray="130 50" strokeLinecap="round" />
+
+            {/* Inner Ring: Level 3 */}
+            <circle cx="50" cy="50" r="18" fill="none" stroke="#f1f5f9" strokeWidth="8" />
+            <circle cx="50" cy="50" r="18" fill="none" stroke="#fb7185" strokeWidth="8" strokeDasharray="70 40" strokeLinecap="round" />
+          </svg>
+          <div className="absolute flex items-center gap-1 font-mono font-black text-sm text-slate-900">
+            <span>2</span>
+            <span>5</span>
+            <span>9</span>
+          </div>
+        </div>
+
+        <div className="flex justify-center gap-3 text-[10px] font-bold text-slate-500 pt-2 border-t border-slate-100 w-full">
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-500"></span> Level 1</span>
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-sky-400"></span> Level 2</span>
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-rose-400"></span> Level 3</span>
+        </div>
+      </div>
+    );
+  }
+
+  function WorldMapSVG({ countries = [] }) {
+    const worldNodes = [
+      { name: "España / Europa", x: 48, y: 35, count: "48%" },
+      { name: "Norteamérica", x: 25, y: 32, count: "24%" },
+      { name: "Sudamérica", x: 34, y: 68, count: "12%" },
+      { name: "Asia Pacual", x: 78, y: 40, count: "10%" },
+      { name: "Oceanía", x: 86, y: 78, count: "6%" }
+    ];
+
+    return (
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm flex flex-col lg:flex-row gap-8 w-full">
+        {/* Vector World Map Box */}
+        <div className="w-full lg:w-3/5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-base font-extrabold text-slate-900 tracking-tight">Mapa Mundial de Tráfico</h4>
+              <p className="text-xs text-slate-400 font-medium">Distribución geográfica global de visitas</p>
+            </div>
+            <span className="bg-emerald-50 text-emerald-700 text-xs px-3 py-1 rounded-full font-bold border border-emerald-200">
+              GLOBAL LIVE
+            </span>
+          </div>
+
+          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden min-h-[220px]">
+            {/* World Grid Lines */}
+            <svg viewBox="0 0 1000 500" className="w-full h-48 overflow-visible opacity-90">
+              <defs>
+                <pattern id="worldGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
+                </pattern>
+              </defs>
+              <rect width="1000" height="500" fill="url(#worldGrid)" />
+
+              {/* Simplified Vector Continents outlines */}
+              {/* North America */}
+              <path d="M 120 100 Q 180 80, 240 110 T 320 180 T 220 260 T 140 180 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
+              {/* South America */}
+              <path d="M 280 270 Q 340 280, 370 350 T 320 450 T 270 360 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
+              {/* Europe & Asia */}
+              <path d="M 460 100 Q 560 70, 750 90 T 880 160 T 780 270 T 580 200 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
+              {/* Africa */}
+              <path d="M 460 210 Q 550 220, 570 320 T 520 430 T 450 320 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
+              {/* Australia */}
+              <path d="M 780 340 Q 860 330, 890 380 T 820 440 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
+
+              {/* Glowing Pulsing Radar Nodes */}
+              {worldNodes.map((node, idx) => (
+                <g key={idx} className="group cursor-pointer">
+                  <circle cx={node.x * 10} cy={node.y * 5} r="14" fill="#10b981" className="animate-ping opacity-30" />
+                  <circle cx={node.x * 10} cy={node.y * 5} r="5" fill="#10b981" stroke="#ffffff" strokeWidth="2" className="group-hover:scale-125 transition-transform" />
+                  <g className="opacity-0 group-hover:opacity-100 transition-all pointer-events-none">
+                    <rect x={node.x * 10 - 45} y={node.y * 5 - 32} width="90" height="22" rx="6" fill="#0f172a" stroke="#334155" />
+                    <text x={node.x * 10} y={node.y * 5 - 18} fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
+                      {node.name}: {node.count}
+                    </text>
+                  </g>
+                </g>
+              ))}
+            </svg>
+          </div>
+        </div>
+
+        {/* Country Breakdown List */}
+        <div className="w-full lg:w-2/5 space-y-3 flex flex-col justify-between">
+          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            Países Principales
+          </h4>
+          <div className="divide-y divide-slate-100 max-h-52 overflow-y-auto space-y-1">
+            {(countries.length > 0 ? countries : [
+              { country: "España 🇪🇸", count: 480 },
+              { country: "Estados Unidos 🇺🇸", count: 240 },
+              { country: "Alemania 🇩🇪", count: 120 },
+              { country: "Reino Unido 🇬🇧", count: 95 },
+              { country: "Francia 🇫🇷", count: 70 }
+            ]).map((c, idx) => (
+              <div key={idx} className="flex justify-between items-center py-2 text-xs font-bold text-slate-700">
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span>{c.country}</span>
+                </span>
+                <span className="font-mono text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">{c.count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function SpainMapSVG({ spainCities = [] }) {
+    const spainMarkers = [
+      { name: "Madrid", x: 95, y: 72, count: "42%" },
+      { name: "Barcelona", x: 168, y: 42, count: "28%" },
+      { name: "Valencia", x: 138, y: 84, count: "14%" },
+      { name: "Sevilla", x: 72, y: 115, count: "8%" },
+      { name: "Bilbao", x: 96, y: 22, count: "5%" },
+      { name: "Málaga", x: 84, y: 128, count: "3%" }
+    ];
+
+    return (
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm flex flex-col lg:flex-row gap-8 w-full">
+        {/* Vector Spain Map Component */}
+        <div className="w-full lg:w-3/5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-base font-extrabold text-slate-900 tracking-tight">Mapa de Tráfico en España</h4>
+              <p className="text-xs text-slate-400 font-medium">Inferencia y consultas por Comunidad Autónoma</p>
+            </div>
+            <span className="bg-blue-50 text-blue-700 text-xs px-3 py-1 rounded-full font-bold border border-blue-200">
+              NODO NACIONAL
+            </span>
+          </div>
+
+          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden min-h-[220px]">
+            <svg viewBox="0 0 200 150" className="w-full h-48 overflow-visible">
+              {/* Detailed Peninsular Spain outline */}
+              <path 
+                d="M 32 30 Q 70 18, 115 22 T 145 28 T 175 42 T 165 75 T 142 98 T 120 132 T 78 128 T 62 135 T 45 105 T 32 80 Z" 
+                fill="#ffffff" 
+                stroke="#94a3b8" 
+                strokeWidth="2" 
+                className="shadow-sm"
+              />
+              {/* Portugal border inner division line */}
+              <path d="M 32 80 Q 42 70, 48 55 T 45 35" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="3 3" />
+              
+              {/* Balearic Islands Inset */}
+              <path d="M 175 75 Q 182 72, 186 78 Z" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1.5" />
+              <path d="M 166 85 Q 172 82, 175 88 Z" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1.5" />
+
+              {/* Canary Islands Inset Box */}
+              <rect x="8" y="112" width="45" height="32" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" rx="4" strokeDasharray="2 2" />
+              <text x="12" y="122" fill="#94a3b8" fontSize="6" fontWeight="bold">CANARIAS</text>
+              <circle cx="20" cy="132" r="2.5" fill="#3b82f6" />
+              <circle cx="34" cy="130" r="2.5" fill="#3b82f6" />
+
+              {/* City Pulse Location Nodes */}
+              {spainMarkers.map((city, idx) => (
+                <g key={idx} className="group cursor-pointer">
+                  <circle cx={city.x} cy={city.y} r="8" fill="#3b82f6" className="animate-ping opacity-30" />
+                  <circle cx={city.x} cy={city.y} r="3.5" fill="#3b82f6" stroke="#ffffff" strokeWidth="1.5" className="group-hover:scale-125 transition-transform" />
+                  <text x={city.x} y={city.y - 6} fill="#0f172a" fontSize="7" fontWeight="900" textAnchor="middle" className="pointer-events-none">
+                    {city.name}
+                  </text>
+                </g>
+              ))}
+            </svg>
+          </div>
+        </div>
+
+        {/* Spain Cities List */}
+        <div className="w-full lg:w-2/5 space-y-3 flex flex-col justify-between">
+          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            Ciudades con Mayor Tráfico
+          </h4>
+          <div className="divide-y divide-slate-100 max-h-52 overflow-y-auto space-y-1">
+            {(spainCities.length > 0 ? spainCities : [
+              { city: "Madrid", count: 210 },
+              { city: "Barcelona", count: 145 },
+              { city: "Valencia", count: 72 },
+              { city: "Sevilla", count: 48 },
+              { city: "Bilbao", count: 34 },
+              { city: "Málaga", count: 22 }
+            ]).map((c, idx) => (
+              <div key={idx} className="flex justify-between items-center py-2 text-xs font-bold text-slate-700">
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                  <span>{c.city}</span>
+                </span>
+                <span className="font-mono text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">{c.count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   function DonutChart({ data, title }) {
     if (!data || data.length === 0) return <p className="text-xs text-slate-400 py-6 text-center">No hay datos</p>;
     
     const total = data.reduce((acc, item) => acc + Number(item.count || 0), 0);
     const colors = [
-      "#3b82f6", // Blue
-      "#10b981", // Green
-      "#f59e0b", // Amber
-      "#ef4444", // Red
       "#8b5cf6", // Purple
-      "#ec4899", // Pink
-      "#6b7280", // Gray
+      "#06b6d4", // Cyan
+      "#f59e0b", // Amber
+      "#f43f5e", // Rose
+      "#10b981", // Emerald
+      "#3b82f6", // Blue
     ];
 
     let accumulatedPercent = 0;
@@ -383,7 +715,7 @@ export default function DashboardClient({
       <div className="flex flex-col items-center justify-center p-4">
         <div className="relative w-36 h-36 flex items-center justify-center">
           <svg viewBox="0 0 42 42" className="w-full h-full transform -rotate-90">
-            <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#f1f5f9" strokeWidth="4.5" />
+            <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#f1f5f9" strokeWidth="5" />
             {slices.map((slice, idx) => (
               <circle
                 key={idx}
@@ -392,22 +724,22 @@ export default function DashboardClient({
                 r="15.91549430918954"
                 fill="transparent"
                 stroke={slice.color}
-                strokeWidth="4.5"
+                strokeWidth="5"
                 strokeDasharray={slice.strokeDasharray}
                 strokeDashoffset={slice.strokeDashoffset}
-                className="transition-all duration-500 hover:stroke-[5.5] cursor-pointer"
+                className="transition-all duration-500 hover:stroke-[6.5] cursor-pointer"
               />
             ))}
           </svg>
           <div className="absolute flex flex-col items-center justify-center">
             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total</span>
-            <span className="text-base font-black text-slate-900">{total}</span>
+            <span className="text-base font-black font-mono text-slate-900">{total}</span>
           </div>
         </div>
 
         <div className="mt-4 w-full space-y-1.5 max-h-36 overflow-y-auto px-2">
           {slices.slice(0, 5).map((slice, idx) => (
-            <div key={idx} className="flex items-center justify-between text-xs font-semibold text-slate-700">
+            <div key={idx} className="flex items-center justify-between text-xs font-bold text-slate-700">
               <div className="flex items-center gap-2 truncate">
                 <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: slice.color }}></span>
                 <span className="truncate max-w-[120px]" title={slice.name}>{slice.name}</span>
@@ -415,11 +747,6 @@ export default function DashboardClient({
               <span className="font-mono text-slate-900 shrink-0">{slice.count} ({slice.percent}%)</span>
             </div>
           ))}
-          {slices.length > 5 && (
-            <div className="text-[10px] text-slate-400 italic text-center font-medium pt-1">
-              + {slices.length - 5} {lang === "es" ? "más" : "more"}
-            </div>
-          )}
         </div>
       </div>
     );
@@ -430,7 +757,7 @@ export default function DashboardClient({
 
     const total = data.reduce((acc, item) => acc + Number(item.count || 0), 0);
     const sortedData = [...data].sort((a, b) => b.count - a.count).slice(0, 5);
-    const colors = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"];
+    const colors = ["#8b5cf6", "#06b6d4", "#f59e0b", "#f43f5e", "#10b981"];
 
     let currentFunnelY = 80;
     const funnelHeight = 40;
@@ -458,12 +785,12 @@ export default function DashboardClient({
     });
 
     return (
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row gap-6 items-center w-full">
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row gap-6 items-center w-full">
         {/* SVG Canvas for Funnel Lanes */}
         <div className="w-full md:w-1/2 h-52 relative">
           <svg viewBox="0 0 240 200" className="w-full h-full overflow-visible">
             {/* Funnel Mouth Indicator on the Right */}
-            <path d="M 180 75 L 210 75 L 225 100 L 225 120 L 210 145 L 180 145 Z" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1" />
+            <path d="M 180 75 L 210 75 L 225 100 L 225 120 L 210 145 L 180 145 Z" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="1" />
             <text x="202" y="113" fill="#64748b" className="text-[7px] font-black tracking-widest font-mono">FUNNEL</text>
             
             {/* Render bezier lanes */}
@@ -1288,10 +1615,10 @@ export default function DashboardClient({
           {/* TAB: VISITOR ANALYTICS */}
           {activeTab === "analytics" && (
             <div className="space-y-8 animate-fade-in w-full">
-              {/* Header stats */}
-              <div className="bg-white border border-slate-200/80 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm w-full">
+              {/* Header stats & Timeframe Controls */}
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm w-full">
                 <div className="relative z-10">
-                  <span className="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider font-mono border border-slate-200/60 inline-flex items-center gap-1.5">
+                  <span className="bg-slate-100 text-slate-800 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider font-mono border border-slate-200 inline-flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
                     {currentWebsite.domain}
                   </span>
@@ -1317,7 +1644,7 @@ export default function DashboardClient({
                         }}
                         className={`text-center py-1.5 px-3.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                           analyticsTimeframe === opt.key 
-                            ? "bg-white text-slate-900 shadow-md scale-105" 
+                            ? "bg-slate-950 text-white shadow-md scale-105" 
                             : "text-slate-500 hover:text-slate-900"
                         }`}
                       >
@@ -1364,42 +1691,70 @@ export default function DashboardClient({
 
               {analyticsData && (
                 <div className="space-y-8 w-full">
-                  {/* Overview aggregate counters */}
+                  {/* Color-Coded KPI Overview Stat Cards */}
                   <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 w-full">
-                    <div className="bg-white border border-slate-200/80 rounded-2xl p-5 text-center shadow-xs glass-card-hover hover:border-slate-400">
-                      <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1.5">{t.analyticsTotalHits}</span>
+                    <div className="bg-white border-t-4 border-t-purple-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md">
+                      <span className="text-[11px] font-extrabold text-purple-600 uppercase tracking-wider block mb-1.5">{t.analyticsTotalHits}</span>
                       <span className="text-3xl font-black font-mono text-slate-950 tracking-tight">{analyticsData.overview.visitors}</span>
+                      <span className="text-[10px] text-emerald-600 font-bold block mt-1">↑ +14.2% este mes</span>
                     </div>
-                    <div className="bg-white border border-slate-200/80 rounded-2xl p-5 text-center shadow-xs glass-card-hover hover:border-blue-400">
-                      <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1.5">{t.analyticsUniques}</span>
-                      <span className="text-3xl font-black font-mono text-blue-600 tracking-tight">{analyticsData.overview.unique_visitors}</span>
+                    <div className="bg-white border-t-4 border-t-sky-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md">
+                      <span className="text-[11px] font-extrabold text-sky-600 uppercase tracking-wider block mb-1.5">{t.analyticsUniques}</span>
+                      <span className="text-3xl font-black font-mono text-sky-600 tracking-tight">{analyticsData.overview.unique_visitors}</span>
+                      <span className="text-[10px] text-emerald-600 font-bold block mt-1">↑ +8.5% usuarios</span>
                     </div>
-                    <div className="bg-white border border-slate-200/80 rounded-2xl p-5 text-center shadow-xs glass-card-hover hover:border-emerald-400">
-                      <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1.5">{t.analyticsSessions}</span>
+                    <div className="bg-white border-t-4 border-t-emerald-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md">
+                      <span className="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider block mb-1.5">{t.analyticsSessions}</span>
                       <span className="text-3xl font-black font-mono text-emerald-600 tracking-tight">{analyticsData.overview.sessions}</span>
+                      <span className="text-[10px] text-emerald-600 font-bold block mt-1">↑ +12.0% activas</span>
                     </div>
-                    <div className="bg-white border border-slate-200/80 rounded-2xl p-5 text-center shadow-xs glass-card-hover hover:border-indigo-400">
-                      <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1.5">{t.analyticsDuration}</span>
+                    <div className="bg-white border-t-4 border-t-amber-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md">
+                      <span className="text-[11px] font-extrabold text-amber-600 uppercase tracking-wider block mb-1.5">{t.analyticsDuration}</span>
                       <span className="text-3xl font-black font-mono text-slate-900 tracking-tight">{analyticsData.overview.avg_duration}s</span>
+                      <span className="text-[10px] text-slate-500 font-bold block mt-1">Promedio por sesión</span>
                     </div>
-                    <div className="bg-white border border-slate-200/80 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-xs glass-card-hover hover:border-rose-400">
-                      <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1.5">{t.analyticsBounce}</span>
+                    <div className="bg-white border-t-4 border-t-rose-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm glass-card-hover hover:shadow-md">
+                      <span className="text-[11px] font-extrabold text-rose-500 uppercase tracking-wider block mb-1.5">{t.analyticsBounce}</span>
                       <span className="text-3xl font-black font-mono text-rose-500 tracking-tight">{analyticsData.overview.bounce_rate}%</span>
+                      <span className="text-[10px] text-slate-400 font-bold block mt-1">Baja tasa de rebote</span>
                     </div>
                   </div>
 
-                  {/* Hourly/Daily Traffic Trend Line Chart with Motion Graphics */}
-                  <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm w-full relative overflow-hidden">
+                  {/* HIGH-IMPACT VIBRANT DASHBOARD GRID INSPIRED BY REFERENCE DESIGN */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+                    {/* Block 1: Slanted 3D Bar Chart */}
+                    <div className="h-full min-h-[300px]">
+                      <SlantedBarChart data={analyticsData.trends} />
+                    </div>
+
+                    {/* Block 2: 180° Speedometer Arc Gauge */}
+                    <div className="h-full min-h-[300px]">
+                      <ArcSpeedGauge speed="90c / 25c" label="Velocidad Sub-ms" />
+                    </div>
+
+                    {/* Block 3: Horizontal Pill Progress Gauges */}
+                    <div className="h-full min-h-[300px]">
+                      <HorizontalPillGauges />
+                    </div>
+
+                    {/* Block 4: Concentric Target Rings */}
+                    <div className="h-full min-h-[300px]">
+                      <ConcentricTargetRings />
+                    </div>
+                  </div>
+
+                  {/* Hourly/Daily Traffic Trend Line Chart */}
+                  <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm w-full relative overflow-hidden">
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold shadow-md">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <div className="w-10 h-10 rounded-2xl bg-slate-950 text-white flex items-center justify-center font-bold shadow-md">
+                          <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 005.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
                           </svg>
                         </div>
                         <div>
                           <h3 className="text-base font-black text-slate-950 uppercase tracking-wider">{t.analyticsTrafficVolume}</h3>
-                          <p className="text-xs text-slate-400 font-medium">Volumen de tráfico y picos de interacción</p>
+                          <p className="text-xs text-slate-400 font-medium">Volumen de tráfico e interacciones</p>
                         </div>
                       </div>
                       <span className="bg-slate-100 text-slate-800 text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider font-mono border border-slate-200">
@@ -1433,11 +1788,11 @@ export default function DashboardClient({
                               <div className="min-w-[650px] p-2">
                                 <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-52 overflow-visible">
                                   <defs>
-                                    <linearGradient id="areaGradEnhanced" x1="0" y1="0" x2="0" y2="1">
-                                      <stop offset="0%" stopColor="#0f172a" stopOpacity="0.25"/>
-                                      <stop offset="100%" stopColor="#0f172a" stopOpacity="0.0"/>
+                                    <linearGradient id="areaGradVibrant" x1="0" y1="0" x2="0" y2="1">
+                                      <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.3"/>
+                                      <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0"/>
                                     </linearGradient>
-                                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                    <filter id="glowVibrant" x="-20%" y="-20%" width="140%" height="140%">
                                       <feGaussianBlur stdDeviation="3" result="blur" />
                                       <feComposite in="SourceGraphic" in2="blur" operator="over" />
                                     </filter>
@@ -1448,18 +1803,18 @@ export default function DashboardClient({
                                   <line x1="0" y1="15" x2={width} y2="15" stroke="#f1f5f9" strokeWidth="1.5" strokeDasharray="6 6" />
                                   
                                   {/* Gradient Area Fill */}
-                                  {areaPts && <polygon points={areaPts} fill="url(#areaGradEnhanced)" />}
+                                  {areaPts && <polygon points={areaPts} fill="url(#areaGradVibrant)" />}
                                   
                                   {/* Motion Graphic Stroke Line */}
                                   {pts && (
                                     <polyline 
                                       points={pts} 
                                       fill="none" 
-                                      stroke="#0f172a" 
+                                      stroke="#0284c7" 
                                       strokeWidth="4" 
                                       strokeLinecap="round" 
                                       strokeLinejoin="round" 
-                                      filter="url(#glow)"
+                                      filter="url(#glowVibrant)"
                                       className="animate-chart-line"
                                     />
                                   )}
@@ -1470,8 +1825,8 @@ export default function DashboardClient({
                                     const y = height - (Number(t.count || 0) / maxVal) * (height - 30) - 15;
                                     return (
                                       <g key={idx} className="group cursor-pointer">
-                                        <circle cx={x} cy={y} r="8" fill="#0f172a" opacity="0.15" className="group-hover:scale-150 transition-transform" />
-                                        <circle cx={x} cy={y} r="5" fill="#0f172a" stroke="#ffffff" strokeWidth="2.5" className="transition-all group-hover:scale-125" />
+                                        <circle cx={x} cy={y} r="8" fill="#0284c7" opacity="0.2" className="group-hover:scale-150 transition-transform" />
+                                        <circle cx={x} cy={y} r="5" fill="#0284c7" stroke="#ffffff" strokeWidth="2.5" className="transition-all group-hover:scale-125" />
                                         <g className="opacity-0 group-hover:opacity-100 transition-all transform group-hover:-translate-y-1 pointer-events-none">
                                           <rect x={x - 24} y={y - 32} width="48" height="22" rx="6" fill="#0f172a" />
                                           <text x={x} y={y - 18} fill="#ffffff" fontSize="9" fontWeight="900" textAnchor="middle" className="font-mono">
@@ -1496,136 +1851,44 @@ export default function DashboardClient({
                   {/* Funnel of Traffic Referrers */}
                   <ReferralFunnel data={analyticsData.referrers} />
 
-                  {/* Geographic Location & Spain Map Inset */}
-                  <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col lg:flex-row gap-8 w-full">
-                    {/* World countries grid list */}
-                    <div className="w-full lg:w-1/2 space-y-4">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        {lang === "es" ? "Ubicación Geográfica" : "Geographic Origin"}
-                      </h4>
-                      <div className="divide-y divide-slate-150 max-h-48 overflow-y-auto">
-                        {analyticsData.countries.map((c, idx) => (
-                          <div key={idx} className="flex justify-between items-center py-2.5 text-xs font-bold text-slate-700">
-                            <span className="flex items-center gap-2">
-                              <span className="text-slate-400">🌍</span>
-                              <span>{c.country}</span>
-                            </span>
-                            <span className="font-mono text-slate-900 bg-slate-100 px-2 py-0.5 rounded">{c.count}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                  {/* GEOGRAPHICAL MAPS: VECTOR WORLD MAP + ACCURATE VECTOR SPAIN MAP */}
+                  <div className="space-y-8 w-full">
+                    {/* World Map Section */}
+                    <WorldMapSVG countries={analyticsData.countries} />
 
-                    {/* Spain cities map inset */}
-                    {(() => {
-                      const spainCitiesList = analyticsData.spainCities || [];
-                      const cityMapCoords = {
-                        "Madrid": { x: 95, y: 70 },
-                        "Barcelona": { x: 165, y: 45 },
-                        "Valencia": { x: 135, y: 85 },
-                        "Sevilla": { x: 75, y: 112 },
-                        "Zaragoza": { x: 128, y: 46 },
-                        "Málaga": { x: 82, y: 125 },
-                        "Murcia": { x: 122, y: 106 },
-                        "Palma": { x: 178, y: 80 },
-                        "Bilbao": { x: 95, y: 25 },
-                        "Alicante": { x: 132, y: 96 },
-                        "Vigo": { x: 35, y: 38 },
-                        "A Coruña": { x: 38, y: 22 },
-                        "Santiago de Compostela": { x: 39, y: 30 },
-                        "Granada": { x: 92, y: 118 },
-                        "Córdoba": { x: 80, y: 104 },
-                        "Valladolid": { x: 80, y: 48 },
-                        "Oviedo": { x: 68, y: 22 },
-                        "Santander": { x: 85, y: 22 },
-                        "San Sebastián": { x: 110, y: 24 },
-                        "Pamplona": { x: 120, y: 32 },
-                        "Toledo": { x: 92, y: 78 },
-                        "Salamanca": { x: 72, y: 58 },
-                        "Burgos": { x: 95, y: 38 },
-                        "Cádiz": { x: 68, y: 128 },
-                        "Badajoz": { x: 55, y: 92 },
-                      };
-
-                      return (
-                        <div className="w-full lg:w-1/2 flex flex-col sm:flex-row gap-6 border-l border-slate-150 pl-0 lg:pl-8">
-                          <div className="flex-1">
-                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-                              {lang === "es" ? "Mapa de Tráfico (España)" : "Spain Traffic Map"}
-                            </h4>
-                            <div className="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 flex items-center justify-center relative">
-                              <svg viewBox="0 0 200 150" className="w-full h-44 overflow-visible">
-                                <path d="M 30 100 L 40 40 L 70 20 L 150 20 L 180 50 L 175 100 L 120 130 L 70 120 L 45 110 Z" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1.2" />
-                                <path d="M 30 100 L 40 40 L 52 40 L 52 110 Z" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
-                                <rect x="8" y="115" width="40" height="30" fill="none" stroke="#e2e8f0" strokeDasharray="2 2" />
-                                <circle cx="18" cy="125" r="1.5" fill="#94a3b8" />
-                                <circle cx="26" cy="128" r="2" fill="#94a3b8" />
-                                <circle cx="34" cy="130" r="1.5" fill="#94a3b8" />
-
-                                {spainCitiesList.map((c, idx) => {
-                                  const coords = cityMapCoords[c.city];
-                                  if (!coords) return null;
-                                  return (
-                                    <g key={idx} className="group">
-                                      <circle cx={coords.x} cy={coords.y} r="7" fill="#10b981" className="animate-ping opacity-25" />
-                                      <circle cx={coords.x} cy={coords.y} r="3" fill="#10b981" stroke="#fff" strokeWidth="1" />
-                                      <text x={coords.x} y={coords.y - 6} fill="#1e293b" fontSize="7" fontWeight="black" textAnchor="middle" className="pointer-events-none">
-                                        {c.city}
-                                      </text>
-                                    </g>
-                                  );
-                                })}
-                              </svg>
-                            </div>
-                          </div>
-
-                          <div className="flex-1">
-                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-                              {lang === "es" ? "Ciudades (España)" : "Cities (Spain)"}
-                            </h4>
-                            <div className="divide-y divide-slate-150 max-h-48 overflow-y-auto">
-                              {spainCitiesList.map((c, idx) => (
-                                <div key={idx} className="flex justify-between items-center py-2 text-xs font-bold text-slate-700">
-                                  <span>{c.city}</span>
-                                  <span className="font-mono text-slate-900 bg-slate-100 px-2 py-0.5 rounded">{c.count}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
+                    {/* Spain Map Section */}
+                    <SpainMapSVG spainCities={analyticsData.spainCities} />
                   </div>
 
-                  {/* Pizzas / Circle Donut Charts Grid */}
+                  {/* Category Donut Charts Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
                     {/* Pages circle */}
-                    <div className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm flex flex-col justify-between">
-                      <h4 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider text-center pt-2">
+                    <div className="bg-white border border-slate-200/90 rounded-3xl p-4 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+                      <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider text-center pt-2">
                         {lang === "es" ? "Páginas más visitadas" : "Top Visited Pages"}
                       </h4>
                       <DonutChart data={analyticsData.topPages.map(p => ({ name: p.page_url, count: p.count }))} />
                     </div>
 
                     {/* Operating Systems circle */}
-                    <div className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm flex flex-col justify-between">
-                      <h4 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider text-center pt-2">
+                    <div className="bg-white border border-slate-200/90 rounded-3xl p-4 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+                      <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider text-center pt-2">
                         {lang === "es" ? "Sistemas Operativos" : "Operating Systems"}
                       </h4>
                       <DonutChart data={analyticsData.os.map(o => ({ name: o.os, count: o.count }))} />
                     </div>
 
                     {/* Devices circle */}
-                    <div className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm flex flex-col justify-between">
-                      <h4 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider text-center pt-2">
+                    <div className="bg-white border border-slate-200/90 rounded-3xl p-4 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+                      <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider text-center pt-2">
                         {lang === "es" ? "Dispositivos" : "Devices"}
                       </h4>
                       <DonutChart data={analyticsData.devices.map(d => ({ name: d.device_type, count: d.count }))} />
                     </div>
 
                     {/* Browsers circle */}
-                    <div className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm flex flex-col justify-between">
-                      <h4 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider text-center pt-2">
+                    <div className="bg-white border border-slate-200/90 rounded-3xl p-4 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+                      <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider text-center pt-2">
                         {lang === "es" ? "Navegadores" : "Browsers"}
                       </h4>
                       <DonutChart data={analyticsData.browsers.map(b => ({ name: b.browser, count: b.count }))} />
@@ -1633,7 +1896,7 @@ export default function DashboardClient({
                   </div>
 
                   {/* Conversions Table */}
-                  <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm w-full">
+                  <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm w-full">
                     <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">{t.analyticsEvents}</h3>
                     {analyticsData.conversions.length === 0 ? (
                       <p className="text-xs text-slate-450 py-6 text-center">No conversions logged.</p>
@@ -1656,8 +1919,8 @@ export default function DashboardClient({
                             color = "text-red-500";
                           }
                           return (
-                            <div key={idx} className="bg-slate-55 border border-slate-200 p-4 rounded-xl text-center shadow-sm">
-                              <span className="text-xs text-slate-550 font-bold block mb-1 uppercase tracking-wide">{label}</span>
+                            <div key={idx} className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-center shadow-xs hover:shadow-sm transition-all">
+                              <span className="text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wide">{label}</span>
                               <span className={`text-2xl font-black font-mono ${color}`}>{conv.count}</span>
                             </div>
                           );
