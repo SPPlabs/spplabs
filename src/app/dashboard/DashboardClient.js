@@ -346,6 +346,46 @@ export default function DashboardClient({
     }
   };
 
+  // Handle deleting announcement / notification
+  const handleDeleteAnnouncement = async (id) => {
+    if (!confirm(lang === "es" ? "¿Está seguro de que desea eliminar esta notificación?" : "Are you sure you want to delete this notification?")) return;
+    try {
+      const res = await fetch(`/api/admin/notifications?id=${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setAnnouncementsList(prev => prev.filter(item => item.id !== id));
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.message || "Error al eliminar notificación");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error al eliminar notificación");
+    }
+  };
+
+  // Handle deleting petition
+  const handleDeletePetition = async (id) => {
+    if (!confirm(lang === "es" ? "¿Está seguro de eliminar esta petición?" : "Are you sure you want to delete this petition?")) return;
+    try {
+      const res = await fetch(`/api/admin/petitions?id=${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setPetitionsList(prev => prev.filter(item => item.id !== id));
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.message || "Error al eliminar petición");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error al eliminar petición");
+    }
+  };
+
   // Handle administrative user account deletion
   const handleDeleteUser = async (userId) => {
     if (!confirm(t.usersDeleteConfirm)) return;
@@ -1291,6 +1331,25 @@ export default function DashboardClient({
                 )}
               </button>
             ))}
+
+            {/* Special Impersonation Return Button ("vuelve a spplabs.es") */}
+            {isImpersonating && (
+              <button
+                onClick={() => {
+                  router.push("/dashboard?domain=spplabs.es");
+                  setActiveTab("overview");
+                }}
+                className={`w-full flex items-center transition-all cursor-pointer rounded-xl font-black text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200/80 ${
+                  sidebarOpen ? "gap-3 px-4 py-3 text-left" : "justify-center p-3 relative"
+                } mt-3 shadow-xs active:scale-95`}
+                title="vuelve a spplabs.es"
+              >
+                <svg className="w-5 h-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 016 6v3" />
+                </svg>
+                {sidebarOpen && <span className="truncate">vuelve a spplabs.es</span>}
+              </button>
+            )}
           </nav>
         </div>
 
@@ -1360,23 +1419,24 @@ export default function DashboardClient({
       {/* RIGHT MAIN VIEWPORT */}
       <div className="flex-1 h-full flex flex-col overflow-hidden bg-slate-50 relative z-10">
         
-        {/* Impersonation Info Header Bar (Clean notification overlay instead of huge block) */}
+        {/* Impersonation Info Header Bar */}
         {isImpersonating && (
-          <div className="bg-brand-blue text-white px-6 py-2.5 text-center text-xs font-bold flex items-center justify-center gap-3 shadow-sm relative z-30 animate-fade-in shrink-0">
+          <div className="bg-slate-900 text-white px-6 py-2.5 text-center text-xs font-bold flex items-center justify-center gap-3 shadow-sm relative z-30 animate-fade-in shrink-0">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
               {lang === "es" 
-                ? `Vista de impersonación: viendo el panel de ${currentWebsite.domain}` 
-                : `Impersonation view: viewing dashboard for ${currentWebsite.domain}`}
+                ? `Vista de cliente: viendo el dashboard de ${currentWebsite.domain}` 
+                : `Client view: viewing dashboard for ${currentWebsite.domain}`}
             </span>
             <button
               onClick={() => {
-                router.push("/dashboard");
-                setActiveTab("admin");
+                router.push("/dashboard?domain=spplabs.es");
+                setActiveTab("overview");
               }}
-              className="bg-white text-brand-blue hover:bg-slate-100 px-3 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer shadow-sm"
+              className="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1 rounded-xl text-xs font-black transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
             >
-              {lang === "es" ? "Salir de Impersonación" : "Exit Impersonation"}
+              <span>↩</span>
+              <span>vuelve a spplabs.es</span>
             </button>
           </div>
         )}
@@ -2007,6 +2067,52 @@ export default function DashboardClient({
                   </div>
                 );
               })()}
+
+              {/* Login & Signup Activity Feed Box */}
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm w-full">
+                <div className="flex justify-between items-center mb-5">
+                  <div>
+                    <h3 className="font-black text-base text-slate-950 flex items-center gap-2">
+                      <span className="text-lg">🔐</span>
+                      {lang === "es" ? "Inicios de Sesión y Registros Recientes" : "Recent Logins & User Activity"}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">
+                      {lang === "es" ? "Histórico de accesos y nuevos usuarios registrados en la plataforma" : "Logins and newly registered accounts"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab("notificaciones")}
+                    className="text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 cursor-pointer transition-all"
+                  >
+                    {lang === "es" ? "Ver todas las notificaciones" : "View all notifications"}
+                  </button>
+                </div>
+                
+                {announcementsList.length === 0 ? (
+                  <p className="text-xs text-slate-400 italic py-6 text-center font-medium">No hay actividad de inicio de sesión registrada aún.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {announcementsList.slice(0, 5).map((ann) => (
+                      <div key={ann.id} className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 shadow-xs ${
+                            ann.title.includes("Admin") ? "bg-purple-100 text-purple-700" : ann.title.includes("Registro") ? "bg-emerald-100 text-emerald-700" : "bg-sky-100 text-sky-700"
+                          }`}>
+                            {ann.title.includes("Admin") ? "👑" : ann.title.includes("Registro") ? "✨" : "🔑"}
+                          </div>
+                          <div>
+                            <span className="font-extrabold text-slate-900 block">{ann.title}</span>
+                            <span className="text-slate-600 font-medium">{ann.message}</span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-slate-400 font-mono font-bold shrink-0 self-start sm:self-center">
+                          {new Date(ann.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Data Lists Briefs */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">

@@ -52,8 +52,8 @@ export async function DELETE(request) {
     }
 
     const session = await verifyJWT(sessionToken);
-    if (!session || session.role !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden", message: "Admin access required." }, { status: 403 });
+    if (!session) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -63,11 +63,21 @@ export async function DELETE(request) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
+    // Admins can delete any notification. Regular users can delete notifications associated with their website or global.
+    const notif = await prisma.notification.findUnique({ where: { id } });
+    if (!notif) {
+      return NextResponse.json({ error: "Notification not found" }, { status: 404 });
+    }
+
+    if (session.role !== "ADMIN" && notif.websiteId && notif.websiteId !== session.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     await prisma.notification.delete({
       where: { id },
     });
 
-    return NextResponse.json({ success: true, message: "Announcement deleted successfully." });
+    return NextResponse.json({ success: true, message: "Notification deleted successfully." });
   } catch (error) {
     console.error("Notification deletion error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
