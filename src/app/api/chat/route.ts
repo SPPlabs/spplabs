@@ -260,20 +260,39 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     // Record Visitor Message into PostgreSQL using withRLS
     let conversationId = body.conversation_id || body.conversationId;
-    const visitorId = body.visitor_id || body.visitorId || "visitor_" + Date.now();
+    const visitorId = body.visitor_id || body.visitorId || (origin ? `visitor_${origin.replace(/[^a-z0-9]/gi, '_')}` : "visitor_anonymous");
     const rlsDb = withRLS(website.id);
 
     let activeConversation = null;
+    
+    // 1. Try finding conversation by conversationId if provided
     if (conversationId && isValidUuid(conversationId)) {
       try {
         activeConversation = await rlsDb.chatConversation.findUnique({
           where: { id: conversationId },
         });
-      } catch (e) {
+      } catch (e: unknown) {
         logger.warn("Conversation lookup warning:", e);
       }
     }
 
+    // 2. Fallback: Find existing active conversation for this visitorId & websiteId
+    if (!activeConversation && visitorId) {
+      try {
+        activeConversation = await rlsDb.chatConversation.findFirst({
+          where: {
+            websiteId: website.id,
+            visitorId: visitorId,
+            status: "ACTIVE",
+          },
+          orderBy: { lastMessageAt: "desc" },
+        });
+      } catch (e: unknown) {
+        logger.warn("Visitor active conversation lookup warning:", e);
+      }
+    }
+
+    // 3. Create a new conversation thread if none exists
     if (!activeConversation) {
       try {
         activeConversation = await rlsDb.chatConversation.create({
@@ -285,8 +304,7 @@ export async function POST(request: NextRequest): Promise<Response> {
             status: "ACTIVE",
           },
         });
-        conversationId = activeConversation.id;
-      } catch (e) {
+      } catch (e: unknown) {
         logger.error("Failed to create ChatConversation:", e);
       }
     }
