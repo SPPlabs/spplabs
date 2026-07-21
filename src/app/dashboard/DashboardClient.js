@@ -1418,28 +1418,6 @@ export default function DashboardClient({
 
       {/* RIGHT MAIN VIEWPORT */}
       <div className="flex-1 h-full flex flex-col overflow-hidden bg-slate-50 relative z-10">
-        
-        {/* Impersonation Info Header Bar */}
-        {isImpersonating && (
-          <div className="bg-slate-900 text-white px-6 py-2.5 text-center text-xs font-bold flex items-center justify-center gap-3 shadow-sm relative z-30 animate-fade-in shrink-0">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
-              {lang === "es" 
-                ? `Vista de cliente: viendo el dashboard de ${currentWebsite.domain}` 
-                : `Client view: viewing dashboard for ${currentWebsite.domain}`}
-            </span>
-            <button
-              onClick={() => {
-                router.push("/dashboard?domain=spplabs.es");
-                setActiveTab("overview");
-              }}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1 rounded-xl text-xs font-black transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
-            >
-              <span>↩</span>
-              <span>vuelve a spplabs.es</span>
-            </button>
-          </div>
-        )}
 
         {/* Minimal Top Header info panel */}
         <header className="h-16 border-b border-slate-200/80 bg-white flex items-center justify-between px-8 shrink-0 shadow-sm">
@@ -2370,8 +2348,8 @@ export default function DashboardClient({
           {activeTab === "notificaciones" && (
             <div className="space-y-8 animate-fade-in">
               
-              {/* ADMIN VIEW: Send Notifications Form */}
-              {session.domain === "spplabs.es" && (
+              {/* ADMIN VIEW: Send Notifications Form (Only shown when viewing spplabs.es admin domain directly) */}
+              {currentWebsite.domain === "spplabs.es" && (
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
                   <h3 className="text-lg font-bold mb-1 text-slate-950">{t.adminNotifTitle}</h3>
                   <p className="text-sm text-slate-550 mb-6">{t.adminNotifDesc}</p>
