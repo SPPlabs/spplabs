@@ -873,153 +873,196 @@ export default function DashboardClient({
           onClick={() => setSidebarOpen(false)}
         />
       )}
-
-      {/* LEFT FIXED SIDEBAR */}
       <aside className={`h-full bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0 fixed inset-y-0 left-0 z-40 md:relative md:z-20 shadow-sm transition-all duration-300 ease-in-out ${
-        sidebarOpen ? "w-72 p-6" : "w-0 p-0 overflow-hidden border-r-0"
+        sidebarOpen 
+          ? "w-72 p-5" 
+          : "w-0 p-0 overflow-hidden border-r-0 md:w-20 md:p-3 md:border-r md:overflow-visible"
       }`}>
-        <div className="flex flex-col gap-8">
-          {/* Logo Section */}
-          <div className="flex items-center gap-3 px-2">
-            <img src="/logo.webp" alt="SPP Labs Logo" className="w-8 h-8 object-contain" />
-            <SppLabsLogo inline={true} className="text-slate-900" />
-          </div>
+        <div className="flex flex-col gap-6">
+          {/* Logo & Retract/Expand Toggle Section inside side panel */}
+          {sidebarOpen ? (
+            <div className="flex items-center justify-between px-1 py-1">
+              <div className="flex items-center gap-3 overflow-hidden">
+                <img src="/logo.webp" alt="SPP Labs Logo" className="w-8 h-8 object-contain shrink-0" />
+                <SppLabsLogo inline={true} className="text-slate-900 truncate" />
+              </div>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-1.5 hover:bg-slate-100 text-slate-500 hover:text-slate-900 rounded-xl transition-all cursor-pointer border border-slate-200/60 shrink-0"
+                title={lang === "es" ? "Contraer panel" : "Collapse sidebar"}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 py-1">
+              <img src="/logo.webp" alt="SPP Labs Logo" className="w-8 h-8 object-contain" />
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="p-1.5 hover:bg-slate-100 text-slate-500 hover:text-slate-900 rounded-xl transition-all cursor-pointer border border-slate-200/60"
+                title={lang === "es" ? "Expandir panel" : "Expand sidebar"}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            </div>
+          )}
 
           {/* Navigation Links */}
           <nav className="flex flex-col gap-1.5">
-            {/* Show "Usuarios" only if logged in as admin AND NOT impersonating another client */}
-            {session.role === "ADMIN" && !isImpersonating && (
+            {[
+              {
+                id: "overview",
+                label: t.menuResumen,
+                icon: (
+                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
+                  </svg>
+                ),
+              },
+              {
+                id: "analytics",
+                label: t.menuAnaliticas,
+                icon: (
+                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                ),
+              },
+              {
+                id: "clientes",
+                label: t.menuClientes,
+                count: contactForms.length + bookings.length,
+                icon: (
+                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                ),
+              },
+              {
+                id: "ia",
+                label: t.menuIA,
+                icon: (
+                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364.364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                ),
+              },
+              {
+                id: "notificaciones",
+                label: t.menuNotificaciones,
+                count: announcementsList.length,
+                icon: (
+                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                ),
+              },
+              ...(session.role === "ADMIN" && !isImpersonating ? [{
+                id: "admin",
+                label: t.menuUsuarios,
+                icon: (
+                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                ),
+              }] : []),
+            ].map((item) => (
               <button
-                onClick={() => handleNavigate("admin")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
-                  activeTab === "admin"
+                key={item.id}
+                onClick={() => handleNavigate(item.id)}
+                title={item.label}
+                className={`w-full flex items-center transition-all cursor-pointer rounded-xl font-bold ${
+                  sidebarOpen
+                    ? "gap-3 px-4 py-3 text-left text-sm"
+                    : "justify-center p-3 relative"
+                } ${
+                  activeTab === item.id
                     ? "bg-slate-900 text-white shadow-sm"
-                    : "hover:bg-slate-50 text-slate-500 hover:text-slate-900"
+                    : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
                 }`}
               >
-                <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                {t.menuUsuarios}
+                {item.icon}
+                {sidebarOpen && <span className="truncate">{item.label}</span>}
+                {item.count > 0 && (
+                  sidebarOpen ? (
+                    <span className={`ml-auto text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                      activeTab === item.id ? "bg-slate-800 text-white border border-slate-700" : "bg-slate-100 text-slate-700 border border-slate-200"
+                    }`}>
+                      {item.count}
+                    </span>
+                  ) : (
+                    <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-slate-900 ring-2 ring-white" />
+                  )
+                )}
               </button>
-            )}
-
-            <button
-              onClick={() => handleNavigate("overview")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
-                activeTab === "overview"
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "hover:bg-slate-50 text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
-              </svg>
-              {t.menuResumen}
-            </button>
-
-            <button
-              onClick={() => handleNavigate("analytics")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
-                activeTab === "analytics"
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "hover:bg-slate-50 text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              {t.menuAnaliticas}
-            </button>
-
-            <button
-              onClick={() => handleNavigate("clientes")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
-                activeTab === "clientes"
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "hover:bg-slate-50 text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              {t.menuClientes}
-              {(contactForms.length > 0 || bookings.length > 0) && (
-                <span className="ml-auto bg-slate-100 text-slate-700 border border-slate-200 text-[10px] px-2 py-0.5 rounded-full font-bold">
-                  {contactForms.length + bookings.length}
-                </span>
-              )}
-            </button>
-
-            <button
-              onClick={() => handleNavigate("ia")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
-                activeTab === "ia"
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "hover:bg-slate-50 text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364.364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              {t.menuIA}
-            </button>
-
-            <button
-              onClick={() => handleNavigate("notificaciones")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-bold transition-all cursor-pointer ${
-                activeTab === "notificaciones"
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "hover:bg-slate-50 text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-              {t.menuNotificaciones}
-              {announcementsList.length > 0 && (
-                <span className="ml-auto bg-slate-100 text-slate-700 border border-slate-200 text-[10px] px-2 py-0.5 rounded-full font-bold">
-                  {announcementsList.length}
-                </span>
-              )}
-            </button>
+            ))}
           </nav>
         </div>
 
         {/* Sidebar Footer Zone */}
-        <div className="flex flex-col gap-4">
-          {/* Business Info / Profile rectangle */}
-          <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3.5 flex items-center justify-between shadow-sm">
-            <div className="overflow-hidden mr-2">
-              <span className="font-bold text-xs text-slate-800 block truncate" title={currentWebsite.displayName}>
-                {currentWebsite.displayName}
-              </span>
-              <span className="text-[10px] text-slate-500 font-mono block truncate" title={currentWebsite.domain}>
-                {currentWebsite.domain}
-              </span>
-            </div>
-            <button
-              onClick={() => setShowSettingsModal(true)}
-              className="p-2 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-lg transition-all cursor-pointer border border-transparent hover:border-slate-300/40 shrink-0"
-              title={lang === "es" ? "Ajustes de Idioma" : "Language Settings"}
-            >
-              <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </button>
-          </div>
+        <div className="flex flex-col gap-3">
+          {sidebarOpen ? (
+            <>
+              {/* Business Info / Profile rectangle */}
+              <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3.5 flex items-center justify-between shadow-sm">
+                <div className="overflow-hidden mr-2">
+                  <span className="font-bold text-xs text-slate-800 block truncate" title={currentWebsite.displayName}>
+                    {currentWebsite.displayName}
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-mono block truncate" title={currentWebsite.domain}>
+                    {currentWebsite.domain}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowSettingsModal(true)}
+                  className="p-2 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-lg transition-all cursor-pointer border border-transparent hover:border-slate-300/40 shrink-0"
+                  title={lang === "es" ? "Ajustes de Idioma" : "Language Settings"}
+                >
+                  <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </button>
+              </div>
 
-          {/* Logout Button */}
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 h-10 border border-slate-200 hover:border-red-200 hover:text-red-650 hover:bg-red-50/50 rounded-xl text-xs font-bold transition-all cursor-pointer"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            {lang === "es" ? "Cerrar Sesión" : "Sign Out"}
-          </button>
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 h-10 border border-slate-200 hover:border-red-200 hover:text-red-650 hover:bg-red-50/50 rounded-xl text-xs font-bold transition-all cursor-pointer text-slate-700"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                {lang === "es" ? "Cerrar Sesión" : "Sign Out"}
+              </button>
+            </>
+          ) : (
+            <div className="flex flex-col gap-2 items-center">
+              <button
+                onClick={() => setShowSettingsModal(true)}
+                className="w-full flex items-center justify-center p-3 bg-slate-50 border border-slate-200/60 rounded-xl hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
+                title={lang === "es" ? "Ajustes de Idioma" : "Language Settings"}
+              >
+                <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center p-3 border border-slate-200 hover:border-red-200 hover:text-red-650 hover:bg-red-50/50 rounded-xl text-slate-600 transition-all cursor-pointer"
+                title={lang === "es" ? "Cerrar Sesión" : "Sign Out"}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       </aside>
 
