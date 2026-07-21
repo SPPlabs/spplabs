@@ -795,4 +795,38 @@ body {
   box-shadow: 0 12px 24px -6px rgba(15, 23, 42, 0.08);
 }
 
+/* Hovering logos floating animations */
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1.5deg);
+  }
+}
+
+@keyframes floatReverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(10px) rotate(-1.5deg);
+  }
+}
+
+.animate-float-gentle {
+  animation: floatGentle 5s infinite ease-in-out;
+}
+
+.animate-float-reverse {
+  animation: floatReverse 6.5s infinite ease-in-out;
+}
+
+.delay-1 { animation-delay: 0.6s; }
+.delay-2 { animation-delay: 1.2s; }
+.delay-3 { animation-delay: 1.8s; }
+.delay-4 { animation-delay: 2.4s; }
+.delay-5 { animation-delay: 3s; }
+
+
 
