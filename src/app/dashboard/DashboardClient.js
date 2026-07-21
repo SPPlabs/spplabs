@@ -147,11 +147,23 @@ export default function DashboardClient({
     }
   };
 
+  // Re-sync all domain-specific local states whenever currentWebsite or domain changes (e.g. impersonation)
   useEffect(() => {
+    setChatbotContent(chatbotKnowledge?.content || "");
+    setPetitionsList(supportRequests || []);
+    setAnnouncementsList(notifications || []);
+    setAnalyticsData(null);
+    setVisitorsTrends([]);
     if (activeTab === "analytics") {
       fetchAnalytics(analyticsTimeframe);
     }
-  }, [activeTab, currentWebsite.domain, analyticsTimeframe]);
+  }, [currentWebsite.domain, chatbotKnowledge?.content, supportRequests, notifications]);
+
+  useEffect(() => {
+    if (activeTab === "analytics" && !analyticsData && !analyticsLoading) {
+      fetchAnalytics(analyticsTimeframe);
+    }
+  }, [activeTab, analyticsTimeframe]);
 
   // Handle Update Booking Status
   const handleUpdateBookingStatus = async (bookingId, status) => {
