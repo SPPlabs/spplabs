@@ -2465,29 +2465,22 @@ export default function DashboardClient({
 
                 {/* Chatbot RAG Editor Form */}
                 <form onSubmit={handleUpdateChatbotKnowledge} className="space-y-4">
-                  <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
-                    <div className="bg-slate-100 px-5 py-3 border-b border-slate-200/80 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full bg-rose-400 inline-block"></span>
-                        <span className="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
-                        <span className="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span>
-                        <span className="text-xs font-mono font-bold text-slate-600 ml-2">knowledge_base.txt</span>
+                  <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <label className="block text-xs font-black uppercase tracking-wider text-slate-900 mb-1">{t.iaRagContent}</label>
+                        <p className="text-xs text-slate-500 font-medium">{t.iaRagDesc}</p>
                       </div>
-                      <span className="text-[10px] font-mono font-bold text-slate-400">
-                        {chatbotContent.length} chars
+                      <span className="text-[10px] font-mono font-bold text-slate-400 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
+                        {chatbotContent.length} caracteres
                       </span>
                     </div>
-
-                    <div className="p-4">
-                      <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">{t.iaRagContent}</label>
-                      <p className="text-xs text-slate-400 mb-3">{t.iaRagDesc}</p>
-                      <textarea
-                        value={chatbotContent}
-                        onChange={(e) => setChatbotContent(e.target.value)}
-                        placeholder={t.iaPlaceholder}
-                        className="w-full h-72 bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-800 placeholder-slate-400 font-mono focus:outline-none focus:border-slate-900 focus:bg-white transition-all resize-y leading-relaxed"
-                      />
-                    </div>
+                    <textarea
+                      value={chatbotContent}
+                      onChange={(e) => setChatbotContent(e.target.value)}
+                      placeholder={t.iaPlaceholder}
+                      className="w-full h-72 bg-white border border-slate-200/80 rounded-xl p-4 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 transition-all resize-y leading-relaxed mt-3 shadow-2xs font-normal"
+                    />
                   </div>
 
                   {iaSaved && (
