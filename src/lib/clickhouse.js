@@ -493,3 +493,38 @@ function generateMockSeedEvents(website_id) {
 
   return seeds;
 }
+
+/**
+ * Deletes all analytics events belonging to a specific website_id (domain or UUID).
+ * Works in both Real ClickHouse and Mock mode.
+ */
+export async function clickhouseDeleteWebsiteEvents(website_id) {
+  if (!website_id) return;
+  const cleanId = String(website_id).trim().toLowerCase();
+
+  // Mock mode deletion
+  if (isMock || !host || !client) {
+    for (let i = mockEvents.length - 1; i >= 0; i--) {
+      if (
+        String(mockEvents[i].website_id).toLowerCase() === cleanId ||
+        String(mockEvents[i].website_id) === website_id
+      ) {
+        mockEvents.splice(i, 1);
+      }
+    }
+    console.log(`[ClickHouse Mock] Deleted events for website_id: ${website_id}`);
+    return;
+  }
+
+  // Real ClickHouse deletion
+  try {
+    await ensureConnection();
+    await client.exec({
+      query: `ALTER TABLE analytics_events DELETE WHERE website_id = {website_id: String}`,
+      query_params: { website_id: cleanId },
+    });
+    console.log(`[ClickHouse] Deleted analytics events for website_id: ${cleanId}`);
+  } catch (err) {
+    console.error(`[ClickHouse] Failed to delete events for website_id ${cleanId}:`, err.message);
+  }
+}
