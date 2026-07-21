@@ -112,11 +112,46 @@ export default async function DashboardPage(props) {
     orderBy: { createdAt: "desc" }
   });
 
-  // Fetch Support Requests (petitions sent by this user)
-  const supportRequests = await prisma.supportRequest.findMany({
-    where: { websiteId: currentWebsite.id },
-    orderBy: { createdAt: "desc" }
-  });
+  // Fetch Support Requests / Petitions from PostgreSQL DB
+  let supportRequests = [];
+  if (currentWebsite.domain === "spplabs.es") {
+    // Admin receives all petitions sent by client users
+    const rawPetitions = await prisma.supportRequest.findMany({
+      include: {
+        website: {
+          select: {
+            domain: true,
+            displayName: true,
+          }
+        }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+    supportRequests = rawPetitions.map(p => ({
+      id: p.id,
+      title: p.title,
+      message: p.message,
+      createdAt: p.createdAt,
+      websiteId: p.websiteId,
+      domain: p.website?.domain || "Usuario",
+      displayName: p.website?.displayName || "Cliente",
+    }));
+  } else {
+    // Client user sees their own sent petitions
+    const rawPetitions = await prisma.supportRequest.findMany({
+      where: { websiteId: currentWebsite.id },
+      orderBy: { createdAt: "desc" }
+    });
+    supportRequests = rawPetitions.map(p => ({
+      id: p.id,
+      title: p.title,
+      message: p.message,
+      createdAt: p.createdAt,
+      websiteId: p.websiteId,
+      domain: currentWebsite.domain,
+      displayName: currentWebsite.displayName,
+    }));
+  }
 
   return (
     <DashboardClient
