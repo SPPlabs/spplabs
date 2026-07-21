@@ -65,8 +65,8 @@ export default function DashboardClient({
 
   const t = translations[lang] || translations.es;
 
-  // Active navigation tab state
-  const defaultTab = session.role === "ADMIN" && !searchParams.get("domain") ? "admin" : "overview";
+  // Active navigation tab state - Everyone (admin or client) defaults to Resumen ("overview")
+  const defaultTab = "overview";
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   const handleNavigate = (tab) => {
