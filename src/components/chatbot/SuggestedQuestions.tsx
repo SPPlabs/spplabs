@@ -14,7 +14,7 @@ export const SuggestedQuestions: React.FC<SuggestedQuestionsProps> = ({ question
         <button
           key={i}
           onClick={() => onSelect(q)}
-          className="px-3 py-1.5 bg-slate-800/60 hover:bg-slate-750 border border-slate-700/50 text-[10px] font-semibold text-slate-300 rounded-full hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm"
+          className="px-3.5 py-1.5 bg-white hover:bg-zinc-100 border border-zinc-300 text-[11px] font-bold text-black rounded-full hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-xs"
         >
           {q}
         </button>

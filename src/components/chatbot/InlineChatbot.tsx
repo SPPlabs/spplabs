@@ -11,7 +11,7 @@ export const InlineChatbot: React.FC = () => {
 
   // Use a separate storage key prefix or keep it synced with the float widget
   // Let's keep it synced so they share the history, or let it run on its own
-  const chat = useChat(resolvedWebsiteId, resolvedApiKey, "Hi! 👋 How can I help you today?");
+  const chat = useChat(resolvedWebsiteId, resolvedApiKey, "Hola, estás hablando con el asistente de inteligencia artificial de SPP labs, en qué te puedo ayudar.");
   const { messages, sendMessage, clearChat, stopGeneration, isLoading, isStreaming } = chat;
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -48,6 +48,10 @@ export const InlineChatbot: React.FC = () => {
     await sendMessage(messageText);
   };
 
+  const handleSelectQuestion = async (question: string) => {
+    await sendMessage(question);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -56,14 +60,14 @@ export const InlineChatbot: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto flex flex-col font-sans text-zinc-900 bg-white border border-zinc-200/60 rounded-[2.5rem] shadow-xl p-8 min-h-[420px] transition-all duration-300">
+    <div className="w-full max-w-4xl mx-auto flex flex-col font-sans text-black bg-white border border-zinc-200/80 rounded-[2.5rem] shadow-xl p-8 min-h-[420px] transition-all duration-300">
       
       {/* Top Header Control (e.g. Clear history button on the right) */}
       <div className="flex justify-end mb-4">
         {messages.length > 1 && (
           <button
             onClick={clearChat}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-400 hover:text-zinc-600 border border-zinc-200 rounded-full hover:bg-zinc-50 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-black hover:text-zinc-700 border border-zinc-300 rounded-full hover:bg-zinc-50 transition-all cursor-pointer"
             title="Clear Chat History"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,15 +80,29 @@ export const InlineChatbot: React.FC = () => {
 
       {/* Main Conversation or Welcome Area */}
       {messages.length <= 1 ? (
-        <div className="flex-1 flex flex-col justify-center items-center my-6">
-          <h2 className="text-4xl font-bold tracking-tight text-zinc-800 text-center mb-8">
+        <div className="flex-1 flex flex-col justify-center items-center my-6 text-center">
+          <h2 className="text-3xl font-black tracking-tight text-black text-center mb-4">
             {lang === "es" ? "¿En qué puedo ayudarte?" : "What can I help with?"}
           </h2>
+          {messages.length === 1 && (
+            <p className="text-sm text-black font-semibold text-center leading-relaxed max-w-md bg-zinc-50 p-4 rounded-2xl border border-zinc-200 shadow-xs mb-6">
+              {messages[0].content}
+            </p>
+          )}
+          <button
+            onClick={() => handleSelectQuestion("qué servicios ofrecéis?")}
+            className="bg-white text-black text-sm px-6 py-3.5 rounded-2xl hover:bg-zinc-100 transition-all font-bold border border-zinc-300 shadow-sm cursor-pointer flex items-center gap-3"
+          >
+            <span>qué servicios ofrecéis?</span>
+            <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
         </div>
       ) : (
         <div
           ref={scrollRef}
-          className="flex-1 px-4 py-2 mb-6 overflow-y-auto max-h-[350px] scrollbar-thin scrollbar-thumb-zinc-200"
+          className="flex-1 px-4 py-2 mb-6 overflow-y-auto max-h-[350px] scrollbar-thin scrollbar-thumb-zinc-300 text-black font-medium"
         >
           {messages.map((msg, index) => (
             <Message key={index} message={msg} accentColor="bg-black" />
@@ -105,7 +123,7 @@ export const InlineChatbot: React.FC = () => {
           <div className="flex justify-center mb-2">
             <button
               onClick={stopGeneration}
-              className="flex items-center space-x-1.5 px-3 py-1 bg-white hover:bg-zinc-50 border border-zinc-200 rounded-full text-[10px] font-bold text-zinc-600 transition-colors shadow-sm cursor-pointer"
+              className="flex items-center space-x-1.5 px-3 py-1 bg-white hover:bg-zinc-50 border border-zinc-200 rounded-full text-[10px] font-bold text-black transition-colors shadow-sm cursor-pointer"
             >
               <span className="w-1.5 h-1.5 bg-rose-500 rounded animate-pulse" />
               <span>{lang === "es" ? "Detener generación" : "Stop Generating"}</span>
@@ -113,7 +131,7 @@ export const InlineChatbot: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleSend} className="w-full bg-white border border-zinc-200 rounded-[1.6rem] shadow-md p-4 flex flex-col gap-3 max-w-3xl mx-auto">
+        <form onSubmit={handleSend} className="w-full bg-white border border-zinc-300 rounded-[1.6rem] shadow-md p-4 flex flex-col gap-3 max-w-3xl mx-auto">
           <textarea
             rows={1}
             value={input}
@@ -121,35 +139,11 @@ export const InlineChatbot: React.FC = () => {
             onKeyDown={handleKeyDown}
             placeholder={lang === "es" ? "Pregunta lo que quieras" : "Ask anything"}
             disabled={isLoading || isStreaming}
-            className="w-full text-sm bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-zinc-800 placeholder-zinc-400 resize-none font-sans min-h-[32px] max-h-32 py-1.5"
+            className="w-full text-sm bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-black font-semibold placeholder-zinc-500 resize-none font-sans min-h-[32px] max-h-32 py-1.5"
             aria-label="Chat input field"
           />
           
-          <div className="flex items-center justify-between border-t border-zinc-150/60 pt-3">
-            {/* Circular utility buttons */}
-            <div className="flex items-center gap-2 text-zinc-400">
-              <button type="button" className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-50 hover:text-zinc-650 transition-colors cursor-pointer">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 0A3 3 0 109.5 14.5m5.328-5.328l-5.656 5.656m0 0a3 3 0 11-4.243-4.243L10.5 4.5a5.5 5.5 0 117.778 7.778l-6.364 6.364a8 8 0 11-11.314-11.314l1.414-1.414" />
-                </svg>
-              </button>
-              <button type="button" className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-50 hover:text-zinc-655 transition-colors cursor-pointer">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                </svg>
-              </button>
-              <button type="button" className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-50 hover:text-zinc-655 transition-colors cursor-pointer">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-              </button>
-              <button type="button" className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-50 hover:text-zinc-655 transition-colors cursor-pointer">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path d="M5 12h.01M12 12h.01M19 12h.01" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </div>
-
+          <div className="flex items-center justify-end border-t border-zinc-100 pt-3">
             {/* Submit Arrow Button */}
             <button
               type="submit"
@@ -157,7 +151,7 @@ export const InlineChatbot: React.FC = () => {
               className="w-9 h-9 rounded-2xl bg-black text-white flex items-center justify-center hover:bg-zinc-800 disabled:opacity-20 transition-all cursor-pointer shadow-sm"
               aria-label="Send message"
             >
-              <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <svg className="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
               </svg>
             </button>
@@ -165,7 +159,7 @@ export const InlineChatbot: React.FC = () => {
         </form>
 
         {/* Disclaimer */}
-        <span className="text-[10px] text-zinc-400 text-center mt-3 select-none leading-normal">
+        <span className="text-[10px] text-black font-semibold text-center mt-3 select-none leading-normal">
           {lang === "es" 
             ? "La IA puede cometer errores. Por favor, verifica las respuestas." 
             : "AI can make mistakes. Please double-check responses."}

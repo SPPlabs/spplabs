@@ -170,7 +170,7 @@ function renderMarkdown(text: string): React.ReactNode {
       // Headings
       if (line.startsWith("# ")) {
         parsedLines.push(
-          <h1 key={i} className="text-sm font-black text-white mt-3 mb-1 font-sans">
+          <h1 key={i} className="text-sm font-black text-black mt-3 mb-1 font-sans">
             {parseInlineMarkdown(line.slice(2))}
           </h1>
         );
@@ -178,7 +178,7 @@ function renderMarkdown(text: string): React.ReactNode {
       }
       if (line.startsWith("## ")) {
         parsedLines.push(
-          <h2 key={i} className="text-xs font-black text-slate-200 mt-2.5 mb-1 font-sans">
+          <h2 key={i} className="text-xs font-black text-black mt-2.5 mb-1 font-sans">
             {parseInlineMarkdown(line.slice(3))}
           </h2>
         );
@@ -186,7 +186,7 @@ function renderMarkdown(text: string): React.ReactNode {
       }
       if (line.startsWith("### ")) {
         parsedLines.push(
-          <h3 key={i} className="text-[11px] font-bold text-slate-300 mt-2 mb-0.5 font-sans">
+          <h3 key={i} className="text-[11px] font-bold text-black mt-2 mb-0.5 font-sans">
             {parseInlineMarkdown(line.slice(4))}
           </h3>
         );
@@ -196,7 +196,7 @@ function renderMarkdown(text: string): React.ReactNode {
       // Bullet lists
       if (line.trim().startsWith("- ") || line.trim().startsWith("* ")) {
         parsedLines.push(
-          <li key={i} className="ml-3.5 list-disc text-[11px] text-slate-300 my-0.5 font-sans">
+          <li key={i} className="ml-3.5 list-disc text-[11px] text-black font-semibold my-0.5 font-sans">
             {parseInlineMarkdown(line.trim().slice(2))}
           </li>
         );
@@ -207,7 +207,7 @@ function renderMarkdown(text: string): React.ReactNode {
       const numberedMatch = line.trim().match(/^(\d+)\.\s(.*)$/);
       if (numberedMatch) {
         parsedLines.push(
-          <li key={i} className="ml-3.5 list-decimal text-[11px] text-slate-300 my-0.5 font-sans">
+          <li key={i} className="ml-3.5 list-decimal text-[11px] text-black font-semibold my-0.5 font-sans">
             {parseInlineMarkdown(numberedMatch[2])}
           </li>
         );
@@ -222,7 +222,7 @@ function renderMarkdown(text: string): React.ReactNode {
 
       // Normal text
       parsedLines.push(
-        <p key={i} className="text-[11px] text-slate-300 my-0.5 leading-relaxed font-sans">
+        <p key={i} className="text-[11px] text-black font-semibold my-0.5 leading-relaxed font-sans">
           {parseInlineMarkdown(line)}
         </p>
       );
@@ -233,22 +233,22 @@ function renderMarkdown(text: string): React.ReactNode {
       const currentHeaders = [...tableHeaders];
       const currentRows = [...tableRows];
       parsedLines.push(
-        <div key="table-final" className="overflow-x-auto my-2 border border-slate-700/60 rounded-lg">
-          <table className="min-w-full divide-y divide-slate-700/60 text-[11px] font-sans">
-            <thead className="bg-slate-905">
+        <div key="table-final" className="overflow-x-auto my-2 border border-zinc-300 rounded-lg">
+          <table className="min-w-full divide-y divide-zinc-200 text-[11px] font-sans">
+            <thead className="bg-zinc-100">
               <tr>
                 {currentHeaders.map((h, idx) => (
-                  <th key={idx} className="px-2.5 py-1.5 text-left font-bold text-slate-400 uppercase tracking-wider border-b border-slate-700/60">
+                  <th key={idx} className="px-2.5 py-1.5 text-left font-bold text-black uppercase tracking-wider border-b border-zinc-300">
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 bg-slate-900/40">
+            <tbody className="divide-y divide-zinc-200 bg-white">
               {currentRows.map((row, rIdx) => (
                 <tr key={rIdx}>
                   {row.map((cell, cIdx) => (
-                    <td key={cIdx} className="px-2.5 py-1.5 text-slate-300">
+                    <td key={cIdx} className="px-2.5 py-1.5 text-black font-semibold">
                       {parseInlineMarkdown(cell)}
                     </td>
                   ))}
@@ -273,7 +273,7 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
     const split = part.split(/(`[^`]+`)/g);
     return split.map((s) => {
       if (s.startsWith("`") && s.endsWith("`")) {
-        return <code key={s} className="bg-slate-950 text-rose-400 px-1 py-0.5 rounded font-mono text-[10px] border border-slate-800">{s.slice(1, -1)}</code>;
+        return <code key={s} className="bg-zinc-100 text-black font-bold px-1 py-0.5 rounded font-mono text-[10px] border border-zinc-300">{s.slice(1, -1)}</code>;
       }
       return s;
     });
@@ -285,7 +285,7 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
     const split = part.split(/(\*\*[^*]+\*\*)/g);
     return split.map((s) => {
       if (s.startsWith("**") && s.endsWith("**")) {
-        return <strong key={s} className="font-extrabold text-white">{s.slice(2, -2)}</strong>;
+        return <strong key={s} className="font-black text-black">{s.slice(2, -2)}</strong>;
       }
       return s;
     });
@@ -297,7 +297,7 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
     const split = part.split(/(\*[^*]+\*)/g);
     return split.map((s) => {
       if (s.startsWith("*") && s.endsWith("*")) {
-        return <em key={s} className="italic text-slate-100">{s.slice(1, -1)}</em>;
+        return <em key={s} className="italic font-bold text-black">{s.slice(1, -1)}</em>;
       }
       return s;
     });
@@ -316,7 +316,7 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
             href={match[2]}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-indigo-400 hover:text-indigo-300 font-semibold underline transition-colors"
+            className="text-black font-black underline transition-colors"
           >
             {match[1]}
           </a>
