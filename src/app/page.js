@@ -430,9 +430,9 @@ export default function Home() {
             {/* Hero Section */}
             <section className="relative overflow-hidden pt-10 pb-20 md:py-32 border-b border-zinc-100">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-                <div className="grid md:grid-cols-12 gap-12 md:gap-16 items-center">
+                <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
                   {/* Hero Copy */}
-                  <div className="md:col-span-7 flex flex-col items-start text-left">
+                  <div className="lg:col-span-6 flex flex-col items-start text-left">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-zinc-200 text-xs font-bold bg-white mb-6 shadow-sm">
                       <span className="text-brand-blue">IA</span>
                       <span className="text-zinc-350">•</span>
@@ -536,17 +536,30 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Hero Visual Mockup: Video Animation */}
-                  <div className="md:col-span-5 relative w-full flex items-center justify-center py-8 md:py-0">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/20 via-purple-500/20 to-brand-green/20 rounded-3xl blur-3xl -z-10"></div>
-                    <div className="relative w-full max-w-lg p-2 rounded-3xl bg-gradient-to-br from-brand-blue/30 via-zinc-900 to-brand-green/30 shadow-2xl border border-zinc-200/40 group overflow-hidden">
+                  {/* Hero Visual Mockup: Enlarged Premium Video Container */}
+                  <div className="lg:col-span-6 relative w-full flex items-center justify-center py-6 lg:py-0">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/25 via-purple-600/20 to-brand-green/25 rounded-3xl blur-3xl -z-10 animate-pulse duration-1000"></div>
+                    <div className="relative w-full max-w-2xl p-3 sm:p-4 rounded-3xl bg-gradient-to-br from-zinc-900/95 via-black to-zinc-950/95 shadow-[0_25px_60px_-15px_rgba(37,99,235,0.25)] border border-zinc-700/60 ring-1 ring-white/10 group transition-all duration-500 hover:border-zinc-500 hover:shadow-[0_25px_70px_-10px_rgba(16,185,129,0.3)]">
+                      {/* Decorative High-Tech Window Header */}
+                      <div className="flex items-center justify-between pb-3 px-2 mb-2 border-b border-zinc-800/80">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                          <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                          <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/90 border border-zinc-800 text-[10px] font-mono text-zinc-400">
+                          <span className="w-2 h-2 rounded-full bg-brand-green animate-ping"></span>
+                          <span>SPP_LABS_DEMO.MP4</span>
+                        </div>
+                      </div>
+
                       <video
                         src="/hola_necesito_una_animacion_p.mp4"
                         autoPlay
                         loop
                         muted
                         playsInline
-                        className="w-full h-auto rounded-2xl shadow-2xl border border-zinc-800/80 object-cover block"
+                        className="w-full h-auto rounded-2xl shadow-2xl border border-zinc-800/90 object-cover block"
                       />
                     </div>
                   </div>
@@ -556,21 +569,21 @@ export default function Home() {
 
             {/* Inline Chatbot Section */}
             <section className="py-20 bg-zinc-50 border-b border-zinc-100">
-              <div className="max-w-7xl mx-auto px-6">
+              <div className="max-w-[94rem] mx-auto px-6">
                 <InlineChatbot />
                 
-                {/* 4 Service Cards with Floating Holographic Numbers */}
+                {/* 5 Service Cards with Floating Holographic Numbers */}
                 <div className="mt-24">
                   <div className="text-center max-w-2xl mx-auto mb-16">
                     <span className="text-xs font-bold uppercase tracking-widest text-brand-blue bg-brand-blue/5 border border-brand-blue/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
                       {lang === "es" ? "Nuestros Servicios Destacados" : "Our Featured Services"}
                     </span>
                     <h3 className="text-2xl sm:text-4xl font-black text-black">
-                      {lang === "es" ? "Sistemas de Alto Rendimiento en 4 Pasos" : "High-Performance Workflows in 4 Steps"}
+                      {lang === "es" ? "Sistemas de Alto Rendimiento en 5 Pasos" : "High-Performance Workflows in 5 Steps"}
                     </h3>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 justify-items-center">
                     {/* Card 1 */}
                     <div className="flex flex-col items-center">
                       <div className="card-6" aria-hidden="true">
@@ -695,6 +708,38 @@ export default function Home() {
                             </p>
                           </div>
                           <span className="text-emerald-400 text-[9px] uppercase font-bold tracking-wider">04 // Support</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 5 */}
+                    <div className="flex flex-col items-center">
+                      <div className="card-6" aria-hidden="true">
+                        <div className="card-6__holo">
+                          <div className="card-6__layer card-6__layer--back">5</div>
+                          <div className="card-6__layer card-6__layer--mid">5</div>
+                          <div className="card-6__layer card-6__layer--front">5</div>
+                        </div>
+                      </div>
+                      
+                      <div className="service-card">
+                        <div className="service-card-inner p-6 flex flex-col justify-between text-left">
+                          <div>
+                            <div className="text-cyan-400 text-2xl mb-4">
+                              <svg className="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                            <h4 className="text-white text-base font-extrabold mb-2">
+                              {lang === "es" ? "Sistema de Reservas y Contacto" : "Booking & Contact System"}
+                            </h4>
+                            <p className="text-zinc-400 text-xs leading-relaxed">
+                              {lang === "es"
+                                ? "Gestión automatizada de citas en tiempo real y recepción directa de clientes potenciales integrados con CRM."
+                                : "Automated real-time appointment scheduling and instant lead capture integrated into your CRM."}
+                            </p>
+                          </div>
+                          <span className="text-cyan-400 text-[9px] uppercase font-bold tracking-wider">05 // Bookings & Leads</span>
                         </div>
                       </div>
                     </div>
