@@ -103,6 +103,9 @@ export default function DashboardClient({
 
   const isImpersonating = session.role === "ADMIN" && currentWebsite.domain !== "spplabs.es";
 
+  // Mobile Drawer State
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
   // Analytics state
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
@@ -1248,19 +1251,13 @@ export default function DashboardClient({
   }
 
   return (
-    <div className="h-screen w-screen bg-slate-50 flex overflow-hidden font-sans selection:bg-brand-blue selection:text-white text-slate-900">
+    <div className="min-h-screen w-full bg-slate-50 flex flex-col lg:flex-row overflow-x-hidden font-sans selection:bg-brand-blue selection:text-white text-slate-900">
       
-      {/* Backdrop overlay for mobile sidebar */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-slate-900/40 z-30 md:hidden animate-fade-in"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-      <aside className={`h-full bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0 fixed inset-y-0 left-0 z-40 md:relative md:z-20 shadow-sm transition-all duration-300 ease-in-out ${
+      {/* Desktop Sidebar (lg:flex) */}
+      <aside className={`hidden lg:flex h-full bg-white border-r border-slate-200/80 flex-col justify-between shrink-0 relative z-20 shadow-sm transition-all duration-300 ease-in-out ${
         sidebarOpen 
           ? "w-72 p-5" 
-          : "w-0 p-0 overflow-hidden border-r-0 md:w-20 md:p-3 md:border-r md:overflow-visible"
+          : "w-20 p-3 overflow-visible"
       }`}>
         <div className="flex flex-col gap-6">
           {/* Logo & Retract/Expand Toggle Section inside side panel */}
@@ -1472,8 +1469,130 @@ export default function DashboardClient({
       {/* RIGHT MAIN VIEWPORT */}
       <div className="flex-1 h-full flex flex-col overflow-hidden bg-slate-50 relative z-10">
 
+        {/* STICKY MOBILE TOP HEADER (lg:hidden) */}
+        <div className="lg:hidden bg-white border-b border-slate-200/90 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setMobileDrawerOpen(true)}
+              className="p-2 text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all cursor-pointer border border-slate-200/80"
+              aria-label="Abrir Menú Móvil"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
+            <div className="flex items-center gap-2">
+              <img src="/logo.webp" alt="SPP Labs" className="w-6 h-6 object-contain" />
+              <SppLabsLogo inline={true} className="text-slate-900 text-sm" />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-xl border border-slate-200 truncate max-w-[130px]">
+              {currentWebsite.domain}
+            </span>
+          </div>
+        </div>
+
+        {/* MOBILE SIDEBAR DRAWER OVERLAY (lg:hidden) */}
+        {mobileDrawerOpen && (
+          <div className="lg:hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex animate-fade-in" onClick={() => setMobileDrawerOpen(false)}>
+            <aside
+              className="w-72 bg-white h-full border-r border-slate-200 p-5 flex flex-col justify-between shadow-2xl animate-slide-in-left"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                  <div className="flex items-center gap-2">
+                    <img src="/logo.webp" alt="SPP Labs" className="w-7 h-7 object-contain" />
+                    <SppLabsLogo inline={true} className="text-slate-900" />
+                  </div>
+                  <button
+                    onClick={() => setMobileDrawerOpen(false)}
+                    className="p-2 text-slate-400 hover:text-slate-800 rounded-full hover:bg-slate-100 transition-all cursor-pointer font-bold"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <nav className="space-y-1.5">
+                  {[
+                    { id: "overview", label: t.menuResumen, icon: "📊" },
+                    { id: "analytics", label: t.menuAnaliticas, icon: "📈" },
+                    { id: "clientes", label: t.menuClientes, count: contactForms.length + bookings.length, icon: "👥" },
+                    { id: "ia", label: t.menuIA, icon: "⚡" },
+                    { id: "notificaciones", label: t.menuNotificaciones, count: announcementsList.length, icon: "🔔" },
+                    { id: "petitions", label: session.domain === "spplabs.es" ? "Peticiones de Clientes" : "Mis Peticiones", count: petitionsList.length, icon: "📩" },
+                    ...(session.role === "ADMIN" && !isImpersonating ? [{ id: "admin", label: t.menuUsuarios, icon: "🔑" }] : [])
+                  ].map((item) => {
+                    const active = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setActiveTab(item.id);
+                          setMobileDrawerOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between p-3.5 rounded-2xl text-xs font-black transition-all cursor-pointer ${
+                          active
+                            ? "bg-slate-950 text-white shadow-md scale-[1.02]"
+                            : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-base">{item.icon}</span>
+                          <span>{item.label}</span>
+                        </div>
+                        {item.count > 0 && (
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                            active ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-700 border border-slate-200"
+                          }`}>
+                            {item.count}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+
+                  {session.domain === "spplabs.es" && currentWebsite.domain !== "spplabs.es" && (
+                    <button
+                      onClick={() => {
+                        handleInspectUser(session.domain);
+                        setMobileDrawerOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 p-3.5 rounded-2xl text-xs font-black bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all border border-blue-200 mt-4 cursor-pointer"
+                    >
+                      <svg className="w-5 h-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 016 6v3" />
+                      </svg>
+                      <span>vuelve a spplabs.es</span>
+                    </button>
+                  )}
+                </nav>
+              </div>
+
+              <div className="space-y-3 pt-4 border-t border-slate-100">
+                <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
+                  <span className="font-bold text-xs text-slate-800 block truncate">{currentWebsite.displayName}</span>
+                  <span className="text-[10px] text-slate-500 font-mono block truncate">{currentWebsite.domain}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-center gap-2 h-10 border border-slate-200 hover:border-red-200 hover:text-red-600 hover:bg-red-50 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  {lang === "es" ? "Cerrar Sesión" : "Sign Out"}
+                </button>
+              </div>
+            </aside>
+          </div>
+        )}
+
         {/* Tab content viewport window */}
-        <main className="flex-1 overflow-y-auto p-8 w-full max-w-full">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 w-full max-w-full">
           {/* TAB: ADMIN PANEL (USUARIOS) */}
           {activeTab === "admin" && session.role === "ADMIN" && (
             <div className="space-y-8 animate-fade-in">
