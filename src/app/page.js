@@ -1673,8 +1673,8 @@ export default function Home() {
                 </h2>
                 <p className="text-zinc-650 mt-4 text-sm leading-relaxed">
                   {lang === "es"
-                    ? "Seleccione una fecha disponible para una videollamada de consultoría, o escríbanos sus requerimientos técnicos directamente."
-                    : "Pick a consultation date using our database scheduler below, or write your system integration inquiries to our team."}
+                    ? "Seleccione una fecha para una agendar una llamada de consultoría, o escríbanos sus requerimientos técnicos o un mensaje directamente."
+                    : "Select a date to schedule a consultation call, or send us your technical requirements or a message directly."}
                 </p>
               </div>
 
