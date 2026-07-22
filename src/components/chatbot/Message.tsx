@@ -28,7 +28,7 @@ export const Message: React.FC<MessageProps> = ({ message, accentColor }) => {
         {/* Message Bubble Container */}
         <div className="relative flex items-start">
           <div
-            className={`px-4 py-2.5 rounded-2xl text-xs leading-relaxed ${
+            className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
               isUser
                 ? "bg-[#e3e3e2] text-zinc-900 rounded-tr-none border border-zinc-300/20 shadow-sm"
                 : "text-zinc-850 px-1 py-1"
@@ -196,7 +196,7 @@ function renderMarkdown(text: string): React.ReactNode {
       // Bullet lists
       if (line.trim().startsWith("- ") || line.trim().startsWith("* ")) {
         parsedLines.push(
-          <li key={i} className="ml-3.5 list-disc text-[11px] text-black font-semibold my-0.5 font-sans">
+          <li key={i} className="ml-3.5 list-disc text-xs text-black font-semibold my-0.5 font-sans">
             {parseInlineMarkdown(line.trim().slice(2))}
           </li>
         );
@@ -207,7 +207,7 @@ function renderMarkdown(text: string): React.ReactNode {
       const numberedMatch = line.trim().match(/^(\d+)\.\s(.*)$/);
       if (numberedMatch) {
         parsedLines.push(
-          <li key={i} className="ml-3.5 list-decimal text-[11px] text-black font-semibold my-0.5 font-sans">
+          <li key={i} className="ml-3.5 list-decimal text-xs text-black font-semibold my-0.5 font-sans">
             {parseInlineMarkdown(numberedMatch[2])}
           </li>
         );
@@ -222,7 +222,7 @@ function renderMarkdown(text: string): React.ReactNode {
 
       // Normal text
       parsedLines.push(
-        <p key={i} className="text-[11px] text-black font-semibold my-0.5 leading-relaxed font-sans">
+        <p key={i} className="text-xs text-black font-semibold my-0.5 leading-relaxed font-sans">
           {parseInlineMarkdown(line)}
         </p>
       );

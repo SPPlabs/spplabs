@@ -1331,31 +1331,8 @@ export default function Home() {
 
               <div className="grid lg:grid-cols-12 gap-12 items-start">
                 
-                {/* Left Column: Contact details + Booking calendar */}
+                {/* Left Column: Booking calendar */}
                 <div className="lg:col-span-7 space-y-8">
-                  
-                  {/* Fake Contact Information card */}
-                  <div className="bg-zinc-50 border border-zinc-200 rounded-3xl p-8 shadow-sm">
-                    <h3 className="text-lg font-bold text-black mb-6">{lang === "es" ? "Detalles de Contacto" : "Contact Details"}</h3>
-                    <div className="grid sm:grid-cols-2 gap-6 text-sm">
-                      <div className="space-y-1">
-                        <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 block">{lang === "es" ? "Teléfono" : "Phone"}</span>
-                        <a href="tel:+34910000000" className="text-zinc-800 hover:text-brand-blue font-bold font-mono transition-colors block">+34 910 000 000</a>
-                      </div>
-                      <div className="space-y-1">
-                        <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 block">{lang === "es" ? "Correo Electrónico" : "Email"}</span>
-                        <a href="mailto:info@spplabs.es" className="text-zinc-800 hover:text-brand-blue font-bold font-mono transition-colors block">info@spplabs.es</a>
-                      </div>
-                      <div className="space-y-1">
-                        <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 block">{lang === "es" ? "Dirección" : "Office"}</span>
-                        <span className="text-zinc-700 font-bold block">Calle Gran Vía 12, 28013 Madrid, España</span>
-                      </div>
-                      <div className="space-y-1">
-                        <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 block">{lang === "es" ? "Horario" : "Working Hours"}</span>
-                        <span className="text-zinc-700 font-bold block">{lang === "es" ? "Lunes - Viernes: 09:00 - 18:00" : "Monday - Friday: 09:00 - 18:00"}</span>
-                      </div>
-                    </div>
-                  </div>
 
                   {/* Calendar component */}
                   <div className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm relative overflow-hidden">
