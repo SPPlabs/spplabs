@@ -536,14 +536,16 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Hero Visual Mockup: Laptop & Mobile Devices Image */}
-                  <div className="lg:col-span-6 relative w-full flex items-center justify-center py-6 lg:py-0">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/20 via-cyan-400/15 to-brand-green/20 rounded-3xl blur-3xl -z-10 animate-pulse"></div>
+                  {/* Hero Visual Mockup: Laptop & Mobile Devices Seamlessly Integrated */}
+                  <div className="lg:col-span-6 relative w-full flex items-center justify-center py-4 lg:py-0">
+                    {/* Ambient Floor Glow under devices */}
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-4/5 h-16 bg-gradient-to-r from-brand-blue/25 via-cyan-400/25 to-brand-green/25 blur-2xl rounded-full pointer-events-none -z-10"></div>
+                    
                     <div className="relative w-full max-w-2xl flex items-center justify-center">
                       <img
                         src="/foto_inicio_portatil_movil.png"
                         alt="SPP Labs Dispositivos Portátil y Móvil"
-                        className="w-full h-auto object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.18)] transition-transform duration-500 hover:scale-[1.02] block"
+                        className="w-full h-auto object-contain mix-blend-multiply transition-transform duration-500 hover:scale-[1.02] block"
                       />
                     </div>
                   </div>
