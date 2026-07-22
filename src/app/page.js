@@ -777,6 +777,278 @@ export default function Home() {
               </div>
             </section>
 
+            {/* Dashboard Todo en Uno Section */}
+            <section className="py-20 md:py-28 bg-white border-b border-zinc-100 overflow-hidden">
+              <div className="max-w-[94rem] mx-auto px-4 sm:px-6 md:px-12">
+                <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+                  
+                  {/* Left Column: Copy & Checklist */}
+                  <div className="lg:col-span-5 flex flex-col items-start text-left">
+                    {/* Pill badge: DASHBOARD in blue, TODO EN UNO in green */}
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-zinc-200 bg-white shadow-xs mb-6">
+                      <span className="text-xs font-black uppercase tracking-wider text-brand-blue">DASHBOARD</span>
+                      <span className="text-xs font-black uppercase tracking-wider text-brand-green">TODO EN UNO</span>
+                    </div>
+
+                    {/* Main Heading */}
+                    <h2 className="text-3xl sm:text-5xl font-black text-zinc-950 tracking-tight leading-[1.12] mb-8 font-sans">
+                      {lang === "es" ? (
+                        <>
+                          Gestiona y mide <br className="hidden sm:inline" />
+                          <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-cyan-500 to-brand-green">
+                            todo desde un solo lugar
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          Manage and measure <br className="hidden sm:inline" />
+                          <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-cyan-500 to-brand-green">
+                            everything from one place
+                          </span>
+                        </>
+                      )}
+                    </h2>
+
+                    {/* 6 Checklist items with green check icons */}
+                    <ul className="space-y-4 mb-10 w-full text-zinc-850 font-semibold text-base sm:text-lg">
+                      {[
+                        lang === "es" ? "Panel de control intuitivo" : "Intuitive control panel",
+                        lang === "es" ? "Estadísticas en tiempo real" : "Real-time statistics",
+                        lang === "es" ? "Clientes y leads organizados" : "Organized clients & leads",
+                        lang === "es" ? "Reservas y citas automáticas" : "Automated bookings & scheduling",
+                        lang === "es" ? "Chatbot IA integrado" : "Integrated AI Chatbot",
+                        lang === "es" ? "Reportes y métricas avanzadas" : "Advanced metrics & reports"
+                      ].map((item, idx) => (
+                        <li key={idx} className="flex items-center gap-3.5 group">
+                          <div className="w-6 h-6 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green shrink-0 group-hover:scale-110 transition-transform">
+                            <svg className="w-4 h-4 text-brand-green" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                            </svg>
+                          </div>
+                          <span className="text-zinc-900 group-hover:text-black transition-colors">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* Demo Button */}
+                    <button
+                      onClick={() => {
+                        const el = document.getElementById("prueba-gratis");
+                        if (el) el.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className="inline-flex items-center justify-center gap-3 px-8 h-14 text-base font-bold bg-gradient-to-r from-brand-blue via-cyan-500 to-brand-green text-white rounded-2xl shadow-lg shadow-brand-blue/20 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 cursor-pointer w-full sm:w-auto"
+                    >
+                      <span>{lang === "es" ? "Ver demo del dashboard" : "Explore dashboard demo"}</span>
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Right Column: Full Dashboard Mockup Container */}
+                  <div className="lg:col-span-7 relative w-full">
+                    {/* Glow backdrop */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/15 via-cyan-400/10 to-brand-green/15 rounded-[2.5rem] blur-3xl -z-10"></div>
+                    
+                    <div className="w-full bg-white border border-zinc-200/90 rounded-[2rem] shadow-2xl p-4 sm:p-6 overflow-hidden flex flex-col md:flex-row gap-6 border-zinc-200 text-black">
+                      
+                      {/* Sidebar Mockup */}
+                      <div className="w-full md:w-56 shrink-0 bg-zinc-50 border border-zinc-200/80 rounded-2xl p-4 flex flex-col justify-between">
+                        <div>
+                          {/* Brand Logo Header */}
+                          <div className="flex items-center gap-2 mb-6 px-1">
+                            <img src="/logo.webp" alt="SPP Logo" className="w-6 h-6 object-contain" />
+                            <SppLabsLogo inline={true} className="text-black scale-90" />
+                          </div>
+
+                          {/* Sidebar Menu Items */}
+                          <div className="space-y-1">
+                            <div className="px-3 py-2 rounded-xl text-xs font-bold text-zinc-600 flex items-center gap-2.5">
+                              <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                              <span>Resumen</span>
+                            </div>
+                            
+                            {/* Active Analíticas Item */}
+                            <div className="px-3 py-2 rounded-xl text-xs font-bold bg-zinc-950 text-white flex items-center gap-2.5 shadow-sm">
+                              <svg className="w-4 h-4 text-brand-green" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                              <span>Analíticas</span>
+                            </div>
+
+                            <div className="px-3 py-2 rounded-xl text-xs font-bold text-zinc-600 flex items-center gap-2.5">
+                              <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                              <span>Clientes</span>
+                            </div>
+
+                            <div className="px-3 py-2 rounded-xl text-xs font-bold text-zinc-600 flex items-center gap-2.5">
+                              <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                              <span>IA (Chatbot)</span>
+                            </div>
+
+                            <div className="px-3 py-2 rounded-xl text-xs font-bold text-zinc-600 flex items-center gap-2.5">
+                              <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                              <span className="truncate">Notificaciones...</span>
+                            </div>
+
+                            <div className="px-3 py-2 rounded-xl text-xs font-bold text-zinc-600 flex items-center gap-2.5">
+                              <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                              <span>Usuarios</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Admin Footer */}
+                        <div className="mt-8 space-y-2 pt-4 border-t border-zinc-200">
+                          <div className="p-2.5 bg-white border border-zinc-200 rounded-xl flex items-center justify-between">
+                            <div>
+                              <span className="text-[11px] font-bold text-black block">SPP Labs Admin</span>
+                              <span className="text-[9px] text-zinc-400 block font-mono">spplabs.es</span>
+                            </div>
+                            <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
+                          </div>
+                          <div className="w-full py-1.5 bg-white border border-zinc-200 rounded-xl text-[10px] font-bold text-zinc-600 text-center flex items-center justify-center gap-1">
+                            <svg className="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                            <span>Cerrar Sesión</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Main Dashboard Panel */}
+                      <div className="flex-1 space-y-4">
+                        
+                        {/* Top Toolbar */}
+                        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-zinc-150">
+                          <div>
+                            <span className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase bg-zinc-100 px-2 py-0.5 rounded">SPPLABS.ES</span>
+                            <h3 className="text-base font-black text-black mt-1">Analíticas de Tráfico</h3>
+                            <p className="text-[11px] text-zinc-500 font-medium">Métricas de visitas e interacción ingeridas en tiempo real</p>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <div className="flex bg-zinc-100 p-1 rounded-xl text-[10px] font-bold">
+                              <span className="px-2 py-1 text-zinc-600">Día</span>
+                              <span className="px-2 py-1 bg-black text-white rounded-lg shadow-xs">Semana</span>
+                              <span className="px-2 py-1 text-zinc-600">Mes</span>
+                              <span className="px-2 py-1 text-zinc-600">Año</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2.5 py-1 rounded-xl text-[10px] font-bold">
+                              <span className="w-2 h-2 rounded-full bg-brand-green animate-ping"></span>
+                              <span>2 activos</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 5 Metric Cards */}
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                          <div className="bg-zinc-50 border-t-2 border-purple-500 border-x border-b border-zinc-200 p-3 rounded-xl text-center">
+                            <span className="text-[8px] font-bold uppercase text-purple-600 tracking-wider block">Total Impresiones</span>
+                            <span className="text-lg font-black text-black my-0.5 block">934</span>
+                            <span className="text-[8px] font-bold text-emerald-600 block">↑ +100% vs semana</span>
+                          </div>
+
+                          <div className="bg-zinc-50 border-t-2 border-brand-cyan border-x border-b border-zinc-200 p-3 rounded-xl text-center">
+                            <span className="text-[8px] font-bold uppercase text-cyan-600 tracking-wider block">Visitantes Únicos</span>
+                            <span className="text-lg font-black text-black my-0.5 block">30</span>
+                            <span className="text-[8px] font-bold text-emerald-600 block">↑ +100% vs semana</span>
+                          </div>
+
+                          <div className="bg-zinc-50 border-t-2 border-brand-green border-x border-b border-zinc-200 p-3 rounded-xl text-center">
+                            <span className="text-[8px] font-bold uppercase text-brand-green tracking-wider block">Sesiones</span>
+                            <span className="text-lg font-black text-black my-0.5 block">53</span>
+                            <span className="text-[8px] font-bold text-emerald-600 block">↑ +100% vs semana</span>
+                          </div>
+
+                          <div className="bg-zinc-50 border-t-2 border-amber-500 border-x border-b border-zinc-200 p-3 rounded-xl text-center">
+                            <span className="text-[8px] font-bold uppercase text-amber-600 tracking-wider block">Duración Promedio</span>
+                            <span className="text-lg font-black text-black my-0.5 block">72s</span>
+                            <span className="text-[8px] font-bold text-zinc-400 block">Promedio por sesión</span>
+                          </div>
+
+                          <div className="bg-zinc-50 border-t-2 border-blue-500 border-x border-b border-zinc-200 p-3 rounded-xl text-center col-span-2 sm:col-span-1">
+                            <span className="text-[8px] font-bold uppercase text-blue-600 tracking-wider block">Tasa Rebote</span>
+                            <span className="text-lg font-black text-black my-0.5 block">28%</span>
+                            <span className="text-[8px] font-bold text-emerald-600 block">Excelente</span>
+                          </div>
+                        </div>
+
+                        {/* Traffic Volume Chart */}
+                        <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-xs">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-lg bg-zinc-950 text-brand-cyan flex items-center justify-center">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 005.814-5.519l2.74-1.22" /></svg>
+                              </div>
+                              <div>
+                                <span className="text-[10px] font-extrabold text-black uppercase tracking-wider block">Volumen de Tráfico (Últimos 7 días)</span>
+                                <span className="text-[9px] text-zinc-400 block">Histórico de visitas e interacción</span>
+                              </div>
+                            </div>
+                            <span className="text-[9px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded">Semana</span>
+                          </div>
+
+                          {/* Spline SVG Chart */}
+                          <div className="relative w-full h-32 pt-2">
+                            <svg viewBox="0 0 500 120" className="w-full h-full text-brand-cyan overflow-visible" fill="none" stroke="currentColor" strokeWidth="3">
+                              <defs>
+                                <linearGradient id="dashboardGrad" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="0%" stopColor="#00c8ff" stopOpacity="0.25" />
+                                  <stop offset="100%" stopColor="#00c8ff" stopOpacity="0.0" />
+                                </linearGradient>
+                              </defs>
+                              <path d="M 10 90 Q 75 75 140 70 T 270 20 T 390 30 T 490 75" />
+                              <path d="M 10 90 Q 75 75 140 70 T 270 20 T 390 30 T 490 75 L 490 120 L 10 120 Z" fill="url(#dashboardGrad)" stroke="none" />
+                              <circle cx="140" cy="70" r="4" fill="#00c8ff" />
+                              <circle cx="270" cy="20" r="5" fill="#0052ff" className="animate-ping" />
+                              <circle cx="270" cy="20" r="4" fill="#0052ff" />
+                              <circle cx="390" cy="30" r="4" fill="#00c8ff" />
+                            </svg>
+                          </div>
+                        </div>
+
+                        {/* Traffic Sources Progress Rows */}
+                        <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-xs space-y-2.5">
+                          <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-wider block">Orígenes de Tráfico</span>
+                          
+                          <div className="space-y-2 text-[11px] font-semibold">
+                            <div>
+                              <div className="flex justify-between text-zinc-800 mb-1">
+                                <span>● Direct / None</span>
+                                <span className="font-mono">622 (66.6%)</span>
+                              </div>
+                              <div className="w-full bg-zinc-100 rounded-full h-2 overflow-hidden">
+                                <div className="bg-purple-600 h-full rounded-full" style={{ width: "66.6%" }}></div>
+                              </div>
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between text-zinc-800 mb-1">
+                                <span>● Organic Google SEO</span>
+                                <span className="font-mono">270 (28.9%)</span>
+                              </div>
+                              <div className="w-full bg-zinc-100 rounded-full h-2 overflow-hidden">
+                                <div className="bg-brand-cyan h-full rounded-full" style={{ width: "28.9%" }}></div>
+                              </div>
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between text-zinc-800 mb-1">
+                                <span>● Internal AI Engine</span>
+                                <span className="font-mono">15 (1.6%)</span>
+                              </div>
+                              <div className="w-full bg-zinc-100 rounded-full h-2 overflow-hidden">
+                                <div className="bg-brand-green h-full rounded-full" style={{ width: "1.6%" }}></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </section>
+
           </>
         )}
 
