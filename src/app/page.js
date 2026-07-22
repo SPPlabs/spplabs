@@ -576,7 +576,7 @@ export default function Home() {
                           Todo lo que tu negocio necesita <br className="hidden sm:inline" />
                           para{" "}
                           <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-cyan-500 to-brand-green">
-                            crecer online
+                            crecer
                           </span>
                         </>
                       ) : (
@@ -584,7 +584,7 @@ export default function Home() {
                           Everything your business needs <br className="hidden sm:inline" />
                           to{" "}
                           <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-cyan-500 to-brand-green">
-                            grow online
+                            grow
                           </span>
                         </>
                       )}
@@ -650,15 +650,15 @@ export default function Home() {
                               </svg>
                             </div>
                             <h4 className="text-white text-base font-extrabold mb-2">
-                              {lang === "es" ? "Optimización SEO" : "SEO Optimization"}
+                              {lang === "es" ? "Optimización SEO y GEO" : "SEO & GEO Optimization"}
                             </h4>
                             <p className="text-zinc-400 text-xs leading-relaxed">
                               {lang === "es"
-                                ? "Aseguramos la máxima indexación orgánica en Google a través de velocidad móvil, código semántico y metadatos limpios."
-                                : "Increase organic crawl visibility with mobile speed upgrades, semantic elements, and clean meta tags."}
+                                ? "Indexación orgánica en Google (SEO) y estructura de datos optimizada (GEO) para ser recomendados por motores de IA como Perplexity y ChatGPT."
+                                : "Increase organic search visibility on Google and structure your data (GEO) to be cited by AI engines like ChatGPT and Perplexity."}
                             </p>
                           </div>
-                          <span className="text-brand-blue text-[9px] uppercase font-bold tracking-wider">02 // Positioning</span>
+                          <span className="text-brand-blue text-[9px] uppercase font-bold tracking-wider">02 // SEO & GEO</span>
                         </div>
                       </div>
                     </div>
@@ -678,19 +678,19 @@ export default function Home() {
                           <div>
                             <div className="text-brand-green text-2xl mb-4">
                               <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                               </svg>
                             </div>
                             <h4 className="text-white text-base font-extrabold mb-2">
-                              {lang === "es" ? "Optimización GEO" : "GEO Optimization"}
+                              {lang === "es" ? "CRM" : "CRM"}
                             </h4>
                             <p className="text-zinc-400 text-xs leading-relaxed">
                               {lang === "es"
-                                ? "Generative Engine Optimization. Preparamos sus datos para ser citados y sugeridos por motores de IA como Perplexity y ChatGPT."
-                                : "Generative Engine Optimization. We structure your datasets to be retrieved and cited by Gemini, Claude, and ChatGPT."}
+                                ? "Gestión centralizada de clientes y contactos, seguimiento de leads y automatización del flujo de ventas."
+                                : "Centralized client and contact management, lead tracking, and sales pipeline automation."}
                             </p>
                           </div>
-                          <span className="text-purple-400 text-[9px] uppercase font-bold tracking-wider">03 // AI Engines</span>
+                          <span className="text-purple-400 text-[9px] uppercase font-bold tracking-wider">03 // CRM & Leads</span>
                         </div>
                       </div>
                     </div>
