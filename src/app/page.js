@@ -803,70 +803,6 @@ export default function Home() {
               </div>
             </section>
 
-            {/* Prueba gratis (Free Trial) Section */}
-            <section id="pricing" className="py-24 bg-white border-b border-zinc-100 scroll-mt-20">
-              <div className="max-w-4xl mx-auto px-6 text-center">
-                <div className="max-w-2xl mx-auto mb-16">
-                  <span className="text-xs font-bold uppercase tracking-widest text-brand-green bg-brand-green/5 border border-brand-green/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
-                    {lang === "es" ? "Comienza Hoy" : "Start Today"}
-                  </span>
-                  <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-black mb-6">
-                    {lang === "es" ? "Prueba Gratis por 14 Días" : "14-Day Free Trial"}
-                  </h2>
-                  <p className="text-zinc-650 text-base leading-relaxed">
-                    {lang === "es"
-                      ? "Prueba todas nuestras soluciones premium (Desarrollo Web, SEO, GEO, CRM y Chatbots de IA) sin compromiso. No requerimos tarjeta de crédito para empezar."
-                      : "Experience all of our premium capabilities (Web Development, SEO, GEO, CRM, and AI Agents) risk-free. No credit card required to start."}
-                  </p>
-                </div>
-
-                <div className="border border-zinc-200 bg-zinc-50 rounded-3xl p-8 md:p-12 shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden max-w-2xl mx-auto">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-tr from-brand-blue/10 to-brand-green/10 rounded-full blur-2xl pointer-events-none"></div>
-                  
-                  <h3 className="text-2xl font-black text-black mb-4">
-                    {lang === "es" ? "Todo Incluido en tu Prueba" : "Everything Included in Your Trial"}
-                  </h3>
-                  
-                  <div className="grid sm:grid-cols-2 gap-4 text-left my-8 border-y border-zinc-200 py-8">
-                    <div className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "Soporte de Agente IA 24/7" : "24/7 Dedicated AI Chatbot"}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "Análisis GEO para Motores de IA" : "AI Search Engine GEO Audit"}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "Integración CRM de Clientes" : "Integrated Client CRM Suite"}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-zinc-700">
-                      <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{lang === "es" ? "Despliegues Web Next.js Ilimitados" : "Unlimited Next.js Web Deployments"}</span>
-                    </div>
-                  </div>
-
-                  <a
-                    href="/signup"
-                    className="inline-flex items-center justify-center w-full sm:w-auto px-8 h-13 text-base font-bold text-white bg-black hover:bg-zinc-800 rounded-xl transition-colors duration-200 shadow-md cursor-pointer"
-                  >
-                    {lang === "es" ? "Activar Prueba Gratuita" : "Activate Free Trial"}
-                  </a>
-                  
-                  <div className="mt-4 text-xs text-zinc-500">
-                    {lang === "es" ? "Cancela en cualquier momento con un clic." : "Cancel anytime with a single click."}
-                  </div>
-                </div>
-              </div>
-            </section>
           </>
         )}
 
@@ -1739,6 +1675,51 @@ export default function Home() {
           </section>
         )}
 
+        {/* GLOBAL GALAXY CTA SECTION (Rendered on all pages EXCEPT contacto) */}
+        {activePage !== "contacto" && (
+          <section className="py-20 md:py-28 bg-zinc-950 text-white relative overflow-hidden border-b border-zinc-900">
+            <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/15 via-purple-600/15 to-brand-green/15 pointer-events-none" />
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10">
+              <span className="text-xs font-bold uppercase tracking-widest text-purple-400 bg-purple-500/10 border border-purple-500/20 px-4 py-1.5 rounded-full inline-block mb-4">
+                {lang === "es" ? "Promoción Especial 2026-2027" : "Special Offer 2026-2027"}
+              </span>
+              
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white mb-4 leading-tight">
+                {lang === "es" ? "Empieza tu prueba gratis hasta 2027" : "Start your free trial until 2027"}
+              </h2>
+              
+              <p className="text-zinc-400 text-sm sm:text-base max-w-xl mx-auto mb-10 leading-relaxed font-medium">
+                {lang === "es"
+                  ? "Accede hoy mismo a nuestro ecosistema completo de Inteligencia Artificial, desarrollo web de alto rendimiento, optimización SEO/GEO y gestión CRM sin compromiso."
+                  : "Get instant access to our complete AI ecosystem, high-performance web development, SEO/GEO optimization, and client CRM management risk-free."}
+              </p>
+
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActivePage("contacto");
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="galaxy-btn inline-flex items-center justify-center cursor-pointer"
+                  id="cta-galaxy-btn"
+                >
+                  <span className="galaxy-btn__content">
+                    <span className="galaxy-btn__text">
+                      {lang === "es" ? "Empezar Prueba Gratis" : "Start Free Trial"}
+                    </span>
+                    <svg className="galaxy-btn__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24}>
+                      <path fill="none" d="M0 0h24v24H0z" />
+                      <path d="M13 14h-2a8.999 8.999 0 0 0-7.968 4.81A10.136 10.136 0 0 1 3 18C3 12.477 7.477 8 13 8V3l10 8-10 8v-5z" fill="currentColor" />
+                    </svg>
+                  </span>
+                  <span className="galaxy-btn__glow" />
+                  <span className="galaxy-btn__stars" />
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
 
       </main>
 
