@@ -1435,20 +1435,25 @@ export default function Home() {
               <div className="grid md:grid-cols-12 gap-12 items-center mb-24">
                 <div className="md:col-span-7 space-y-6">
                   <span className="text-xs font-bold uppercase tracking-widest text-brand-blue bg-brand-blue/5 border border-brand-blue/10 px-3.5 py-1.5 rounded-full inline-block">
-                    {lang === "es" ? "Fundadores de SPP Labs" : "SPP Labs Founders"}
+                    {lang === "es" ? "Conoce SPP Labs" : "About SPP Labs"}
                   </span>
                   <h2 className="text-3xl sm:text-5xl font-black text-black tracking-tight leading-tight">
-                    {lang === "es" ? "Conozca a los Hermanos SPP" : "Meet the Hermanos SPP"}
+                    {lang === "es" ? "En SPP Labs ayudamos a empresas a crecer" : "Empowering Business Growth with Digital Solutions"}
                   </h2>
-                  <p className="text-zinc-650 text-base md:text-lg leading-relaxed">
+                  <p className="text-zinc-650 text-base md:text-lg leading-relaxed font-medium">
                     {lang === "es"
-                      ? "SPP Labs es un laboratorio de ingeniería de software e infraestructura digital fundado por los hermanos SPP. Nos apasiona construir arquitecturas web ultra rápidas, alojar datos de forma segura en servidores bare-metal dedicados y diseñar inteligencias artificiales locales útiles para el día a día empresarial."
-                      : "SPP Labs is a hardware-integrated software development studio founded by the SPP brothers. Focused on data autonomy, we build hybrid web dashboards, set up local database nodes, and structure local AI chatbot pipelines."}
+                      ? "En SPP Labs ayudamos a empresas a crecer mediante soluciones digitales que combinan diseño web premium, inteligencia artificial y automatización."
+                      : "At SPP Labs we help businesses grow through digital solutions combining premium web design, artificial intelligence, and automation."}
                   </p>
-                  <p className="text-zinc-500 text-sm">
+                  <p className="text-zinc-650 text-sm md:text-base leading-relaxed">
                     {lang === "es"
-                      ? "Creemos firmemente en la descentralización del cómputo y en dar a las empresas el control absoluto de sus datos analíticos y modelos de lenguaje sin depender de servicios de terceros."
-                      : "We strongly advocate for computation sovereignty, giving businesses complete governance over their analytic events and model inferences without SaaS dependencies."}
+                      ? "Creamos experiencias digitales enfocadas en atraer clientes, optimizar procesos y generar resultados reales. Cada proyecto está diseñado para ofrecer el máximo rendimiento, un diseño cuidado y tecnología preparada para el futuro."
+                      : "We build digital experiences focused on attracting clients, streamlining processes, and delivering real results. Every project is crafted for peak performance, thoughtful design, and future-proof technology."}
+                  </p>
+                  <p className="text-brand-blue font-extrabold text-sm md:text-base">
+                    {lang === "es"
+                      ? "Innovamos para que tu negocio destaque."
+                      : "We innovate so your business stands out."}
                   </p>
                 </div>
 
@@ -1594,10 +1599,8 @@ export default function Home() {
 
                   {/* Floating Logo Badges */}
                   {/* TikTok Floating Logo */}
-                  <div className="absolute top-6 left-6 sm:top-8 sm:left-10 p-3 sm:p-3.5 bg-black/70 border border-zinc-700/80 rounded-2xl shadow-xl backdrop-blur-md hover:scale-110 hover:border-cyan-400/60 transition-all duration-300 animate-pulse pointer-events-none">
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 1 1-5.2-1.74 2.89 2.89 0 0 1 2.31-2.84V7.58a6.34 6.34 0 0 0-5.46 6.27A6.34 6.34 0 0 0 10.36 20a6.34 6.34 0 0 0 6.34-6.34V9.38a8.16 8.16 0 0 0 4.77 1.52V7.44a4.85 4.85 0 0 1-1.88-.75z"/>
-                    </svg>
+                  <div className="absolute top-6 left-6 sm:top-8 sm:left-10 p-2.5 sm:p-3 bg-black/80 border border-zinc-700/80 rounded-2xl shadow-xl backdrop-blur-md hover:scale-110 hover:border-cyan-400/60 transition-all duration-300 animate-pulse pointer-events-none flex items-center justify-center">
+                    <img src="/logo_tiktok_sin_fondo.png" alt="TikTok" className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
                   </div>
 
                   {/* Instagram Floating Logo */}
@@ -1643,10 +1646,8 @@ export default function Home() {
                       className="inline-flex items-center justify-center gap-3.5 px-8 py-4 bg-gradient-to-r from-zinc-900 via-black to-zinc-900 hover:from-black hover:to-zinc-950 text-white rounded-2xl border border-zinc-700 shadow-xl hover:shadow-cyan-500/20 hover:border-cyan-400/60 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 font-extrabold text-sm sm:text-base group"
                       id="comunidad-tiktok-cta"
                     >
-                      <div className="w-9 h-9 rounded-xl bg-black border border-zinc-700 flex items-center justify-center text-white group-hover:border-cyan-400 group-hover:bg-cyan-500/10 transition-colors shadow-inner">
-                        <svg className="w-5 h-5 text-cyan-400" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 1 1-5.2-1.74 2.89 2.89 0 0 1 2.31-2.84V7.58a6.34 6.34 0 0 0-5.46 6.27A6.34 6.34 0 0 0 10.36 20a6.34 6.34 0 0 0 6.34-6.34V9.38a8.16 8.16 0 0 0 4.77 1.52V7.44a4.85 4.85 0 0 1-1.88-.75z"/>
-                        </svg>
+                      <div className="w-9 h-9 rounded-xl bg-black border border-zinc-700 flex items-center justify-center group-hover:border-cyan-400 group-hover:bg-cyan-500/10 transition-colors shadow-inner overflow-hidden p-1">
+                        <img src="/logo_tiktok_sin_fondo.png" alt="TikTok" className="w-full h-full object-contain" />
                       </div>
                       <span>{lang === "es" ? "Síguenos en TikTok" : "Follow us on TikTok"}</span>
                     </a>
