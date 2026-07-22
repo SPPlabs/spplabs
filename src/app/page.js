@@ -420,30 +420,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Mobile Navigation - Horizontal Pill Row (Visible only when drawer is closed) */}
-        {!mobileMenuOpen && (
-          <div className="flex md:hidden border-t border-zinc-100 bg-white/90 overflow-x-auto scrollbar-none px-4 py-2.5 justify-start border-b border-zinc-150/40">
-            <div className="flex bg-zinc-100/70 border border-zinc-200/40 p-0.5 rounded-full whitespace-nowrap gap-0.5">
-              {navItems.map((item) => {
-                const active = activePage === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActivePage(item.id)}
-                    className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-205 cursor-pointer hover:scale-[1.02] ${
-                      active
-                        ? "bg-gradient-to-r from-brand-blue to-brand-green text-white shadow-sm shadow-brand-blue/20"
-                        : "text-zinc-550 hover:text-black hover:bg-zinc-200/50"
-                    }`}
-                    id={`nav-mobile-${item.id}`}
-                  >
-                    {lang === "es" ? item.labelEs : item.labelEn}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </header>
 
       <main className="flex-1 bg-white">
@@ -452,9 +428,9 @@ export default function Home() {
         {activePage === "inicio" && (
           <>
             {/* Hero Section */}
-            <section className="relative overflow-hidden pt-12 pb-24 md:py-32 border-b border-zinc-100">
+            <section className="relative overflow-hidden pt-10 pb-20 md:py-32 border-b border-zinc-100">
               <div className="max-w-7xl mx-auto px-6 relative z-10">
-                <div className="grid md:grid-cols-12 gap-16 items-center">
+                <div className="grid md:grid-cols-12 gap-12 md:gap-16 items-center">
                   {/* Hero Copy */}
                   <div className="md:col-span-7 flex flex-col items-start text-left">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-zinc-200 text-xs font-bold bg-white mb-6 shadow-sm">
@@ -470,16 +446,16 @@ export default function Home() {
                     <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-zinc-950 leading-[1.08] mb-8 lowercase font-sans">
                       {lang === "es" ? (
                         <>
-                          convierte <br />
-                          visitas en <br />
+                          convierte <br className="hidden sm:inline" />
+                          visitas en{" "}
                           <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue to-brand-green">
                             clientes
                           </span>
                         </>
                       ) : (
                         <>
-                          convert <br />
-                          visits into <br />
+                          convert <br className="hidden sm:inline" />
+                          visits into{" "}
                           <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue to-brand-green">
                             clients
                           </span>
@@ -496,14 +472,14 @@ export default function Home() {
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto items-center">
                       <button
                         onClick={() => setActivePage("contacto")}
-                        className="btn-donate cursor-pointer inline-flex items-center justify-center font-semibold"
+                        className="btn-donate cursor-pointer inline-flex items-center justify-center font-semibold w-full sm:w-auto"
                         id="hero-primary-cta"
                       >
                         {lang === "es" ? "Contactar" : "Contact Us"}
                       </button>
                       <button
                         onClick={() => setActivePage("servicios")}
-                        className="inline-flex items-center justify-center gap-2 px-8 h-12 text-sm font-bold bg-white text-zinc-800 border border-zinc-200 rounded-xl hover:border-zinc-400 transition-colors duration-300 shadow-sm cursor-pointer"
+                        className="inline-flex items-center justify-center gap-2 px-8 h-12 text-sm font-bold bg-white text-zinc-800 border border-zinc-200 rounded-xl hover:border-zinc-400 transition-colors duration-300 shadow-sm cursor-pointer w-full sm:w-auto"
                         id="hero-secondary-cta"
                       >
                         <svg className="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -514,8 +490,8 @@ export default function Home() {
                       </button>
                     </div>
 
-                    {/* Bottom feature badges (from image) */}
-                    <div className="mt-16 pt-8 border-t border-zinc-150/60 w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 text-zinc-600">
+                    {/* Bottom feature badges */}
+                    <div className="mt-12 sm:mt-16 pt-8 border-t border-zinc-150/60 w-full grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 text-zinc-600">
                       <div className="flex items-center gap-2.5 text-xs font-bold tracking-wide">
                         <svg className="w-5 h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />

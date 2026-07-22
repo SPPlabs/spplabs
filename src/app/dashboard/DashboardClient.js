@@ -2527,16 +2527,16 @@ export default function DashboardClient({
                   ) : (
                     <div className="bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-2xs divide-y divide-slate-100">
                       {conversationsList.map((conv) => (
-                        <div key={conv.id} className="p-4 hover:bg-slate-50/80 transition-all flex items-center justify-between gap-4">
+                        <div key={conv.id} className="p-4 hover:bg-slate-50/80 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="min-w-0 flex-1 cursor-pointer" onClick={() => setSelectedConversation(conv)}>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs font-black text-slate-900 font-mono">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <span className="text-xs font-black text-slate-900 font-mono truncate max-w-[200px] sm:max-w-none">
                                 👤 {conv.visitorName || conv.visitorId}
                               </span>
                               <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">
                                 {conv.messageCount} msgs
                               </span>
-                              <span className="text-[10px] text-slate-400 font-mono ml-auto">
+                              <span className="text-[10px] text-slate-400 font-mono sm:ml-auto">
                                 {new Date(conv.lastMessageAt).toLocaleString("es-ES")}
                               </span>
                             </div>
@@ -2544,11 +2544,11 @@ export default function DashboardClient({
                               "{conv.firstMessageSnippet}"
                             </p>
                           </div>
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center pt-1 sm:pt-0">
                             <button
                               type="button"
                               onClick={() => setSelectedConversation(conv)}
-                              className="px-3 py-1.5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-2xs transition-all cursor-pointer"
+                              className="px-3.5 py-1.5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-2xs transition-all cursor-pointer"
                             >
                               Ver Transcript
                             </button>
@@ -2571,27 +2571,27 @@ export default function DashboardClient({
 
                 {/* Conversation Transcript Modal */}
                 {selectedConversation && (
-                  <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-                    <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-fade-in flex flex-col max-h-[85vh]">
-                      <div className="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-                        <div>
+                  <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
+                    <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-fade-in flex flex-col max-h-[90vh] sm:max-h-[85vh]">
+                      <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                        <div className="min-w-0 pr-2">
                           <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
                             <span>💬</span> Transcripción de la Conversación
                           </h3>
-                          <p className="text-xs text-slate-500 font-mono mt-0.5">
+                          <p className="text-xs text-slate-500 font-mono mt-0.5 truncate">
                             Visitante: {selectedConversation.visitorName || selectedConversation.visitorId} • {new Date(selectedConversation.startedAt).toLocaleString("es-ES")}
                           </p>
                         </div>
                         <button
                           type="button"
                           onClick={() => setSelectedConversation(null)}
-                          className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-bold text-xs transition-all cursor-pointer"
+                          className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-bold text-xs transition-all cursor-pointer shrink-0"
                         >
                           ✕
                         </button>
                       </div>
 
-                      <div className="p-6 overflow-y-auto flex-1 space-y-4 bg-slate-100/50">
+                      <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 bg-slate-100/50">
                         {selectedConversation.messages?.map((msg, idx) => (
                           <div
                             key={msg.id || idx}
@@ -2599,14 +2599,14 @@ export default function DashboardClient({
                           >
                             <div className="flex items-center gap-1.5 mb-1 px-1">
                               <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">
-                                {msg.sender === "VISITOR" ? `Visitante (${selectedConversation.visitorId})` : "Asistente IA SPP"}
+                                {msg.sender === "VISITOR" ? `Visitante` : "Asistente IA SPP"}
                               </span>
                               <span className="text-[9px] text-slate-300">
                                 {new Date(msg.createdAt).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
                               </span>
                             </div>
                             <div
-                              className={`p-4 rounded-2xl max-w-[85%] text-xs leading-relaxed shadow-2xs font-medium whitespace-pre-wrap ${
+                              className={`p-3.5 sm:p-4 rounded-2xl max-w-[90%] sm:max-w-[85%] text-xs leading-relaxed shadow-2xs font-medium whitespace-pre-wrap ${
                                 msg.sender === "VISITOR"
                                   ? "bg-white text-slate-900 border border-slate-200/80 rounded-tl-none"
                                   : "bg-slate-950 text-white rounded-tr-none"
