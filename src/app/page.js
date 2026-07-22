@@ -574,12 +574,42 @@ export default function Home() {
                 
                 {/* 5 Service Cards with Floating Holographic Numbers */}
                 <div className="mt-24">
-                  <div className="text-center max-w-3xl mx-auto mb-16 flex justify-center items-center">
-                    <img
-                      src="/soluciones.png"
-                      alt="Soluciones Tecnológicas SPP Labs"
-                      className="max-w-md sm:max-w-xl lg:max-w-2xl h-auto object-contain drop-shadow-sm transition-transform duration-300 hover:scale-[1.02]"
-                    />
+                  {/* Section Header matching Soluciones design */}
+                  <div className="text-center max-w-3xl mx-auto mb-16">
+                    {/* Top Pill Badge */}
+                    <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-zinc-200 bg-white shadow-xs mb-5">
+                      <span className="text-xs font-extrabold uppercase tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-brand-blue to-brand-green">
+                        {lang === "es" ? "SOLUCIONES COMPLETAS" : "COMPLETE SOLUTIONS"}
+                      </span>
+                    </div>
+
+                    {/* Main Title */}
+                    <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-zinc-950 tracking-tight leading-[1.15] mb-5 font-sans">
+                      {lang === "es" ? (
+                        <>
+                          Todo lo que tu negocio necesita <br className="hidden sm:inline" />
+                          para{" "}
+                          <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-cyan-500 to-brand-green">
+                            crecer online
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          Everything your business needs <br className="hidden sm:inline" />
+                          to{" "}
+                          <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-cyan-500 to-brand-green">
+                            grow online
+                          </span>
+                        </>
+                      )}
+                    </h2>
+
+                    {/* Subtitle */}
+                    <p className="text-zinc-500 text-sm sm:text-base max-w-xl mx-auto font-medium leading-relaxed">
+                      {lang === "es"
+                        ? "Combinamos diseño, tecnología e inteligencia artificial para ofrecerte una solución 360°."
+                        : "We combine design, technology, and artificial intelligence to deliver a 360° solution."}
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 justify-items-center">
