@@ -536,30 +536,14 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Hero Visual Mockup: Enlarged Premium Video Container */}
+                  {/* Hero Visual Mockup: Laptop & Mobile Devices Image */}
                   <div className="lg:col-span-6 relative w-full flex items-center justify-center py-6 lg:py-0">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/25 via-purple-600/20 to-brand-green/25 rounded-3xl blur-3xl -z-10 animate-pulse duration-1000"></div>
-                    <div className="relative w-full max-w-2xl p-3 sm:p-4 rounded-3xl bg-gradient-to-br from-zinc-900/95 via-black to-zinc-950/95 shadow-[0_25px_60px_-15px_rgba(37,99,235,0.25)] border border-zinc-700/60 ring-1 ring-white/10 group transition-all duration-500 hover:border-zinc-500 hover:shadow-[0_25px_70px_-10px_rgba(16,185,129,0.3)]">
-                      {/* Decorative High-Tech Window Header */}
-                      <div className="flex items-center justify-between pb-3 px-2 mb-2 border-b border-zinc-800/80">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                          <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                          <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
-                        </div>
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/90 border border-zinc-800 text-[10px] font-mono text-zinc-400">
-                          <span className="w-2 h-2 rounded-full bg-brand-green animate-ping"></span>
-                          <span>SPP_LABS_DEMO.MP4</span>
-                        </div>
-                      </div>
-
-                      <video
-                        src="/hola_necesito_una_animacion_p.mp4"
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="w-full h-auto rounded-2xl shadow-2xl border border-zinc-800/90 object-cover block"
+                    <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/20 via-cyan-400/15 to-brand-green/20 rounded-3xl blur-3xl -z-10 animate-pulse"></div>
+                    <div className="relative w-full max-w-2xl flex items-center justify-center">
+                      <img
+                        src="/foto_inicio_portatil_movil.png"
+                        alt="SPP Labs Dispositivos Portátil y Móvil"
+                        className="w-full h-auto object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.18)] transition-transform duration-500 hover:scale-[1.02] block"
                       />
                     </div>
                   </div>
