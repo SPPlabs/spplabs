@@ -429,7 +429,7 @@ export default function Home() {
           <>
             {/* Hero Section */}
             <section className="relative overflow-hidden pt-10 pb-20 md:py-32 border-b border-zinc-100">
-              <div className="max-w-7xl mx-auto px-6 relative z-10">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
                 <div className="grid md:grid-cols-12 gap-12 md:gap-16 items-center">
                   {/* Hero Copy */}
                   <div className="md:col-span-7 flex flex-col items-start text-left">
