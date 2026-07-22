@@ -515,13 +515,13 @@ body {
   --btn-bg-1: hsla(194 100% 69% / 1);
   --btn-bg-2: hsla(217 100% 56% / 1);
   --btn-bg-color: hsla(360 100% 100% / 1);
-  --radii: 0.5em;
+  --radii: 0.9em;
   cursor: pointer;
-  padding: 0.9em 1.4em;
-  min-width: 120px;
-  min-height: 44px;
-  font-size: var(--size, 1rem);
-  font-weight: 500;
+  padding: 0.65em 1.4em;
+  min-width: 140px;
+  min-height: 48px;
+  font-size: 1.2em;
+  font-weight: 700;
   transition: 0.8s;
   background-size: 280% auto;
   background-image: linear-gradient(

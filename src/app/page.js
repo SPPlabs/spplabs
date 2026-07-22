@@ -574,13 +574,12 @@ export default function Home() {
                 
                 {/* 5 Service Cards with Floating Holographic Numbers */}
                 <div className="mt-24">
-                  <div className="text-center max-w-2xl mx-auto mb-16">
-                    <span className="text-xs font-bold uppercase tracking-widest text-brand-blue bg-brand-blue/5 border border-brand-blue/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
-                      {lang === "es" ? "Nuestros Servicios Destacados" : "Our Featured Services"}
-                    </span>
-                    <h3 className="text-2xl sm:text-4xl font-black text-black">
-                      {lang === "es" ? "Sistemas de Alto Rendimiento en 5 Pasos" : "High-Performance Workflows in 5 Steps"}
-                    </h3>
+                  <div className="text-center max-w-3xl mx-auto mb-16 flex justify-center items-center">
+                    <img
+                      src="/soluciones.png"
+                      alt="Soluciones Tecnológicas SPP Labs"
+                      className="max-w-md sm:max-w-xl lg:max-w-2xl h-auto object-contain drop-shadow-sm transition-transform duration-300 hover:scale-[1.02]"
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 justify-items-center">
