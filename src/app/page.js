@@ -477,17 +477,24 @@ export default function Home() {
                       >
                         {lang === "es" ? "Contactar" : "Contact Us"}
                       </button>
-                      <button
-                        onClick={() => setActivePage("servicios")}
-                        className="inline-flex items-center justify-center gap-2 px-8 h-12 text-sm font-bold bg-white text-zinc-800 border border-zinc-200 rounded-xl hover:border-zinc-400 transition-colors duration-300 shadow-sm cursor-pointer w-full sm:w-auto"
-                        id="hero-secondary-cta"
-                      >
-                        <svg className="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {lang === "es" ? "Ver ejemplo" : "See example"}
-                      </button>
+                      <div className="prueba-gratis-styled-wrapper w-full sm:w-auto">
+                        <div className="container">
+                          <button
+                            className="button w-full sm:w-auto"
+                            id="hero-secondary-cta"
+                            onClick={() => {
+                              const el = document.getElementById("prueba-gratis");
+                              if (el) {
+                                el.scrollIntoView({ behavior: "smooth" });
+                              } else {
+                                window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+                              }
+                            }}
+                          >
+                            Prueba Gratis
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Bottom feature badges */}
@@ -529,125 +536,18 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Hero Visual Mockup: 3D Hover Phone Device */}
-                  <div className="md:col-span-5 relative w-full flex items-center justify-center py-12 md:py-0">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/10 via-transparent to-brand-green/10 rounded-3xl blur-3xl -z-10"></div>
-                    <div className="phone-card-container">
-                      <div className="phone-device">
-                        {/* Front Face */}
-                        <div className="phone-face front">
-                          {/* Front camera notch */}
-                          <div className="front-camera" />
-                          
-                          {/* Header panel */}
-                          <div className="head">
-                            <div className="h-left font-bold tracking-wider">SPP</div>
-                            <div className="h-right">
-                              <span className="wifi">
-                                <svg stroke="#ffffff" xmlSpace="preserve" viewBox="0 0 365.892 365.892" xmlns="http://www.w3.org/2000/svg" className="logo-head" fill="#ffffff">
-                                  <circle r="41.494" cy="286.681" cx="182.945" />
-                                  <path d="M182.946,176.029c-35.658,0-69.337,17.345-90.09,46.398c-5.921,8.288-4.001,19.806,4.286,25.726 c3.249,2.321,6.994,3.438,10.704,3.438c5.754,0,11.423-2.686,15.021-7.724c13.846-19.383,36.305-30.954,60.078-30.954 c23.775,0,46.233,11.571,60.077,30.953c5.919,8.286,17.437,10.209,25.726,4.288c8.288-5.92,10.208-17.438,4.288-25.726 C252.285,193.373,218.606,176.029,182.946,176.029z" />
-                                  <path d="M182.946,106.873c-50.938,0-99.694,21.749-133.77,59.67c-6.807,7.576-6.185,19.236,1.392,26.044 c3.523,3.166,7.929,4.725,12.32,4.725c5.051-0.001,10.082-2.063,13.723-6.116c27.091-30.148,65.849-47.439,106.336-47.439 s79.246,17.291,106.338,47.438c6.808,7.576,18.468,8.198,26.043,1.391c7.576-6.808,8.198-18.468,1.391-26.043 C282.641,128.621,233.883,106.873,182.946,106.873z" />
-                                  <path d="M360.611,112.293c-47.209-48.092-110.305-74.577-177.665-74.577c-67.357,0-130.453,26.485-177.664,74.579 c-7.135,7.269-7.027,18.944,0.241,26.079c3.59,3.524,8.255,5.282,12.918,5.281c4.776,0,9.551-1.845,13.161-5.522 c40.22-40.971,93.968-63.534,151.344-63.534c57.379,0,111.127,22.563,151.343,63.532c7.136,7.269,18.812,7.376,26.08,0.242 C367.637,131.238,367.745,119.562,360.611,112.293z" />
-                                </svg>
-                              </span>
-                              <span className="network">
-                                <svg strokeWidth="0.00062" stroke="#ffffff" fill="#ffffff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" className="logo-head">
-                                  <path fill="#ffffff" d="m 13 1 c -0.554688 0 -1 0.445312 -1 1 v 12 c 0 0.554688 0.445312 1 1 1 h 1 c 0.554688 0 1 -0.445312 1 -1 v -12 c 0 -0.554688 -0.445312 -1 -1 -1 z m -4 3 c -0.554688 0 -1 0.445312 -1 1 v 9 c 0 0.554688 0.445312 1 1 1 h 1 c 0.554688 0 1 -0.445312 1 -1 v -9 c 0 -0.554688 -0.445312 -1 -1 -1 z m -4 3 c -0.554688 0 -1 0.445312 -1 1 v 6 c 0 0.554688 0.445312 1 1 1 h 1 c 0.554688 0 1 -0.445312 1 -1 v -6 c 0 -0.554688 -0.445312 -1 -1 -1 z m -4 3 c -0.554688 0 -1 0.445312 -1 1 v 3 c 0 0.554688 0.445312 1 1 1 h 1 c 0.554688 0 1 -0.445312 1 -1 v -3 c 0 -0.554688 -0.445312 -1 -1 -1 z" />
-                                </svg>
-                              </span>
-                              <span className="battery">
-                                <svg transform="matrix(-1, 0, 0, 1, 0, 0)" fill="#ffffff" xmlns="http://www.w3.org/2000/svg" viewBox="1 10 20 5" className="logo-head">
-                                  <path fillOpacity="0.3" d="M20,10V8.33A1.34,1.34,0,0,0,18.67,7H8V17H18.67A1.34,1.34,0,0,0,20,15.67V14h2V10Z" />
-                                  <path d="M3.33,17H8V7H3.34A1.34,1.34,0,0,0,2,8.33v7.33A1.34,1.34,0,0,0,3.33,17Z" />
-                                </svg>
-                              </span>
-                            </div>
-                          </div>
-                          
-                          {/* Search Google panel */}
-                          <div className="search">
-                            <input placeholder="Search..." type="search" className="search-google" readOnly />
-                            <svg width={24} viewBox="0 0 24 24" height={24} xmlns="http://www.w3.org/2000/svg" className="logo-google">
-                              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                            </svg>
-                          </div>
-                          
-                          {/* Brand Info Overlay & Copyright */}
-                          <div className="flex flex-col items-center justify-center py-4 my-2 border border-white/10 rounded-xl bg-black/40 backdrop-blur-sm">
-                            <SppLabsLogo inline={false} className="text-white scale-90 mb-2" />
-                            <span className="text-[7px] text-zinc-300 tracking-widest uppercase font-bold">© 2026 SPP Labs Inc.</span>
-                            <span className="text-[6px] text-brand-green mt-1 font-mono uppercase tracking-wider">OPERATIONAL // NODE-01</span>
-                          </div>
-
-                          {/* Time & Date display */}
-                          <div className="date font-mono my-2 text-center">
-                            <span className="hour text-white">10:50</span>
-                            <span className="period text-white">PM</span><br />
-                            <span className="day text-zinc-350">Sat, 04 Nov</span>
-                          </div>
-
-                          {/* App drawer icons */}
-                          <div className="phone-app-grid">
-                            <span className="app">
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28.99 31.99" className="logo-app">
-                                <path style={{fill: '#ea4335'}} d="M13.54 15.28.12 29.34a3.66 3.66 0 0 0 5.33 2.16l15.1-8.6Z" />
-                                <path style={{fill: '#fbbc04'}} d="m27.11 12.89-6.53-3.74-7.35 6.45 7.38 7.28 6.48-3.7a3.54 3.54 0 0 0 1.5-4.79 3.62 3.62 0 0 0-1.5-1.5z" />
-                                <path style={{fill: '#4285f4'}} d="M.12 2.66a3.57 3.57 0 0 0-.12.92v24.84a3.57 3.57 0 0 0 .12.92L14 15.64Z" />
-                                <path style={{fill: '#34a853'}} d="m13.64 16 6.94-6.85L5.5.51A3.73 3.73 0 0 0 3.63 0 3.64 3.64 0 0 0 .12 2.65Z" />
-                              </svg>
-                            </span>
-                            <span className="app">
-                              <svg viewBox="52 42 88 66" xmlns="http://www.w3.org/2000/svg" className="logo-app">
-                                <path d="M58 108h14V74L52 59v43c0 3.32 2.69 6 6 6" fill="#4285f4" />
-                                <path d="M120 108h14c3.32 0 6-2.69 6-6V59l-20 15" fill="#34a853" />
-                                <path d="M120 48v26l20-15v-8c0-7.42-8.47-11.65-14.4-7.2" fill="#fbbc04" />
-                                <path d="M72 74V48l24 18 24-18v26L96 92" fill="#ea4335" />
-                                <path d="M52 51v8l20 15V48l-5.6-4.2c-5.94-4.45-14.4-.22-14.4 7.2" fill="#c5221f" />
-                              </svg>
-                            </span>
-                            <span className="app logo-phone">
-                              <svg viewBox="0 0 122.88 122.27" xmlns="http://www.w3.org/2000/svg" className="logo-app" fill="#ffffff">
-                                <path d="M33.84,50.25c4.13,7.45,8.89,14.6,15.07,21.12c6.2,6.56,13.91,12.53,23.89,17.63c0.74,0.36,1.44,0.36,2.07,0.11 c0.95-0.36,1.92-1.15,2.87-2.1c0.74-0.74,1.66-1.92,2.62-3.21c3.84-5.05,8.59-11.32,15.3-8.18c0.15,0.07,0.26,0.15,0.41,0.21 l22.38,12.87c0.07,0.04,0.15,0.11,0.21,0.15c2.95,2.03,4.17,5.16,4.2,8.71c0,3.61-1.33,7.67-3.28,11.1 c-2.58,4.53-6.38,7.53-10.76,9.51c-4.17,1.92-8.81,2.95-13.27,3.61c-7,1.03-13.56,0.37-20.27-1.69 c-6.56-2.03-13.17-5.38-20.39-9.84l-0.53-0.34c-3.31-2.07-6.89-4.28-10.4-6.89C31.12,93.32,18.03,79.31,9.5,63.89 C2.35,50.95-1.55,36.98,0.58,23.67c1.18-7.3,4.31-13.94,9.77-18.32c4.76-3.84,11.17-5.94,19.47-5.2c0.95,0.07,1.8,0.62,2.25,1.44 l14.35,24.26c2.1,2.72,2.36,5.42,1.21,8.12c-0.95,2.21-2.87,4.25-5.49,6.15c-0.77,0.66-1.69,1.33-2.66,2.03 c-3.21,2.33-6.86,5.02-5.61,8.18L33.84,50.25L33.84,50.25L33.84,50.25z" />
-                              </svg>
-                            </span>
-                            <span className="app menu">
-                              <svg className="logo-menu" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-                                <path fill="#ffffff" d="M10,39.5V69h29.5H69V39.5V10H39.5H10V39.5z M98.5,39.5V69H128h29.5V39.5V10H128H98.5V39.5z M187,39.5V69h29.5H246V39.5V10h-29.5H187V39.5z M10,128v29.5h29.5H69V128V98.5H39.5H10V128z M98.5,128v29.5H128h29.5V128V98.5H128H98.5V128z M187,128v29.5h29.5H246V128V98.5h-29.5H187V128z M10,216.5V246h29.5H69v-29.5V187H39.5H10V216.5z M98.5,216.5V246H128h29.5v-29.5V187H128H98.5V216.5z M187,216.5V246h29.5H246v-29.5V187h-29.5H187V216.5z" />
-                              </svg>
-                            </span>
-                          </div>
-                          
-                          {/* Dot controls */}
-                          <div className="bullet mt-4" />
-                          
-                          {/* Navigation bar buttons */}
-                          <div className="navigation">
-                            <span className="btn btn-task" />
-                            <span className="btn btn-home" />
-                            <span className="btn btn-back" />
-                          </div>
-                        </div>
-                        
-                        {/* Back Face */}
-                        <div className="phone-face back flex items-center justify-center font-bold text-xs text-zinc-500">SPP LABS</div>
-                        
-                        {/* Structural Side Faces */}
-                        <div className="phone-face left" />
-                        <div className="phone-face right" />
-                        <div className="phone-face top" />
-                        <div className="phone-face bottom">
-                          <div className="elements">
-                            <span className="headphone" />
-                            <span className="microphone" />
-                            <span className="charge" />
-                            <span className="speaker" />
-                          </div>
-                        </div>
-                      </div>
+                  {/* Hero Visual Mockup: Video Animation */}
+                  <div className="md:col-span-5 relative w-full flex items-center justify-center py-8 md:py-0">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/20 via-purple-500/20 to-brand-green/20 rounded-3xl blur-3xl -z-10"></div>
+                    <div className="relative w-full max-w-lg p-2 rounded-3xl bg-gradient-to-br from-brand-blue/30 via-zinc-900 to-brand-green/30 shadow-2xl border border-zinc-200/40 group overflow-hidden">
+                      <video
+                        src="/hola_necesito_una_animacion_p.mp4"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-auto rounded-2xl shadow-2xl border border-zinc-800/80 object-cover block"
+                      />
                     </div>
                   </div>
                 </div>
@@ -1677,7 +1577,7 @@ export default function Home() {
 
         {/* GLOBAL GALAXY CTA SECTION (Rendered on all pages EXCEPT contacto) */}
         {activePage !== "contacto" && (
-          <section className="py-20 md:py-28 bg-zinc-950 text-white relative overflow-hidden border-b border-zinc-900">
+          <section id="prueba-gratis" className="py-20 md:py-28 bg-zinc-950 text-white relative overflow-hidden border-b border-zinc-900">
             <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/15 via-purple-600/15 to-brand-green/15 pointer-events-none" />
             <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10">
               <span className="text-xs font-bold uppercase tracking-widest text-purple-400 bg-purple-500/10 border border-purple-500/20 px-4 py-1.5 rounded-full inline-block mb-4">
