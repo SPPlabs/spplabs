@@ -512,10 +512,10 @@ body {
    Donate / Contact Button style (.btn-donate)
    ========================================================================== */
 .btn-donate {
-  --clr-font-main: #ffffff;
-  --btn-bg-1: #00c8ff;
-  --btn-bg-2: #0052ff;
-  --btn-bg-color: #ffffff;
+  --clr-font-main: hsla(0 0% 20% / 100);
+  --btn-bg-1: hsla(194 100% 69% / 1);
+  --btn-bg-2: hsla(217 100% 56% / 1);
+  --btn-bg-color: hsla(360 100% 100% / 1);
   --radii: 0.9em;
   cursor: pointer;
   padding: 0.65em 1.4em;
@@ -527,18 +527,18 @@ body {
   background-size: 280% auto;
   background-image: linear-gradient(
     325deg,
-    #0052ff 0%,
-    #00c8ff 50%,
-    #76e000 100%
+    var(--btn-bg-2) 0%,
+    var(--btn-bg-1) 55%,
+    var(--btn-bg-2) 90%
   );
   border: none;
   border-radius: var(--radii);
-  color: #ffffff;
+  color: var(--btn-bg-color);
   box-shadow:
-    0px 0px 22px rgba(0, 200, 255, 0.55),
-    0px 5px 12px -1px rgba(0, 82, 255, 0.4),
-    inset 4px 4px 8px rgba(175, 240, 255, 0.6),
-    inset -4px -4px 8px rgba(0, 82, 255, 0.4);
+    0px 0px 20px rgba(71, 184, 255, 0.5),
+    0px 5px 5px -1px rgba(58, 125, 233, 0.25),
+    inset 4px 4px 8px rgba(175, 230, 255, 0.5),
+    inset -4px -4px 8px rgba(19, 95, 216, 0.35);
 }
 
 .btn-donate:hover {
@@ -1006,7 +1006,7 @@ body {
 .prueba-gratis-styled-wrapper .container {
   position: relative;
   padding: 3px;
-  background: linear-gradient(90deg, #0052ff, #00c8ff, #76e000);
+  background: linear-gradient(90deg, #03a9f4, #f441a5);
   border-radius: 0.9em;
   transition: all 0.4s ease;
 }
@@ -1023,7 +1023,7 @@ body {
 }
 
 .prueba-gratis-styled-wrapper .container:hover::before {
-  background: linear-gradient(90deg, #0052ff, #00c8ff, #76e000);
+  background: linear-gradient(90deg, #03a9f4, #f441a5);
   filter: blur(1.2em);
 }
 
