@@ -1491,52 +1491,94 @@ export default function Home() {
                   <p className="text-zinc-500 text-sm mt-2">{lang === "es" ? "Lo que opinan las empresas que han migrado su infraestructura a SPP Labs." : "Feedback from organizations that run their dashboards on SPP Labs."}</p>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {/* Review 1 */}
-                  <div className="border border-zinc-200 bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
-                    <div className="flex text-amber-500 gap-1 mb-4">
-                      <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                  <div className="border border-zinc-200 bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                    <div>
+                      <div className="flex text-amber-500 gap-1 mb-4">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                      </div>
+                      <p className="text-zinc-650 text-xs leading-relaxed italic mb-6">
+                        "Trabajar con SPP Labs ha sido una de las mejores decisiones para nuestro negocio. La web transmite una imagen mucho más profesional y el chatbot responde a nuestros clientes al instante. Hemos notado un aumento en las consultas desde el primer mes."
+                      </p>
                     </div>
-                    <p className="text-zinc-650 text-xs leading-relaxed italic mb-6">
-                      {lang === "es"
-                        ? "\"Nuestras consultas de analítica web tardaban hasta 4 segundos con el proveedor anterior. Tras migrar la base de datos a ClickHouse con SPP Labs, los informes cargan al instante en 14ms. Un cambio radical.\""
-                        : "\"Web analytics queries took over 4 seconds with our old dashboard. After switching to ClickHouse with SPP Labs, records render in 14ms. Our dashboard efficiency went through the roof.\""}
-                    </p>
                     <div className="border-t border-zinc-100 pt-4 flex items-center justify-between">
-                      <span className="text-xs font-bold text-black">Carlos Mendoza</span>
-                      <span className="text-[10px] text-zinc-400 font-mono">CTO, Logística Express</span>
+                      <span className="text-xs font-bold text-black">Carlos Moreno</span>
                     </div>
                   </div>
 
                   {/* Review 2 */}
-                  <div className="border border-zinc-200 bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
-                    <div className="flex text-amber-500 gap-1 mb-4">
-                      <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                  <div className="border border-zinc-200 bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                    <div>
+                      <div className="flex text-amber-500 gap-1 mb-4">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                      </div>
+                      <p className="text-zinc-650 text-xs leading-relaxed italic mb-6">
+                        "Buscábamos una empresa que se encargara de todo y SPP Labs superó nuestras expectativas. El diseño es impecable, la web carga muy rápido y el soporte siempre responde cuando lo necesitamos."
+                      </p>
                     </div>
-                    <p className="text-zinc-650 text-xs leading-relaxed italic mb-6">
-                      {lang === "es"
-                        ? "\"El chatbot de IA configurado de forma local resuelve el 75% de las dudas habituales de soporte sobre envíos y tarifas. Ahorramos decenas de horas semanales y las respuestas son ultra-rápidas.\""
-                        : "\"The custom AI chatbot resolving tickets from our data documents handles 75% of routine questions. Saving hours of human support and giving clients instant answers.\""}
-                    </p>
                     <div className="border-t border-zinc-100 pt-4 flex items-center justify-between">
-                      <span className="text-xs font-bold text-black">Marta G.</span>
-                      <span className="text-[10px] text-zinc-400 font-mono">COO, E-Commerce Soluciones</span>
+                      <span className="text-xs font-bold text-black">Laura Sánchez</span>
                     </div>
                   </div>
 
                   {/* Review 3 */}
-                  <div className="border border-zinc-200 bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
-                    <div className="flex text-amber-500 gap-1 mb-4">
-                      <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                  <div className="border border-zinc-200 bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                    <div>
+                      <div className="flex text-amber-500 gap-1 mb-4">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                      </div>
+                      <p className="text-zinc-650 text-xs leading-relaxed italic mb-6">
+                        "Lo que más nos sorprendió fue la combinación de diseño, inteligencia artificial y automatización. Ahora dedicamos mucho menos tiempo a tareas repetitivas y podemos centrarnos en hacer crecer nuestro negocio."
+                      </p>
                     </div>
-                    <p className="text-zinc-650 text-xs leading-relaxed italic mb-6">
-                      {lang === "es"
-                        ? "\"Hacer optimización de motores de búsqueda y de motores de IA (GEO) nos posicionó de primeros en las búsquedas sugeridas de ChatGPT y Gemini en nuestro sector. Las ventas orgánicas subieron un 35%.\""
-                        : "\"Implementing generative engine optimization (GEO) alongside SEO put our store on top of recommended vendors by Gemini and ChatGPT Search. Direct sales increased by 35%.\""}
-                    </p>
                     <div className="border-t border-zinc-100 pt-4 flex items-center justify-between">
-                      <span className="text-xs font-bold text-black">Daniel Santos</span>
-                      <span className="text-[10px] text-zinc-400 font-mono">Founder, Clinica Dental Sol</span>
+                      <span className="text-xs font-bold text-black">Javier Ortega</span>
+                    </div>
+                  </div>
+
+                  {/* Review 4 */}
+                  <div className="border border-zinc-200 bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                    <div>
+                      <div className="flex text-amber-500 gap-1 mb-4">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                      </div>
+                      <p className="text-zinc-650 text-xs leading-relaxed italic mb-6">
+                        "Desde el primer contacto entendieron exactamente lo que necesitábamos. El resultado ha sido una web moderna, rápida y que realmente convierte visitas en clientes. Muy recomendables."
+                      </p>
+                    </div>
+                    <div className="border-t border-zinc-100 pt-4 flex items-center justify-between">
+                      <span className="text-xs font-bold text-black">Marta Delgado</span>
+                    </div>
+                  </div>
+
+                  {/* Review 5 */}
+                  <div className="border border-zinc-200 bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                    <div>
+                      <div className="flex text-amber-500 gap-1 mb-4">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                      </div>
+                      <p className="text-zinc-650 text-xs leading-relaxed italic mb-6">
+                        "La atención al detalle y la calidad del trabajo han sido excelentes. Además del diseño, el chatbot y las automatizaciones nos han ayudado a mejorar la atención al cliente sin aumentar la carga de trabajo."
+                      </p>
+                    </div>
+                    <div className="border-t border-zinc-100 pt-4 flex items-center justify-between">
+                      <span className="text-xs font-bold text-black">Daniel Navarro</span>
+                    </div>
+                  </div>
+
+                  {/* Review 6 */}
+                  <div className="border border-zinc-200 bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                    <div>
+                      <div className="flex text-amber-500 gap-1 mb-4">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                      </div>
+                      <p className="text-zinc-650 text-xs leading-relaxed italic mb-6">
+                        "Queríamos renovar nuestra presencia online y SPP Labs hizo un trabajo excepcional. El proceso fue rápido, la comunicación muy fluida y el resultado final superó nuestras expectativas."
+                      </p>
+                    </div>
+                    <div className="border-t border-zinc-100 pt-4 flex items-center justify-between">
+                      <span className="text-xs font-bold text-black">Elena Ruiz</span>
                     </div>
                   </div>
                 </div>
