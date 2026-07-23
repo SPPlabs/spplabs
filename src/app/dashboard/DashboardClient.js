@@ -1383,16 +1383,16 @@ export default function DashboardClient({
                   {item.icon}
                   {sidebarOpen && <span className="truncate">{item.label}</span>}
                   {item.count > 0 ? (
-                    <span className="absolute -top-1.5 -right-1.5 z-20 flex items-center justify-center pointer-events-none">
+                    <span className="absolute -top-1 -right-1 z-20 flex items-center justify-center pointer-events-none">
                       <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
-                      <span className="relative z-10 flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-black leading-none shadow-[0_0_12px_rgba(239,68,68,0.95),0_0_4px_rgba(239,68,68,0.6)] border border-white/40">
+                      <span className="relative z-10 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[8.5px] font-black leading-none shadow-[0_0_8px_rgba(239,68,68,0.9)] border border-white/40">
                         {item.count}
                       </span>
                     </span>
                   ) : item.hasDotNoNumber ? (
                     <span className="absolute -top-1 -right-1 z-20 flex items-center justify-center pointer-events-none">
                       <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
-                      <span className="relative z-10 w-2.5 h-2.5 rounded-full bg-gradient-to-r from-red-600 to-rose-600 shadow-[0_0_10px_rgba(239,68,68,0.95),0_0_4px_rgba(239,68,68,0.6)] border border-white/40" />
+                      <span className="relative z-10 w-4 h-4 rounded-full bg-gradient-to-r from-red-600 to-rose-600 shadow-[0_0_8px_rgba(239,68,68,0.9)] border border-white/40" />
                     </span>
                   ) : null}
                 </button>
@@ -1629,16 +1629,16 @@ export default function DashboardClient({
                             <span>{item.label}</span>
                           </div>
                           {item.count > 0 ? (
-                            <span className="absolute -top-1.5 -right-1.5 z-20 flex items-center justify-center pointer-events-none">
+                            <span className="absolute -top-1 -right-1 z-20 flex items-center justify-center pointer-events-none">
                               <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
-                              <span className="relative z-10 flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-black leading-none shadow-[0_0_12px_rgba(239,68,68,0.95),0_0_4px_rgba(239,68,68,0.6)] border border-white/40">
+                              <span className="relative z-10 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[8.5px] font-black leading-none shadow-[0_0_8px_rgba(239,68,68,0.9)] border border-white/40">
                                 {item.count}
                               </span>
                             </span>
                           ) : item.hasDotNoNumber ? (
                             <span className="absolute -top-1 -right-1 z-20 flex items-center justify-center pointer-events-none">
                               <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
-                              <span className="relative z-10 w-2.5 h-2.5 rounded-full bg-gradient-to-r from-red-600 to-rose-600 shadow-[0_0_10px_rgba(239,68,68,0.95),0_0_4px_rgba(239,68,68,0.6)] border border-white/40" />
+                              <span className="relative z-10 w-4 h-4 rounded-full bg-gradient-to-r from-red-600 to-rose-600 shadow-[0_0_8px_rgba(239,68,68,0.9)] border border-white/40" />
                             </span>
                           ) : null}
                         </button>

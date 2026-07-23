@@ -844,7 +844,7 @@ export default function Home() {
                               </div>
                               <span className="relative flex items-center justify-center shrink-0">
                                 <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
-                                <span className="relative z-10 flex items-center justify-center min-w-[18px] h-4.5 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[9px] font-black leading-none shadow-[0_0_10px_rgba(239,68,68,0.9)] border border-white/40">
+                                <span className="relative z-10 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[8.5px] font-black leading-none shadow-[0_0_8px_rgba(239,68,68,0.9)] border border-white/40">
                                   4
                                 </span>
                               </span>
@@ -858,7 +858,7 @@ export default function Home() {
                               </div>
                               <span className="relative flex items-center justify-center shrink-0">
                                 <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
-                                <span className="relative z-10 w-2.5 h-2.5 rounded-full bg-gradient-to-r from-red-600 to-rose-600 shadow-[0_0_10px_rgba(239,68,68,0.95)] border border-white/40" />
+                                <span className="relative z-10 w-4 h-4 rounded-full bg-gradient-to-r from-red-600 to-rose-600 shadow-[0_0_8px_rgba(239,68,68,0.9)] border border-white/40" />
                               </span>
                             </div>
 
@@ -869,7 +869,7 @@ export default function Home() {
                               </div>
                               <span className="relative flex items-center justify-center shrink-0">
                                 <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
-                                <span className="relative z-10 flex items-center justify-center min-w-[18px] h-4.5 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[9px] font-black leading-none shadow-[0_0_10px_rgba(239,68,68,0.9)] border border-white/40">
+                                <span className="relative z-10 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[8.5px] font-black leading-none shadow-[0_0_8px_rgba(239,68,68,0.9)] border border-white/40">
                                   8
                                 </span>
                               </span>
@@ -882,7 +882,7 @@ export default function Home() {
                               </div>
                               <span className="relative flex items-center justify-center shrink-0">
                                 <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
-                                <span className="relative z-10 flex items-center justify-center min-w-[18px] h-4.5 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[9px] font-black leading-none shadow-[0_0_10px_rgba(239,68,68,0.9)] border border-white/40">
+                                <span className="relative z-10 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[8.5px] font-black leading-none shadow-[0_0_8px_rgba(239,68,68,0.9)] border border-white/40">
                                   3
                                 </span>
                               </span>
@@ -895,7 +895,7 @@ export default function Home() {
                               </div>
                               <span className="relative flex items-center justify-center shrink-0">
                                 <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
-                                <span className="relative z-10 flex items-center justify-center min-w-[18px] h-4.5 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[9px] font-black leading-none shadow-[0_0_10px_rgba(239,68,68,0.9)] border border-white/40">
+                                <span className="relative z-10 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[8.5px] font-black leading-none shadow-[0_0_8px_rgba(239,68,68,0.9)] border border-white/40">
                                   5
                                 </span>
                               </span>
