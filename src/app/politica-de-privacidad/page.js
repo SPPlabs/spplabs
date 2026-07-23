@@ -35,7 +35,7 @@ export default function PoliticaDePrivacidadPage() {
             <div className="mt-3 flex flex-wrap gap-4 text-xs font-medium text-zinc-500">
               <span><strong>Última revisión:</strong> 23 de julio de 2026</span>
               <span>•</span>
-              <span><strong>Versión:</strong> 1.1</span>
+              <span><strong>Versión:</strong> 1.2</span>
               <span>•</span>
               <span><strong>Ámbito:</strong> spplabs.es</span>
             </div>
@@ -51,42 +51,29 @@ export default function PoliticaDePrivacidadPage() {
             </p>
           </section>
 
-          {/* Section 2 */}
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              2. Responsable del Tratamiento
-            </h2>
-            <ul className="list-disc pl-5 text-sm text-zinc-700 space-y-1">
-              <li><strong>Identidad del Responsable:</strong> SPP Labs</li>
-              <li><strong>Sitio Web:</strong> spplabs.es</li>
-              <li><strong>Correo electrónico de contacto para Protección de Datos:</strong> <a href="mailto:info@spplabs.es" className="text-brand-blue font-bold hover:underline">info@spplabs.es</a></li>
-              <li><strong>Delegado de Protección de Datos (DPD):</strong> <a href="mailto:info@spplabs.es" className="text-brand-blue font-bold hover:underline">info@spplabs.es</a></li>
-            </ul>
-          </section>
-
-          {/* Section 3 */}
+          {/* Section 2 (Categorías de Datos, Finalidades y Base Jurídica) */}
           <section className="space-y-4">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              3. Categorías de datos, finalidades y base jurídica del tratamiento
+              2. Categorías de datos, finalidades y base jurídica del tratamiento
             </h2>
 
             <div className="space-y-3 text-sm text-zinc-700">
-              <h3 className="font-bold text-black">3.1. Formulario de Contacto General</h3>
+              <h3 className="font-bold text-black">2.1. Formulario de Contacto General</h3>
               <p><strong>Datos recabados:</strong> Nombre completo, correo electrónico, teléfono (opcional) y mensaje.</p>
               <p><strong>Finalidad:</strong> Atender las consultas o peticiones formuladas por los usuarios.</p>
               <p><strong>Base jurídica:</strong> Consentimiento del interesado (Art. 6.1.a RGPD).</p>
 
-              <h3 className="font-bold text-black pt-2">3.2. Formulario de Solicitud de Reservas y Citas</h3>
+              <h3 className="font-bold text-black pt-2">2.2. Formulario de Solicitud de Reservas y Citas</h3>
               <p><strong>Datos recabados:</strong> Nombre completo, correo electrónico, teléfono, fecha deseada, hora solicitada y mensaje aclaratorio.</p>
               <p><strong>Finalidad:</strong> Tramitar, agendar y confirmar citas o reuniones comerciales con SPP Labs.</p>
               <p><strong>Base jurídica:</strong> Aplicación de medidas precontractuales (Art. 6.1.b RGPD).</p>
 
-              <h3 className="font-bold text-black pt-2">3.3. Área de Clientes y Gestión de Cuentas</h3>
+              <h3 className="font-bold text-black pt-2">2.3. Área de Clientes y Gestión de Cuentas</h3>
               <p><strong>Datos recabados:</strong> Nombre de dominio registrado, contraseña de acceso (almacenada mediante hash criptográfico) y tokens de autenticación.</p>
               <p><strong>Finalidad:</strong> Gestionar el alta, la autenticación y el acceso seguro de los clientes al panel de control.</p>
               <p><strong>Base jurídica:</strong> Ejecución del contrato de prestación de servicios (Art. 6.1.b RGPD).</p>
 
-              <h3 className="font-bold text-black pt-2">3.4. Asistente Virtual / Chatbot Inteligente</h3>
+              <h3 className="font-bold text-black pt-2">2.4. Asistente Virtual / Chatbot Inteligente</h3>
               <p><strong>Datos procesados:</strong> Mensajes de texto enviados voluntariamente por el usuario durante la interacción con el asistente.</p>
               <p><strong>Finalidad:</strong> Responder en tiempo real a las dudas de navegación o soporte mediante un sistema RAG (Retrieval-Augmented Generation).</p>
               <p><strong>Declaración explícita sobre el tratamiento en el Asistente Virtual:</strong></p>
@@ -95,16 +82,16 @@ export default function PoliticaDePrivacidadPage() {
                 <li><strong>Consultas / Prompts:</strong> Se procesan en memoria exclusivamente para generar la respuesta en tiempo real y no se utilizan para entrenar modelos comerciales externos.</li>
               </ul>
 
-              <h3 className="font-bold text-black pt-2">3.5. Analítica de Navegación e Interacción</h3>
+              <h3 className="font-bold text-black pt-2">2.5. Analítica de Navegación e Interacción</h3>
               <p><strong>Datos recabados:</strong> Identificador seudónimo de visitante, identificador de sesión, páginas visitadas, sistema operativo, dispositivo, navegador e interacción de eventos.</p>
               <p><strong>Tratamiento de la Dirección IP:</strong> Las direcciones IP no se almacenan en texto plano en los registros analíticos, sino que se transforman mediante un proceso criptográfico irreversible antes de su almacenamiento.</p>
             </div>
           </section>
 
-          {/* Section 4 */}
+          {/* Section 3 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              4. Conservación de los datos
+              3. Conservación de los datos
             </h2>
             <ul className="list-disc pl-5 text-sm text-zinc-700 space-y-1">
               <li><strong>Registros Analíticos:</strong> 2 años exactos mediante mecanismo automatizado de supresión.</li>
@@ -115,20 +102,20 @@ export default function PoliticaDePrivacidadPage() {
             </ul>
           </section>
 
-          {/* Section 5 */}
+          {/* Section 4 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              5. Destinatarios y transferencias internacionales de datos
+              4. Destinatarios y transferencias internacionales de datos
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               SPP Labs no vende, alquila ni cede datos personales a terceros con fines comerciales. Las solicitudes del asistente virtual se procesan en infraestructura propia o dedicada gestionada por SPP Labs.
             </p>
           </section>
 
-          {/* Section 6 */}
+          {/* Section 5 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              6. Medidas de seguridad implementadas
+              5. Medidas de seguridad implementadas
             </h2>
             <ul className="list-disc pl-5 text-sm text-zinc-700 space-y-1">
               <li>Protección de credenciales y claves mediante algoritmos criptográficos hash.</li>
@@ -138,10 +125,10 @@ export default function PoliticaDePrivacidadPage() {
             </ul>
           </section>
 
-          {/* Section 7 */}
+          {/* Section 6 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              7. Derechos de los interesados y cómo ejercerlos
+              6. Derechos de los interesados y cómo ejercerlos
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               De acuerdo con el RGPD y la LOPDGDD, usted puede ejercitar sus derechos de Acceso, Rectificación, Supresión ("Derecho al Olvido"), Oposición, Limitación del Tratamiento, Portabilidad y Retirada del Consentimiento.
@@ -149,7 +136,7 @@ export default function PoliticaDePrivacidadPage() {
             <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-4 text-sm text-zinc-700 space-y-2">
               <p className="font-bold text-black">Canal para el Ejercicio de Derechos:</p>
               <p>
-                Envíe su solicitud escrita adjuntando copia de un documento acreditativo de identidad a:
+                Para ejercitar cualquiera de estos derechos, envíe una solicitud escrita acreditando su identidad a:
               </p>
               <p>
                 • <strong>Correo electrónico:</strong>{" "}
@@ -163,10 +150,10 @@ export default function PoliticaDePrivacidadPage() {
             </div>
           </section>
 
-          {/* Section 8 */}
+          {/* Section 7 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              8. Menores de edad y cambios en la política
+              7. Menores de edad y cambios en la política
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               Los servicios de SPP Labs están dirigidos a mayores de 18 años. No recabamos a sabiendas datos de menores de 14 años sin el consentimiento de sus padres o tutores legales.

@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { ChatbotProvider } from "@/components/chatbot/ChatbotProvider";
+import { CookieBanner } from "@/components/CookieBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,6 +42,7 @@ export default function RootLayout({ children }) {
       <body className="min-h-full flex flex-col">
         <ChatbotProvider>
           {children}
+          <CookieBanner />
         </ChatbotProvider>
       </body>
     </html>
