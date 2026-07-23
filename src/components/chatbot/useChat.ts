@@ -29,13 +29,17 @@ export function useChat(websiteId: string, apiKey: string, welcomeMessage: strin
     }
 
     // Default Welcome Message if no stored session exists
-    setMessages([
-      {
-        role: "assistant",
-        content: welcomeMessage,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      },
-    ]);
+    if (welcomeMessage && welcomeMessage.trim() !== "") {
+      setMessages([
+        {
+          role: "assistant",
+          content: welcomeMessage,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ]);
+    } else {
+      setMessages([]);
+    }
   }, [welcomeMessage]);
 
   // 2. Persist Messages on Changes
@@ -217,13 +221,17 @@ export function useChat(websiteId: string, apiKey: string, welcomeMessage: strin
     } catch (e) {
       console.error("Failed to clear sessionStorage:", e);
     }
-    setMessages([
-      {
-        role: "assistant",
-        content: welcomeMessage,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      },
-    ]);
+    if (welcomeMessage && welcomeMessage.trim() !== "") {
+      setMessages([
+        {
+          role: "assistant",
+          content: welcomeMessage,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ]);
+    } else {
+      setMessages([]);
+    }
   }, [stopGeneration, welcomeMessage]);
 
   return {

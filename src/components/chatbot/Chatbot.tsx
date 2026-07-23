@@ -10,7 +10,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({
   title = "SPP Labs Support",
   subtitle = "AI Chat Assistant",
   logo,
-  welcomeMessage = "Hola, estás hablando con el asistente de inteligencia artificial de SPP labs, en qué te puedo ayudar.",
+  welcomeMessage = "",
   placeholder = "Escribe tu pregunta...",
   primaryColor = "bg-white",
   accentColor = "bg-slate-900",
@@ -74,7 +74,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({
         aria-expanded={isOpen}
       >
         {/* Unread indicator dot badge */}
-        {hasUnread && !isOpen && (
+        {!isOpen && (
           <span className="absolute top-0 right-0 flex h-3.5 w-3.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rose-500 border border-slate-900"></span>

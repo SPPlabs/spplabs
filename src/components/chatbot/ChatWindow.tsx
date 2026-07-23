@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { SppLabsLogo } from "@/components/SppLabsLogo";
 import { Message } from "./Message";
 import { TypingIndicator } from "./TypingIndicator";
 import { SuggestedQuestions } from "./SuggestedQuestions";
@@ -105,21 +107,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     >
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4">
-        {/* Top Left: Sidebar layout icon (Clear history shortcut) */}
-        <button 
-          onClick={clearChat}
-          className="p-1 text-black hover:text-zinc-700 transition-colors cursor-pointer"
-          title="Clear conversation history"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-            <rect width="18" height="18" x="3" y="3" rx="2.5" />
-            <path d="M9 3v18" />
-          </svg>
-        </button>
+        {/* Top Left: SPP Labs Logo */}
+        <div className="flex items-center">
+          <SppLabsLogo inline style={{ height: "22px" }} />
+        </div>
 
-        {/* Top Right: Profile Gradient Avatar & Close Button */}
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-zinc-800 to-black shadow-sm" />
+        {/* Top Right: Close Button */}
+        <div className="flex items-center space-x-2">
+          {messages.length > 0 && (
+            <button 
+              onClick={clearChat}
+              className="p-1 text-black hover:text-zinc-700 transition-colors cursor-pointer"
+              title="Clear conversation history"
+            >
+              <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          )}
           <button
             onClick={onClose}
             className="p-1 text-black hover:text-zinc-700 transition-colors cursor-pointer"
@@ -133,17 +138,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       </div>
 
       {/* Main View Area */}
-      {messages.length <= 1 ? (
+      {messages.length === 0 ? (
         <div className="flex-1 flex flex-col justify-between px-6 pt-8 pb-4">
           <div className="my-auto flex flex-col items-center text-center">
             <h2 className="text-2xl font-black tracking-tight text-black text-center mb-3 leading-tight">
               {lang === "es" ? "¿En qué puedo ayudarte?" : "What can I help with?"}
             </h2>
-            {messages.length === 1 && (
-              <p className="text-xs text-black font-semibold text-center leading-relaxed max-w-xs bg-white p-3 rounded-2xl border border-zinc-200 shadow-xs mb-4">
-                {messages[0].content}
-              </p>
-            )}
           </div>
           
           <div className="w-full flex flex-col gap-2 mb-2">
@@ -221,11 +221,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
         {/* Disclaimer */}
         <span className="text-[10px] text-black font-semibold text-center mt-1 select-none leading-normal">
-          {lang === "es" 
-            ? "La IA puede cometer errores. Por favor, verifica las respuestas." 
-            : "AI can make mistakes. Please double-check responses."}
+          Al hablar con esta IA estás aceptando nuestra{" "}
+          <Link href="/politica-de-privacidad" className="underline hover:text-zinc-700">
+            política de privacidad
+          </Link>{" "}
+          y nuestros{" "}
+          <Link href="/terminos-y-condiciones" className="underline hover:text-zinc-700">
+            términos y condiciones
+          </Link>
         </span>
       </div>
     </div>
   );
 }
+

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { useChat } from "./useChat";
 import { Message } from "./Message";
 import { TypingIndicator } from "./TypingIndicator";
@@ -9,9 +10,7 @@ export const InlineChatbot: React.FC = () => {
   const resolvedApiKey = process.env.NEXT_PUBLIC_SPP_API_KEY || "";
   const resolvedWebsiteId = process.env.NEXT_PUBLIC_WEBSITE_ID || "spplabs.es";
 
-  // Use a separate storage key prefix or keep it synced with the float widget
-  // Let's keep it synced so they share the history, or let it run on its own
-  const chat = useChat(resolvedWebsiteId, resolvedApiKey, "Hola, estás hablando con el asistente de inteligencia artificial de SPP labs, en qué te puedo ayudar.");
+  const chat = useChat(resolvedWebsiteId, resolvedApiKey, "");
   const { messages, sendMessage, clearChat, stopGeneration, isLoading, isStreaming } = chat;
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -48,10 +47,6 @@ export const InlineChatbot: React.FC = () => {
     await sendMessage(messageText);
   };
 
-  const handleSelectQuestion = async (question: string) => {
-    await sendMessage(question);
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -64,7 +59,7 @@ export const InlineChatbot: React.FC = () => {
       
       {/* Top Header Control (e.g. Clear history button on the right) */}
       <div className="flex justify-end mb-4">
-        {messages.length > 1 && (
+        {messages.length > 0 && (
           <button
             onClick={clearChat}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-black hover:text-zinc-700 border border-zinc-300 rounded-full hover:bg-zinc-50 transition-all cursor-pointer"
@@ -79,25 +74,11 @@ export const InlineChatbot: React.FC = () => {
       </div>
 
       {/* Main Conversation or Welcome Area */}
-      {messages.length <= 1 ? (
+      {messages.length === 0 ? (
         <div className="flex-1 flex flex-col justify-center items-center my-6 text-center">
           <h2 className="text-3xl font-black tracking-tight text-black text-center mb-4">
             {lang === "es" ? "¿En qué puedo ayudarte?" : "What can I help with?"}
           </h2>
-          {messages.length === 1 && (
-            <p className="text-sm text-black font-semibold text-center leading-relaxed max-w-md bg-zinc-50 p-4 rounded-2xl border border-zinc-200 shadow-xs mb-6">
-              {messages[0].content}
-            </p>
-          )}
-          <button
-            onClick={() => handleSelectQuestion("qué servicios ofrecéis?")}
-            className="bg-white text-black text-sm px-6 py-3.5 rounded-2xl hover:bg-zinc-100 transition-all font-bold border border-zinc-300 shadow-sm cursor-pointer flex items-center gap-3"
-          >
-            <span>qué servicios ofrecéis?</span>
-            <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </button>
         </div>
       ) : (
         <div
@@ -160,11 +141,17 @@ export const InlineChatbot: React.FC = () => {
 
         {/* Disclaimer */}
         <span className="text-[10px] text-black font-semibold text-center mt-3 select-none leading-normal">
-          {lang === "es" 
-            ? "La IA puede cometer errores. Por favor, verifica las respuestas." 
-            : "AI can make mistakes. Please double-check responses."}
+          Al hablar con esta IA estás aceptando nuestra{" "}
+          <Link href="/politica-de-privacidad" className="underline hover:text-zinc-700">
+            política de privacidad
+          </Link>{" "}
+          y nuestros{" "}
+          <Link href="/terminos-y-condiciones" className="underline hover:text-zinc-700">
+            términos y condiciones
+          </Link>
         </span>
       </div>
     </div>
   );
 };
+

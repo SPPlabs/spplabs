@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Script from "next/script";
+import Link from "next/link";
 import { translations } from "@/lib/translations";
 import { SppLabsLogo } from "@/components/SppLabsLogo";
 import { InlineChatbot } from "@/components/chatbot/InlineChatbot";
@@ -2006,10 +2007,10 @@ export default function Home() {
             <span className="text-xs text-zinc-400">{lang === "es" ? "| © 2026 SPP Labs Inc. Todos los derechos reservados." : "| © 2026 SPP Labs Inc. All rights reserved."}</span>
           </div>
 
-          <div className="flex items-center gap-8 text-xs font-semibold text-zinc-500">
-            <a href="#" className="hover:text-black transition-colors" id="footer-link-status">{lang === "es" ? "Estado" : "Status"}</a>
-            <a href="#" className="hover:text-black transition-colors" id="footer-link-privacy">{lang === "es" ? "Política de Privacidad" : "Privacy Policy"}</a>
-            <a href="#" className="hover:text-black transition-colors" id="footer-link-terms">{lang === "es" ? "Términos de Servicio" : "Terms of Service"}</a>
+          <div className="flex flex-wrap items-center gap-8 text-xs font-semibold text-zinc-500">
+            <Link href="/politica-de-cookies" className="hover:text-black transition-colors" id="footer-link-cookies">Política de Cookies</Link>
+            <Link href="/politica-de-privacidad" className="hover:text-black transition-colors" id="footer-link-privacy">Política de Privacidad</Link>
+            <Link href="/terminos-y-condiciones" className="hover:text-black transition-colors" id="footer-link-terms">Términos y Condiciones</Link>
           </div>
         </div>
       </footer>
