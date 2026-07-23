@@ -1677,6 +1677,12 @@ export default function Home() {
                     ? "Seleccione una fecha para una agendar una llamada de consultoría, o escríbanos sus requerimientos técnicos o un mensaje directamente."
                     : "Select a date to schedule a consultation call, or send us your technical requirements or a message directly."}
                 </p>
+                <div className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-zinc-700 bg-zinc-100/80 px-4 py-2 rounded-full w-fit mx-auto border border-zinc-200 shadow-2xs">
+                  <svg className="w-4 h-4 text-brand-blue shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <span>Email: <a href="mailto:info@spplabs.es" className="hover:text-black transition-colors underline">info@spplabs.es</a></span>
+                </div>
               </div>
 
               <div className="grid lg:grid-cols-12 gap-12 items-start">
@@ -2007,7 +2013,13 @@ export default function Home() {
             <span className="text-xs text-zinc-400">{lang === "es" ? "| © 2026 SPP Labs Inc. Todos los derechos reservados." : "| © 2026 SPP Labs Inc. All rights reserved."}</span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-8 text-xs font-semibold text-zinc-500">
+          <div className="flex flex-wrap items-center gap-6 text-xs font-semibold text-zinc-500">
+            <a href="mailto:info@spplabs.es" className="hover:text-black transition-colors flex items-center gap-1.5" id="footer-link-email">
+              <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>info@spplabs.es</span>
+            </a>
             <Link href="/politica-de-cookies" className="hover:text-black transition-colors" id="footer-link-cookies">Política de Cookies</Link>
             <Link href="/politica-de-privacidad" className="hover:text-black transition-colors" id="footer-link-privacy">Política de Privacidad</Link>
             <Link href="/terminos-y-condiciones" className="hover:text-black transition-colors" id="footer-link-terms">Términos y Condiciones</Link>

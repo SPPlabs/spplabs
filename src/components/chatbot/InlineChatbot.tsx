@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { SppLabsLogo } from "@/components/SppLabsLogo";
 import { useChat } from "./useChat";
 import { Message } from "./Message";
 import { TypingIndicator } from "./TypingIndicator";
@@ -57,8 +58,12 @@ export const InlineChatbot: React.FC = () => {
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col font-sans text-black bg-white border border-zinc-200/80 rounded-[2.5rem] shadow-xl p-8 min-h-[420px] transition-all duration-300">
       
-      {/* Top Header Control (e.g. Clear history button on the right) */}
-      <div className="flex justify-end mb-4">
+      {/* Top Header Control */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <img src="/logo.webp" alt="SPP Labs Logo" className="w-6 h-6 object-contain" />
+          <SppLabsLogo inline style={{ height: "24px" }} />
+        </div>
         {messages.length > 0 && (
           <button
             onClick={clearChat}
