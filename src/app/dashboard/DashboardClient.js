@@ -2407,20 +2407,14 @@ export default function DashboardClient({
                 <h3 className="text-lg font-bold mb-1 text-slate-900">{t.clientesBookings}</h3>
                 <p className="text-sm text-slate-500 mb-6">{t.clientesSubtitle}</p>
 
-                {bookings.length === 0 ? (
-                  <div className="text-center py-10 text-slate-450 text-sm">
-                    {t.clientesNoBookings}
-                  </div>
-                ) : (
-                  <BookingsCalendar
-                    bookings={bookings}
-                    lang={lang}
-                    onAccept={handleUpdateBookingStatus}
-                    onReject={handleUpdateBookingStatus}
-                    onDelete={handleDeleteBooking}
-                    t={t}
-                  />
-                )}
+                <BookingsCalendar
+                  bookings={bookings}
+                  lang={lang}
+                  onAccept={handleUpdateBookingStatus}
+                  onReject={handleUpdateBookingStatus}
+                  onDelete={handleDeleteBooking}
+                  t={t}
+                />
               </div>
             </div>
           )}
