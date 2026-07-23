@@ -390,13 +390,10 @@ export default function TerminosYCondicionesPage() {
               SPP Labs se reserva el derecho a cesar total o parcialmente la prestación de sus servicios o finalizar su actividad empresarial.
             </p>
             <p className="text-sm text-zinc-700 leading-relaxed">
-              Siempre que resulte razonablemente posible, dicho cese será comunicado a los clientes con una antelación mínima de treinta (30) días.
+              Siempre que resulte razonablemente posible, SPP Labs notificará el cese de la actividad con una antelación suficiente para que los clientes puedan adoptar las medidas oportunas, salvo que dicho cese venga motivado por causas legales, fuerza mayor o circunstancias técnicas que impidan realizar dicho preaviso.
             </p>
             <p className="text-sm text-zinc-700 leading-relaxed">
-              Durante dicho período, los clientes podrán solicitar la exportación de sus datos cuando ello sea técnicamente viable.
-            </p>
-            <p className="text-sm text-zinc-700 leading-relaxed">
-              Finalizado el período de preaviso o la relación contractual, SPP Labs podrá eliminar de forma permanente las cuentas, archivos, bases de datos y demás información asociada a los servicios, salvo que exista una obligación legal de conservación.
+              Finalizado el cese de actividad o la relación contractual, SPP Labs podrá eliminar de forma permanente las cuentas, archivos, bases de datos y demás información asociada a los servicios, salvo que exista una obligación legal de conservación.
             </p>
           </section>
 
