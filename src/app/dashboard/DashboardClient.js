@@ -1495,30 +1495,55 @@ export default function DashboardClient({
       <div className="flex-1 h-full flex flex-col overflow-hidden bg-slate-50 relative z-10">
 
         {/* STICKY MOBILE TOP HEADER (lg:hidden) */}
-        <div className="lg:hidden bg-white border-b border-slate-200/90 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setMobileDrawerOpen(true)}
-              className="p-2 text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all cursor-pointer border border-slate-200/80"
-              aria-label="Abrir Menú Móvil"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-              </svg>
-            </button>
-            <div className="flex items-center gap-2">
-              <img src="/logo.webp" alt="SPP Labs" className="w-6 h-6 object-contain" />
-              <SppLabsLogo inline={true} className="text-slate-900 text-sm" />
-            </div>
-          </div>
+        {(() => {
+          const pendingBookingsCount = bookings.filter(b => b.status === "PENDING").length;
+          const recentContactsCount = contactForms.filter(c => {
+            const created = new Date(c.createdAt).getTime();
+            return Date.now() - created < 48 * 60 * 60 * 1000;
+          }).length;
 
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-xl border border-slate-200 truncate max-w-[130px]">
-              {currentWebsite.domain}
-            </span>
-          </div>
-        </div>
+          const overviewNotifCount = pendingBookingsCount + recentContactsCount + announcementsList.length;
+          const clientesNotifCount = contactForms.length + bookings.length;
+          const iaNotifCount = conversationsList.length;
+          const notificacionesNotifCount = announcementsList.length + petitionsList.length;
+          const hasAnalyticsNotif = Boolean(analyticsData || analyticsLoading);
+
+          const hasAnyActiveNotification = overviewNotifCount > 0 || clientesNotifCount > 0 || iaNotifCount > 0 || notificacionesNotifCount > 0 || hasAnalyticsNotif;
+
+          return (
+            <div className="lg:hidden bg-white border-b border-slate-200/90 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setMobileDrawerOpen(true)}
+                  className="relative p-2 text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all cursor-pointer border border-slate-200/80"
+                  aria-label="Abrir Menú Móvil"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                  </svg>
+
+                  {!mobileDrawerOpen && hasAnyActiveNotification && (
+                    <span className="absolute -top-1 -right-1 z-20 flex h-3 w-3 items-center justify-center pointer-events-none">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-ping" />
+                      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-r from-red-600 to-rose-600 border border-white/60 shadow-[0_0_6px_rgba(239,68,68,0.9)]" />
+                    </span>
+                  )}
+                </button>
+                <div className="flex items-center gap-2">
+                  <img src="/logo.webp" alt="SPP Labs" className="w-6 h-6 object-contain" />
+                  <SppLabsLogo inline={true} className="text-slate-900 text-sm" />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-xl border border-slate-200 truncate max-w-[130px]">
+                  {currentWebsite.domain}
+                </span>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* MOBILE SIDEBAR DRAWER OVERLAY (lg:hidden) */}
         {mobileDrawerOpen && (
