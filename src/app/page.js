@@ -282,15 +282,15 @@ export default function Home() {
     <div className="bg-white min-h-screen text-black flex flex-col font-sans selection:bg-brand-blue selection:text-white">
       {/* Navigation */}
       <header className="border-b border-zinc-150/70 bg-white/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-[94rem] mx-auto px-4 sm:px-8 md:px-12 h-20 flex items-center justify-between gap-4">
+        <div className="max-w-[94rem] mx-auto px-3 sm:px-8 md:px-12 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
           <a 
             href="#" 
             onClick={(e) => { e.preventDefault(); setActivePage("inicio"); }}
-            className="flex items-center gap-3 group shrink-0 transition-transform hover:scale-[1.01]" 
+            className="flex items-center gap-2 sm:gap-3 group shrink transition-transform hover:scale-[1.01] min-w-0" 
             id="nav-logo"
           >
-            <img src="/logo.webp" alt="SPP Labs Logo" className="w-8 h-8 object-contain" />
-            <SppLabsLogo inline={true} className="text-black" />
+            <img src="/logo.webp" alt="SPP Labs Logo" className="w-7 h-7 sm:w-8 sm:h-8 object-contain shrink-0" />
+            <SppLabsLogo inline={true} className="text-black text-xs sm:text-base shrink min-w-0" />
           </a>
 
           {/* Desktop Navigation - Pill Box */}
@@ -314,9 +314,9 @@ export default function Home() {
             })}
           </nav>
 
-          <div className="flex items-center gap-4 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             {/* Language Switcher Link */}
-            <div className="flex gap-2 text-xs font-bold bg-zinc-50 border border-zinc-200 px-2.5 py-1.5 rounded-xl shadow-sm">
+            <div className="flex gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold bg-zinc-50 border border-zinc-200 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg sm:rounded-xl shadow-xs">
               <button
                 onClick={() => changeLanguage("es")}
                 className={`hover:text-brand-blue cursor-pointer transition-colors ${lang === "es" ? "text-brand-blue font-black" : "text-zinc-400"}`}
@@ -341,7 +341,7 @@ export default function Home() {
             </a>
             <a
               href="/login"
-              className="inline-flex items-center justify-center px-5 h-10 text-sm font-bold bg-gradient-to-r from-brand-blue to-brand-green text-white rounded-lg hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 shadow-sm shadow-brand-blue/15 hover:shadow-lg hover:shadow-brand-green/20 cursor-pointer"
+              className="inline-flex items-center justify-center px-3 sm:px-5 h-8.5 sm:h-10 text-xs sm:text-sm font-bold bg-gradient-to-r from-brand-blue to-brand-green text-white rounded-lg hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 shadow-sm shadow-brand-blue/15 hover:shadow-lg hover:shadow-brand-green/20 cursor-pointer whitespace-nowrap"
               id="nav-cta"
             >
               {t.navLogin}
