@@ -1145,7 +1145,7 @@ export default function Home() {
                 <h3 className="text-2xl font-black text-black mb-3">{lang === "es" ? "¿Listo para escalar su infraestructura?" : "Ready to scale your digital workflow?"}</h3>
                 <p className="text-sm text-zinc-650 mb-8 max-w-xl mx-auto">
                   {lang === "es"
-                    ? "Hable con nuestros ingenieros para diseñar y cotizar un proyecto adaptado a las métricas y objetivos de su empresa."
+                    ? "Programe una consulta con nosotros para diseñar un proyecto adaptado a las métricas y objetivos de su empresa."
                     : "Schedule a session with our engineering founders to map out a technical implementation plan for your site."}
                 </p>
                 <button
