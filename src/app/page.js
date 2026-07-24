@@ -500,7 +500,7 @@ export default function Home() {
                     
                     <div className="relative w-full max-w-2xl flex items-center justify-center">
                       <img
-                        src="/foto_inicio_portatil_movil.png"
+                        src="/foto_inicio_portatil_movil.webp"
                         alt="SPP Labs Dispositivos Portátil y Móvil"
                         className="w-full h-auto object-contain mix-blend-multiply transition-transform duration-500 hover:scale-[1.02] block"
                       />
