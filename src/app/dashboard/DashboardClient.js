@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { translations } from "@/lib/translations";
 import { SppLabsLogo } from "@/components/SppLabsLogo";
@@ -68,9 +68,13 @@ export default function DashboardClient({
   // Active navigation tab state - Everyone (admin or client) defaults to Resumen ("overview")
   const defaultTab = "overview";
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const mainContainerRef = useRef(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    if (mainContainerRef.current) {
+      mainContainerRef.current.scrollTop = 0;
+    }
   }, [activeTab]);
 
   const handleNavigate = (tab) => {
@@ -1687,7 +1691,7 @@ export default function DashboardClient({
         )}
 
         {/* Tab content viewport window */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-8 w-full max-w-full">
+        <main ref={mainContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-8 w-full max-w-full">
           {/* TAB: ADMIN PANEL (USUARIOS) */}
           {activeTab === "admin" && session.role === "ADMIN" && (
             <div className="space-y-8 animate-fade-in">
