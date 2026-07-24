@@ -1583,26 +1583,6 @@ export default function Home() {
                   <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
                   <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-green/10 rounded-full blur-3xl pointer-events-none"></div>
 
-                  {/* Floating Logo Badges */}
-                  {/* TikTok Floating Logo */}
-                  <div className="absolute top-6 left-6 sm:top-8 sm:left-10 p-2.5 sm:p-3 bg-black/80 border border-zinc-700/80 rounded-2xl shadow-xl backdrop-blur-md hover:scale-110 hover:border-cyan-400/60 transition-all duration-300 animate-pulse pointer-events-none flex items-center justify-center">
-                    <img src="/logo_tiktok_sin_fondo.png" alt="TikTok" className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
-                  </div>
-
-                  {/* Instagram Floating Logo */}
-                  <div className="absolute top-6 right-6 sm:top-8 sm:right-10 p-3 sm:p-3.5 bg-gradient-to-tr from-amber-500/20 via-rose-500/20 to-purple-600/20 border border-rose-500/40 rounded-2xl shadow-xl backdrop-blur-md hover:scale-110 hover:border-rose-400 transition-all duration-300 animate-pulse pointer-events-none">
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-rose-400" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                    </svg>
-                  </div>
-
-                  {/* Facebook Floating Logo */}
-                  <div className="absolute bottom-6 left-6 sm:bottom-8 sm:left-10 p-3 sm:p-3.5 bg-blue-600/20 border border-blue-500/40 rounded-2xl shadow-xl backdrop-blur-md hover:scale-110 hover:border-blue-400 transition-all duration-300 hidden sm:flex pointer-events-none">
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                    </svg>
-                  </div>
-
                   {/* Top Badge */}
                   <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-zinc-700 bg-zinc-900/90 text-xs font-extrabold uppercase tracking-widest text-brand-green mb-6 shadow-sm">
                     {lang === "es" ? "ÚNETE A NUESTRA COMUNIDAD" : "JOIN OUR COMMUNITY"}
@@ -1629,12 +1609,12 @@ export default function Home() {
                       href="https://www.tiktok.com/@spplabs"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-3.5 px-8 py-4 bg-gradient-to-r from-zinc-900 via-black to-zinc-900 hover:from-black hover:to-zinc-950 text-white rounded-2xl border border-zinc-700 shadow-xl hover:shadow-cyan-500/20 hover:border-cyan-400/60 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 font-extrabold text-sm sm:text-base group"
+                      className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-zinc-900 via-black to-zinc-900 hover:from-black hover:to-zinc-950 text-white rounded-2xl border border-zinc-700 shadow-xl hover:shadow-cyan-500/20 hover:border-cyan-400/60 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 font-extrabold text-sm sm:text-base group cursor-pointer"
                       id="comunidad-tiktok-cta"
                     >
-                      <div className="w-9 h-9 rounded-xl bg-black border border-zinc-700 flex items-center justify-center group-hover:border-cyan-400 group-hover:bg-cyan-500/10 transition-colors shadow-inner overflow-hidden p-1">
-                        <img src="/logo_tiktok_sin_fondo.png" alt="TikTok" className="w-full h-full object-contain" />
-                      </div>
+                      <svg className="w-6 h-6 fill-current text-white group-hover:text-cyan-400 transition-colors shrink-0" viewBox="0 0 24 24">
+                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 1 1-5.2-1.74 2.89 2.89 0 0 1 2.31-2.83V7.63a6.34 6.34 0 0 0-4.66 1.83 6.34 6.34 0 0 0-1.85 4.66 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.33V9.05a8.28 8.28 0 0 0 4.95 1.63V7.24a4.83 4.83 0 0 1-1.0.55z" />
+                      </svg>
                       <span>{lang === "es" ? "Síguenos en TikTok" : "Follow us on TikTok"}</span>
                     </a>
                   </div>
