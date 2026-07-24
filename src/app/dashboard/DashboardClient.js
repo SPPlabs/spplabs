@@ -69,6 +69,10 @@ export default function DashboardClient({
   const defaultTab = "overview";
   const [activeTab, setActiveTab] = useState(defaultTab);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [activeTab]);
+
   const handleNavigate = (tab) => {
     setActiveTab(tab);
     if (window.innerWidth < 768) {
