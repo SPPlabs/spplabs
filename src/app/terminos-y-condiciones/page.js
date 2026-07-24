@@ -502,8 +502,10 @@ export default function TerminosYCondicionesPage() {
       </main>
 
       {/* Simple Footer */}
-      <footer className="bg-white border-t border-zinc-200 py-6 text-center text-xs text-zinc-500">
-        © 2026 SPP Labs Inc. Todos los derechos reservados. | <a href="mailto:info@spplabs.es" className="hover:text-black underline">info@spplabs.es</a>
+      <footer className="bg-white border-t border-zinc-200 py-6 px-4 text-center text-xs text-zinc-500 flex flex-col sm:flex-row justify-center items-center gap-2">
+        <span>© 2026 SPP Labs Inc. Todos los derechos reservados.</span>
+        <span className="hidden sm:inline">|</span>
+        <a href="mailto:info@spplabs.es" className="hover:text-black underline">info@spplabs.es</a>
       </footer>
     </div>
   );
