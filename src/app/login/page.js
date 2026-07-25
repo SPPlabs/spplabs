@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { translations } from "@/lib/translations";
 import { SppLabsLogo } from "@/components/SppLabsLogo";
 
@@ -97,7 +98,14 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-xl relative">
         {/* SPP Labs Logo */}
         <div className="flex flex-col items-center mb-8">
-          <img src="/logo.webp" alt="SPP Labs Logo" className="w-16 h-16 object-contain mb-3" />
+          <Image
+            src="/logo.webp"
+            alt="SPP Labs Logo"
+            width={64}
+            height={64}
+            sizes="64px"
+            className="w-16 h-16 object-contain mb-3"
+          />
           <SppLabsLogo inline={true} className="text-slate-950" style={{ fontSize: "1.75rem" }} />
           <p className="text-slate-500 text-sm mt-3">{t.loginSubtitle}</p>
         </div>

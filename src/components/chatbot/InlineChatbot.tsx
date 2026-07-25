@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { SppLabsLogo } from "@/components/SppLabsLogo";
 import { useChat } from "./useChat";
 import { Message } from "./Message";
@@ -61,7 +62,14 @@ export const InlineChatbot: React.FC = () => {
       {/* Top Header Control */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <img src="/logo.webp" alt="SPP Labs Logo" className="w-6 h-6 object-contain" />
+          <Image
+            src="/logo.webp"
+            alt="SPP Labs Logo"
+            width={24}
+            height={24}
+            sizes="24px"
+            className="w-6 h-6 object-contain"
+          />
           <SppLabsLogo inline style={{ height: "24px" }} />
         </div>
         {messages.length > 0 && (

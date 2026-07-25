@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 interface SppLabsLogoProps {
   inline?: boolean;
@@ -60,11 +61,15 @@ export function SppLabsLogo({
             }}
           />
           {/* Labs letters standard gradient WebP */}
-          <img
+          <Image
             src="/labs.webp"
             alt="Labs"
+            width={300}
+            height={200}
+            sizes="(max-width: 640px) 120px, 240px"
             style={{
               height: "100%",
+              width: "auto",
               aspectRatio: "1.5",
               objectFit: "contain",
             }}
@@ -98,11 +103,15 @@ export function SppLabsLogo({
             }}
           />
           {/* Labs letters standard gradient WebP */}
-          <img
+          <Image
             src="/labs.webp"
             alt="Labs"
+            width={300}
+            height={200}
+            sizes="(max-width: 640px) 120px, 240px"
             style={{
               height: "35%",
+              width: "auto",
               aspectRatio: "1.5",
               objectFit: "contain",
             }}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { translations } from "@/lib/translations";
 import { SppLabsLogo } from "@/components/SppLabsLogo";
 
@@ -1268,7 +1269,14 @@ export default function DashboardClient({
           {sidebarOpen ? (
             <div className="flex items-center justify-between px-1 py-1">
               <div className="flex items-center gap-3 overflow-hidden">
-                <img src="/logo.webp" alt="SPP Labs Logo" className="w-8 h-8 object-contain shrink-0" />
+                <Image
+                  src="/logo.webp"
+                  alt="SPP Labs Logo"
+                  width={32}
+                  height={32}
+                  sizes="32px"
+                  className="w-8 h-8 object-contain shrink-0"
+                />
                 <SppLabsLogo inline={true} className="text-slate-900 truncate" />
               </div>
               <button
@@ -1283,7 +1291,14 @@ export default function DashboardClient({
             </div>
           ) : (
             <div className="flex flex-col items-center gap-3 py-1">
-              <img src="/logo.webp" alt="SPP Labs Logo" className="w-8 h-8 object-contain" />
+              <Image
+                src="/logo.webp"
+                alt="SPP Labs Logo"
+                width={32}
+                height={32}
+                sizes="32px"
+                className="w-8 h-8 object-contain"
+              />
               <button
                 onClick={() => setSidebarOpen(true)}
                 className="p-1.5 hover:bg-slate-100 text-slate-500 hover:text-slate-900 rounded-xl transition-all cursor-pointer border border-slate-200/60"
@@ -1531,7 +1546,14 @@ export default function DashboardClient({
                   )}
                 </button>
                 <div className="flex items-center gap-2">
-                  <img src="/logo.webp" alt="SPP Labs" className="w-6 h-6 object-contain" />
+                  <Image
+                    src="/logo.webp"
+                    alt="SPP Labs"
+                    width={24}
+                    height={24}
+                    sizes="24px"
+                    className="w-6 h-6 object-contain"
+                  />
                   <SppLabsLogo inline={true} className="text-slate-900 text-sm" />
                 </div>
               </div>
@@ -1555,7 +1577,14 @@ export default function DashboardClient({
               <div className="space-y-6">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                   <div className="flex items-center gap-2">
-                    <img src="/logo.webp" alt="SPP Labs" className="w-7 h-7 object-contain" />
+                    <Image
+                      src="/logo.webp"
+                      alt="SPP Labs"
+                      width={28}
+                      height={28}
+                      sizes="28px"
+                      className="w-7 h-7 object-contain"
+                    />
                     <SppLabsLogo inline={true} className="text-slate-900" />
                   </div>
                   <button
