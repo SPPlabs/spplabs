@@ -19,8 +19,16 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata = {
-  title: "SPP Labs | Next-Generation Operations & Analytics Platform",
-  description: "Accelerate your development cycle, monitor performance, and scale secure workflows with SPP Labs' premium operations platform.",
+  title: "SPP labs | Soluciones tecnológicas para empresas",
+  description: "Creamos páginas web premium integradas con CRM, automatizaciones con IA y soluciones digitales para empresas.",
+  openGraph: {
+    title: "SPP labs | Soluciones tecnológicas para empresas",
+    description: "Creamos páginas web premium integradas con CRM, automatizaciones con IA y soluciones digitales para empresas.",
+    url: "https://spplabs.es",
+    siteName: "SPP Labs",
+    locale: "es_ES",
+    type: "website",
+  },
   icons: {
     icon: "/favicon.ico",
   },
@@ -36,7 +44,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html
-      lang="en"
+      lang="es"
       className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
