@@ -1135,7 +1135,7 @@ export default function Home() {
                     <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Sistema de Reservas y Contacto" : "Contact & Booking Scheduler"}</h3>
                     <p className="text-zinc-600 leading-relaxed text-sm">
                       {lang === "es" 
-                        ? "Agendador interactivo de reuniones y llamadas comerciales. Bloquea dinámicamente horas ocupadas, envía correos de confirmación y sincroniza eventos de forma segura con sus calendarios internos." 
+                        ? "Agendador interactivo de reuniones y llamadas comerciales. Bloquea dinámicamente horas ocupadas y sincroniza eventos de forma segura con sus calendarios internos." 
                         : "An interactive call scheduling platform. Disables fully booked days, synchronizes with email notifications, and streams scheduled calls directly to your support logs."}
                     </p>
                   </div>
@@ -1176,7 +1176,7 @@ export default function Home() {
                 </h2>
                 <p className="text-zinc-650 mt-4 text-base md:text-lg leading-relaxed">
                   {lang === "es"
-                    ? "Bases de datos ultra-rápidas, aceleración por hardware y orquestación de inteligencia artificial ejecutadas en nuestro núcleo."
+                    ? "Bases de datos ultra-rápidas, aceleración por hardware y orquestación de inteligencia artificial ejecutadas en nuestros servidores de SPP labs"
                     : "High-throughput databases, hardware acceleration, and AI orchestration engines running at the core of our infrastructure."}
                 </p>
               </div>
@@ -1292,12 +1292,12 @@ export default function Home() {
                   />
                 </div>
 
-                {/* 10. AMD EPYC - Top Center Left (350°) */}
+                {/* 10. AMD - Top Center Left (350°) */}
                 <div className="absolute top-[3%] left-[34%] -translate-x-1/2 z-20 animate-float-reverse delay-5">
                   <img
                     src="/tech/AMD_E_Blk_RGB.webp"
-                    alt="AMD EPYC"
-                    title="AMD EPYC"
+                    alt="AMD"
+                    title="AMD"
                     className="w-16 md:w-24 h-14 md:h-20 object-contain rounded-2xl bg-white p-2.5 shadow-md border border-slate-200/80 hover:scale-125 transition-transform duration-300 cursor-pointer"
                   />
                 </div>
@@ -1314,10 +1314,10 @@ export default function Home() {
                   {/* Tech 1: Next.js */}
                   <div className="border border-zinc-200 rounded-2xl p-5 hover:shadow-md transition-all bg-white flex flex-col items-center text-center">
                     <img src="/tech/next-js-logo-png_seeklogo-321806.webp" alt="Next.js" className="w-12 h-12 object-contain rounded-xl mb-3" />
-                    <span className="text-[10px] font-bold text-brand-blue uppercase tracking-wider">Frontend</span>
+                    <span className="text-[10px] font-bold text-brand-blue uppercase tracking-wider">Framework</span>
                     <h4 className="text-sm font-extrabold text-black mt-1">Next.js</h4>
                     <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-                      {lang === "es" ? "Renderizado híbrido en servidor." : "Hybrid server-side rendering."}
+                      {lang === "es" ? "El framework que utilizamos." : "Hybrid server-side rendering."}
                     </p>
                   </div>
 
@@ -1337,7 +1337,7 @@ export default function Home() {
                     <span className="text-[10px] font-bold text-brand-green uppercase tracking-wider">Database</span>
                     <h4 className="text-sm font-extrabold text-black mt-1">PostgreSQL</h4>
                     <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-                      {lang === "es" ? "Base de datos ACID primaria." : "Primary ACID storage tables."}
+                      {lang === "es" ? "Base de datos primaria." : "Primary ACID storage tables."}
                     </p>
                   </div>
 
@@ -1347,7 +1347,7 @@ export default function Home() {
                     <span className="text-[10px] font-bold text-brand-green uppercase tracking-wider">Analytics</span>
                     <h4 className="text-sm font-extrabold text-black mt-1">ClickHouse DB</h4>
                     <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-                      {lang === "es" ? "Análisis en milisegundos." : "Millisecond analytical engine."}
+                      {lang === "es" ? "Base de datos de analíticas." : "Millisecond analytical engine."}
                     </p>
                   </div>
 
@@ -1367,7 +1367,7 @@ export default function Home() {
                     <span className="text-[10px] font-bold text-purple-600 uppercase tracking-wider">Vector DB</span>
                     <h4 className="text-sm font-extrabold text-black mt-1">Qdrant</h4>
                     <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-                      {lang === "es" ? "Búsqueda vectorial RAG." : "Vector RAG context storage."}
+                      {lang === "es" ? "Base de datos vectorial." : "Vector RAG context storage."}
                     </p>
                   </div>
 
@@ -1405,7 +1405,7 @@ export default function Home() {
                   <div className="border border-zinc-200 rounded-2xl p-5 hover:shadow-md transition-all bg-white flex flex-col items-center text-center">
                     <img src="/tech/AMD_E_Blk_RGB.webp" alt="AMD" className="w-14 h-12 object-contain rounded-xl mb-3" />
                     <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Compute</span>
-                    <h4 className="text-sm font-extrabold text-black mt-1">AMD EPYC</h4>
+                    <h4 className="text-sm font-extrabold text-black mt-1">AMD</h4>
                     <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
                       {lang === "es" ? "Servidores multi-núcleo." : "Multi-core server nodes."}
                     </p>
