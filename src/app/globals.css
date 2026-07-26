@@ -1048,3 +1048,9 @@ body {
   white-space: nowrap;
 }
 
+/* Hide browser native password reveal icons */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
