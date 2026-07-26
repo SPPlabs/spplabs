@@ -78,7 +78,7 @@ export default function Header({ activePage }) {
 
           <a
             href="/signup"
-            className="text-sm font-semibold text-zinc-650 hover:text-black transition-colors hidden sm:inline-block"
+            className="text-sm font-semibold text-zinc-650 hover:text-black transition-colors hidden lg:inline-block"
             id="nav-signup-link"
           >
             {t.loginRegisterLink}
