@@ -45,7 +45,7 @@ export default function Header({ activePage }) {
               <Link
                 key={item.id}
                 href={item.href}
-                className={`px-5 py-2 rounded-full text-xs font-bold tracking-wide transition-all duration-300 ease-out cursor-pointer hover:scale-[1.03] active:scale-[0.97] ${
+                className={`px-3.5 md:px-4 lg:px-5 py-1.5 md:py-2 rounded-full text-xs font-bold tracking-wide transition-all duration-300 ease-out cursor-pointer hover:scale-[1.03] active:scale-[0.97] ${
                   active
                     ? "bg-gradient-to-r from-brand-blue to-brand-green text-white shadow-sm shadow-brand-blue/20 hover:shadow-[0_0_12px_rgba(37,99,235,0.35)]"
                     : "text-zinc-600 hover:text-black hover:bg-zinc-200/50"

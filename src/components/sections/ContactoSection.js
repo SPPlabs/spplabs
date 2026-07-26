@@ -326,7 +326,7 @@ export default function ContactoSection() {
                         <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
                           {lang === "es" ? "Horas disponibles para" : "Slots for"} {new Date(bookingDate).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { weekday: "short", month: "short", day: "numeric" })}:
                         </span>
-                        <div className="grid grid-cols-4 gap-1.5">
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-4 gap-2">
                           {["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"].map((t) => {
                             const isOccupied = occupiedSlots.some((slot) => slot.date === bookingDate && slot.time === t);
                             return (

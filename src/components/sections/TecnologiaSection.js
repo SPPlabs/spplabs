@@ -74,7 +74,7 @@ export default function TecnologiaSection() {
           </div>
 
           {/* 3. ClickHouse DB - Right (72°) */}
-          <div className="absolute top-1/2 -translate-y-1/2 right-[1%] md:right-[5%] z-20 animate-float-gentle delay-3">
+          <div className="absolute top-1/2 -translate-y-1/2 right-[2%] sm:right-[3%] md:right-[5%] z-20 animate-float-gentle delay-3">
             <Image
               src="/tech/clickhouse-logo_freelogovectors.net_.webp"
               alt="ClickHouse DB"
@@ -82,12 +82,12 @@ export default function TecnologiaSection() {
               width={96}
               height={80}
               sizes="(max-width: 768px) 64px, 96px"
-              className="w-16 md:w-24 h-14 md:h-20 object-contain rounded-2xl bg-white p-2.5 shadow-md border border-slate-200/80 hover:scale-125 transition-transform duration-300 cursor-pointer"
+              className="w-14 sm:w-16 md:w-24 h-12 sm:h-14 md:h-20 object-contain rounded-2xl bg-white p-2.5 shadow-md border border-slate-200/80 hover:scale-125 transition-transform duration-300 cursor-pointer"
             />
           </div>
 
           {/* 4. PostgreSQL - Bottom Right (110°) */}
-          <div className="absolute bottom-[15%] right-[12%] md:right-[16%] z-20 animate-float-reverse delay-4">
+          <div className="absolute bottom-[15%] right-[10%] sm:right-[12%] md:right-[16%] z-20 animate-float-reverse delay-4">
             <Image
               src="/tech/PostgreSQL_logo.3colors.120x120.webp"
               alt="PostgreSQL"
@@ -95,7 +95,7 @@ export default function TecnologiaSection() {
               width={80}
               height={80}
               sizes="(max-width: 768px) 56px, 80px"
-              className="w-14 md:w-20 h-14 md:h-20 object-contain rounded-2xl bg-white p-2.5 shadow-md border border-slate-200/80 hover:scale-125 transition-transform duration-300 cursor-pointer"
+              className="w-12 sm:w-14 md:w-20 h-12 sm:h-14 md:h-20 object-contain rounded-2xl bg-white p-2.5 shadow-md border border-slate-200/80 hover:scale-125 transition-transform duration-300 cursor-pointer"
             />
           </div>
 
@@ -108,7 +108,7 @@ export default function TecnologiaSection() {
               width={112}
               height={80}
               sizes="(max-width: 768px) 80px, 112px"
-              className="w-20 md:w-28 h-14 md:h-20 object-contain rounded-2xl bg-white p-2.5 shadow-md border border-slate-200/80 hover:scale-125 transition-transform duration-300 cursor-pointer"
+              className="w-16 sm:w-20 md:w-28 h-12 sm:h-14 md:h-20 object-contain rounded-2xl bg-white p-2.5 shadow-md border border-slate-200/80 hover:scale-125 transition-transform duration-300 cursor-pointer"
             />
           </div>
 
@@ -121,12 +121,12 @@ export default function TecnologiaSection() {
               width={80}
               height={80}
               sizes="(max-width: 768px) 56px, 80px"
-              className="w-14 md:w-20 h-14 md:h-20 object-contain rounded-2xl bg-white p-2.5 shadow-md border border-slate-200/80 hover:scale-125 transition-transform duration-300 cursor-pointer"
+              className="w-12 sm:w-14 md:w-20 h-12 sm:h-14 md:h-20 object-contain rounded-2xl bg-white p-2.5 shadow-md border border-slate-200/80 hover:scale-125 transition-transform duration-300 cursor-pointer"
             />
           </div>
 
           {/* 7. Qdrant Vector DB - Bottom Left (250°) */}
-          <div className="absolute bottom-[15%] left-[12%] md:left-[16%] z-20 animate-float-gentle delay-2">
+          <div className="absolute bottom-[15%] left-[10%] sm:left-[12%] md:left-[16%] z-20 animate-float-gentle delay-2">
             <Image
               src="/tech/qdrant-logo-red-black.webp"
               alt="Qdrant Vector DB"
@@ -134,12 +134,12 @@ export default function TecnologiaSection() {
               width={112}
               height={80}
               sizes="(max-width: 768px) 80px, 112px"
-              className="w-20 md:w-28 h-14 md:h-20 object-contain rounded-2xl bg-white p-2.5 shadow-md border border-slate-200/80 hover:scale-125 transition-transform duration-300 cursor-pointer"
+              className="w-16 sm:w-20 md:w-28 h-12 sm:h-14 md:h-20 object-contain rounded-2xl bg-white p-2.5 shadow-md border border-slate-200/80 hover:scale-125 transition-transform duration-300 cursor-pointer"
             />
           </div>
 
           {/* 8. LangChain - Left (288°) */}
-          <div className="absolute top-1/2 -translate-y-1/2 left-[1%] md:left-[5%] z-20 animate-float-reverse delay-3">
+          <div className="absolute top-1/2 -translate-y-1/2 left-[2%] sm:left-[3%] md:left-[5%] z-20 animate-float-reverse delay-3">
             <Image
               src="/tech/LangChain-Logo.webp"
               alt="LangChain"
@@ -147,7 +147,7 @@ export default function TecnologiaSection() {
               width={112}
               height={80}
               sizes="(max-width: 768px) 80px, 112px"
-              className="w-20 md:w-28 h-14 md:h-20 object-contain rounded-2xl bg-white p-2.5 shadow-md border border-slate-200/80 hover:scale-125 transition-transform duration-300 cursor-pointer"
+              className="w-16 sm:w-20 md:w-28 h-12 sm:h-14 md:h-20 object-contain rounded-2xl bg-white p-2.5 shadow-md border border-slate-200/80 hover:scale-125 transition-transform duration-300 cursor-pointer"
             />
           </div>
 
