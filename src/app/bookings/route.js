@@ -116,6 +116,18 @@ export async function POST(request) {
       );
     }
 
+    // Enforce booking date within current month or next month
+    const now = new Date();
+    const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 2, 0, 23, 59, 59, 999);
+
+    if (parsedDate < todayDate || parsedDate > endOfNextMonth) {
+      return jsonResponse(
+        { error: "Bad Request", message: "Bookings can only be made for dates within the current month and next month." },
+        { status: 400 }
+      );
+    }
+
     const db = withRLS(website.id);
 
     const booking = await db.booking.create({

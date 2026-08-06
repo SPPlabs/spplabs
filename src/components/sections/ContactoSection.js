@@ -28,6 +28,19 @@ export default function ContactoSection() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [occupiedSlots, setOccupiedSlots] = useState([]);
 
+  // Month navigation & date boundaries (current month & next month only)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const startOfCurrentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const startOfNextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+  const endOfNextMonth = new Date(today.getFullYear(), today.getMonth() + 2, 0, 23, 59, 59, 999);
+
+  const currentViewMonthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+
+  const canGoPrev = currentViewMonthStart > startOfCurrentMonth;
+  const canGoNext = currentViewMonthStart < startOfNextMonth;
+
   const fetchOccupiedSlots = async () => {
     try {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || "https://api.spplabs.es";
@@ -59,36 +72,35 @@ export default function ContactoSection() {
       days.push(<div key={`pad-${i}`} className="w-8 h-8"></div>);
     }
 
-    // Render current month days
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
     for (let day = 1; day <= totalDays; day++) {
       const dateObj = new Date(year, month, day);
       const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
       const isPast = dateObj < today;
+      const isAfterNextMonth = dateObj > endOfNextMonth;
       const isSelected = bookingDate === dateStr;
 
       const occupiedForDay = occupiedSlots.filter((slot) => slot.date === dateStr);
       const isFullyBooked = occupiedForDay.length >= 9;
+      const isDisabled = isPast || isAfterNextMonth || isFullyBooked;
 
       days.push(
         <button
           key={day}
           type="button"
-          disabled={isPast || isFullyBooked}
+          disabled={isDisabled}
           onClick={() => {
+            if (isDisabled) return;
             setBookingDate(dateStr);
             setBookingTime(""); // reset time when date changes
           }}
-          className={`w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
+          className={`w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center ${
             isSelected
-              ? "bg-brand-green text-white shadow-md font-extrabold"
-              : isPast
+              ? "bg-brand-green text-white shadow-md font-extrabold cursor-pointer"
+              : isPast || isAfterNextMonth
               ? "text-zinc-350 cursor-not-allowed"
               : isFullyBooked
               ? "bg-zinc-55 text-zinc-300 border border-zinc-150/60 cursor-not-allowed line-through"
-              : "hover:bg-zinc-200 hover:text-black text-zinc-800 bg-white border border-zinc-100"
+              : "hover:bg-zinc-200 hover:text-black text-zinc-800 bg-white border border-zinc-100 cursor-pointer"
           }`}
           title={isFullyBooked ? (lang === "es" ? "Completo" : "Fully booked") : ""}
         >
@@ -277,29 +289,41 @@ export default function ContactoSection() {
                       <span className="text-xs font-bold text-zinc-700 uppercase tracking-wider">
                         {lang === "es" ? "Seleccione Fecha y Hora" : "Select Date & Time"}
                       </span>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 items-center">
                         <button
                           type="button"
+                          disabled={!canGoPrev}
                           onClick={() => {
-                            const prev = new Date(currentMonth);
-                            prev.setMonth(prev.getMonth() - 1);
+                            if (!canGoPrev) return;
+                            const prev = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
                             setCurrentMonth(prev);
                           }}
-                          className="p-1.5 hover:bg-zinc-200 text-zinc-600 rounded-lg transition-all cursor-pointer"
+                          className={`p-1.5 rounded-lg transition-all ${
+                            canGoPrev
+                              ? "hover:bg-zinc-200 text-zinc-600 cursor-pointer"
+                              : "text-zinc-300 cursor-not-allowed opacity-40"
+                          }`}
+                          title={!canGoPrev ? (lang === "es" ? "Mes anterior no disponible" : "Previous month not available") : ""}
                         >
                           ‹
                         </button>
-                        <span className="text-xs font-bold text-zinc-850">
+                        <span className="text-xs font-bold text-zinc-850 min-w-[110px] text-center">
                           {currentMonth.toLocaleDateString(lang === "es" ? "es-ES" : "en-US", { month: "long", year: "numeric" })}
                         </span>
                         <button
                           type="button"
+                          disabled={!canGoNext}
                           onClick={() => {
-                            const next = new Date(currentMonth);
-                            next.setMonth(next.getMonth() + 1);
+                            if (!canGoNext) return;
+                            const next = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
                             setCurrentMonth(next);
                           }}
-                          className="p-1.5 hover:bg-zinc-200 text-zinc-600 rounded-lg transition-all cursor-pointer"
+                          className={`p-1.5 rounded-lg transition-all ${
+                            canGoNext
+                              ? "hover:bg-zinc-200 text-zinc-600 cursor-pointer"
+                              : "text-zinc-300 cursor-not-allowed opacity-40"
+                          }`}
+                          title={!canGoNext ? (lang === "es" ? "Mes siguiente no disponible" : "Next month not available") : ""}
                         >
                           ›
                         </button>
