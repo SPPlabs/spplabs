@@ -35,6 +35,13 @@ export async function POST(request) {
       return NextResponse.json({ error: "Invalid parameters" }, { status: 400 });
     }
 
+    if (content.length > 30000) {
+      return NextResponse.json(
+        { error: "El contenido de la base de conocimiento no puede superar los 30,000 caracteres." },
+        { status: 400 }
+      );
+    }
+
     // 3. Security: Check if user owns the requested domain, or is an ADMIN
     if (session.role !== "ADMIN" && session.domain !== domain) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });

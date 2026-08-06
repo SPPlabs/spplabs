@@ -319,6 +319,10 @@ export default function DashboardClient({
   // Handle Chatbot Knowledge RAG Prompt text update
   const handleUpdateChatbotKnowledge = async (e) => {
     e.preventDefault();
+    if (chatbotContent.length > 30000) {
+      alert("El contenido de la base de conocimiento no puede superar los 30,000 caracteres.");
+      return;
+    }
     setIaSaving(true);
     setIaSaved(false);
     try {
@@ -327,8 +331,8 @@ export default function DashboardClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: chatbotContent, domain: currentWebsite.domain }),
       });
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
         if (data.warning) {
           alert(data.warning);
         } else {
@@ -2756,13 +2760,18 @@ export default function DashboardClient({
                         <label className="block text-xs font-black uppercase tracking-wider text-slate-900 mb-1">{t.iaRagContent}</label>
                         <p className="text-xs text-slate-500 font-medium">{t.iaRagDesc}</p>
                       </div>
-                      <span className="text-[10px] font-mono font-bold text-slate-400 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
-                        {chatbotContent.length} caracteres
+                      <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-xl shadow-2xs border ${
+                        chatbotContent.length >= 30000
+                          ? "text-amber-700 bg-amber-50 border-amber-300 font-extrabold"
+                          : "text-slate-400 bg-white border-slate-200"
+                      }`}>
+                        {chatbotContent.length.toLocaleString()} / 30,000 caracteres
                       </span>
                     </div>
                     <textarea
                       value={chatbotContent}
                       onChange={(e) => setChatbotContent(e.target.value)}
+                      maxLength={30000}
                       placeholder={t.iaPlaceholder}
                       className="w-full h-72 bg-white border border-slate-200/80 rounded-xl p-4 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 transition-all resize-y leading-relaxed mt-3 shadow-2xs font-normal"
                     />
