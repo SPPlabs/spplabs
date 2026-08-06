@@ -21,6 +21,12 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata = {
   title: "SPP labs | Soluciones tecnológicas para empresas",
   description: "Creamos páginas web premium integradas con CRM, automatizaciones con IA y soluciones digitales para empresas.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "SPP labs",
+    statusBarStyle: "default",
+  },
   openGraph: {
     title: "SPP labs | Soluciones tecnológicas para empresas",
     description: "Creamos páginas web premium integradas con CRM, automatizaciones con IA y soluciones digitales para empresas.",
@@ -31,6 +37,7 @@ export const metadata = {
   },
   icons: {
     icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
 };
 
