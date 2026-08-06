@@ -22,7 +22,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   accentColor = "bg-indigo-600",
   suggestedQuestions = [],
   width = 380,
-  height = 520,
+  height = 490,
   chat,
   onClose,
 }) => {
@@ -96,12 +96,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
   return (
     <div
-      className="flex flex-col bg-[#f4f4f4] border border-zinc-200/80 rounded-[2.2rem] shadow-2xl overflow-hidden transition-all duration-300 transform scale-100 origin-bottom-right animate-fade-in z-50 text-black font-sans"
+      className="flex flex-col bg-[#f4f4f4] border border-zinc-200/80 rounded-[2.2rem] shadow-2xl overflow-hidden transition-all duration-300 transform scale-100 origin-bottom-right animate-fade-in z-50 text-black font-sans w-[calc(100vw-2rem)] sm:w-auto h-[410px] sm:h-[490px] max-h-[60vh] sm:max-h-[calc(100vh-120px)]"
       style={{
-        width: "100%",
         maxWidth: `${width}px`,
-        height: `${height}px`,
-        maxHeight: "calc(100vh - 100px)",
       }}
       role="dialog"
       aria-label={`${title} chat window`}
