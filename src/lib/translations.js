@@ -27,6 +27,21 @@ export const translations = {
     signupHasAccount: "¿Ya registrado?",
     signupLoginLink: "Iniciar Sesión",
     
+    // 404 Page
+    notFoundTitle: "Página no encontrada",
+    notFoundSubtitle: "Lo sentimos, la página que buscas no existe, ha sido movida o la URL ingresada es incorrecta.",
+    notFoundBackHome: "Volver al Inicio",
+    notFoundContact: "Contactar Soporte",
+    notFoundQuickLinksTitle: "Secciones recomendadas de SPP Labs",
+    notFoundNavInicio: "Página Principal",
+    notFoundNavInicioDesc: "Vuelve al punto de partida de nuestro sitio.",
+    notFoundNavServicios: "Servicios Digitales",
+    notFoundNavServiciosDesc: "Descubre nuestro catálogo de soluciones web e IA.",
+    notFoundNavTecnologia: "Nuestra Tecnología",
+    notFoundNavTecnologiaDesc: "Conoce nuestro stack moderno y arquitectura.",
+    notFoundNavContacto: "Contacto",
+    notFoundNavContactoDesc: "Ponte en contacto directamente con nuestro equipo.",
+
     // Sidebar items
     menuResumen: "Resumen",
     menuAnaliticas: "Analíticas",
@@ -172,6 +187,21 @@ export const translations = {
     signupHasAccount: "Already registered?",
     signupLoginLink: "Sign In",
     
+    // 404 Page
+    notFoundTitle: "Page Not Found",
+    notFoundSubtitle: "Sorry, the page you are looking for doesn't exist, has been moved, or the link is broken.",
+    notFoundBackHome: "Back to Home",
+    notFoundContact: "Contact Support",
+    notFoundQuickLinksTitle: "Recommended SPP Labs Sections",
+    notFoundNavInicio: "Home Page",
+    notFoundNavInicioDesc: "Return to our website starting point.",
+    notFoundNavServicios: "Digital Services",
+    notFoundNavServiciosDesc: "Explore our catalog of web & AI solutions.",
+    notFoundNavTecnologia: "Our Technology",
+    notFoundNavTecnologiaDesc: "Learn about our modern stack and architecture.",
+    notFoundNavContacto: "Contact",
+    notFoundNavContactoDesc: "Get in touch directly with our team.",
+
     // Sidebar items
     menuResumen: "Summary",
     menuAnaliticas: "Analytics",
