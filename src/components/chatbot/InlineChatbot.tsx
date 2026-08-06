@@ -131,6 +131,7 @@ export const InlineChatbot: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
+            maxLength={500}
             placeholder={lang === "es" ? "Pregunta lo que quieras" : "Ask anything"}
             disabled={isLoading || isStreaming}
             className="w-full text-sm bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-black font-semibold placeholder-zinc-500 resize-none font-sans min-h-[32px] max-h-32 py-1.5"
