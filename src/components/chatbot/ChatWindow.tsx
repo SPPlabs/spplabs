@@ -204,7 +204,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            maxLength={500}
+            maxLength={150}
             placeholder={lang === "es" ? "Pregunta lo que quieras" : "Ask anything"}
             disabled={isLoading || isStreaming}
             className="w-full text-xs bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-black font-semibold placeholder-zinc-500 resize-none font-sans min-h-[24px] max-h-24 py-1"

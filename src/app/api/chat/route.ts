@@ -158,8 +158,8 @@ export async function POST(request: NextRequest): Promise<Response> {
     return jsonResponse({ error: "Bad Request", message: "message is required in the body." }, 400, corsHeaders);
   }
 
-  if (message.length > 500) {
-    return jsonResponse({ error: "Bad Request", message: "El mensaje excede el límite máximo de 500 caracteres." }, 400, corsHeaders);
+  if (message.length > 150) {
+    return jsonResponse({ error: "Bad Request", message: "El mensaje excede el límite máximo de 150 caracteres." }, 400, corsHeaders);
   }
 
   // 3. Validate and Extract Bearer API Key from Authorization Header
@@ -353,7 +353,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const stream = await generateChatCompletion({
       messages,
       stream: true,
-      max_tokens: 250,
+      max_tokens: 375,
       temperature: 0.2,
     });
 
