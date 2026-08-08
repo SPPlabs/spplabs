@@ -2,81 +2,81 @@
 
 import { useState } from "react";
 
-// Accurate mathematical (latitude, longitude) conversion for Spanish cities onto a 600x480 SVG Canvas
+// Accurate percentage coordinates (left %, top %) mapped onto españa.webp
 const CITY_LOOKUP = {
-  "Madrid": { name: "Madrid", region: "Comunidad de Madrid", x: 281, y: 199 },
-  "Barcelona": { name: "Barcelona", region: "Cataluña", x: 516, y: 150 },
-  "Valencia": { name: "Valencia", region: "Comunitat Valenciana", x: 415, y: 246 },
-  "Sevilla": { name: "Sevilla", region: "Andalucía", x: 190, y: 350 },
-  "Zaragoza": { name: "Zaragoza", region: "Aragón", x: 394, y: 137 },
-  "Málaga": { name: "Málaga", region: "Andalucía", x: 253, y: 384 },
-  "Malaga": { name: "Málaga", region: "Andalucía", x: 253, y: 384 },
-  "Murcia": { name: "Murcia", region: "Región de Murcia", x: 384, y: 320 },
-  "Palma": { name: "Palma de Mallorca", region: "Islas Baleares", x: 536, y: 241 },
-  "Palma de Mallorca": { name: "Palma de Mallorca", region: "Islas Baleares", x: 536, y: 241 },
-  "Bilbao": { name: "Bilbao", region: "País Vasco", x: 312, y: 57 },
-  "Alicante": { name: "Alicante", region: "Comunitat Valenciana", x: 410, y: 302 },
-  "Vigo": { name: "Vigo", region: "Galicia", x: 81, y: 108 },
-  "A Coruña": { name: "A Coruña", region: "Galicia", x: 93, y: 52 },
-  "La Coruña": { name: "A Coruña", region: "Galicia", x: 93, y: 52 },
-  "Coruña": { name: "A Coruña", region: "Galicia", x: 93, y: 52 },
-  "Granada": { name: "Granada", region: "Andalucía", x: 286, y: 361 },
-  "Córdoba": { name: "Córdoba", region: "Andalucía", x: 239, y: 325 },
-  "Cordoba": { name: "Córdoba", region: "Andalucía", x: 239, y: 325 },
-  "Valladolid": { name: "Valladolid", region: "Castilla y León", x: 241, y: 137 },
-  "Oviedo": { name: "Oviedo", region: "Principado de Asturias", x: 196, y: 52 },
-  "Gijón": { name: "Gijón", region: "Principado de Asturias", x: 202, y: 48 },
-  "Gijon": { name: "Gijón", region: "Principado de Asturias", x: 202, y: 48 },
-  "Santander": { name: "Santander", region: "Cantabria", x: 277, y: 47 },
-  "San Sebastián": { name: "San Sebastián", region: "País Vasco", x: 350, y: 54 },
-  "Donostia": { name: "San Sebastián", region: "País Vasco", x: 350, y: 54 },
-  "Pamplona": { name: "Pamplona", region: "Comunidad Foral de Navarra", x: 364, y: 79 },
-  "Toledo": { name: "Toledo", region: "Castilla-La Mancha", x: 269, y: 227 },
-  "Salamanca": { name: "Salamanca", region: "Castilla y León", x: 203, y: 171 },
-  "Burgos": { name: "Burgos", region: "Castilla y León", x: 282, y: 103 },
-  "Cádiz": { name: "Cádiz", region: "Andalucía", x: 178, y: 393 },
-  "Cadiz": { name: "Cádiz", region: "Andalucía", x: 178, y: 393 },
-  "Badajoz": { name: "Badajoz", region: "Extremadura", x: 151, y: 276 },
-  "Almería": { name: "Almería", region: "Andalucía", x: 331, y: 378 },
-  "Almeria": { name: "Almería", region: "Andalucía", x: 331, y: 378 },
-  "Girona": { name: "Girona", region: "Cataluña", x: 542, y: 121 },
-  "Gerona": { name: "Girona", region: "Cataluña", x: 542, y: 121 },
-  "Tarragona": { name: "Tarragona", region: "Cataluña", x: 480, y: 164 },
-  "Castellón": { name: "Castellón de la Plana", region: "Comunitat Valenciana", x: 428, y: 221 },
-  "Castellon": { name: "Castellón de la Plana", region: "Comunitat Valenciana", x: 428, y: 221 },
-  "Albacete": { name: "Albacete", region: "Castilla-La Mancha", x: 355, y: 270 },
-  "Logroño": { name: "Logroño", region: "La Rioja", x: 332, y: 97 },
-  "Logrono": { name: "Logroño", region: "La Rioja", x: 332, y: 97 },
-  "Huelva": { name: "Huelva", region: "Andalucía", x: 152, y: 357 },
-  "Lleida": { name: "Lleida", region: "Cataluña", x: 455, y: 139 },
-  "Lerida": { name: "Lleida", region: "Cataluña", x: 455, y: 139 },
-  "Marbella": { name: "Marbella", region: "Andalucía", x: 234, y: 394 },
-  "León": { name: "León", region: "Castilla y León", x: 207, y: 90 },
-  "Leon": { name: "León", region: "Castilla y León", x: 207, y: 90 },
-  "Jaén": { name: "Jaén", region: "Andalucía", x: 278, y: 331 },
-  "Jaen": { name: "Jaén", region: "Andalucía", x: 278, y: 331 },
-  "Ourense": { name: "Ourense", region: "Galicia", x: 115, y: 103 },
-  "Orense": { name: "Ourense", region: "Galicia", x: 115, y: 103 },
-  "Lugo": { name: "Lugo", region: "Galicia", x: 127, y: 69 },
-  "Cáceres": { name: "Cáceres", region: "Extremadura", x: 175, y: 246 },
-  "Caceres": { name: "Cáceres", region: "Extremadura", x: 175, y: 246 },
-  "Las Palmas": { name: "Las Palmas de Gran Canaria", region: "Canarias", x: 75, y: 420 },
-  "Las Palmas de Gran Canaria": { name: "Las Palmas de Gran Canaria", region: "Canarias", x: 75, y: 420 },
-  "Santa Cruz de Tenerife": { name: "Santa Cruz de Tenerife", region: "Canarias", x: 45, y: 415 },
-  "Tenerife": { name: "Santa Cruz de Tenerife", region: "Canarias", x: 45, y: 415 },
-  "Ceuta": { name: "Ceuta", region: "Ceuta", x: 205, y: 425 },
-  "Melilla": { name: "Melilla", region: "Melilla", x: 270, y: 430 },
+  "Madrid": { name: "Madrid", region: "Comunidad de Madrid", left: 50.0, top: 45.0 },
+  "Barcelona": { name: "Barcelona", region: "Cataluña", left: 79.5, top: 31.0 },
+  "Valencia": { name: "Valencia", region: "Comunitat Valenciana", left: 65.5, top: 48.5 },
+  "Sevilla": { name: "Sevilla", region: "Andalucía", left: 34.5, top: 72.5 },
+  "Zaragoza": { name: "Zaragoza", region: "Aragón", left: 63.5, top: 30.5 },
+  "Málaga": { name: "Málaga", region: "Andalucía", left: 41.5, top: 79.5 },
+  "Malaga": { name: "Málaga", region: "Andalucía", left: 41.5, top: 79.5 },
+  "Murcia": { name: "Murcia", region: "Región de Murcia", left: 61.5, top: 63.5 },
+  "Palma": { name: "Palma de Mallorca", region: "Islas Baleares", left: 85.5, top: 50.0 },
+  "Palma de Mallorca": { name: "Palma de Mallorca", region: "Islas Baleares", left: 85.5, top: 50.0 },
+  "Bilbao": { name: "Bilbao", region: "País Vasco", left: 53.5, top: 13.5 },
+  "Alicante": { name: "Alicante", region: "Comunitat Valenciana", left: 65.0, top: 59.5 },
+  "Vigo": { name: "Vigo", region: "Galicia", left: 19.5, top: 20.0 },
+  "A Coruña": { name: "A Coruña", region: "Galicia", left: 21.0, top: 8.5 },
+  "La Coruña": { name: "A Coruña", region: "Galicia", left: 21.0, top: 8.5 },
+  "Coruña": { name: "A Coruña", region: "Galicia", left: 21.0, top: 8.5 },
+  "Granada": { name: "Granada", region: "Andalucía", left: 47.0, top: 75.0 },
+  "Córdoba": { name: "Córdoba", region: "Andalucía", left: 40.5, top: 68.0 },
+  "Cordoba": { name: "Córdoba", region: "Andalucía", left: 40.5, top: 68.0 },
+  "Valladolid": { name: "Valladolid", region: "Castilla y León", left: 42.5, top: 29.5 },
+  "Oviedo": { name: "Oviedo", region: "Principado de Asturias", left: 36.5, top: 10.5 },
+  "Gijón": { name: "Gijón", region: "Principado de Asturias", left: 37.0, top: 9.5 },
+  "Gijon": { name: "Gijón", region: "Principado de Asturias", left: 37.0, top: 9.5 },
+  "Santander": { name: "Santander", region: "Cantabria", left: 47.5, top: 10.0 },
+  "San Sebastián": { name: "San Sebastián", region: "País Vasco", left: 57.5, top: 14.0 },
+  "Donostia": { name: "San Sebastián", region: "País Vasco", left: 57.5, top: 14.0 },
+  "Pamplona": { name: "Pamplona", region: "Comunidad Foral de Navarra", left: 59.5, top: 18.5 },
+  "Toledo": { name: "Toledo", region: "Castilla-La Mancha", left: 47.0, top: 50.5 },
+  "Salamanca": { name: "Salamanca", region: "Castilla y León", left: 36.5, top: 36.5 },
+  "Burgos": { name: "Burgos", region: "Castilla y León", left: 49.5, top: 21.5 },
+  "Cádiz": { name: "Cádiz", region: "Andalucía", left: 31.0, top: 82.5 },
+  "Cadiz": { name: "Cádiz", region: "Andalucía", left: 31.0, top: 82.5 },
+  "Badajoz": { name: "Badajoz", region: "Extremadura", left: 30.5, top: 56.5 },
+  "Almería": { name: "Almería", region: "Andalucía", left: 53.5, top: 78.5 },
+  "Almeria": { name: "Almería", region: "Andalucía", left: 53.5, top: 78.5 },
+  "Girona": { name: "Girona", region: "Cataluña", left: 83.5, top: 23.5 },
+  "Gerona": { name: "Girona", region: "Cataluña", left: 83.5, top: 23.5 },
+  "Tarragona": { name: "Tarragona", region: "Cataluña", left: 74.0, top: 34.5 },
+  "Castellón": { name: "Castellón de la Plana", region: "Comunitat Valenciana", left: 67.5, top: 42.5 },
+  "Castellon": { name: "Castellón de la Plana", region: "Comunitat Valenciana", left: 67.5, top: 42.5 },
+  "Albacete": { name: "Albacete", region: "Castilla-La Mancha", left: 57.5, top: 55.5 },
+  "Logroño": { name: "Logroño", region: "La Rioja", left: 54.0, top: 21.0 },
+  "Logrono": { name: "Logroño", region: "La Rioja", left: 54.0, top: 21.0 },
+  "Huelva": { name: "Huelva", region: "Andalucía", left: 28.5, top: 74.5 },
+  "Lleida": { name: "Lleida", region: "Cataluña", left: 71.5, top: 27.5 },
+  "Lerida": { name: "Lleida", region: "Cataluña", left: 71.5, top: 27.5 },
+  "Marbella": { name: "Marbella", region: "Andalucía", left: 39.5, top: 81.5 },
+  "León": { name: "León", region: "Castilla y León", left: 36.0, top: 18.5 },
+  "Leon": { name: "León", region: "Castilla y León", left: 36.0, top: 18.5 },
+  "Jaén": { name: "Jaén", region: "Andalucía", left: 46.0, top: 69.5 },
+  "Jaen": { name: "Jaén", region: "Andalucía", left: 46.0, top: 69.5 },
+  "Ourense": { name: "Ourense", region: "Galicia", left: 25.0, top: 21.5 },
+  "Orense": { name: "Ourense", region: "Galicia", left: 25.0, top: 21.5 },
+  "Lugo": { name: "Lugo", region: "Galicia", left: 26.5, top: 13.5 },
+  "Cáceres": { name: "Cáceres", region: "Extremadura", left: 33.5, top: 49.5 },
+  "Caceres": { name: "Cáceres", region: "Extremadura", left: 33.5, top: 49.5 },
+  "Las Palmas": { name: "Las Palmas de Gran Canaria", region: "Canarias", left: 14.5, top: 91.0 },
+  "Las Palmas de Gran Canaria": { name: "Las Palmas de Gran Canaria", region: "Canarias", left: 14.5, top: 91.0 },
+  "Santa Cruz de Tenerife": { name: "Santa Cruz de Tenerife", region: "Canarias", left: 11.5, top: 90.0 },
+  "Tenerife": { name: "Santa Cruz de Tenerife", region: "Canarias", left: 11.5, top: 90.0 },
+  "Ceuta": { name: "Ceuta", region: "Ceuta", left: 37.1, top: 90.7 },
+  "Melilla": { name: "Melilla", region: "Melilla", left: 52.3, top: 94.0 },
 };
 
 function getCityMeta(rawCity) {
-  if (!rawCity) return { name: "Desconocida", region: "España", x: 281, y: 199 };
+  if (!rawCity) return { name: "Desconocida", region: "España", left: 50.0, top: 45.0 };
   const trimmed = rawCity.trim();
   if (CITY_LOOKUP[trimmed]) return CITY_LOOKUP[trimmed];
 
   const key = Object.keys(CITY_LOOKUP).find(k => k.toLowerCase() === trimmed.toLowerCase());
   if (key) return CITY_LOOKUP[key];
 
-  return { name: trimmed, region: "España", x: 281, y: 199 };
+  return { name: trimmed, region: "España", left: 50.0, top: 45.0 };
 }
 
 export default function SpainMap({ spainCities = [], lang = "es" }) {
@@ -87,7 +87,7 @@ export default function SpainMap({ spainCities = [], lang = "es" }) {
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col lg:flex-row gap-8 w-full transition-colors">
-      {/* SVG Canvas Container */}
+      {/* Map Container */}
       <div className="w-full lg:w-3/5 space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -96,7 +96,7 @@ export default function SpainMap({ spainCities = [], lang = "es" }) {
               {lang === "es" ? "Mapa de Ciudades en España" : "Spain City Visitor Map"}
             </h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              {lang === "es" ? "Geolocalización precisa e Ingestion ClickHouse" : "Precise geolocation via ClickHouse ingestion"}
+              {lang === "es" ? "Geolocalización ClickHouse en mapa oficial" : "ClickHouse geolocation overlay"}
             </p>
           </div>
           <span className="bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 text-xs px-3 py-1.5 rounded-xl font-bold border border-sky-200 dark:border-sky-800 font-mono">
@@ -104,212 +104,80 @@ export default function SpainMap({ spainCities = [], lang = "es" }) {
           </span>
         </div>
 
-        {/* Spain Vector ViewBox */}
-        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden min-h-[260px] shadow-inner">
-          <svg viewBox="0 0 600 450" className="w-full h-auto max-h-[300px] overflow-visible">
-            <defs>
-              <pattern id="spainGrid" width="30" height="30" patternUnits="userSpaceOnUse">
-                <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-              </pattern>
-              <filter id="skyGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="3.5" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-            </defs>
+        {/* Real Spain Image Box with Overlay */}
+        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3 relative overflow-hidden shadow-inner group">
+          <img
+            src="/espana.webp"
+            alt="Mapa España"
+            className="w-full h-auto object-contain rounded-xl opacity-90 transition-opacity duration-300 group-hover:opacity-100"
+          />
 
-            <rect width="600" height="450" fill="url(#spainGrid)" />
-
-            {/* Accurate Peninsular Spain Vector Contour */}
-            <path
-              d="
-                M 90 40 
-                Q 140 38, 200 42 
-                T 280 40 
-                T 350 45 
-                T 370 65 
-                T 450 110 
-                T 545 115 
-                T 550 145 
-                T 510 170 
-                T 475 220 
-                T 430 240 
-                T 420 310 
-                T 340 375 
-                T 270 395 
-                T 220 395 
-                T 170 390 
-                T 145 355 
-                T 150 270 
-                T 195 240 
-                T 200 170 
-                T 195 125 
-                T 145 135 
-                T 75 115 
-                T 70 65 
-                Z
-              "
-              fill="#1e293b"
-              stroke="#38bdf8"
-              strokeWidth="1.8"
-              opacity="0.9"
-            />
-
-            {/* Portugal Border Divider Line */}
-            <path
-              d="M 195 125 L 145 135 L 150 270 L 195 240"
-              fill="none"
-              stroke="#475569"
-              strokeWidth="1.5"
-              strokeDasharray="4 4"
-            />
-            <text x="160" y="200" fill="#64748b" fontSize="9" fontWeight="bold" letterSpacing="1">
-              PORTUGAL
-            </text>
-
-            {/* France / Pyrenees Line */}
-            <line x1="370" y1="65" x2="545" y2="115" stroke="#475569" strokeWidth="1.5" strokeDasharray="3 3" />
-            <text x="440" y="70" fill="#64748b" fontSize="9" fontWeight="bold">
-              FRANCIA
-            </text>
-
-            {/* Balearic Islands */}
-            {/* Mallorca */}
-            <path d="M 525 230 Q 545 225, 545 245 T 525 245 Z" fill="#1e293b" stroke="#38bdf8" strokeWidth="1.5" />
-            {/* Menorca */}
-            <path d="M 555 215 Q 565 212, 563 222 Z" fill="#1e293b" stroke="#38bdf8" strokeWidth="1.5" />
-            {/* Ibiza & Formentera */}
-            <path d="M 505 250 Q 515 248, 513 258 Z" fill="#1e293b" stroke="#38bdf8" strokeWidth="1.5" />
-            <text x="510" y="272" fill="#94a3b8" fontSize="8" fontWeight="bold">
-              BALEARES
-            </text>
-
-            {/* Canary Islands Inset Box */}
-            <rect x="15" y="375" width="110" height="60" fill="#090d16" stroke="#334155" strokeWidth="1" rx="8" />
-            <text x="22" y="388" fill="#38bdf8" fontSize="8" fontWeight="800" letterSpacing="0.5">
-              CANARIAS
-            </text>
-            {/* Tenerife */}
-            <path d="M 40 410 Q 52 405, 48 420 Z" fill="#1e293b" stroke="#38bdf8" strokeWidth="1" />
-            {/* Gran Canaria */}
-            <path d="M 70 412 Q 80 410, 78 422 Z" fill="#1e293b" stroke="#38bdf8" strokeWidth="1" />
-            {/* Lanzarote & Fuerteventura */}
-            <path d="M 100 395 Q 110 390, 105 410 Z" fill="#1e293b" stroke="#38bdf8" strokeWidth="1" />
-
-            {/* Ceuta & Melilla Insets */}
-            <rect x="195" y="415" width="22" height="16" fill="#090d16" stroke="#334155" strokeWidth="1" rx="4" />
-            <text x="198" y="426" fill="#94a3b8" fontSize="7" fontWeight="bold">CEU</text>
-
-            <rect x="260" y="420" width="22" height="16" fill="#090d16" stroke="#334155" strokeWidth="1" rx="4" />
-            <text x="262" y="431" fill="#94a3b8" fontSize="7" fontWeight="bold">MEL</text>
-
-            {/* Render City Heatmap Nodes */}
+          {/* Data Nodes Layer */}
+          <div className="absolute inset-0 w-full h-full pointer-events-none">
             {spainCities.map((c, idx) => {
               const count = Number(c.count || 0);
               const meta = getCityMeta(c.city);
               const isHovered = hoveredCity?.city === c.city;
               const pct = totalSpainVisits > 0 ? ((count / totalSpainVisits) * 100).toFixed(1) : "0.0";
 
-              const radius = 4 + Math.min(10, (count / maxCityCount) * 8);
+              const sizePx = 14 + Math.min(18, (count / maxCityCount) * 14);
 
               return (
-                <g
+                <div
                   key={idx}
+                  style={{
+                    left: `${meta.left}%`,
+                    top: `${meta.top}%`,
+                    transform: "translate(-50%, -50%)",
+                  }}
                   onMouseEnter={() => setHoveredCity({ ...c, meta, pct })}
                   onMouseLeave={() => setHoveredCity(null)}
-                  className="cursor-pointer group"
+                  className="absolute pointer-events-auto cursor-pointer group/node"
                 >
-                  {/* Heat Pulse Ring */}
-                  <circle
-                    cx={meta.x}
-                    cy={meta.y}
-                    r={radius * 2}
-                    fill="#0284c7"
-                    opacity="0.4"
-                    className="animate-ping"
-                  />
+                  {/* Ping Animation Ring */}
+                  <span
+                    style={{ width: `${sizePx * 2.2}px`, height: `${sizePx * 2.2}px` }}
+                    className="absolute -inset-1/2 m-auto rounded-full bg-sky-400 opacity-40 animate-ping"
+                  ></span>
 
-                  {/* Heat Aura */}
-                  <circle
-                    cx={meta.x}
-                    cy={meta.y}
-                    r={radius + 3}
-                    fill="#0ea5e9"
-                    opacity="0.3"
-                    filter="url(#skyGlow)"
-                  />
-
-                  {/* Core City Pin Node */}
-                  <circle
-                    cx={meta.x}
-                    cy={meta.y}
-                    r={radius}
-                    fill="#38bdf8"
-                    stroke="#ffffff"
-                    strokeWidth={isHovered ? "2.5" : "1.5"}
-                    className="transition-all duration-200 group-hover:scale-125"
-                  />
-
-                  {/* City Label */}
-                  <text
-                    x={meta.x}
-                    y={meta.y - radius - 3}
-                    fill="#ffffff"
-                    fontSize="9"
-                    fontWeight="800"
-                    textAnchor="middle"
-                    className="pointer-events-none drop-shadow-md"
+                  {/* Beacon Core */}
+                  <div
+                    style={{ width: `${sizePx}px`, height: `${sizePx}px` }}
+                    className={`relative rounded-full bg-sky-500 border-2 border-white shadow-lg flex items-center justify-center transition-all duration-200 ${
+                      isHovered ? "scale-125 bg-sky-400 ring-4 ring-sky-400/40 z-30" : "hover:scale-110"
+                    }`}
                   >
-                    {c.city}
-                  </text>
-                </g>
+                    <span className="w-2 h-2 rounded-full bg-white"></span>
+                  </div>
+
+                  {/* Hover Tooltip Card */}
+                  {isHovered && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 whitespace-nowrap bg-slate-900/95 border border-sky-400/50 backdrop-blur-md px-3 py-2 rounded-xl shadow-2xl animate-fade-in pointer-events-none">
+                      <div className="flex items-center gap-1.5 text-xs font-black text-white">
+                        <span>📍 {meta.name}</span>
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-semibold">{meta.region}</div>
+                      <div className="text-[11px] font-mono text-sky-400 font-bold mt-0.5">
+                        {count} {count === 1 ? "visita" : "visitas"} ({pct}%)
+                      </div>
+                    </div>
+                  )}
+                </div>
               );
             })}
 
-            {/* Active Hover Card Tooltip */}
-            {hoveredCity && (
-              <g className="pointer-events-none animate-fade-in">
-                <rect
-                  x={Math.max(10, Math.min(440, hoveredCity.meta.x - 70))}
-                  y={Math.max(10, hoveredCity.meta.y - 65)}
-                  width="140"
-                  height="48"
-                  rx="10"
-                  fill="#090d16"
-                  stroke="#38bdf8"
-                  strokeWidth="1.5"
-                  className="shadow-2xl"
-                />
-                <text
-                  x={Math.max(10, Math.min(440, hoveredCity.meta.x - 70)) + 10}
-                  y={Math.max(10, hoveredCity.meta.y - 65) + 18}
-                  fill="#ffffff"
-                  fontSize="11"
-                  fontWeight="900"
-                >
-                  📍 {hoveredCity.meta.name}
-                </text>
-                <text
-                  x={Math.max(10, Math.min(440, hoveredCity.meta.x - 70)) + 10}
-                  y={Math.max(10, hoveredCity.meta.y - 65) + 34}
-                  fill="#38bdf8"
-                  fontSize="10"
-                  fontWeight="700"
-                >
-                  {hoveredCity.count} {hoveredCity.count === 1 ? "visita" : "visitas"} ({hoveredCity.pct}%)
-                </text>
-              </g>
-            )}
-
             {spainCities.length === 0 && (
-              <text x="300" y="225" fill="#64748b" fontSize="13" fontWeight="bold" textAnchor="middle">
-                {lang === "es" ? "Sin accesos registrados en España aún" : "No visits recorded from Spain yet"}
-              </text>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="bg-slate-900/80 border border-slate-700 text-slate-400 text-xs font-bold px-4 py-2 rounded-xl backdrop-blur-sm">
+                  {lang === "es" ? "Sin accesos registrados en España aún" : "No visits recorded from Spain yet"}
+                </span>
+              </div>
             )}
-          </svg>
+          </div>
         </div>
       </div>
 
-      {/* Cities Leaderboard Panel */}
+      {/* Spain Cities Leaderboard Panel */}
       <div className="w-full lg:w-2/5 space-y-4 flex flex-col justify-between">
         <div>
           <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
@@ -361,7 +229,7 @@ export default function SpainMap({ spainCities = [], lang = "es" }) {
           )}
         </div>
 
-        {/* Map Footer Info */}
+        {/* Spain Legend */}
         <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400">
           <span>Total España: <strong className="text-sky-600 dark:text-sky-400">{totalSpainVisits}</strong></span>
           <span>{spainCities.length} ciudades activas</span>
