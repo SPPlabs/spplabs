@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { translations } from "@/lib/translations";
 import { SppLabsLogo } from "@/components/SppLabsLogo";
+import WorldMap from "@/components/analytics/WorldMap";
+import SpainMap from "@/components/analytics/SpainMap";
 
 function BookingsCalendar({ bookings, lang, onAccept, onReject, onDelete, t, currentWebsiteDomain, router }) {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -821,279 +823,7 @@ export default function DashboardClient({
   // HELPER VISUAL COMPONENTS FOR ANALYTICS, MAPS & BOOKINGS
   // ========================================================
   
-  function WorldChoroplethMap({ countries = [] }) {
-    // Real ClickHouse visitor count mapping for countries
-    const maxCount = Math.max(...countries.map(c => Number(c.count || 0)), 1);
 
-    // Dynamic color scale helper based on real ClickHouse counts (Light Blue -> Dark Blue)
-    const getCountryColor = (count) => {
-      if (!count || count === 0) return "#f1f5f9"; // Neutral light slate
-      const ratio = count / maxCount;
-      if (ratio > 0.75) return "#1e3a8a"; // Dark blue
-      if (ratio > 0.50) return "#0284c7"; // Deep blue
-      if (ratio > 0.25) return "#38bdf8"; // Medium blue
-      return "#bae6fd"; // Light blue
-    };
-
-    // Country coordinates map for rendering markers on real countries
-    const countryCoords = {
-      "Spain": { x: 480, y: 175, code: "ES", flag: "🇪🇸" },
-      "España": { x: 480, y: 175, code: "ES", flag: "🇪🇸" },
-      "ES": { x: 480, y: 175, code: "ES", flag: "🇪🇸" },
-      "United States": { x: 240, y: 160, code: "US", flag: "🇺🇸" },
-      "USA": { x: 240, y: 160, code: "US", flag: "🇺🇸" },
-      "US": { x: 240, y: 160, code: "US", flag: "🇺🇸" },
-      "Germany": { x: 510, y: 145, code: "DE", flag: "🇩🇪" },
-      "Alemania": { x: 510, y: 145, code: "DE", flag: "🇩🇪" },
-      "DE": { x: 510, y: 145, code: "DE", flag: "🇩🇪" },
-      "United Kingdom": { x: 475, y: 140, code: "GB", flag: "🇬🇧" },
-      "Reino Unido": { x: 475, y: 140, code: "GB", flag: "🇬🇧" },
-      "GB": { x: 475, y: 140, code: "GB", flag: "🇬🇧" },
-      "France": { x: 490, y: 160, code: "FR", flag: "🇫🇷" },
-      "Francia": { x: 490, y: 160, code: "FR", flag: "🇫🇷" },
-      "FR": { x: 490, y: 160, code: "FR", flag: "🇫🇷" },
-      "Italy": { x: 520, y: 170, code: "IT", flag: "🇮🇹" },
-      "Italia": { x: 520, y: 170, code: "IT", flag: "🇮🇹" },
-      "IT": { x: 520, y: 170, code: "IT", flag: "🇮🇹" },
-      "Japan": { x: 860, y: 180, code: "JP", flag: "🇯🇵" },
-      "Japón": { x: 860, y: 180, code: "JP", flag: "🇯🇵" },
-      "JP": { x: 860, y: 180, code: "JP", flag: "🇯🇵" },
-      "Brazil": { x: 340, y: 320, code: "BR", flag: "🇧🇷" },
-      "Brasil": { x: 340, y: 320, code: "BR", flag: "🇧🇷" },
-      "BR": { x: 340, y: 320, code: "BR", flag: "🇧🇷" },
-      "Mexico": { x: 210, y: 210, code: "MX", flag: "🇲🇽" },
-      "México": { x: 210, y: 210, code: "MX", flag: "🇲🇽" },
-      "MX": { x: 210, y: 210, code: "MX", flag: "🇲🇽" },
-      "Argentina": { x: 310, y: 390, code: "AR", flag: "🇦🇷" },
-      "AR": { x: 310, y: 390, code: "AR", flag: "🇦🇷" },
-      "Canada": { x: 230, y: 110, code: "CA", flag: "🇨🇦" },
-      "Canadá": { x: 230, y: 110, code: "CA", flag: "🇨🇦" },
-      "CA": { x: 230, y: 110, code: "CA", flag: "🇨🇦" },
-      "Australia": { x: 850, y: 370, code: "AU", flag: "🇦🇺" },
-      "AU": { x: 850, y: 370, code: "AU", flag: "🇦🇺" },
-    };
-
-    return (
-      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm flex flex-col lg:flex-row gap-8 w-full">
-        {/* World Choropleth SVG */}
-        <div className="w-full lg:w-3/5 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-base font-extrabold text-slate-900 tracking-tight">Mapa Mundial de Visitas (ClickHouse)</h4>
-              <p className="text-xs text-slate-400 font-medium">Gradiente Azul: De azul claro (menos visitas) a azul oscuro (más visitas)</p>
-            </div>
-            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 font-mono">
-              <span className="w-3 h-3 rounded bg-[#bae6fd]"></span> Bajo
-              <span className="w-3 h-3 rounded bg-[#38bdf8]"></span> Medio
-              <span className="w-3 h-3 rounded bg-[#0284c7]"></span> Alto
-              <span className="w-3 h-3 rounded bg-[#1e3a8a]"></span> Máximo
-            </div>
-          </div>
-
-          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden min-h-[240px]">
-            <svg viewBox="0 0 1000 500" className="w-full h-52 overflow-visible">
-              <defs>
-                <pattern id="worldGridLines" width="50" height="50" patternUnits="userSpaceOnUse">
-                  <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1"/>
-                </pattern>
-              </defs>
-              <rect width="1000" height="500" fill="url(#worldGridLines)" />
-
-              {/* Vector Continents with Dynamic Real Color Fill based on ClickHouse data */}
-              {/* North America */}
-              <path d="M 120 100 Q 180 80, 240 110 T 320 180 T 220 260 T 140 180 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
-              {/* South America */}
-              <path d="M 280 270 Q 340 280, 370 350 T 320 450 T 270 360 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
-              {/* Europe & Asia */}
-              <path d="M 460 100 Q 560 70, 750 90 T 880 160 T 780 270 T 580 200 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
-              {/* Africa */}
-              <path d="M 460 210 Q 550 220, 570 320 T 520 430 T 450 320 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
-              {/* Australia */}
-              <path d="M 780 340 Q 860 330, 890 380 T 820 440 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
-
-              {/* Render ONLY real visitor nodes from ClickHouse */}
-              {countries.map((c, idx) => {
-                const info = countryCoords[c.country] || { x: 500, y: 250, flag: "🌍" };
-                const count = Number(c.count || 0);
-                const color = getCountryColor(count);
-
-                return (
-                  <g key={idx} className="group cursor-pointer">
-                    <circle cx={info.x} cy={info.y} r="16" fill={color} opacity="0.4" className="animate-ping" />
-                    <circle cx={info.x} cy={info.y} r="7" fill={color} stroke="#ffffff" strokeWidth="2" className="group-hover:scale-125 transition-transform" />
-                    <g className="opacity-0 group-hover:opacity-100 transition-all pointer-events-none">
-                      <rect x={info.x - 55} y={info.y - 34} width="110" height="24" rx="6" fill="#0f172a" stroke="#38bdf8" strokeWidth="1" />
-                      <text x={info.x} y={info.y - 18} fill="#ffffff" fontSize="10" fontWeight="900" textAnchor="middle">
-                        {info.flag || "🌍"} {c.country}: {count} visitas
-                      </text>
-                    </g>
-                  </g>
-                );
-              })}
-
-              {countries.length === 0 && (
-                <text x="500" y="250" fill="#94a3b8" fontSize="14" fontWeight="bold" textAnchor="middle">
-                  Sin registros de tráfico internacional en ClickHouse aún
-                </text>
-              )}
-            </svg>
-          </div>
-        </div>
-
-        {/* Real Country List from ClickHouse */}
-        <div className="w-full lg:w-2/5 space-y-3 flex flex-col justify-between">
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            Países de Origen (Datos Reales ClickHouse)
-          </h4>
-          {countries.length === 0 ? (
-            <p className="text-xs text-slate-400 py-8 text-center font-medium">No se han registrado visitas por país en el periodo seleccionado.</p>
-          ) : (
-            <div className="divide-y divide-slate-100 max-h-56 overflow-y-auto space-y-1">
-              {countries.map((c, idx) => {
-                const count = Number(c.count || 0);
-                const color = getCountryColor(count);
-                const flag = countryCoords[c.country]?.flag || "🌍";
-
-                return (
-                  <div key={idx} className="flex justify-between items-center py-2.5 text-xs font-bold text-slate-700">
-                    <span className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: color }}></span>
-                      <span className="text-sm">{flag}</span>
-                      <span>{c.country}</span>
-                    </span>
-                    <span className="font-mono text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
-                      {count} {count === 1 ? "visita" : "visitas"}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  function SpainCitiesHeatmap({ spainCities = [] }) {
-    // Real ClickHouse coordinates mapping for Spanish cities
-    const cityCoords = {
-      "Madrid": { x: 98, y: 72 },
-      "Barcelona": { x: 168, y: 44 },
-      "Valencia": { x: 138, y: 84 },
-      "Sevilla": { x: 72, y: 118 },
-      "Zaragoza": { x: 130, y: 48 },
-      "Málaga": { x: 84, y: 128 },
-      "Murcia": { x: 124, y: 104 },
-      "Palma": { x: 176, y: 78 },
-      "Bilbao": { x: 96, y: 22 },
-      "Alicante": { x: 134, y: 94 },
-      "Vigo": { x: 38, y: 38 },
-      "A Coruña": { x: 39, y: 22 },
-      "Santiago de Compostela": { x: 39, y: 30 },
-      "Granada": { x: 92, y: 118 },
-      "Córdoba": { x: 80, y: 104 },
-      "Valladolid": { x: 80, y: 48 },
-      "Oviedo": { x: 68, y: 22 },
-      "Santander": { x: 85, y: 22 },
-      "San Sebastián": { x: 110, y: 24 },
-      "Pamplona": { x: 120, y: 32 },
-      "Toledo": { x: 92, y: 78 },
-      "Salamanca": { x: 72, y: 58 },
-      "Burgos": { x: 95, y: 38 },
-      "Cádiz": { x: 68, y: 128 },
-      "Badajoz": { x: 55, y: 92 },
-    };
-
-    const maxCityCount = Math.max(...spainCities.map(c => Number(c.count || 0)), 1);
-
-    return (
-      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm flex flex-col lg:flex-row gap-8 w-full">
-        {/* Spain Map SVG */}
-        <div className="w-full lg:w-3/5 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-base font-extrabold text-slate-900 tracking-tight">Mapa de Ciudades en España (Datos Reales)</h4>
-              <p className="text-xs text-slate-400 font-medium">Ubicación exacta donde los usuarios han accedido</p>
-            </div>
-            <span className="bg-sky-50 text-sky-700 text-xs px-3 py-1 rounded-full font-bold border border-sky-200">
-              NODO ESPAÑA
-            </span>
-          </div>
-
-          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden min-h-[240px]">
-            <svg viewBox="0 0 200 150" className="w-full h-52 overflow-visible">
-              {/* Detailed Peninsular Spain Vector shape */}
-              <path 
-                d="M 32 30 Q 70 18, 115 22 T 145 28 T 175 42 T 165 75 T 142 98 T 120 132 T 78 128 T 62 135 T 45 105 T 32 80 Z" 
-                fill="#ffffff" 
-                stroke="#cbd5e1" 
-                strokeWidth="1.8" 
-                className="shadow-sm"
-              />
-              {/* Portugal border line */}
-              <path d="M 32 80 Q 42 70, 48 55 T 45 35" fill="none" stroke="#e2e8f0" strokeWidth="1.5" strokeDasharray="3 3" />
-              
-              {/* Balearic Islands Inset */}
-              <path d="M 175 75 Q 182 72, 186 78 Z" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1.5" />
-              <path d="M 166 85 Q 172 82, 175 88 Z" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1.5" />
-
-              {/* Canary Islands Inset Box */}
-              <rect x="8" y="112" width="45" height="32" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" rx="4" strokeDasharray="2 2" />
-              <text x="12" y="122" fill="#94a3b8" fontSize="6" fontWeight="bold">CANARIAS</text>
-
-              {/* Render ONLY real city nodes from ClickHouse */}
-              {spainCities.map((c, idx) => {
-                const coords = cityCoords[c.city];
-                if (!coords) return null;
-                const count = Number(c.count || 0);
-                const radius = 3 + (count / maxCityCount) * 5;
-
-                return (
-                  <g key={idx} className="group cursor-pointer">
-                    <circle cx={coords.x} cy={coords.y} r={radius * 2} fill="#0284c7" className="animate-ping opacity-30" />
-                    <circle cx={coords.x} cy={coords.y} r={radius} fill="#0284c7" stroke="#ffffff" strokeWidth="1.5" className="group-hover:scale-125 transition-transform" />
-                    <text x={coords.x} y={coords.y - 6} fill="#0f172a" fontSize="7" fontWeight="900" textAnchor="middle" className="pointer-events-none">
-                      {c.city} ({count})
-                    </text>
-                  </g>
-                );
-              })}
-
-              {spainCities.length === 0 && (
-                <text x="100" y="75" fill="#94a3b8" fontSize="9" fontWeight="bold" textAnchor="middle">
-                  Sin accesos desde España en ClickHouse aún
-                </text>
-              )}
-            </svg>
-          </div>
-        </div>
-
-        {/* Real Spain Cities List from ClickHouse */}
-        <div className="w-full lg:w-2/5 space-y-3 flex flex-col justify-between">
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            Ciudades (Datos Reales ClickHouse)
-          </h4>
-          {spainCities.length === 0 ? (
-            <p className="text-xs text-slate-400 py-8 text-center font-medium">No hay ciudades de España registradas en este periodo.</p>
-          ) : (
-            <div className="divide-y divide-slate-100 max-h-56 overflow-y-auto space-y-1">
-              {spainCities.map((c, idx) => (
-                <div key={idx} className="flex justify-between items-center py-2.5 text-xs font-bold text-slate-700">
-                  <span className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
-                    <span>{c.city}</span>
-                  </span>
-                  <span className="font-mono text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
-                    {c.count} {Number(c.count) === 1 ? "visita" : "visitas"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
 
   function DonutChart({ data, title }) {
     if (!data || data.length === 0) return <p className="text-xs text-slate-400 py-6 text-center">No hay datos</p>;
@@ -2197,13 +1927,13 @@ export default function DashboardClient({
                   {/* Funnel of Traffic Referrers */}
                   <ReferralFunnel data={analyticsData.referrers} />
 
-                  {/* GEOGRAPHICAL MAPS: VECTOR WORLD MAP + ACCURATE VECTOR SPAIN MAP (REAL CLICKHOUSE DATA ONLY) */}
+                  {/* GEOGRAPHICAL MAPS: HIGH-PRECISION VECTOR WORLD MAP + ACCURATE SPAIN MAP */}
                   <div className="space-y-8 w-full">
-                    {/* World Map Section with Light Blue -> Dark Blue intensity */}
-                    <WorldChoroplethMap countries={analyticsData.countries} />
+                    {/* World Map Section */}
+                    <WorldMap countries={analyticsData.countries} lang={lang} />
 
-                    {/* Spain Map Section with Real City Nodes */}
-                    <SpainCitiesHeatmap spainCities={analyticsData.spainCities} />
+                    {/* Spain Map Section with Real City Geolocation */}
+                    <SpainMap spainCities={analyticsData.spainCities} lang={lang} />
                   </div>
 
                   {/* Category Donut Charts Grid */}
