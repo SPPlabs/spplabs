@@ -39,7 +39,12 @@ export default function ServiciosSection() {
                   : "Custom applications built with Next.js and React. We deliver blazing-fast, secure, fully responsive platforms connected to live transactional operations."}
               </p>
             </div>
-            <span className="text-xs font-bold text-brand-blue mt-6 block uppercase tracking-wider">React • Next.js • SSR</span>
+            <div className="mt-6 pt-4 border-t border-zinc-100 flex items-center justify-between">
+              <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">React • Next.js • SSR</span>
+              <Link href="/servicios/desarrollo-web" className="text-xs font-black text-black hover:text-brand-blue transition-colors flex items-center gap-1">
+                {lang === "es" ? "Ver detalles →" : "Explore →"}
+              </Link>
+            </div>
           </div>
 
           {/* Service 2: SEO */}
@@ -57,7 +62,12 @@ export default function ServiciosSection() {
                   : "Advanced index tuning for search engines. Semantic code design, fast mobile load speeds, clean URL maps, and optimized meta configurations to lift your brand’s organic reach."}
               </p>
             </div>
-            <span className="text-xs font-bold text-brand-green mt-6 block uppercase tracking-wider">Semantic HTML • Speed • Crawlability</span>
+            <div className="mt-6 pt-4 border-t border-zinc-100 flex items-center justify-between">
+              <span className="text-xs font-bold text-brand-green uppercase tracking-wider">Speed • Search • Meta</span>
+              <Link href="/servicios/posicionamiento-seo" className="text-xs font-black text-black hover:text-brand-green transition-colors flex items-center gap-1">
+                {lang === "es" ? "Ver detalles →" : "Explore →"}
+              </Link>
+            </div>
           </div>
 
           {/* Service 3: GEO */}
@@ -75,25 +85,35 @@ export default function ServiciosSection() {
                   : "SEO built for the AI era. We format, schema, and reference your business databases so large AI systems (Gemini, Perplexity, ChatGPT) extract and display your brand as the primary reference."}
               </p>
             </div>
-            <span className="text-xs font-bold text-black mt-6 block uppercase tracking-wider">AI Engines • LLM Citations • Schema</span>
+            <div className="mt-6 pt-4 border-t border-zinc-100 flex items-center justify-between">
+              <span className="text-xs font-bold text-black uppercase tracking-wider">AI Search • LLM • Citations</span>
+              <Link href="/servicios/optimizacion-geo" className="text-xs font-black text-black hover:text-purple-600 transition-colors flex items-center gap-1">
+                {lang === "es" ? "Ver detalles →" : "Explore →"}
+              </Link>
+            </div>
           </div>
 
           {/* Service 4: CRM */}
-          <div className="border border-zinc-200 bg-zinc-50/20 rounded-2xl p-8 hover:border-brand-blue transition-all duration-300 group hover:shadow-lg flex flex-col justify-between">
+          <div className="border border-zinc-200 bg-zinc-50/20 rounded-2xl p-8 hover:border-brand-blue transition-all duration-300 group hover:shadow-lg flex flex-col justify-between ring-2 ring-blue-500/20">
             <div>
               <div className="w-12 h-12 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue mb-6 group-hover:scale-110 transition-transform duration-300">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Sistemas CRM" : "CRM System Integrations"}</h3>
+              <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Sistemas CRM y Panel de Control" : "CRM & Operations Dashboard"}</h3>
               <p className="text-zinc-600 leading-relaxed text-sm">
                 {lang === "es" 
-                  ? "Conectamos formularios, reservas e historiales de clientes directamente en bases de datos PostgreSQL o ClickHouse, accesibles desde un panel administrativo privado para optimizar su embudo comercial." 
-                  : "Centralize customer forms, scheduler slots, and support history directly into optimized databases, queryable from your custom secure operations panel."}
+                  ? "Conectamos formularios, reservas e historiales de clientes directamente en un panel administrativo privado con analíticas en tiempo real para optimizar su embudo comercial." 
+                  : "Centralize customer forms, scheduler slots, and support history directly into an optimized operations panel."}
               </p>
             </div>
-            <span className="text-xs font-bold text-brand-blue mt-6 block uppercase tracking-wider">PostgreSQL • Admin Panel • Pipelines</span>
+            <div className="mt-6 pt-4 border-t border-zinc-100 flex items-center justify-between">
+              <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">CRM • Analytics • Pipeline</span>
+              <Link href="/servicios/crm-dashboard" className="text-xs font-black text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1">
+                {lang === "es" ? "Ver detalles →" : "Explore →"}
+              </Link>
+            </div>
           </div>
 
           {/* Service 5: AI Chatbot */}
@@ -107,11 +127,16 @@ export default function ServiciosSection() {
               <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Chatbot de IA 24/7" : "24/7 Custom AI Chatbot"}</h3>
               <p className="text-zinc-600 leading-relaxed text-sm">
                 {lang === "es" 
-                  ? "Un asistente de inteligencia artificial entrenado con los datos de su empresa (PDFs, manuales, catálogos) para contestar al instante cualquier consulta técnica o comercial, integrado de manera local." 
-                  : "Deploy dynamic chat agents trained on your documentation, operating hours, and service booklets, resolving support tickets instantly 24 hours a day."}
+                  ? "Un asistente de inteligencia artificial entrenado con los datos de su empresa para contestar al instante cualquier consulta técnica o comercial las 24 horas del día." 
+                  : "Deploy dynamic chat agents trained on your documentation, resolving support tickets instantly 24 hours a day."}
               </p>
             </div>
-            <span className="text-xs font-bold text-brand-green mt-6 block uppercase tracking-wider">RAG Systems • Local GPU Inference • vLLM</span>
+            <div className="mt-6 pt-4 border-t border-zinc-100 flex items-center justify-between">
+              <span className="text-xs font-bold text-brand-green uppercase tracking-wider">RAG • 24/7 AI • Leads</span>
+              <Link href="/servicios/chatbot-ia" className="text-xs font-black text-black hover:text-emerald-600 transition-colors flex items-center gap-1">
+                {lang === "es" ? "Ver detalles →" : "Explore →"}
+              </Link>
+            </div>
           </div>
 
           {/* Service 6: Booking System */}
@@ -125,11 +150,16 @@ export default function ServiciosSection() {
               <h3 className="text-xl font-bold text-black mb-3">{lang === "es" ? "Sistema de Reservas y Contacto" : "Contact & Booking Scheduler"}</h3>
               <p className="text-zinc-600 leading-relaxed text-sm">
                 {lang === "es" 
-                  ? "Agendador interactivo de reuniones y llamadas comerciales. Bloquea dinámicamente horas ocupadas y sincroniza eventos de forma segura con sus calendarios internos." 
-                  : "An interactive call scheduling platform. Disables fully booked days, synchronizes with email notifications, and streams scheduled calls directly to your support logs."}
+                  ? "Agendador interactivo de reuniones y llamadas comerciales. Bloquea dinámicamente horas ocupadas y sincroniza eventos de forma segura." 
+                  : "An interactive call scheduling platform. Disables fully booked days, synchronizes with email notifications, and streams scheduled calls directly to your logs."}
               </p>
             </div>
-            <span className="text-xs font-bold text-black mt-6 block uppercase tracking-wider">Web Calendar • Dynamic Slots • Email API</span>
+            <div className="mt-6 pt-4 border-t border-zinc-100 flex items-center justify-between">
+              <span className="text-xs font-bold text-black uppercase tracking-wider">Calendar • Slots • Booking</span>
+              <Link href="/servicios/sistema-reservas" className="text-xs font-black text-black hover:text-indigo-600 transition-colors flex items-center gap-1">
+                {lang === "es" ? "Ver detalles →" : "Explore →"}
+              </Link>
+            </div>
           </div>
         </div>
 

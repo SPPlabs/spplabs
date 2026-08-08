@@ -13,6 +13,42 @@ export default function sitemap() {
       url: `${baseUrl}/servicios`,
       lastModified: currentDate,
       changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/servicios/crm-dashboard`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/servicios/desarrollo-web`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/servicios/posicionamiento-seo`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/servicios/optimizacion-geo`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/servicios/chatbot-ia`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/servicios/sistema-reservas`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
       priority: 0.8,
     },
     {

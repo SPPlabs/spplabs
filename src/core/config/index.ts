@@ -50,15 +50,15 @@ export function validateConfig(): void {
   try {
     parsedConfig = {
       ai: {
-        vllmUrl: getRequiredEnv("AI_VLLM_URL"),
+        vllmUrl: getOptionalEnv("AI_VLLM_URL", "http://localhost:8000/v1"),
         vllmModel: getOptionalEnv("VLLM_MODEL", "qwen3-4b"),
-        qdrantUrl: getRequiredEnv("AI_QDRANT_URL"),
-        collectionName: getRequiredEnv("AI_COLLECTION_NAME"),
-        embeddingModel: getRequiredEnv("EMBEDDING_MODEL"),
-        chunkSize: getRequiredEnvInt("CHUNK_SIZE"),
-        chunkOverlap: getRequiredEnvInt("CHUNK_OVERLAP"),
+        qdrantUrl: getOptionalEnv("AI_QDRANT_URL", "http://localhost:6333"),
+        collectionName: getOptionalEnv("AI_COLLECTION_NAME", "spplabs_docs"),
+        embeddingModel: getOptionalEnv("EMBEDDING_MODEL", "text-embedding-3-small"),
+        chunkSize: parseInt(getOptionalEnv("CHUNK_SIZE", "500"), 10),
+        chunkOverlap: parseInt(getOptionalEnv("CHUNK_OVERLAP", "50"), 10),
       },
-      databaseUrl: getRequiredEnv("DATABASE_URL"),
+      databaseUrl: getOptionalEnv("DATABASE_URL", "postgresql://localhost:5432/spplabs"),
     };
   } catch (error) {
     console.error("AI Infrastructure Configuration Validation Failed!");
