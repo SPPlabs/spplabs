@@ -118,13 +118,18 @@ function getCountryMeta(rawName) {
 export default function WorldMap({ countries = [], lang = "es" }) {
   const [hoveredCountry, setHoveredCountry] = useState(null);
 
-  // Filter valid geographic country entries for pins
-  const validCountryNodes = countries
+  // Filter out non-geographic records (System, Unknown, N/A) completely from both map and sidebar
+  const validCountries = countries.filter(c => {
+    const meta = getCountryMeta(c.country);
+    return meta !== null;
+  });
+
+  const validCountryNodes = validCountries
     .map(c => ({ ...c, meta: getCountryMeta(c.country) }))
     .filter(c => c.meta && c.meta.left !== null && c.meta.top !== null);
 
-  const totalVisits = countries.reduce((acc, c) => acc + Number(c.count || 0), 0);
-  const maxCount = Math.max(...countries.map(c => Number(c.count || 0)), 1);
+  const totalVisits = validCountries.reduce((acc, c) => acc + Number(c.count || 0), 0);
+  const maxCount = Math.max(...validCountries.map(c => Number(c.count || 0)), 1);
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col lg:flex-row gap-8 w-full transition-colors relative z-10">
@@ -231,16 +236,16 @@ export default function WorldMap({ countries = [], lang = "es" }) {
           <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             {lang === "es" ? "Desglose por País (ClickHouse)" : "Country Breakdown (ClickHouse)"}
           </h4>
-          <span className="text-[11px] font-mono text-slate-400 font-semibold">{countries.length} registros</span>
+          <span className="text-[11px] font-mono text-slate-400 font-semibold">{validCountries.length} países</span>
         </div>
 
-        {countries.length === 0 ? (
+        {validCountries.length === 0 ? (
           <div className="text-center py-16 text-slate-400 text-xs italic font-medium flex-1 flex items-center justify-center">
             {lang === "es" ? "No se han detectado visitas en el periodo." : "No visits detected in this timeframe."}
           </div>
         ) : (
           <div className="flex-1 max-h-[380px] overflow-y-auto space-y-2.5 pr-2 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700">
-            {countries.map((c, idx) => {
+            {validCountries.map((c, idx) => {
               const count = Number(c.count || 0);
               const meta = getCountryMeta(c.country);
               const displayName = meta ? meta.name : (c.country || "Desconocido");
