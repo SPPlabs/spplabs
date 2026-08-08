@@ -1943,7 +1943,11 @@ export default function DashboardClient({
                       <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider text-center pt-2">
                         {lang === "es" ? "Páginas más visitadas" : "Top Visited Pages"}
                       </h4>
-                      <DonutChart data={analyticsData.topPages.map(p => ({ name: p.page_url, count: p.count }))} />
+                      <DonutChart
+                        data={analyticsData.topPages
+                          .filter(p => p.page_url && !["/hola", "/test", "/demo", "/api"].includes(p.page_url) && !p.page_url.startsWith("/api/") && !p.page_url.includes(".env") && !p.page_url.includes(".php"))
+                          .map(p => ({ name: p.page_url, count: p.count }))}
+                      />
                     </div>
 
                     {/* Operating Systems circle */}
@@ -1951,7 +1955,11 @@ export default function DashboardClient({
                       <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider text-center pt-2">
                         {lang === "es" ? "Sistemas Operativos" : "Operating Systems"}
                       </h4>
-                      <DonutChart data={analyticsData.os.map(o => ({ name: o.os, count: o.count }))} />
+                      <DonutChart
+                        data={analyticsData.os
+                          .filter(o => o.os && !["Server", "Node", "Unknown", "API"].includes(o.os))
+                          .map(o => ({ name: o.os, count: o.count }))}
+                      />
                     </div>
 
                     {/* Devices circle */}
@@ -1959,7 +1967,11 @@ export default function DashboardClient({
                       <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider text-center pt-2">
                         {lang === "es" ? "Dispositivos" : "Devices"}
                       </h4>
-                      <DonutChart data={analyticsData.devices.map(d => ({ name: d.device_type, count: d.count }))} />
+                      <DonutChart
+                        data={analyticsData.devices
+                          .filter(d => d.device_type && !["API", "Server", "Bot", "Unknown"].includes(d.device_type))
+                          .map(d => ({ name: d.device_type, count: d.count }))}
+                      />
                     </div>
 
                     {/* Browsers circle */}
@@ -1967,7 +1979,11 @@ export default function DashboardClient({
                       <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider text-center pt-2">
                         {lang === "es" ? "Navegadores" : "Browsers"}
                       </h4>
-                      <DonutChart data={analyticsData.browsers.map(b => ({ name: b.browser, count: b.count }))} />
+                      <DonutChart
+                        data={analyticsData.browsers
+                          .filter(b => b.browser && !["Node", "Server", "Unknown", "curl", "axios"].includes(b.browser))
+                          .map(b => ({ name: b.browser, count: b.count }))}
+                      />
                     </div>
                   </div>
 

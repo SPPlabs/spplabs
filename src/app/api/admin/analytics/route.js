@@ -168,12 +168,16 @@ export async function GET(request) {
          AND event_time >= now() - interval 5 minute`,
         { website_id: targetDomain }
       ),
-      // C. Top pages
+      // C. Top pages (Filtered for valid visitor pages, excluding bot probes & test paths like /hola)
       clickhouseQuery(
         `SELECT page_url, count() as count
          FROM analytics_events
          WHERE website_id = {website_id: String} ${timeClause}
          AND event_type = 'page_view'
+         AND page_url NOT IN ('/hola', '/test', '/demo', '/api', '/admin', '/wp-admin', '/wp-login.php', '/.env')
+         AND page_url NOT LIKE '/api/%'
+         AND page_url NOT LIKE '%.env%'
+         AND page_url NOT LIKE '%.php%'
          GROUP BY page_url
          ORDER BY count DESC
          LIMIT 10`,
@@ -184,34 +188,38 @@ export async function GET(request) {
         `SELECT referrer, count() as count
          FROM analytics_events
          WHERE website_id = {website_id: String} ${timeClause}
+         AND referrer NOT IN ('', 'null', 'undefined')
          GROUP BY referrer
          ORDER BY count DESC
          LIMIT 10`,
         { website_id: targetDomain }
       ),
-      // E. Devices
+      // E. Devices (Excluding automated API / Server requests)
       clickhouseQuery(
         `SELECT device_type, count() as count
          FROM analytics_events
          WHERE website_id = {website_id: String} ${timeClause}
+         AND device_type NOT IN ('API', 'Server', 'Bot', 'Unknown', '')
          GROUP BY device_type
          ORDER BY count DESC`,
         { website_id: targetDomain }
       ),
-      // F. Browsers
+      // F. Browsers (Excluding automated Node / Server calls)
       clickhouseQuery(
         `SELECT browser, count() as count
          FROM analytics_events
          WHERE website_id = {website_id: String} ${timeClause}
+         AND browser NOT IN ('Node', 'Server', 'Unknown', 'curl', 'PostmanRuntime', 'axios', 'Python', '')
          GROUP BY browser
          ORDER BY count DESC`,
         { website_id: targetDomain }
       ),
-      // G. Operating Systems
+      // G. Operating Systems (Excluding Server / Node)
       clickhouseQuery(
         `SELECT os, count() as count
          FROM analytics_events
          WHERE website_id = {website_id: String} ${timeClause}
+         AND os NOT IN ('Server', 'Unknown', 'Node', '')
          GROUP BY os
          ORDER BY count DESC`,
         { website_id: targetDomain }
