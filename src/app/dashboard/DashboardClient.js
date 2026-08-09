@@ -1249,14 +1249,14 @@ export default function DashboardClient({
           {/* Navigation Links */}
           <nav className="flex flex-col gap-1.5">
             {(() => {
-              const pendingBookingsCount = bookings.filter(b => b.status === "PENDING").length;
+              const pendingBookingsCount = bookings.filter(b => b.status === "PENDING" || b.status === "pending" || (!b.status && b.status !== "CONFIRMED" && b.status !== "CANCELLED")).length;
               const recentContactsCount = contactForms.filter(c => {
                 const created = new Date(c.createdAt).getTime();
                 return Date.now() - created < 48 * 60 * 60 * 1000;
               }).length;
 
               const overviewNotifCount = clearedTabs.has("overview") ? 0 : (pendingBookingsCount + recentContactsCount + announcementsList.length);
-              const clientesNotifCount = clearedTabs.has("clientes") ? 0 : (contactForms.length + bookings.length);
+              const clientesNotifCount = pendingBookingsCount > 0 ? pendingBookingsCount : (clearedTabs.has("clientes") ? 0 : contactForms.length);
               const iaNotifCount = clearedTabs.has("ia") ? 0 : conversationsList.length;
               const notificacionesNotifCount = clearedTabs.has("notificaciones") ? 0 : (announcementsList.length + petitionsList.length);
               const hasAnalyticsNotif = clearedTabs.has("analytics") ? false : Boolean(analyticsData || analyticsLoading);
@@ -1446,14 +1446,14 @@ export default function DashboardClient({
 
         {/* STICKY MOBILE TOP HEADER (lg:hidden) */}
         {(() => {
-          const pendingBookingsCount = bookings.filter(b => b.status === "PENDING").length;
+          const pendingBookingsCount = bookings.filter(b => b.status === "PENDING" || b.status === "pending" || (!b.status && b.status !== "CONFIRMED" && b.status !== "CANCELLED")).length;
           const recentContactsCount = contactForms.filter(c => {
             const created = new Date(c.createdAt).getTime();
             return Date.now() - created < 48 * 60 * 60 * 1000;
           }).length;
 
           const overviewNotifCount = clearedTabs.has("overview") ? 0 : (pendingBookingsCount + recentContactsCount + announcementsList.length);
-          const clientesNotifCount = clearedTabs.has("clientes") ? 0 : (contactForms.length + bookings.length);
+          const clientesNotifCount = pendingBookingsCount > 0 ? pendingBookingsCount : (clearedTabs.has("clientes") ? 0 : contactForms.length);
           const iaNotifCount = clearedTabs.has("ia") ? 0 : conversationsList.length;
           const notificacionesNotifCount = clearedTabs.has("notificaciones") ? 0 : (announcementsList.length + petitionsList.length);
           const hasAnalyticsNotif = clearedTabs.has("analytics") ? false : Boolean(analyticsData || analyticsLoading);
@@ -1532,14 +1532,14 @@ export default function DashboardClient({
 
                 <nav className="space-y-1.5">
                   {(() => {
-                    const pendingBookingsCount = bookings.filter(b => b.status === "PENDING").length;
+                    const pendingBookingsCount = bookings.filter(b => b.status === "PENDING" || b.status === "pending" || (!b.status && b.status !== "CONFIRMED" && b.status !== "CANCELLED")).length;
                     const recentContactsCount = contactForms.filter(c => {
                       const created = new Date(c.createdAt).getTime();
                       return Date.now() - created < 48 * 60 * 60 * 1000;
                     }).length;
 
                     const overviewNotifCount = clearedTabs.has("overview") ? 0 : (pendingBookingsCount + recentContactsCount + announcementsList.length);
-                    const clientesNotifCount = clearedTabs.has("clientes") ? 0 : (contactForms.length + bookings.length);
+                    const clientesNotifCount = pendingBookingsCount > 0 ? pendingBookingsCount : (clearedTabs.has("clientes") ? 0 : contactForms.length);
                     const iaNotifCount = clearedTabs.has("ia") ? 0 : conversationsList.length;
                     const notificacionesNotifCount = clearedTabs.has("notificaciones") ? 0 : (announcementsList.length + petitionsList.length);
                     const hasAnalyticsNotif = clearedTabs.has("analytics") ? false : Boolean(analyticsData || analyticsLoading);
