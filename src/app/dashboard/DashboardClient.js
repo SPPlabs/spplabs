@@ -501,37 +501,47 @@ export default function DashboardClient({
 
     if (align === "left") {
       containerPos = "left-0 sm:left-1/2 translate-x-0 sm:-translate-x-1/2";
-      arrowPos = "left-4 sm:left-1/2 translate-x-0 sm:-translate-x-1/2";
+      arrowPos = "left-3 sm:left-1/2 translate-x-0 sm:-translate-x-1/2";
     } else if (align === "right") {
       containerPos = "right-0 sm:left-1/2 left-auto sm:left-auto translate-x-0 sm:-translate-x-1/2";
-      arrowPos = "right-4 sm:left-1/2 left-auto sm:left-auto translate-x-0 sm:-translate-x-1/2";
+      arrowPos = "right-3 sm:left-1/2 left-auto sm:left-auto translate-x-0 sm:-translate-x-1/2";
     }
 
     return (
       <div 
-        className="relative group/info cursor-pointer inline-flex items-center"
+        className="relative inline-flex items-center"
         onClick={(e) => {
-          e.stopPropagation();
-          setActiveTooltipId(prev => (prev === id ? null : id));
-        }}
-        onTouchEnd={(e) => {
+          e.preventDefault();
           e.stopPropagation();
           setActiveTooltipId(prev => (prev === id ? null : id));
         }}
       >
-        <svg 
-          className={`w-3.5 h-3.5 transition-colors ${isOpen ? "text-slate-900 scale-110" : "text-slate-400 group-hover/info:text-slate-700"}`} 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="2" 
-          viewBox="0 0 24 24"
+        <button
+          type="button"
+          aria-label="Información"
+          className={`p-1 rounded-full transition-all cursor-pointer flex items-center justify-center ${
+            isOpen 
+              ? "bg-slate-900 text-white scale-110 shadow-sm" 
+              : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+          }`}
         >
-          <circle cx="12" cy="12" r="10" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
-        </svg>
+          <svg 
+            className="w-4 h-4 sm:w-3.5 sm:h-3.5" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2.2" 
+            viewBox="0 0 24 24"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
+          </svg>
+        </button>
 
-        <div className={`transition-all duration-200 absolute bottom-full mb-2.5 w-48 sm:w-56 max-w-[80vw] bg-slate-950 text-white text-[10px] font-medium p-2.5 rounded-2xl shadow-2xl z-50 leading-relaxed text-center border border-slate-700/60 ${containerPos} ${
-          isOpen ? "opacity-100 visible pointer-events-auto scale-100" : "opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible group-hover/info:pointer-events-auto pointer-events-none"
+        {/* Tooltip Card - Elevated to highest z-index layer (z-50) */}
+        <div className={`transition-all duration-200 absolute bottom-full mb-2 w-48 sm:w-56 max-w-[calc(100vw-2.5rem)] bg-slate-950 text-white text-[10.5px] font-medium p-3 rounded-2xl shadow-2xl z-50 leading-relaxed text-center border border-slate-700/80 ${containerPos} ${
+          isOpen 
+            ? "opacity-100 visible pointer-events-auto scale-100" 
+            : "opacity-0 invisible pointer-events-none scale-95"
         }`}>
           {text}
           <div className={`absolute top-full -mt-1 border-4 border-transparent border-t-slate-950 ${arrowPos}`}></div>
@@ -1366,7 +1376,7 @@ export default function DashboardClient({
       </aside>
 
       {/* RIGHT MAIN VIEWPORT */}
-      <div className="flex-1 h-full flex flex-col overflow-hidden bg-slate-50 relative z-10">
+      <div className="flex-1 h-full flex flex-col overflow-hidden bg-slate-50 relative z-10 max-w-full">
 
         {/* STICKY MOBILE TOP HEADER (lg:hidden) */}
         {(() => {
@@ -1623,7 +1633,7 @@ export default function DashboardClient({
         )}
 
         {/* Tab content viewport window */}
-        <main ref={mainContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-8 w-full max-w-full">
+        <main ref={mainContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-8 w-full max-w-full">
           {/* TAB: ADMIN PANEL (USUARIOS) */}
           {activeTab === "admin" && session.role === "ADMIN" && (
             <div className="space-y-8 animate-fade-in">
@@ -1803,7 +1813,7 @@ export default function DashboardClient({
           )}
           {/* TAB: VISITOR ANALYTICS */}
           {activeTab === "analytics" && (
-            <div className="space-y-8 animate-fade-in w-full">
+            <div className="space-y-8 animate-fade-in w-full max-w-full overflow-x-hidden">
               {/* Header stats & Timeframe Controls */}
               <div className="bg-white border border-slate-200/90 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm w-full">
                 <div className="relative z-10">
@@ -1887,8 +1897,10 @@ export default function DashboardClient({
               {analyticsData && (
                 <div className="space-y-8 w-full">
                   {/* Color-Coded KPI Overview Stat Cards */}
-                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 w-full relative z-20">
-                    <div className="bg-white border-t-4 border-t-purple-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative z-10 hover:z-30">
+                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 w-full relative">
+                    <div className={`bg-white border-t-4 border-t-purple-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover transition-all relative ${
+                      activeTooltipId === "totalHits" ? "z-50 shadow-md scale-[1.01]" : "z-10 hover:z-30"
+                    }`}>
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-purple-600 uppercase tracking-wider">{t.analyticsTotalHits}</span>
                         {renderInfoTooltip("totalHits", lang === "es" ? "Suma total de páginas cargadas y solicitudes registradas en la web." : "Total number of pageviews and requests logged on the site.", "left")}
@@ -1899,7 +1911,9 @@ export default function DashboardClient({
                       </span>
                     </div>
 
-                    <div className="bg-white border-t-4 border-t-sky-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative z-10 hover:z-30">
+                    <div className={`bg-white border-t-4 border-t-sky-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover transition-all relative ${
+                      activeTooltipId === "uniques" ? "z-50 shadow-md scale-[1.01]" : "z-10 hover:z-30"
+                    }`}>
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-sky-600 uppercase tracking-wider">{t.analyticsUniques}</span>
                         {renderInfoTooltip("uniques", lang === "es" ? "Número de usuarios o dispositivos distintos que han accedido a la web." : "Number of distinct users or individual devices visiting the site.", "right")}
@@ -1910,7 +1924,9 @@ export default function DashboardClient({
                       </span>
                     </div>
 
-                    <div className="bg-white border-t-4 border-t-emerald-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative z-10 hover:z-30">
+                    <div className={`bg-white border-t-4 border-t-emerald-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover transition-all relative ${
+                      activeTooltipId === "sessions" ? "z-50 shadow-md scale-[1.01]" : "z-10 hover:z-30"
+                    }`}>
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">{t.analyticsSessions}</span>
                         {renderInfoTooltip("sessions", lang === "es" ? "Grupos de interacción continua realizadas por un visitante sin interrupciones." : "Continuous periods of user activity on the site without long breaks.", "left")}
@@ -1921,7 +1937,9 @@ export default function DashboardClient({
                       </span>
                     </div>
 
-                    <div className="bg-white border-t-4 border-t-amber-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative z-10 hover:z-30">
+                    <div className={`bg-white border-t-4 border-t-amber-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover transition-all relative ${
+                      activeTooltipId === "duration" ? "z-50 shadow-md scale-[1.01]" : "z-10 hover:z-30"
+                    }`}>
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">{t.analyticsDuration}</span>
                         {renderInfoTooltip("duration", lang === "es" ? "Tiempo medio estimado que pasa cada visitante dentro del sitio web." : "Average time a visitor spends navigating pages during a session.", "right")}
@@ -1930,7 +1948,9 @@ export default function DashboardClient({
                       <span className="text-[10px] text-slate-500 font-bold block mt-1">Promedio por sesión</span>
                     </div>
 
-                    <div className="bg-white border-t-4 border-t-indigo-600 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm glass-card-hover hover:shadow-md flex flex-col justify-center items-center relative z-10 hover:z-30">
+                    <div className={`bg-white border-t-4 border-t-indigo-600 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm glass-card-hover flex flex-col justify-center items-center transition-all relative ${
+                      activeTooltipId === "bounce" ? "z-50 shadow-md scale-[1.01]" : "z-10 hover:z-30"
+                    }`}>
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider">{t.analyticsBounce}</span>
                         {renderInfoTooltip("bounce", lang === "es" ? "Porcentaje de visitas donde el usuario salió tras ver solo una página." : "Percentage of visits where the user left after viewing only one page.", "center")}
@@ -2131,18 +2151,15 @@ export default function DashboardClient({
                                     return (
                                       <g 
                                         key={idx} 
-                                        className="group cursor-pointer"
+                                        className="cursor-pointer"
                                         onClick={(e) => {
-                                          e.stopPropagation();
-                                          setActiveChartPointIdx(prev => (prev === idx ? null : idx));
-                                        }}
-                                        onTouchEnd={(e) => {
+                                          e.preventDefault();
                                           e.stopPropagation();
                                           setActiveChartPointIdx(prev => (prev === idx ? null : idx));
                                         }}
                                       >
-                                        {/* Large Touch Target for Mobile (36px diameter) */}
-                                        <circle cx={pt.x} cy={pt.y} r="18" fill="transparent" className="cursor-pointer" />
+                                        {/* Touch Target for Mobile (40px diameter) */}
+                                        <circle cx={pt.x} cy={pt.y} r="20" fill="transparent" className="cursor-pointer" />
 
                                         {/* Fixed Visible Dot (Does not move or scale on hover or tap) */}
                                         <circle 
@@ -2291,7 +2308,9 @@ export default function DashboardClient({
                             label = conv.event_type.replace(/_/g, " ").toUpperCase();
                           }
                           return (
-                            <div key={idx} className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-center shadow-xs hover:shadow-sm transition-all relative z-10 hover:z-30">
+                            <div key={idx} className={`bg-slate-50 border border-slate-200 p-4 rounded-2xl text-center shadow-xs hover:shadow-sm transition-all relative ${
+                              activeTooltipId === `conv_${conv.event_type}` ? "z-50 shadow-md scale-[1.01]" : "z-10 hover:z-30"
+                            }`}>
                               <div className="flex items-center justify-center gap-1.5 mb-1">
                                 <span className="text-xs text-slate-500 font-bold uppercase tracking-wide">{label}</span>
                                 {renderInfoTooltip(`conv_${conv.event_type}`, desc, colAlign)}
