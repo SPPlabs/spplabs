@@ -2403,7 +2403,7 @@ export default function DashboardClient({
                   <p className="text-slate-550 text-sm mt-1">{t.overviewActiveSince} {currentWebsite.registeredAt ? new Date(currentWebsite.registeredAt).toLocaleDateString() : new Date(currentWebsite.createdAt).toLocaleDateString()}</p>
                 </div>
 
-                <div className="flex gap-4 shrink-0">
+                <div className="flex gap-4 shrink-0 flex-wrap">
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 min-w-[130px] text-center shadow-sm">
                     <span className="text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wide">{t.overviewTotalContacts}</span>
                     <span className="text-3xl font-black font-mono text-slate-900">{contactForms.length}</span>
@@ -2411,6 +2411,10 @@ export default function DashboardClient({
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 min-w-[130px] text-center shadow-sm">
                     <span className="text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wide">{t.overviewTotalBookings}</span>
                     <span className="text-3xl font-black font-mono text-brand-green">{bookings.length}</span>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 min-w-[130px] text-center shadow-sm">
+                    <span className="text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wide">{t.overviewTotalConversations}</span>
+                    <span className="text-3xl font-black font-mono text-indigo-600">{conversationsList.length}</span>
                   </div>
                 </div>
               </div>
@@ -2496,7 +2500,7 @@ export default function DashboardClient({
               })()}
 
               {/* Data Lists Briefs */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 w-full">
                 {/* Contact List Box */}
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm w-full">
                   <div className="flex justify-between items-center mb-6">
@@ -2576,6 +2580,44 @@ export default function DashboardClient({
                           </div>
                         );
                       })}
+                    </div>
+                  )}
+                </div>
+
+                {/* AI Conversation List Box */}
+                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm w-full">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-bold text-base text-slate-900">{t.overviewAiConversations}</h3>
+                    <button
+                      onClick={() => setActiveTab("ia")}
+                      className="text-xs font-bold text-indigo-600 hover:underline cursor-pointer"
+                    >
+                      {t.heroCTAMore}
+                    </button>
+                  </div>
+
+                  {conversationsList.length === 0 ? (
+                    <div className="text-center py-10 text-slate-450 text-sm">
+                      {t.overviewNoConversations}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {conversationsList.slice(0, 3).map((conv) => (
+                        <div key={conv.id} className="bg-slate-55 border border-slate-200 rounded-xl p-4 text-sm">
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="font-bold text-slate-900 truncate max-w-[160px]">👤 {conv.visitorName || conv.visitorId}</span>
+                            <span className="text-[10px] bg-indigo-50 border border-indigo-200/60 text-indigo-700 font-bold px-2 py-0.5 rounded">
+                              {conv.messageCount} msgs
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-slate-500 font-mono block mb-2">
+                            {new Date(conv.lastMessageAt).toLocaleString("es-ES")}
+                          </span>
+                          <p className="text-slate-600 text-xs bg-white p-2 rounded-lg border border-slate-200 line-clamp-2 italic">
+                            "{conv.firstMessageSnippet}"
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
