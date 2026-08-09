@@ -141,24 +141,48 @@ function BookingsCalendar({ bookings, lang, onAccept, onReject, onDelete, t, cur
           {daysArray.map(day => {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const dayBookings = bookingsMap[dateStr] || [];
-            const hasBooking = dayBookings.length > 0;
+            
+            const pendingCount = dayBookings.filter(b => b.status === "PENDING" || b.status === "pending" || (!b.status && b.status !== "CONFIRMED" && b.status !== "CANCELLED")).length;
+            const confirmedCount = dayBookings.filter(b => b.status === "CONFIRMED" || b.status === "confirmed" || b.status === "ACCEPTED").length;
+
+            const hasPending = pendingCount > 0;
+            const hasConfirmed = confirmedCount > 0;
             const isSelected = selectedDateStr === dateStr;
+
+            let dayStyles = "bg-slate-50/50 border-slate-200/60 hover:bg-slate-100 text-slate-800";
+            if (hasConfirmed) {
+              dayStyles = "bg-emerald-600 border-emerald-700 text-white hover:bg-emerald-700 shadow-xs font-black";
+            } else if (hasPending) {
+              dayStyles = "bg-emerald-50 border-emerald-300 text-emerald-950 hover:bg-emerald-100 font-extrabold";
+            }
+
+            if (isSelected) {
+              dayStyles = "bg-slate-900 border-slate-900 text-white shadow-md scale-95 font-black";
+            }
 
             return (
               <button
                 key={day}
                 onClick={() => handleDayClick(day)}
-                className={`aspect-square rounded-2xl flex flex-col items-center justify-between p-1.5 transition-all border cursor-pointer relative ${
-                  isSelected 
-                    ? "bg-slate-900 border-slate-900 text-white shadow-md scale-95" 
-                    : hasBooking
-                      ? "bg-emerald-50 border-emerald-200 text-emerald-950 hover:bg-emerald-100"
-                      : "bg-slate-50/50 border-slate-200/60 hover:bg-slate-100 text-slate-800"
-                }`}
+                className={`aspect-square rounded-2xl flex flex-col items-center justify-between p-1.5 transition-all border cursor-pointer relative ${dayStyles}`}
               >
-                <span className="text-xs font-bold block">{day}</span>
-                {hasBooking && (
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? "bg-white" : "bg-emerald-500"}`}></span>
+                <span className="text-xs font-extrabold block">{day}</span>
+                
+                {/* Notification Badge with Number of Pending Bookings */}
+                {hasPending && (
+                  <span className="absolute -top-1.5 -right-1.5 z-20 flex items-center justify-center pointer-events-none">
+                    <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
+                    <span className="relative z-10 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[9px] font-black leading-none shadow-sm border border-white/60">
+                      {pendingCount}
+                    </span>
+                  </span>
+                )}
+
+                {/* Status Indicator Dot */}
+                {(hasConfirmed || hasPending) && (
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                    isSelected ? "bg-white" : hasConfirmed ? "bg-emerald-200" : "bg-emerald-500"
+                  }`}></span>
                 )}
               </button>
             );
@@ -477,10 +501,22 @@ export default function DashboardClient({
 
   // Track visited/cleared tabs for notification badges
   const [clearedTabs, setClearedTabs] = useState(new Set());
+  const prevTabRef = useRef(activeTab);
 
-  // Automatically mark activeTab as cleared whenever user enters/visits it
+  // Clear "overview" badge ONLY when switching away from overview to another tab.
+  // Clear all other tabs (analytics, clientes, ia, notificaciones) when entered.
   useEffect(() => {
-    if (activeTab) {
+    if (prevTabRef.current && prevTabRef.current !== activeTab) {
+      const leavingTab = prevTabRef.current;
+      setClearedTabs(prev => {
+        if (prev.has(leavingTab)) return prev;
+        const next = new Set(prev);
+        next.add(leavingTab);
+        return next;
+      });
+    }
+
+    if (activeTab && activeTab !== "overview") {
       setClearedTabs(prev => {
         if (prev.has(activeTab)) return prev;
         const next = new Set(prev);
@@ -488,6 +524,8 @@ export default function DashboardClient({
         return next;
       });
     }
+
+    prevTabRef.current = activeTab;
   }, [activeTab]);
 
   // Mobile / Touch Active States for Info Tooltips & Chart Points
