@@ -2040,15 +2040,15 @@ export default function DashboardClient({
                                         {/* Transparent Fixed Mouse Hit Area */}
                                         <circle cx={pt.x} cy={pt.y} r="14" fill="transparent" />
 
-                                        {/* Smooth Dot Circle (Hidden by default, visible on hover) */}
+                                        {/* Fixed Visible Dot (Does not move or scale on hover) */}
                                         <circle 
                                           cx={pt.x} 
                                           cy={pt.y} 
-                                          r="5" 
+                                          r="4.5" 
                                           fill="#0284c7" 
                                           stroke="#ffffff" 
-                                          strokeWidth="2.5" 
-                                          className="pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 transform group-hover:scale-125" 
+                                          strokeWidth="2" 
+                                          className="pointer-events-none" 
                                         />
 
                                         {/* Hover Tooltip Group */}
