@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { translations } from "@/lib/translations";
 import { SppLabsLogo } from "@/components/SppLabsLogo";
 import WorldMap from "@/components/analytics/WorldMap";
@@ -1206,7 +1207,7 @@ export default function DashboardClient({
           {/* Logo & Retract/Expand Toggle Section inside side panel */}
           {sidebarOpen ? (
             <div className="flex items-center justify-between px-1 py-1">
-              <div className="flex items-center gap-3 overflow-hidden">
+              <Link href="/" className="flex items-center gap-3 overflow-hidden hover:opacity-85 transition-opacity cursor-pointer">
                 <Image
                   src="/logo.webp"
                   alt="SPP Labs Logo"
@@ -1216,7 +1217,7 @@ export default function DashboardClient({
                   className="w-8 h-8 object-contain shrink-0"
                 />
                 <SppLabsLogo inline={true} className="text-slate-900 truncate" />
-              </div>
+              </Link>
               <button
                 onClick={() => setSidebarOpen(false)}
                 className="p-1.5 hover:bg-slate-100 text-slate-500 hover:text-slate-900 rounded-xl transition-all cursor-pointer border border-slate-200/60 shrink-0"
@@ -1229,14 +1230,16 @@ export default function DashboardClient({
             </div>
           ) : (
             <div className="flex flex-col items-center gap-3 py-1">
-              <Image
-                src="/logo.webp"
-                alt="SPP Labs Logo"
-                width={32}
-                height={32}
-                sizes="32px"
-                className="w-8 h-8 object-contain"
-              />
+              <Link href="/" className="flex flex-col items-center gap-3 py-1 hover:opacity-85 transition-opacity cursor-pointer">
+                <Image
+                  src="/logo.webp"
+                  alt="SPP Labs Logo"
+                  width={32}
+                  height={32}
+                  sizes="32px"
+                  className="w-8 h-8 object-contain"
+                />
+              </Link>
               <button
                 onClick={() => setSidebarOpen(true)}
                 className="p-1.5 hover:bg-slate-100 text-slate-500 hover:text-slate-900 rounded-xl transition-all cursor-pointer border border-slate-200/60"
@@ -1483,7 +1486,7 @@ export default function DashboardClient({
                     </span>
                   )}
                 </button>
-                <div className="flex items-center gap-2">
+                <Link href="/" className="flex items-center gap-2 hover:opacity-85 transition-opacity cursor-pointer">
                   <Image
                     src="/logo.webp"
                     alt="SPP Labs"
@@ -1493,7 +1496,7 @@ export default function DashboardClient({
                     className="w-6 h-6 object-contain"
                   />
                   <SppLabsLogo inline={true} className="text-slate-900 text-sm" />
-                </div>
+                </Link>
               </div>
 
               <div className="flex items-center gap-2">
@@ -1514,7 +1517,7 @@ export default function DashboardClient({
             >
               <div className="space-y-6">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                  <div className="flex items-center gap-2">
+                  <Link href="/" onClick={() => setMobileDrawerOpen(false)} className="flex items-center gap-2 hover:opacity-85 transition-opacity cursor-pointer">
                     <Image
                       src="/logo.webp"
                       alt="SPP Labs"
@@ -1524,7 +1527,7 @@ export default function DashboardClient({
                       className="w-7 h-7 object-contain"
                     />
                     <SppLabsLogo inline={true} className="text-slate-900" />
-                  </div>
+                  </Link>
                   <button
                     onClick={() => setMobileDrawerOpen(false)}
                     className="p-2 text-slate-400 hover:text-slate-800 rounded-full hover:bg-slate-100 transition-all cursor-pointer font-bold"
