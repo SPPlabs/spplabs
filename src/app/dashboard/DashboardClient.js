@@ -475,6 +475,21 @@ export default function DashboardClient({
   const [visitorsTrends, setVisitorsTrends] = useState([]);
   const [visitorsTrendsLoading, setVisitorsTrendsLoading] = useState(false);
 
+  // Track visited/cleared tabs for notification badges
+  const [clearedTabs, setClearedTabs] = useState(new Set());
+
+  // Automatically mark activeTab as cleared whenever user enters/visits it
+  useEffect(() => {
+    if (activeTab) {
+      setClearedTabs(prev => {
+        if (prev.has(activeTab)) return prev;
+        const next = new Set(prev);
+        next.add(activeTab);
+        return next;
+      });
+    }
+  }, [activeTab]);
+
   // Mobile / Touch Active States for Info Tooltips & Chart Points
   const [activeTooltipId, setActiveTooltipId] = useState(null);
   const [activeChartPointIdx, setActiveChartPointIdx] = useState(null);
@@ -1202,11 +1217,11 @@ export default function DashboardClient({
                 return Date.now() - created < 48 * 60 * 60 * 1000;
               }).length;
 
-              const overviewNotifCount = pendingBookingsCount + recentContactsCount + announcementsList.length;
-              const clientesNotifCount = contactForms.length + bookings.length;
-              const iaNotifCount = conversationsList.length;
-              const notificacionesNotifCount = announcementsList.length + petitionsList.length;
-              const hasAnalyticsNotif = Boolean(analyticsData || analyticsLoading);
+              const overviewNotifCount = clearedTabs.has("overview") ? 0 : (pendingBookingsCount + recentContactsCount + announcementsList.length);
+              const clientesNotifCount = clearedTabs.has("clientes") ? 0 : (contactForms.length + bookings.length);
+              const iaNotifCount = clearedTabs.has("ia") ? 0 : conversationsList.length;
+              const notificacionesNotifCount = clearedTabs.has("notificaciones") ? 0 : (announcementsList.length + petitionsList.length);
+              const hasAnalyticsNotif = clearedTabs.has("analytics") ? false : Boolean(analyticsData || analyticsLoading);
 
               const navItems = [
                 {
@@ -1399,11 +1414,11 @@ export default function DashboardClient({
             return Date.now() - created < 48 * 60 * 60 * 1000;
           }).length;
 
-          const overviewNotifCount = pendingBookingsCount + recentContactsCount + announcementsList.length;
-          const clientesNotifCount = contactForms.length + bookings.length;
-          const iaNotifCount = conversationsList.length;
-          const notificacionesNotifCount = announcementsList.length + petitionsList.length;
-          const hasAnalyticsNotif = Boolean(analyticsData || analyticsLoading);
+          const overviewNotifCount = clearedTabs.has("overview") ? 0 : (pendingBookingsCount + recentContactsCount + announcementsList.length);
+          const clientesNotifCount = clearedTabs.has("clientes") ? 0 : (contactForms.length + bookings.length);
+          const iaNotifCount = clearedTabs.has("ia") ? 0 : conversationsList.length;
+          const notificacionesNotifCount = clearedTabs.has("notificaciones") ? 0 : (announcementsList.length + petitionsList.length);
+          const hasAnalyticsNotif = clearedTabs.has("analytics") ? false : Boolean(analyticsData || analyticsLoading);
 
           const hasAnyActiveNotification = overviewNotifCount > 0 || clientesNotifCount > 0 || iaNotifCount > 0 || notificacionesNotifCount > 0 || hasAnalyticsNotif;
 
@@ -1485,11 +1500,11 @@ export default function DashboardClient({
                       return Date.now() - created < 48 * 60 * 60 * 1000;
                     }).length;
 
-                    const overviewNotifCount = pendingBookingsCount + recentContactsCount + announcementsList.length;
-                    const clientesNotifCount = contactForms.length + bookings.length;
-                    const iaNotifCount = conversationsList.length;
-                    const notificacionesNotifCount = announcementsList.length + petitionsList.length;
-                    const hasAnalyticsNotif = Boolean(analyticsData || analyticsLoading);
+                    const overviewNotifCount = clearedTabs.has("overview") ? 0 : (pendingBookingsCount + recentContactsCount + announcementsList.length);
+                    const clientesNotifCount = clearedTabs.has("clientes") ? 0 : (contactForms.length + bookings.length);
+                    const iaNotifCount = clearedTabs.has("ia") ? 0 : conversationsList.length;
+                    const notificacionesNotifCount = clearedTabs.has("notificaciones") ? 0 : (announcementsList.length + petitionsList.length);
+                    const hasAnalyticsNotif = clearedTabs.has("analytics") ? false : Boolean(analyticsData || analyticsLoading);
 
                     const navItems = [
                       {
