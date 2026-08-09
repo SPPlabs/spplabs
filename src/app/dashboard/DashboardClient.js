@@ -495,11 +495,16 @@ export default function DashboardClient({
   const renderInfoTooltip = (id, text, align = "center") => {
     const isOpen = activeTooltipId === id;
     
-    // Smart placement classes to prevent overflow on mobile screen edges:
+    // Smart placement classes:
+    // "center": Tooltip centered directly above the info button (default for desktop & mobile)
+    // "shift-left": Centered on mobile, shifted left on desktop for the rightmost card (Porcentaje de Rebote)
     let containerPos = "left-1/2 -translate-x-1/2";
     let arrowPos = "left-1/2 -translate-x-1/2";
 
-    if (align === "left") {
+    if (align === "shift-left") {
+      containerPos = "left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0";
+      arrowPos = "left-1/2 -translate-x-1/2 sm:left-auto sm:right-3 sm:translate-x-0";
+    } else if (align === "left") {
       containerPos = "left-0 sm:left-1/2 translate-x-0 sm:-translate-x-1/2";
       arrowPos = "left-3 sm:left-1/2 translate-x-0 sm:-translate-x-1/2";
     } else if (align === "right") {
@@ -538,7 +543,7 @@ export default function DashboardClient({
         </button>
 
         {/* Tooltip Card - Elevated to highest z-index layer (z-50) */}
-        <div className={`transition-all duration-200 absolute bottom-full mb-2 w-48 sm:w-56 max-w-[calc(100vw-2.5rem)] bg-slate-950 text-white text-[10.5px] font-medium p-3 rounded-2xl shadow-2xl z-50 leading-relaxed text-center border border-slate-700/80 ${containerPos} ${
+        <div className={`transition-all duration-200 absolute bottom-full mb-2 w-48 sm:w-56 max-w-[calc(100vw-3rem)] bg-slate-950 text-white text-[10.5px] font-medium p-3 rounded-2xl shadow-2xl z-50 leading-relaxed text-center border border-slate-700/80 ${containerPos} ${
           isOpen 
             ? "opacity-100 visible pointer-events-auto scale-100" 
             : "opacity-0 invisible pointer-events-none scale-95"
@@ -1903,7 +1908,7 @@ export default function DashboardClient({
                     }`}>
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-purple-600 uppercase tracking-wider">{t.analyticsTotalHits}</span>
-                        {renderInfoTooltip("totalHits", lang === "es" ? "Suma total de páginas cargadas y solicitudes registradas en la web." : "Total number of pageviews and requests logged on the site.", "left")}
+                        {renderInfoTooltip("totalHits", lang === "es" ? "Suma total de páginas cargadas y solicitudes registradas en la web." : "Total number of pageviews and requests logged on the site.", "center")}
                       </div>
                       <span className="text-3xl font-black font-mono text-slate-950 tracking-tight">{analyticsData.overview.visitors}</span>
                       <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.visitors_growth?.startsWith("↓") ? "text-rose-600" : "text-emerald-600"}`}>
@@ -1916,7 +1921,7 @@ export default function DashboardClient({
                     }`}>
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-sky-600 uppercase tracking-wider">{t.analyticsUniques}</span>
-                        {renderInfoTooltip("uniques", lang === "es" ? "Número de usuarios o dispositivos distintos que han accedido a la web." : "Number of distinct users or individual devices visiting the site.", "right")}
+                        {renderInfoTooltip("uniques", lang === "es" ? "Número de usuarios o dispositivos distintos que han accedido a la web." : "Number of distinct users or individual devices visiting the site.", "center")}
                       </div>
                       <span className="text-3xl font-black font-mono text-sky-600 tracking-tight">{analyticsData.overview.unique_visitors}</span>
                       <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.unique_growth?.startsWith("↓") ? "text-rose-600" : "text-sky-600"}`}>
@@ -1929,7 +1934,7 @@ export default function DashboardClient({
                     }`}>
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">{t.analyticsSessions}</span>
-                        {renderInfoTooltip("sessions", lang === "es" ? "Grupos de interacción continua realizadas por un visitante sin interrupciones." : "Continuous periods of user activity on the site without long breaks.", "left")}
+                        {renderInfoTooltip("sessions", lang === "es" ? "Grupos de interacción continua realizadas por un visitante sin interrupciones." : "Continuous periods of user activity on the site without long breaks.", "center")}
                       </div>
                       <span className="text-3xl font-black font-mono text-emerald-600 tracking-tight">{analyticsData.overview.sessions}</span>
                       <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.sessions_growth?.startsWith("↓") ? "text-rose-600" : "text-emerald-600"}`}>
@@ -1942,7 +1947,7 @@ export default function DashboardClient({
                     }`}>
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">{t.analyticsDuration}</span>
-                        {renderInfoTooltip("duration", lang === "es" ? "Tiempo medio estimado que pasa cada visitante dentro del sitio web." : "Average time a visitor spends navigating pages during a session.", "right")}
+                        {renderInfoTooltip("duration", lang === "es" ? "Tiempo medio estimado que pasa cada visitante dentro del sitio web." : "Average time a visitor spends navigating pages during a session.", "center")}
                       </div>
                       <span className="text-3xl font-black font-mono text-slate-900 tracking-tight">{analyticsData.overview.avg_duration}s</span>
                       <span className="text-[10px] text-slate-500 font-bold block mt-1">Promedio por sesión</span>
@@ -1953,7 +1958,7 @@ export default function DashboardClient({
                     }`}>
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider">{t.analyticsBounce}</span>
-                        {renderInfoTooltip("bounce", lang === "es" ? "Porcentaje de visitas donde el usuario salió tras ver solo una página." : "Percentage of visits where the user left after viewing only one page.", "center")}
+                        {renderInfoTooltip("bounce", lang === "es" ? "Porcentaje de visitas donde el usuario salió tras ver solo una página." : "Percentage of visits where the user left after viewing only one page.", "shift-left")}
                       </div>
                       <span className="text-3xl font-black font-mono text-indigo-600 tracking-tight">{analyticsData.overview.bounce_rate}%</span>
                     </div>
@@ -2286,8 +2291,6 @@ export default function DashboardClient({
                           let desc = lang === "es" ? "Eventos e interacciones registradas." : "Recorded events and interactions.";
                           let color = "text-slate-950";
 
-                          const colAlign = idx % 2 === 0 ? "left" : "right";
-
                           if (conv.event_type === "form_submit") {
                             label = lang === "es" ? "Formularios Enviados" : "Form Submissions";
                             desc = lang === "es" ? "Número de contactos o consultas enviadas mediante formularios en la web." : "Number of contact or lead submissions via forms.";
@@ -2313,7 +2316,7 @@ export default function DashboardClient({
                             }`}>
                               <div className="flex items-center justify-center gap-1.5 mb-1">
                                 <span className="text-xs text-slate-500 font-bold uppercase tracking-wide">{label}</span>
-                                {renderInfoTooltip(`conv_${conv.event_type}`, desc, colAlign)}
+                                {renderInfoTooltip(`conv_${conv.event_type}`, desc, "center")}
                               </div>
                               <span className={`text-2xl font-black font-mono ${color}`}>{conv.count}</span>
                             </div>
