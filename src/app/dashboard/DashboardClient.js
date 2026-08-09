@@ -1905,18 +1905,30 @@ export default function DashboardClient({
                         {(() => {
                           const trendPoints = visitorsTrends.length > 0 ? visitorsTrends : analyticsData.trends;
                           const maxVal = Math.max(...trendPoints.map(t => Number(t.count || 0)), 1);
-                          const width = 800;
-                          const height = 200;
-                          const spacing = trendPoints.length > 1 ? width / (trendPoints.length - 1) : width;
+                          const midVal = Math.round(maxVal / 2);
                           
-                          const pts = trendPoints.map((t, idx) => {
-                            const x = idx * spacing;
-                            const y = height - (Number(t.count || 0) / maxVal) * (height - 30) - 15;
-                            return `${x},${y}`;
-                          }).join(" ");
+                          // SVG Layout geometry:
+                          const width = 850;
+                          const height = 240;
+                          const chartLeft = 60;
+                          const chartRight = 830;
+                          const chartTop = 30;
+                          const chartBottom = 190;
+                          const plotWidth = chartRight - chartLeft;
+                          const plotHeight = chartBottom - chartTop;
 
-                          const areaPts = trendPoints.length > 0 
-                            ? `0,${height} ${pts} ${width},${height}` 
+                          const spacing = trendPoints.length > 1 ? plotWidth / (trendPoints.length - 1) : plotWidth;
+                          
+                          const ptsArr = trendPoints.map((t, idx) => {
+                            const x = trendPoints.length > 1 ? chartLeft + idx * spacing : chartLeft + plotWidth / 2;
+                            const y = chartBottom - (Number(t.count || 0) / maxVal) * plotHeight;
+                            return { x, y, t };
+                          });
+
+                          const ptsString = ptsArr.map(p => `${p.x},${p.y}`).join(" ");
+
+                          const areaPts = ptsArr.length > 0 
+                            ? `${chartLeft},${chartBottom} ${ptsString} ${chartRight},${chartBottom}` 
                             : "";
 
                           const formatXLabel = (t) => {
@@ -1965,25 +1977,51 @@ export default function DashboardClient({
                             return t.hour !== undefined ? `${t.hour}:00` : "";
                           };
 
+                          const xAxisTitle = lang === "es"
+                            ? (visitorsTimeframe === "day" ? "Hora del día (24h)" : visitorsTimeframe === "week" ? "Día de la semana" : visitorsTimeframe === "month" ? "Día del mes" : visitorsTimeframe === "year" ? "Mes del año" : "Periodo")
+                            : (visitorsTimeframe === "day" ? "Hour of day (24h)" : visitorsTimeframe === "week" ? "Day of week" : visitorsTimeframe === "month" ? "Day of month" : visitorsTimeframe === "year" ? "Month" : "Period");
+
                           return (
                             <div className="w-full overflow-x-auto">
                               <div className="min-w-[650px] p-2">
-                                <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-52 overflow-visible">
+                                <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-64 overflow-visible">
                                   <defs>
                                     <linearGradient id="areaGradVibrant" x1="0" y1="0" x2="0" y2="1">
                                       <stop offset="0%" stopColor="#0284c7" stopOpacity="0.25"/>
                                       <stop offset="100%" stopColor="#0284c7" stopOpacity="0.0"/>
                                     </linearGradient>
                                   </defs>
-                                  <line x1="0" y1={height - 15} x2={width} y2={height - 15} stroke="#f1f5f9" strokeWidth="1.5" />
-                                  <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke="#f1f5f9" strokeWidth="1.5" strokeDasharray="6 6" />
-                                  <line x1="0" y1="15" x2={width} y2="15" stroke="#f1f5f9" strokeWidth="1.5" strokeDasharray="6 6" />
-                                  
+
+                                  {/* Y-AXIS TITLE & NUMERICAL LABELS */}
+                                  <text x="5" y="16" fill="#0284c7" className="text-[10px] font-black font-mono uppercase tracking-wider">
+                                    {lang === "es" ? "Visitantes" : "Visitors"}
+                                  </text>
+
+                                  {/* Y-AXIS GRID LINES & NUMBERS */}
+                                  {/* Top grid (maxVal) */}
+                                  <line x1={chartLeft} y1={chartTop} x2={chartRight} y2={chartTop} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 4" />
+                                  <text x={chartLeft - 8} y={chartTop + 4} fill="#64748b" textAnchor="end" className="text-[10px] font-mono font-bold">
+                                    {maxVal}
+                                  </text>
+
+                                  {/* Middle grid (midVal) */}
+                                  <line x1={chartLeft} y1={chartTop + plotHeight / 2} x2={chartRight} y2={chartTop + plotHeight / 2} stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4 4" />
+                                  <text x={chartLeft - 8} y={chartTop + plotHeight / 2 + 4} fill="#64748b" textAnchor="end" className="text-[10px] font-mono font-bold">
+                                    {midVal}
+                                  </text>
+
+                                  {/* Bottom grid (0) */}
+                                  <line x1={chartLeft} y1={chartBottom} x2={chartRight} y2={chartBottom} stroke="#cbd5e1" strokeWidth="1.5" />
+                                  <text x={chartLeft - 8} y={chartBottom + 4} fill="#64748b" textAnchor="end" className="text-[10px] font-mono font-bold">
+                                    0
+                                  </text>
+
+                                  {/* AREA SHADING & TREND LINE */}
                                   {areaPts && <polygon points={areaPts} fill="url(#areaGradVibrant)" />}
                                   
-                                  {pts && (
+                                  {ptsString && (
                                     <polyline 
-                                      points={pts} 
+                                      points={ptsString} 
                                       fill="none" 
                                       stroke="#0284c7" 
                                       strokeWidth="3.5" 
@@ -1992,22 +2030,20 @@ export default function DashboardClient({
                                     />
                                   )}
                                   
-                                  {/* Glitch-free, Lag-free Hover Points */}
-                                  {trendPoints.map((t, idx) => {
-                                    const x = idx * spacing;
-                                    const y = height - (Number(t.count || 0) / maxVal) * (height - 30) - 15;
-                                    const labelX = formatXLabel(t);
-                                    const countVal = Number(t.count || 0);
+                                  {/* HOVER POINTS & TOOLTIPS & X TICK LABELS */}
+                                  {ptsArr.map((pt, idx) => {
+                                    const labelX = formatXLabel(pt.t);
+                                    const countVal = Number(pt.t.count || 0);
 
                                     return (
                                       <g key={idx} className="group cursor-pointer">
-                                        {/* Transparent Fixed Mouse Hit Area to prevent hover flicker */}
-                                        <circle cx={x} cy={y} r="14" fill="transparent" />
+                                        {/* Transparent Fixed Mouse Hit Area */}
+                                        <circle cx={pt.x} cy={pt.y} r="14" fill="transparent" />
 
-                                        {/* Smooth Dot Circle (Hidden by default, visible on group hover) */}
+                                        {/* Smooth Dot Circle (Hidden by default, visible on hover) */}
                                         <circle 
-                                          cx={x} 
-                                          cy={y} 
+                                          cx={pt.x} 
+                                          cy={pt.y} 
                                           r="5" 
                                           fill="#0284c7" 
                                           stroke="#ffffff" 
@@ -2015,21 +2051,32 @@ export default function DashboardClient({
                                           className="pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 transform group-hover:scale-125" 
                                         />
 
-                                        {/* Hover Tooltip Group showing visitantes */}
+                                        {/* Hover Tooltip Group */}
                                         <g className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
-                                          <rect x={x - 45} y={y - 32} width="90" height="22" rx="6" fill="#0f172a" />
-                                          <text x={x} y={y - 18} fill="#ffffff" fontSize="9" fontWeight="900" textAnchor="middle" className="font-mono">
+                                          <rect x={pt.x - 45} y={pt.y - 32} width="90" height="22" rx="6" fill="#0f172a" />
+                                          <text x={pt.x} y={pt.y - 18} fill="#ffffff" fontSize="9" fontWeight="900" textAnchor="middle" className="font-mono">
                                             {countVal} {countVal === 1 ? (lang === "es" ? "visitante" : "visitor") : (lang === "es" ? "visitantes" : "visitors")}
                                           </text>
                                         </g>
 
                                         {/* Date / Hour Label along X Axis */}
-                                        <text x={x} y={height + 15} fill="#64748b" fontSize="9" fontWeight="bold" textAnchor="middle" className="pointer-events-none font-mono">
+                                        <text x={pt.x} y={chartBottom + 16} fill="#64748b" fontSize="9" fontWeight="bold" textAnchor="middle" className="pointer-events-none font-mono">
                                           {labelX}
                                         </text>
                                       </g>
                                     );
                                   })}
+
+                                  {/* X-AXIS TITLE AT THE BOTTOM CENTER */}
+                                  <text 
+                                    x={(chartLeft + chartRight) / 2} 
+                                    y={chartBottom + 35} 
+                                    fill="#475569" 
+                                    className="text-[10px] font-black font-mono uppercase tracking-widest"
+                                    textAnchor="middle"
+                                  >
+                                    {xAxisTitle}
+                                  </text>
                                 </svg>
                               </div>
                             </div>
