@@ -101,16 +101,38 @@ export default async function DashboardPage(props) {
     totalTokens: Number(u.totalTokens),
   }));
 
-  // Fetch Notifications (Global announcements OR domain-specific notices)
-  const notifications = await prisma.notification.findMany({
-    where: {
-      OR: [
-        { websiteId: null },
-        { websiteId: currentWebsite.id }
-      ]
+  // Fetch Notifications (Admin on spplabs.es sees all notifications; clients or impersonated view see global OR domain-specific notices)
+  const isAdminMainDashboard = session.role === "ADMIN" && currentWebsite.domain === "spplabs.es";
+  const rawNotifications = await prisma.notification.findMany({
+    where: isAdminMainDashboard
+      ? {}
+      : {
+          OR: [
+            { websiteId: null },
+            { websiteId: currentWebsite.id }
+          ]
+        },
+    include: {
+      website: {
+        select: {
+          id: true,
+          domain: true,
+          displayName: true,
+        }
+      }
     },
     orderBy: { createdAt: "desc" }
   });
+
+  const notifications = rawNotifications.map(n => ({
+    id: n.id,
+    title: n.title,
+    message: n.message,
+    createdAt: n.createdAt,
+    websiteId: n.websiteId,
+    targetDomain: n.website?.domain || null,
+    targetDisplayName: n.website?.displayName || null,
+  }));
 
   // Fetch Support Requests / Petitions from PostgreSQL DB
   let supportRequests = [];

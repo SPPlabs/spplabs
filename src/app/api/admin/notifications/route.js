@@ -34,9 +34,28 @@ export async function POST(request) {
         message: message.trim(),
         websiteId: targetWebsiteId ? targetWebsiteId : null, // If null, global alert
       },
+      include: {
+        website: {
+          select: {
+            id: true,
+            domain: true,
+            displayName: true,
+          }
+        }
+      }
     });
 
-    return NextResponse.json({ success: true, notification });
+    const formattedNotification = {
+      id: notification.id,
+      title: notification.title,
+      message: notification.message,
+      createdAt: notification.createdAt,
+      websiteId: notification.websiteId,
+      targetDomain: notification.website?.domain || null,
+      targetDisplayName: notification.website?.displayName || null,
+    };
+
+    return NextResponse.json({ success: true, notification: formattedNotification });
   } catch (error) {
     console.error("Notification creation error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

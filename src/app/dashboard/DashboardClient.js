@@ -2999,8 +2999,21 @@ export default function DashboardClient({
                   <div className="space-y-4">
                     {announcementsList.map((ann) => (
                       <div key={ann.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-bold text-sm text-slate-900">{ann.title}</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-sm text-slate-900">{ann.title}</span>
+                            {session.domain === "spplabs.es" && !isImpersonating && (
+                              ann.websiteId ? (
+                                <span className="bg-blue-50 text-blue-700 text-[10px] px-2.5 py-0.5 rounded-md font-bold border border-blue-200/60">
+                                  {lang === "es" ? "Para: " : "To: "}{ann.targetDisplayName || ann.targetDomain || "Cliente"} ({ann.targetDomain || "Individual"})
+                                </span>
+                              ) : (
+                                <span className="bg-emerald-50 text-emerald-700 text-[10px] px-2.5 py-0.5 rounded-md font-bold border border-emerald-200/60">
+                                  {lang === "es" ? "Global (Todos los usuarios)" : "Global (All users)"}
+                                </span>
+                              )
+                            )}
+                          </div>
                           <span className="text-[10px] text-slate-500 font-mono">
                             {new Date(ann.createdAt).toLocaleDateString()}
                           </span>
