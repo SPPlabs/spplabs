@@ -469,6 +469,7 @@ export default function DashboardClient({
   const [chatbotContent, setChatbotContent] = useState(chatbotKnowledge?.content || "");
   const [iaSaving, setIaSaving] = useState(false);
   const [iaSaved, setIaSaved] = useState(false);
+  const [isEditingKnowledge, setIsEditingKnowledge] = useState(false);
 
   // User petitions support requests
   const [petitionsList, setPetitionsList] = useState(supportRequests || []);
@@ -685,6 +686,7 @@ export default function DashboardClient({
   // Re-sync all domain-specific local states whenever currentWebsite or domain changes (e.g. impersonation)
   useEffect(() => {
     setChatbotContent(chatbotKnowledge?.content || "");
+    setIsEditingKnowledge(false);
     setPetitionsList(supportRequests || []);
     setAnnouncementsList(notifications || []);
     setAnalyticsData(null);
@@ -827,6 +829,7 @@ export default function DashboardClient({
           alert(data.warning);
         } else {
           setIaSaved(true);
+          setIsEditingKnowledge(false);
           setTimeout(() => setIaSaved(false), 3000);
         }
       } else {
@@ -2911,25 +2914,56 @@ export default function DashboardClient({
                 {/* Chatbot RAG Editor Form */}
                 <form onSubmit={handleUpdateChatbotKnowledge} className="space-y-4">
                   <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
                       <div>
                         <label className="block text-xs font-black uppercase tracking-wider text-slate-900 mb-1">{t.iaRagContent}</label>
                         <p className="text-xs text-slate-500 font-medium">{t.iaRagDesc}</p>
                       </div>
-                      <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-xl shadow-2xs border ${
-                        chatbotContent.length >= 30000
-                          ? "text-amber-700 bg-amber-50 border-amber-300 font-extrabold"
-                          : "text-slate-400 bg-white border-slate-200"
-                      }`}>
-                        {chatbotContent.length.toLocaleString()} / 30,000 caracteres
-                      </span>
+                      <div className="flex items-center gap-2 self-start sm:self-center">
+                        <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-xl shadow-2xs border ${
+                          chatbotContent.length >= 30000
+                            ? "text-amber-700 bg-amber-50 border-amber-300 font-extrabold"
+                            : "text-slate-400 bg-white border-slate-200"
+                        }`}>
+                          {chatbotContent.length.toLocaleString()} / 30,000 caracteres
+                        </span>
+
+                        {!isEditingKnowledge ? (
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingKnowledge(true)}
+                            className="px-3.5 py-1.5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                            </svg>
+                            {t.iaEdit}
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsEditingKnowledge(false);
+                              setChatbotContent(chatbotKnowledge?.content || "");
+                            }}
+                            className="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold rounded-xl transition-all cursor-pointer shrink-0"
+                          >
+                            {t.iaCancelEdit}
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <textarea
+                      readOnly={!isEditingKnowledge}
                       value={chatbotContent}
                       onChange={(e) => setChatbotContent(e.target.value)}
                       maxLength={30000}
                       placeholder={t.iaPlaceholder}
-                      className="w-full h-72 bg-white border border-slate-200/80 rounded-xl p-4 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 transition-all resize-y leading-relaxed mt-3 shadow-2xs font-normal"
+                      className={`w-full h-72 rounded-xl p-4 text-xs resize-y leading-relaxed mt-3 shadow-2xs font-normal transition-all overflow-y-auto ${
+                        !isEditingKnowledge
+                          ? "bg-slate-100/90 border border-slate-200 text-slate-600 cursor-not-allowed select-text"
+                          : "bg-white border-2 border-slate-900 text-slate-900 focus:outline-none focus:border-slate-900 cursor-text"
+                      }`}
                     />
                   </div>
 
@@ -2945,8 +2979,8 @@ export default function DashboardClient({
                   <div className="flex justify-end pt-2">
                     <button
                       type="submit"
-                      disabled={iaSaving}
-                      className="h-11 px-8 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-black shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 flex items-center justify-center cursor-pointer gap-2"
+                      disabled={!isEditingKnowledge || iaSaving}
+                      className="h-11 px-8 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-black shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer gap-2"
                     >
                       {iaSaving ? (
                         <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
