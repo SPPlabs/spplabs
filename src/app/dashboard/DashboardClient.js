@@ -496,12 +496,20 @@ export default function DashboardClient({
     const isOpen = activeTooltipId === id;
     
     // Smart placement classes:
-    // "center": Tooltip centered directly above the info button (default for desktop & mobile)
-    // "shift-left": Centered on mobile, shifted left on desktop for the rightmost card (Porcentaje de Rebote)
+    // "center": Centered directly above the info button on desktop & mobile
+    // "shift-left": Centered on mobile, shifted left on desktop for rightmost card (Porcentaje de Rebote)
+    // "shift-left-mobile": Shifted left towards screen center on mobile, centered on desktop (Visitantes Únicos & Duración Promedio)
+    // "shift-right-mobile": Shifted right towards screen center on mobile, centered on desktop (Total Impresiones & Sesiones)
     let containerPos = "left-1/2 -translate-x-1/2";
     let arrowPos = "left-1/2 -translate-x-1/2";
 
-    if (align === "shift-left") {
+    if (align === "shift-left-mobile") {
+      containerPos = "right-0 left-auto translate-x-0 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto";
+      arrowPos = "right-3 left-auto translate-x-0 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto";
+    } else if (align === "shift-right-mobile") {
+      containerPos = "left-0 translate-x-0 sm:left-1/2 sm:-translate-x-1/2";
+      arrowPos = "left-3 sm:left-1/2 translate-x-0 sm:-translate-x-1/2";
+    } else if (align === "shift-left" || align === "shift-left-desktop") {
       containerPos = "left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0";
       arrowPos = "left-1/2 -translate-x-1/2 sm:left-auto sm:right-3 sm:translate-x-0";
     } else if (align === "left") {
@@ -1908,7 +1916,7 @@ export default function DashboardClient({
                     }`}>
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-purple-600 uppercase tracking-wider">{t.analyticsTotalHits}</span>
-                        {renderInfoTooltip("totalHits", lang === "es" ? "Suma total de páginas cargadas y solicitudes registradas en la web." : "Total number of pageviews and requests logged on the site.", "center")}
+                        {renderInfoTooltip("totalHits", lang === "es" ? "Suma total de páginas cargadas y solicitudes registradas en la web." : "Total number of pageviews and requests logged on the site.", "shift-right-mobile")}
                       </div>
                       <span className="text-3xl font-black font-mono text-slate-950 tracking-tight">{analyticsData.overview.visitors}</span>
                       <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.visitors_growth?.startsWith("↓") ? "text-rose-600" : "text-emerald-600"}`}>
@@ -1921,7 +1929,7 @@ export default function DashboardClient({
                     }`}>
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-sky-600 uppercase tracking-wider">{t.analyticsUniques}</span>
-                        {renderInfoTooltip("uniques", lang === "es" ? "Número de usuarios o dispositivos distintos que han accedido a la web." : "Number of distinct users or individual devices visiting the site.", "center")}
+                        {renderInfoTooltip("uniques", lang === "es" ? "Número de usuarios o dispositivos distintos que han accedido a la web." : "Number of distinct users or individual devices visiting the site.", "shift-left-mobile")}
                       </div>
                       <span className="text-3xl font-black font-mono text-sky-600 tracking-tight">{analyticsData.overview.unique_visitors}</span>
                       <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.unique_growth?.startsWith("↓") ? "text-rose-600" : "text-sky-600"}`}>
@@ -1934,7 +1942,7 @@ export default function DashboardClient({
                     }`}>
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">{t.analyticsSessions}</span>
-                        {renderInfoTooltip("sessions", lang === "es" ? "Grupos de interacción continua realizadas por un visitante sin interrupciones." : "Continuous periods of user activity on the site without long breaks.", "center")}
+                        {renderInfoTooltip("sessions", lang === "es" ? "Grupos de interacción continua realizadas por un visitante sin interrupciones." : "Continuous periods of user activity on the site without long breaks.", "shift-right-mobile")}
                       </div>
                       <span className="text-3xl font-black font-mono text-emerald-600 tracking-tight">{analyticsData.overview.sessions}</span>
                       <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.sessions_growth?.startsWith("↓") ? "text-rose-600" : "text-emerald-600"}`}>
@@ -1947,7 +1955,7 @@ export default function DashboardClient({
                     }`}>
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">{t.analyticsDuration}</span>
-                        {renderInfoTooltip("duration", lang === "es" ? "Tiempo medio estimado que pasa cada visitante dentro del sitio web." : "Average time a visitor spends navigating pages during a session.", "center")}
+                        {renderInfoTooltip("duration", lang === "es" ? "Tiempo medio estimado que pasa cada visitante dentro del sitio web." : "Average time a visitor spends navigating pages during a session.", "shift-left-mobile")}
                       </div>
                       <span className="text-3xl font-black font-mono text-slate-900 tracking-tight">{analyticsData.overview.avg_duration}s</span>
                       <span className="text-[10px] text-slate-500 font-bold block mt-1">Promedio por sesión</span>
