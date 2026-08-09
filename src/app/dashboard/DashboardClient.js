@@ -898,11 +898,71 @@ export default function DashboardClient({
     );
   }
 
+  function formatReferrerName(ref) {
+    if (!ref || ref === "Direct / None" || ref === "Direct" || ref === "Directo / Ninguno" || ref === "" || ref === "null" || ref === "undefined") {
+      return "Directo";
+    }
+
+    const str = String(ref).trim();
+    const lower = str.toLowerCase();
+
+    // Specific brand / browser / platform matches
+    if (lower.includes("google")) return "Google";
+    if (lower.includes("safari")) return "Safari";
+    if (lower.includes("edge") || lower.includes("msn")) return "Edge";
+    if (lower.includes("bing")) return "Bing";
+    if (lower.includes("facebook") || lower.includes("fb.com")) return "Facebook";
+    if (lower.includes("tiktok")) return "TikTok";
+    if (lower.includes("instagram")) return "Instagram";
+    if (lower.includes("twitter") || lower.includes("t.co") || lower.includes("x.com")) return "Twitter / X";
+    if (lower.includes("linkedin") || lower.includes("lnkd.in")) return "LinkedIn";
+    if (lower.includes("youtube") || lower.includes("youtu.be")) return "YouTube";
+    if (lower.includes("github")) return "GitHub";
+    if (lower.includes("reddit")) return "Reddit";
+    if (lower.includes("yahoo")) return "Yahoo";
+    if (lower.includes("duckduckgo")) return "DuckDuckGo";
+    if (lower.includes("whatsapp")) return "WhatsApp";
+    if (lower.includes("telegram") || lower.includes("t.me")) return "Telegram";
+    if (lower.includes("internal ai engine") || lower.includes("ai engine")) return "Motor IA";
+    if (lower.includes("spplabs") || lower.includes("spp labs")) return "SPP Labs";
+
+    // Fallback URL clean domain extraction
+    if (str.startsWith("http://") || str.startsWith("https://") || str.startsWith("android-app://")) {
+      try {
+        let clean = str.replace(/^(https?:\/\/)?(android-app:\/\/)?(www\.|m\.|l\.)?/, "");
+        clean = clean.split("/")[0].split("?")[0].split(":")[0];
+        if (clean) {
+          const parts = clean.split(".");
+          if (parts.length >= 2) {
+            const namePart = parts[parts.length - 2];
+            if (namePart.length >= 2) {
+              return namePart.charAt(0).toUpperCase() + namePart.slice(1);
+            }
+          }
+          return clean.charAt(0).toUpperCase() + clean.slice(1);
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
   function ReferralFunnel({ data }) {
     if (!data || data.length === 0) return <p className="text-xs text-slate-450 py-6 text-center">No hay datos</p>;
 
-    const total = data.reduce((acc, item) => acc + Number(item.count || 0), 0);
-    const sortedData = [...data].sort((a, b) => b.count - a.count).slice(0, 5);
+    // Group / consolidate traffic sources by friendly formatted name
+    const grouped = {};
+    data.forEach(item => {
+      const cleanName = formatReferrerName(item.referrer);
+      const count = Number(item.count || 0);
+      grouped[cleanName] = (grouped[cleanName] || 0) + count;
+    });
+
+    const consolidatedData = Object.entries(grouped).map(([referrer, count]) => ({ referrer, count }));
+    const total = consolidatedData.reduce((acc, item) => acc + item.count, 0);
+    const sortedData = consolidatedData.sort((a, b) => b.count - a.count).slice(0, 5);
     const colors = ["#8b5cf6", "#06b6d4", "#f59e0b", "#f43f5e", "#10b981"];
 
     let currentFunnelY = 80;
@@ -920,7 +980,7 @@ export default function DashboardClient({
       const pathD = `M 20 ${sourceY} C 100 ${sourceY}, 100 ${destY}, 180 ${destY}`;
 
       return {
-        name: item.referrer || "Direct / None",
+        name: item.referrer,
         count: item.count,
         percent: total > 0 ? ((item.count / total) * 100).toFixed(1) : 0,
         pathD,
@@ -937,7 +997,7 @@ export default function DashboardClient({
           <svg viewBox="0 0 240 200" className="w-full h-full overflow-visible">
             {/* Funnel Mouth Indicator on the Right */}
             <path d="M 180 75 L 210 75 L 225 100 L 225 120 L 210 145 L 180 145 Z" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="1" />
-            <text x="202" y="113" fill="#64748b" className="text-[7px] font-black tracking-widest font-mono">FUNNEL</text>
+            <text x="200" y="113" fill="#64748b" textAnchor="middle" className="text-[7px] font-black tracking-widest font-mono">EMBUDO</text>
             
             {/* Render bezier lanes */}
             {lanes.map((lane, idx) => (
@@ -973,7 +1033,7 @@ export default function DashboardClient({
               <div className="flex items-center justify-between text-xs font-bold">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: lane.color }}></span>
-                  <span className="text-slate-800 font-medium truncate max-w-[120px]">{lane.name}</span>
+                  <span className="text-slate-800 font-medium truncate max-w-[150px]" title={lane.name}>{lane.name}</span>
                 </div>
                 <span className="font-mono text-slate-900">{lane.count} ({lane.percent}%)</span>
               </div>

@@ -433,7 +433,7 @@ function generateMockSeedEvents(website_id) {
   const sessionIds = Array.from({ length: 300 }, () => crypto.randomUUID());
   
   const pages = ["/", "/services", "/bookings", "/contacts", "/pricing", "/about"];
-  const referrers = ["Direct / None", "https://google.com", "https://github.com", "https://twitter.com", "https://linkedin.com"];
+  const referrers = ["Direct / None", "https://google.com", "https://safari.apple.com", "https://edge.microsoft.com", "https://bing.com", "https://facebook.com", "https://tiktok.com"];
   const browsers = ["Chrome", "Safari", "Firefox", "Edge"];
   const devices = ["Desktop", "Mobile", "Tablet"];
   const countries = ["Spain", "Spain", "United States", "United Kingdom", "Germany", "France", "Italy"];
