@@ -475,6 +475,71 @@ export default function DashboardClient({
   const [visitorsTrends, setVisitorsTrends] = useState([]);
   const [visitorsTrendsLoading, setVisitorsTrendsLoading] = useState(false);
 
+  // Mobile / Touch Active States for Info Tooltips & Chart Points
+  const [activeTooltipId, setActiveTooltipId] = useState(null);
+  const [activeChartPointIdx, setActiveChartPointIdx] = useState(null);
+
+  useEffect(() => {
+    const handleGlobalTap = () => {
+      setActiveTooltipId(null);
+      setActiveChartPointIdx(null);
+    };
+    window.addEventListener("click", handleGlobalTap);
+    window.addEventListener("touchend", handleGlobalTap);
+    return () => {
+      window.removeEventListener("click", handleGlobalTap);
+      window.removeEventListener("touchend", handleGlobalTap);
+    };
+  }, []);
+
+  const renderInfoTooltip = (id, text, align = "center") => {
+    const isOpen = activeTooltipId === id;
+    
+    // Smart placement classes to prevent overflow on mobile screen edges:
+    let containerPos = "left-1/2 -translate-x-1/2";
+    let arrowPos = "left-1/2 -translate-x-1/2";
+
+    if (align === "left") {
+      containerPos = "left-0 sm:left-1/2 translate-x-0 sm:-translate-x-1/2";
+      arrowPos = "left-4 sm:left-1/2 translate-x-0 sm:-translate-x-1/2";
+    } else if (align === "right") {
+      containerPos = "right-0 sm:left-1/2 left-auto sm:left-auto translate-x-0 sm:-translate-x-1/2";
+      arrowPos = "right-4 sm:left-1/2 left-auto sm:left-auto translate-x-0 sm:-translate-x-1/2";
+    }
+
+    return (
+      <div 
+        className="relative group/info cursor-pointer inline-flex items-center"
+        onClick={(e) => {
+          e.stopPropagation();
+          setActiveTooltipId(prev => (prev === id ? null : id));
+        }}
+        onTouchEnd={(e) => {
+          e.stopPropagation();
+          setActiveTooltipId(prev => (prev === id ? null : id));
+        }}
+      >
+        <svg 
+          className={`w-3.5 h-3.5 transition-colors ${isOpen ? "text-slate-900 scale-110" : "text-slate-400 group-hover/info:text-slate-700"}`} 
+          fill="none" 
+          stroke="currentColor" 
+          strokeWidth="2" 
+          viewBox="0 0 24 24"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
+        </svg>
+
+        <div className={`transition-all duration-200 absolute bottom-full mb-2.5 w-48 sm:w-56 max-w-[80vw] bg-slate-950 text-white text-[10px] font-medium p-2.5 rounded-2xl shadow-2xl z-50 leading-relaxed text-center border border-slate-700/60 ${containerPos} ${
+          isOpen ? "opacity-100 visible pointer-events-auto scale-100" : "opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible group-hover/info:pointer-events-auto pointer-events-none"
+        }`}>
+          {text}
+          <div className={`absolute top-full -mt-1 border-4 border-transparent border-t-slate-950 ${arrowPos}`}></div>
+        </div>
+      </div>
+    );
+  };
+
   const fetchAnalytics = async (timeframeParam = analyticsTimeframe) => {
     setAnalyticsLoading(true);
     setAnalyticsError("");
@@ -1822,20 +1887,11 @@ export default function DashboardClient({
               {analyticsData && (
                 <div className="space-y-8 w-full">
                   {/* Color-Coded KPI Overview Stat Cards */}
-                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 w-full">
-                    <div className="bg-white border-t-4 border-t-purple-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative">
+                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 w-full relative z-20">
+                    <div className="bg-white border-t-4 border-t-purple-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative z-10 hover:z-30">
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-purple-600 uppercase tracking-wider">{t.analyticsTotalHits}</span>
-                        <div className="relative group/info cursor-help inline-flex items-center">
-                          <svg className="w-3.5 h-3.5 text-purple-400 group-hover/info:text-purple-600 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
-                          </svg>
-                          <div className="opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-900 text-white text-[10px] font-medium p-2.5 rounded-xl shadow-xl z-30 leading-tight text-center">
-                            {lang === "es" ? "Suma total de páginas cargadas y solicitudes registradas en la web." : "Total number of pageviews and requests logged on the site."}
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
-                          </div>
-                        </div>
+                        {renderInfoTooltip("totalHits", lang === "es" ? "Suma total de páginas cargadas y solicitudes registradas en la web." : "Total number of pageviews and requests logged on the site.", "left")}
                       </div>
                       <span className="text-3xl font-black font-mono text-slate-950 tracking-tight">{analyticsData.overview.visitors}</span>
                       <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.visitors_growth?.startsWith("↓") ? "text-rose-600" : "text-emerald-600"}`}>
@@ -1843,19 +1899,10 @@ export default function DashboardClient({
                       </span>
                     </div>
 
-                    <div className="bg-white border-t-4 border-t-sky-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative">
+                    <div className="bg-white border-t-4 border-t-sky-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative z-10 hover:z-30">
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-sky-600 uppercase tracking-wider">{t.analyticsUniques}</span>
-                        <div className="relative group/info cursor-help inline-flex items-center">
-                          <svg className="w-3.5 h-3.5 text-sky-400 group-hover/info:text-sky-600 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
-                          </svg>
-                          <div className="opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-900 text-white text-[10px] font-medium p-2.5 rounded-xl shadow-xl z-30 leading-tight text-center">
-                            {lang === "es" ? "Número de usuarios o dispositivos distintos que han accedido a la web." : "Number of distinct users or individual devices visiting the site."}
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
-                          </div>
-                        </div>
+                        {renderInfoTooltip("uniques", lang === "es" ? "Número de usuarios o dispositivos distintos que han accedido a la web." : "Number of distinct users or individual devices visiting the site.", "right")}
                       </div>
                       <span className="text-3xl font-black font-mono text-sky-600 tracking-tight">{analyticsData.overview.unique_visitors}</span>
                       <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.unique_growth?.startsWith("↓") ? "text-rose-600" : "text-sky-600"}`}>
@@ -1863,19 +1910,10 @@ export default function DashboardClient({
                       </span>
                     </div>
 
-                    <div className="bg-white border-t-4 border-t-emerald-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative">
+                    <div className="bg-white border-t-4 border-t-emerald-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative z-10 hover:z-30">
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">{t.analyticsSessions}</span>
-                        <div className="relative group/info cursor-help inline-flex items-center">
-                          <svg className="w-3.5 h-3.5 text-emerald-400 group-hover/info:text-emerald-600 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
-                          </svg>
-                          <div className="opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-900 text-white text-[10px] font-medium p-2.5 rounded-xl shadow-xl z-30 leading-tight text-center">
-                            {lang === "es" ? "Grupos de interacción continua realizadas por un visitante sin interrupciones." : "Continuous periods of user activity on the site without long breaks."}
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
-                          </div>
-                        </div>
+                        {renderInfoTooltip("sessions", lang === "es" ? "Grupos de interacción continua realizadas por un visitante sin interrupciones." : "Continuous periods of user activity on the site without long breaks.", "left")}
                       </div>
                       <span className="text-3xl font-black font-mono text-emerald-600 tracking-tight">{analyticsData.overview.sessions}</span>
                       <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.sessions_growth?.startsWith("↓") ? "text-rose-600" : "text-emerald-600"}`}>
@@ -1883,37 +1921,19 @@ export default function DashboardClient({
                       </span>
                     </div>
 
-                    <div className="bg-white border-t-4 border-t-amber-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative">
+                    <div className="bg-white border-t-4 border-t-amber-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative z-10 hover:z-30">
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">{t.analyticsDuration}</span>
-                        <div className="relative group/info cursor-help inline-flex items-center">
-                          <svg className="w-3.5 h-3.5 text-amber-400 group-hover/info:text-amber-600 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
-                          </svg>
-                          <div className="opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-900 text-white text-[10px] font-medium p-2.5 rounded-xl shadow-xl z-30 leading-tight text-center">
-                            {lang === "es" ? "Tiempo medio estimado que pasa cada visitante dentro del sitio web." : "Average time a visitor spends navigating pages during a session."}
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
-                          </div>
-                        </div>
+                        {renderInfoTooltip("duration", lang === "es" ? "Tiempo medio estimado que pasa cada visitante dentro del sitio web." : "Average time a visitor spends navigating pages during a session.", "right")}
                       </div>
                       <span className="text-3xl font-black font-mono text-slate-900 tracking-tight">{analyticsData.overview.avg_duration}s</span>
                       <span className="text-[10px] text-slate-500 font-bold block mt-1">Promedio por sesión</span>
                     </div>
 
-                    <div className="bg-white border-t-4 border-t-indigo-600 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm glass-card-hover hover:shadow-md flex flex-col justify-center items-center relative">
+                    <div className="bg-white border-t-4 border-t-indigo-600 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm glass-card-hover hover:shadow-md flex flex-col justify-center items-center relative z-10 hover:z-30">
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <span className="text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider">{t.analyticsBounce}</span>
-                        <div className="relative group/info cursor-help inline-flex items-center">
-                          <svg className="w-3.5 h-3.5 text-indigo-400 group-hover/info:text-indigo-600 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
-                          </svg>
-                          <div className="opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-900 text-white text-[10px] font-medium p-2.5 rounded-xl shadow-xl z-30 leading-tight text-center">
-                            {lang === "es" ? "Porcentaje de visitas donde el usuario salió tras ver solo una página." : "Percentage of visits where the user left after viewing only one page."}
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
-                          </div>
-                        </div>
+                        {renderInfoTooltip("bounce", lang === "es" ? "Porcentaje de visitas donde el usuario salió tras ver solo una página." : "Percentage of visits where the user left after viewing only one page.", "center")}
                       </div>
                       <span className="text-3xl font-black font-mono text-indigo-600 tracking-tight">{analyticsData.overview.bounce_rate}%</span>
                     </div>
@@ -2094,31 +2114,53 @@ export default function DashboardClient({
                                     />
                                   )}
                                   
-                                  {/* HOVER POINTS & TOOLTIPS & X TICK LABELS */}
+                                  {/* HOVER & TOUCH TAP POINTS & TOOLTIPS & X TICK LABELS */}
                                   {ptsArr.map((pt, idx) => {
                                     const labelX = formatXLabel(pt.t);
                                     const countVal = Number(pt.t.count || 0);
+                                    const isPointActive = activeChartPointIdx === idx;
+
+                                    // Smart Y placement: if point near top (pt.y < 45), place tooltip below pt.y + 12
+                                    const tooltipY = pt.y < 45 ? pt.y + 12 : pt.y - 32;
+                                    
+                                    // Smart X placement: prevent clipping on left (pt.x < 55) or right (pt.x > width - 55)
+                                    let tooltipX = pt.x - 45;
+                                    if (pt.x < 55) tooltipX = pt.x - 10;
+                                    if (pt.x > width - 55) tooltipX = pt.x - 80;
 
                                     return (
-                                      <g key={idx} className="group cursor-pointer">
-                                        {/* Transparent Fixed Mouse Hit Area */}
-                                        <circle cx={pt.x} cy={pt.y} r="14" fill="transparent" />
+                                      <g 
+                                        key={idx} 
+                                        className="group cursor-pointer"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setActiveChartPointIdx(prev => (prev === idx ? null : idx));
+                                        }}
+                                        onTouchEnd={(e) => {
+                                          e.stopPropagation();
+                                          setActiveChartPointIdx(prev => (prev === idx ? null : idx));
+                                        }}
+                                      >
+                                        {/* Large Touch Target for Mobile (36px diameter) */}
+                                        <circle cx={pt.x} cy={pt.y} r="18" fill="transparent" className="cursor-pointer" />
 
-                                        {/* Fixed Visible Dot (Does not move or scale on hover) */}
+                                        {/* Fixed Visible Dot (Does not move or scale on hover or tap) */}
                                         <circle 
                                           cx={pt.x} 
                                           cy={pt.y} 
                                           r="4.5" 
-                                          fill="#0284c7" 
+                                          fill={isPointActive ? "#0f172a" : "#0284c7"} 
                                           stroke="#ffffff" 
                                           strokeWidth="2" 
-                                          className="pointer-events-none" 
+                                          className="pointer-events-none transition-colors" 
                                         />
 
-                                        {/* Hover Tooltip Group */}
-                                        <g className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
-                                          <rect x={pt.x - 45} y={pt.y - 32} width="90" height="22" rx="6" fill="#0f172a" />
-                                          <text x={pt.x} y={pt.y - 18} fill="#ffffff" fontSize="9" fontWeight="900" textAnchor="middle" className="font-mono">
+                                        {/* Hover & Touch Tap Tooltip Group */}
+                                        <g className={`transition-opacity duration-150 pointer-events-none ${
+                                          isPointActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                                        }`}>
+                                          <rect x={tooltipX} y={tooltipY} width="90" height="22" rx="6" fill="#0f172a" />
+                                          <text x={tooltipX + 45} y={tooltipY + 14} fill="#ffffff" fontSize="9" fontWeight="900" textAnchor="middle" className="font-mono">
                                             {countVal} {countVal === 1 ? (lang === "es" ? "visitante" : "visitor") : (lang === "es" ? "visitantes" : "visitors")}
                                           </text>
                                         </g>
@@ -2214,7 +2256,7 @@ export default function DashboardClient({
                   </div>
 
                   {/* Conversions Table */}
-                  <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm w-full">
+                  <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm w-full relative z-10">
                     <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">{t.analyticsEvents}</h3>
                     {analyticsData.conversions.length === 0 ? (
                       <p className="text-xs text-slate-450 py-6 text-center">
@@ -2226,6 +2268,8 @@ export default function DashboardClient({
                           let label = conv.event_type;
                           let desc = lang === "es" ? "Eventos e interacciones registradas." : "Recorded events and interactions.";
                           let color = "text-slate-950";
+
+                          const colAlign = idx % 2 === 0 ? "left" : "right";
 
                           if (conv.event_type === "form_submit") {
                             label = lang === "es" ? "Formularios Enviados" : "Form Submissions";
@@ -2247,19 +2291,10 @@ export default function DashboardClient({
                             label = conv.event_type.replace(/_/g, " ").toUpperCase();
                           }
                           return (
-                            <div key={idx} className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-center shadow-xs hover:shadow-sm transition-all relative">
+                            <div key={idx} className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-center shadow-xs hover:shadow-sm transition-all relative z-10 hover:z-30">
                               <div className="flex items-center justify-center gap-1.5 mb-1">
                                 <span className="text-xs text-slate-500 font-bold uppercase tracking-wide">{label}</span>
-                                <div className="relative group/info cursor-help inline-flex items-center">
-                                  <svg className="w-3.5 h-3.5 text-slate-400 group-hover/info:text-slate-700 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
-                                  </svg>
-                                  <div className="opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-900 text-white text-[10px] font-medium p-2.5 rounded-xl shadow-xl z-30 leading-tight text-center">
-                                    {desc}
-                                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
-                                  </div>
-                                </div>
+                                {renderInfoTooltip(`conv_${conv.event_type}`, desc, colAlign)}
                               </div>
                               <span className={`text-2xl font-black font-mono ${color}`}>{conv.count}</span>
                             </div>
