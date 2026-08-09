@@ -1464,7 +1464,7 @@ export default function DashboardClient({
           const hasAnyActiveNotification = overviewNotifCount > 0 || clientesNotifCount > 0 || iaNotifCount > 0 || notificacionesNotifCount > 0 || hasAnalyticsNotif;
 
           return (
-            <div className="lg:hidden bg-white border-b border-slate-200/90 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs shrink-0">
+            <header className="lg:hidden bg-white border-b border-slate-200/90 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs shrink-0">
               <div className="flex items-center gap-3">
                 <button
                   type="button"
@@ -1501,7 +1501,7 @@ export default function DashboardClient({
                   {currentWebsite.domain}
                 </span>
               </div>
-            </div>
+            </header>
           );
         })()}
 
@@ -1702,7 +1702,7 @@ export default function DashboardClient({
         )}
 
         {/* Tab content viewport window */}
-        <main ref={mainContainerRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 sm:p-8 w-full max-w-full">
+        <main ref={mainContainerRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 sm:p-8 pb-32 sm:pb-12 w-full max-w-full touch-pan-y [overscroll-behavior-y:contain] [-webkit-overflow-scrolling:touch]">
           {/* TAB: ADMIN PANEL (USUARIOS) */}
           {activeTab === "admin" && session.role === "ADMIN" && (
             <div className="space-y-8 animate-fade-in">
