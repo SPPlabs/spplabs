@@ -2,6 +2,23 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { MessageType } from "./types";
 
 const SESSION_STORAGE_KEY = "spp_chatbot_conversation_session";
+const VISITOR_ID_KEY = "spp_chatbot_visitor_id";
+
+function getOrGenerateVisitorId(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    let vid = localStorage.getItem(VISITOR_ID_KEY);
+    if (!vid) {
+      vid = typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      localStorage.setItem(VISITOR_ID_KEY, vid);
+    }
+    return vid;
+  } catch {
+    return "";
+  }
+}
 
 export function useChat(websiteId: string, apiKey: string, welcomeMessage: string) {
   const [messages, setMessages] = useState<MessageType[]>([]);
@@ -116,6 +133,7 @@ export function useChat(websiteId: string, apiKey: string, welcomeMessage: strin
         body: JSON.stringify({
           website_id: websiteId,
           message: text,
+          visitor_id: getOrGenerateVisitorId(),
         }),
         signal: controller.signal,
       });

@@ -264,7 +264,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     // Record Visitor Message into PostgreSQL using withRLS
     let conversationId = body.conversation_id || body.conversationId;
-    const visitorId = body.visitor_id || body.visitorId || (origin ? `visitor_${origin.replace(/[^a-z0-9]/gi, '_')}` : "visitor_anonymous");
+    const visitorId = body.visitor_id || body.visitorId || (globalThis.crypto?.randomUUID ? `visitor_${globalThis.crypto.randomUUID()}` : `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
     const rlsDb = withRLS(website.id);
 
     let activeConversation = null;
