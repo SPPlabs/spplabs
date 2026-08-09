@@ -1866,13 +1866,19 @@ export default function DashboardClient({
                         </div>
                         <div>
                           <h3 className="text-base font-black text-slate-950 uppercase tracking-wider">{t.analyticsTrafficVolume}</h3>
-                          <p className="text-xs text-slate-400 font-medium">Histórico de visitas e interacción</p>
+                          <p className="text-xs text-slate-400 font-medium">
+                            {lang === "es" 
+                              ? `Histórico de visitantes por ${visitorsTimeframe === "day" ? "hora" : visitorsTimeframe === "week" ? "día de la semana" : visitorsTimeframe === "month" ? "día del mes" : visitorsTimeframe === "year" ? "mes" : "periodo"}`
+                              : "Visitor history over time"}
+                          </p>
                         </div>
                       </div>
 
                       {/* Independent Timeframe Dropdown Select for Visitors Chart */}
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:inline-block">Periodo Gráfica:</span>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:inline-block">
+                          {lang === "es" ? "Periodo Gráfica:" : "Chart Period:"}
+                        </span>
                         <select
                           value={visitorsTimeframe}
                           onChange={(e) => {
@@ -1883,11 +1889,11 @@ export default function DashboardClient({
                           disabled={visitorsTrendsLoading}
                           className="bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs px-3.5 py-1.5 rounded-xl font-bold border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-400 cursor-pointer transition-all shadow-xs"
                         >
-                          <option value="day">{lang === "es" ? "Día" : "Day"}</option>
-                          <option value="week">{lang === "es" ? "Semana" : "Week"}</option>
-                          <option value="month">{lang === "es" ? "Mes" : "Month"}</option>
-                          <option value="year">{lang === "es" ? "Año" : "Year"}</option>
-                          <option value="all">{lang === "es" ? "Todo" : "All"}</option>
+                          <option value="day">{lang === "es" ? "Día (Por hora)" : "Day (Hourly)"}</option>
+                          <option value="week">{lang === "es" ? "Semana (Por día)" : "Week (Daily)"}</option>
+                          <option value="month">{lang === "es" ? "Mes (Por día)" : "Month (Daily)"}</option>
+                          <option value="year">{lang === "es" ? "Año (Por mes)" : "Year (Monthly)"}</option>
+                          <option value="all">{lang === "es" ? "Todo (Por mes)" : "All (Monthly)"}</option>
                         </select>
                       </div>
                     </div>
@@ -1912,6 +1918,52 @@ export default function DashboardClient({
                           const areaPts = trendPoints.length > 0 
                             ? `0,${height} ${pts} ${width},${height}` 
                             : "";
+
+                          const formatXLabel = (t) => {
+                            const tf = visitorsTimeframe;
+                            if (tf === "day") {
+                              if (t.hour !== undefined && t.hour !== null) return `${String(t.hour).padStart(2, "0")}:00`;
+                              if (t.date && t.date.includes(":")) return t.date;
+                              return t.date || `${t.hour || 0}:00`;
+                            }
+                            if (tf === "week") {
+                              if (t.date) {
+                                const parts = t.date.split("-");
+                                if (parts.length === 3) {
+                                  const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+                                  const days = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+                                  return `${days[d.getDay()]} ${parts[2]}/${parts[1]}`;
+                                }
+                                return t.date;
+                              }
+                              return t.hour !== undefined ? `${t.hour}:00` : "";
+                            }
+                            if (tf === "month") {
+                              if (t.date) {
+                                const parts = t.date.split("-");
+                                if (parts.length === 3) return `${parts[2]}/${parts[1]}`;
+                                return t.date;
+                              }
+                              return "";
+                            }
+                            if (tf === "year" || tf === "all") {
+                              if (t.date) {
+                                const parts = t.date.split("-");
+                                if (parts.length >= 2) {
+                                  const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+                                  const mIdx = Number(parts[1]) - 1;
+                                  return months[mIdx] || parts[1];
+                                }
+                                return t.date;
+                              }
+                              return "";
+                            }
+                            if (t.date) {
+                              const parts = t.date.split("-");
+                              return parts.length > 1 ? parts.slice(1).join("/") : t.date;
+                            }
+                            return t.hour !== undefined ? `${t.hour}:00` : "";
+                          };
 
                           return (
                             <div className="w-full overflow-x-auto">
@@ -1944,12 +1996,15 @@ export default function DashboardClient({
                                   {trendPoints.map((t, idx) => {
                                     const x = idx * spacing;
                                     const y = height - (Number(t.count || 0) / maxVal) * (height - 30) - 15;
+                                    const labelX = formatXLabel(t);
+                                    const countVal = Number(t.count || 0);
+
                                     return (
                                       <g key={idx} className="group cursor-pointer">
                                         {/* Transparent Fixed Mouse Hit Area to prevent hover flicker */}
                                         <circle cx={x} cy={y} r="14" fill="transparent" />
 
-                                        {/* Visible Animated Dot Circle */}
+                                        {/* Smooth Dot Circle (Hidden by default, visible on group hover) */}
                                         <circle 
                                           cx={x} 
                                           cy={y} 
@@ -1957,20 +2012,20 @@ export default function DashboardClient({
                                           fill="#0284c7" 
                                           stroke="#ffffff" 
                                           strokeWidth="2.5" 
-                                          className="pointer-events-none transition-transform duration-150 group-hover:scale-150" 
+                                          className="pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 transform group-hover:scale-125" 
                                         />
 
-                                        {/* Hover Tooltip Group */}
+                                        {/* Hover Tooltip Group showing visitantes */}
                                         <g className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
-                                          <rect x={x - 30} y={y - 32} width="60" height="22" rx="6" fill="#0f172a" />
+                                          <rect x={x - 45} y={y - 32} width="90" height="22" rx="6" fill="#0f172a" />
                                           <text x={x} y={y - 18} fill="#ffffff" fontSize="9" fontWeight="900" textAnchor="middle" className="font-mono">
-                                            {t.count} peticiones
+                                            {countVal} {countVal === 1 ? (lang === "es" ? "visitante" : "visitor") : (lang === "es" ? "visitantes" : "visitors")}
                                           </text>
                                         </g>
 
-                                        {/* Date / Hour Label */}
+                                        {/* Date / Hour Label along X Axis */}
                                         <text x={x} y={height + 15} fill="#64748b" fontSize="9" fontWeight="bold" textAnchor="middle" className="pointer-events-none font-mono">
-                                          {t.date ? t.date.split("-").slice(1).join("/") : (t.hour !== undefined ? t.hour + "h" : "")}
+                                          {labelX}
                                         </text>
                                       </g>
                                     );

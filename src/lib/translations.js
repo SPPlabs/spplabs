@@ -77,7 +77,7 @@ export const translations = {
     analyticsSessions: "Sesiones",
     analyticsDuration: "Duración Promedio",
     analyticsBounce: "Porcentaje de Rebote",
-    analyticsTrafficVolume: "Volumen de Tráfico (Últimos 7 Días)",
+    analyticsTrafficVolume: "Evolución de Visitantes",
     analyticsTopPages: "Páginas Más Visitadas",
     analyticsReferrers: "Fuentes de Tráfico",
     analyticsGeo: "Origen Geográfico",
