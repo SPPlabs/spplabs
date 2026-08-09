@@ -811,8 +811,8 @@ export default function DashboardClient({
   // Handle Chatbot Knowledge RAG Prompt text update
   const handleUpdateChatbotKnowledge = async (e) => {
     e.preventDefault();
-    if (chatbotContent.length > 30000) {
-      alert("El contenido de la base de conocimiento no puede superar los 30,000 caracteres.");
+    if (chatbotContent.length > 40000) {
+      alert("El contenido de la base de conocimiento no puede superar los 40,000 caracteres.");
       return;
     }
     setIaSaving(true);
@@ -1194,7 +1194,7 @@ export default function DashboardClient({
 
 
   return (
-    <div className="h-screen w-screen bg-slate-50 flex flex-col lg:flex-row overflow-hidden font-sans selection:bg-brand-blue selection:text-white text-slate-900">
+    <div className="h-screen h-[100dvh] w-screen bg-slate-50 flex flex-col lg:flex-row overflow-hidden font-sans selection:bg-brand-blue selection:text-white text-slate-900">
       
       {/* Desktop Sidebar (lg:flex) */}
       <aside className={`hidden lg:flex h-full bg-white border-r border-slate-200/80 flex-col justify-between shrink-0 relative z-20 shadow-sm transition-all duration-300 ease-in-out ${
@@ -1445,7 +1445,7 @@ export default function DashboardClient({
       </aside>
 
       {/* RIGHT MAIN VIEWPORT */}
-      <div className="flex-1 h-full flex flex-col overflow-hidden bg-slate-50 relative z-10 max-w-full">
+      <div className="flex-1 min-h-0 h-full flex flex-col overflow-hidden bg-slate-50 relative z-10 max-w-full">
 
         {/* STICKY MOBILE TOP HEADER (lg:hidden) */}
         {(() => {
@@ -1464,7 +1464,7 @@ export default function DashboardClient({
           const hasAnyActiveNotification = overviewNotifCount > 0 || clientesNotifCount > 0 || iaNotifCount > 0 || notificacionesNotifCount > 0 || hasAnalyticsNotif;
 
           return (
-            <div className="lg:hidden bg-white border-b border-slate-200/90 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
+            <div className="lg:hidden bg-white border-b border-slate-200/90 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs shrink-0">
               <div className="flex items-center gap-3">
                 <button
                   type="button"
@@ -1702,7 +1702,7 @@ export default function DashboardClient({
         )}
 
         {/* Tab content viewport window */}
-        <main ref={mainContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-8 w-full max-w-full">
+        <main ref={mainContainerRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 sm:p-8 w-full max-w-full">
           {/* TAB: ADMIN PANEL (USUARIOS) */}
           {activeTab === "admin" && session.role === "ADMIN" && (
             <div className="space-y-8 animate-fade-in">
@@ -2406,18 +2406,18 @@ export default function DashboardClient({
                   <p className="text-slate-550 text-sm mt-1">{t.overviewActiveSince} {currentWebsite.registeredAt ? new Date(currentWebsite.registeredAt).toLocaleDateString() : new Date(currentWebsite.createdAt).toLocaleDateString()}</p>
                 </div>
 
-                <div className="flex gap-4 shrink-0 flex-wrap">
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 min-w-[130px] text-center shadow-sm">
-                    <span className="text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wide">{t.overviewTotalContacts}</span>
-                    <span className="text-3xl font-black font-mono text-slate-900">{contactForms.length}</span>
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 w-full md:w-auto shrink-0 mt-2 md:mt-0">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 sm:p-4 text-center shadow-sm flex flex-col justify-center items-center">
+                    <span className="text-[10px] sm:text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wider leading-tight">{t.overviewTotalContacts}</span>
+                    <span className="text-xl sm:text-3xl font-black font-mono text-slate-900">{contactForms.length}</span>
                   </div>
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 min-w-[130px] text-center shadow-sm">
-                    <span className="text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wide">{t.overviewTotalBookings}</span>
-                    <span className="text-3xl font-black font-mono text-brand-green">{bookings.length}</span>
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 sm:p-4 text-center shadow-sm flex flex-col justify-center items-center">
+                    <span className="text-[10px] sm:text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wider leading-tight">{t.overviewTotalBookings}</span>
+                    <span className="text-xl sm:text-3xl font-black font-mono text-brand-green">{bookings.length}</span>
                   </div>
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 min-w-[130px] text-center shadow-sm">
-                    <span className="text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wide">{t.overviewTotalConversations}</span>
-                    <span className="text-3xl font-black font-mono text-indigo-600">{conversationsList.length}</span>
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 sm:p-4 text-center shadow-sm flex flex-col justify-center items-center">
+                    <span className="text-[10px] sm:text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wider leading-tight">{t.overviewTotalConversations}</span>
+                    <span className="text-xl sm:text-3xl font-black font-mono text-indigo-600">{conversationsList.length}</span>
                   </div>
                 </div>
               </div>
@@ -2921,11 +2921,11 @@ export default function DashboardClient({
                       </div>
                       <div className="flex items-center gap-2 self-start sm:self-center">
                         <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-xl shadow-2xs border ${
-                          chatbotContent.length >= 30000
+                          chatbotContent.length >= 40000
                             ? "text-amber-700 bg-amber-50 border-amber-300 font-extrabold"
                             : "text-slate-400 bg-white border-slate-200"
                         }`}>
-                          {chatbotContent.length.toLocaleString()} / 30,000 caracteres
+                          {chatbotContent.length.toLocaleString()} / 40,000 caracteres
                         </span>
 
                         {!isEditingKnowledge ? (
@@ -2957,7 +2957,7 @@ export default function DashboardClient({
                       readOnly={!isEditingKnowledge}
                       value={chatbotContent}
                       onChange={(e) => setChatbotContent(e.target.value)}
-                      maxLength={30000}
+                      maxLength={40000}
                       placeholder={t.iaPlaceholder}
                       className={`w-full h-72 rounded-xl p-4 text-xs resize-y leading-relaxed mt-3 shadow-2xs font-normal transition-all overflow-y-auto ${
                         !isEditingKnowledge

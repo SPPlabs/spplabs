@@ -35,9 +35,9 @@ export async function POST(request) {
       return NextResponse.json({ error: "Invalid parameters" }, { status: 400 });
     }
 
-    if (content.length > 30000) {
+    if (content.length > 40000) {
       return NextResponse.json(
-        { error: "El contenido de la base de conocimiento no puede superar los 30,000 caracteres." },
+        { error: "El contenido de la base de conocimiento no puede superar los 40,000 caracteres." },
         { status: 400 }
       );
     }
