@@ -1823,34 +1823,98 @@ export default function DashboardClient({
                 <div className="space-y-8 w-full">
                   {/* Color-Coded KPI Overview Stat Cards */}
                   <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 w-full">
-                    <div className="bg-white border-t-4 border-t-purple-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md">
-                      <span className="text-[11px] font-extrabold text-purple-600 uppercase tracking-wider block mb-1.5">{t.analyticsTotalHits}</span>
+                    <div className="bg-white border-t-4 border-t-purple-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative">
+                      <div className="flex items-center justify-center gap-1 mb-1.5">
+                        <span className="text-[11px] font-extrabold text-purple-600 uppercase tracking-wider">{t.analyticsTotalHits}</span>
+                        <div className="relative group/info cursor-help inline-flex items-center">
+                          <svg className="w-3.5 h-3.5 text-purple-400 group-hover/info:text-purple-600 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
+                          </svg>
+                          <div className="opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-900 text-white text-[10px] font-medium p-2.5 rounded-xl shadow-xl z-30 leading-tight text-center">
+                            {lang === "es" ? "Suma total de páginas cargadas y solicitudes registradas en la web." : "Total number of pageviews and requests logged on the site."}
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
+                          </div>
+                        </div>
+                      </div>
                       <span className="text-3xl font-black font-mono text-slate-950 tracking-tight">{analyticsData.overview.visitors}</span>
                       <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.visitors_growth?.startsWith("↓") ? "text-rose-600" : "text-emerald-600"}`}>
                         {analyticsData.overview.visitors_growth} {analyticsData.overview.period_label || "vs anterior"}
                       </span>
                     </div>
-                    <div className="bg-white border-t-4 border-t-sky-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md">
-                      <span className="text-[11px] font-extrabold text-sky-600 uppercase tracking-wider block mb-1.5">{t.analyticsUniques}</span>
+
+                    <div className="bg-white border-t-4 border-t-sky-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative">
+                      <div className="flex items-center justify-center gap-1 mb-1.5">
+                        <span className="text-[11px] font-extrabold text-sky-600 uppercase tracking-wider">{t.analyticsUniques}</span>
+                        <div className="relative group/info cursor-help inline-flex items-center">
+                          <svg className="w-3.5 h-3.5 text-sky-400 group-hover/info:text-sky-600 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
+                          </svg>
+                          <div className="opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-900 text-white text-[10px] font-medium p-2.5 rounded-xl shadow-xl z-30 leading-tight text-center">
+                            {lang === "es" ? "Número de usuarios o dispositivos distintos que han accedido a la web." : "Number of distinct users or individual devices visiting the site."}
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
+                          </div>
+                        </div>
+                      </div>
                       <span className="text-3xl font-black font-mono text-sky-600 tracking-tight">{analyticsData.overview.unique_visitors}</span>
                       <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.unique_growth?.startsWith("↓") ? "text-rose-600" : "text-sky-600"}`}>
                         {analyticsData.overview.unique_growth} {analyticsData.overview.period_label || "vs anterior"}
                       </span>
                     </div>
-                    <div className="bg-white border-t-4 border-t-emerald-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md">
-                      <span className="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider block mb-1.5">{t.analyticsSessions}</span>
+
+                    <div className="bg-white border-t-4 border-t-emerald-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative">
+                      <div className="flex items-center justify-center gap-1 mb-1.5">
+                        <span className="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">{t.analyticsSessions}</span>
+                        <div className="relative group/info cursor-help inline-flex items-center">
+                          <svg className="w-3.5 h-3.5 text-emerald-400 group-hover/info:text-emerald-600 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
+                          </svg>
+                          <div className="opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-900 text-white text-[10px] font-medium p-2.5 rounded-xl shadow-xl z-30 leading-tight text-center">
+                            {lang === "es" ? "Grupos de interacción continua realizadas por un visitante sin interrupciones." : "Continuous periods of user activity on the site without long breaks."}
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
+                          </div>
+                        </div>
+                      </div>
                       <span className="text-3xl font-black font-mono text-emerald-600 tracking-tight">{analyticsData.overview.sessions}</span>
                       <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.sessions_growth?.startsWith("↓") ? "text-rose-600" : "text-emerald-600"}`}>
                         {analyticsData.overview.sessions_growth} {analyticsData.overview.period_label || "vs anterior"}
                       </span>
                     </div>
-                    <div className="bg-white border-t-4 border-t-amber-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md">
-                      <span className="text-[11px] font-extrabold text-amber-600 uppercase tracking-wider block mb-1.5">{t.analyticsDuration}</span>
+
+                    <div className="bg-white border-t-4 border-t-amber-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover hover:shadow-md relative">
+                      <div className="flex items-center justify-center gap-1 mb-1.5">
+                        <span className="text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">{t.analyticsDuration}</span>
+                        <div className="relative group/info cursor-help inline-flex items-center">
+                          <svg className="w-3.5 h-3.5 text-amber-400 group-hover/info:text-amber-600 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
+                          </svg>
+                          <div className="opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-900 text-white text-[10px] font-medium p-2.5 rounded-xl shadow-xl z-30 leading-tight text-center">
+                            {lang === "es" ? "Tiempo medio estimado que pasa cada visitante dentro del sitio web." : "Average time a visitor spends navigating pages during a session."}
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
+                          </div>
+                        </div>
+                      </div>
                       <span className="text-3xl font-black font-mono text-slate-900 tracking-tight">{analyticsData.overview.avg_duration}s</span>
                       <span className="text-[10px] text-slate-500 font-bold block mt-1">Promedio por sesión</span>
                     </div>
-                    <div className="bg-white border-t-4 border-t-indigo-600 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm glass-card-hover hover:shadow-md flex flex-col justify-center items-center">
-                      <span className="text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider block mb-1.5">{t.analyticsBounce}</span>
+
+                    <div className="bg-white border-t-4 border-t-indigo-600 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm glass-card-hover hover:shadow-md flex flex-col justify-center items-center relative">
+                      <div className="flex items-center justify-center gap-1 mb-1.5">
+                        <span className="text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider">{t.analyticsBounce}</span>
+                        <div className="relative group/info cursor-help inline-flex items-center">
+                          <svg className="w-3.5 h-3.5 text-indigo-400 group-hover/info:text-indigo-600 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
+                          </svg>
+                          <div className="opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-900 text-white text-[10px] font-medium p-2.5 rounded-xl shadow-xl z-30 leading-tight text-center">
+                            {lang === "es" ? "Porcentaje de visitas donde el usuario salió tras ver solo una página." : "Percentage of visits where the user left after viewing only one page."}
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
+                          </div>
+                        </div>
+                      </div>
                       <span className="text-3xl font-black font-mono text-indigo-600 tracking-tight">{analyticsData.overview.bounce_rate}%</span>
                     </div>
                   </div>
@@ -2153,28 +2217,50 @@ export default function DashboardClient({
                   <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm w-full">
                     <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">{t.analyticsEvents}</h3>
                     {analyticsData.conversions.length === 0 ? (
-                      <p className="text-xs text-slate-450 py-6 text-center">No conversions logged.</p>
+                      <p className="text-xs text-slate-450 py-6 text-center">
+                        {lang === "es" ? "No hay conversiones registradas aún." : "No conversions logged yet."}
+                      </p>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
                         {analyticsData.conversions.map((conv, idx) => {
                           let label = conv.event_type;
+                          let desc = lang === "es" ? "Eventos e interacciones registradas." : "Recorded events and interactions.";
                           let color = "text-slate-950";
+
                           if (conv.event_type === "form_submit") {
-                            label = "Form Submissions";
+                            label = lang === "es" ? "Formularios Enviados" : "Form Submissions";
+                            desc = lang === "es" ? "Número de contactos o consultas enviadas mediante formularios en la web." : "Number of contact or lead submissions via forms.";
                             color = "text-brand-blue";
                           } else if (conv.event_type === "booking_created") {
-                            label = "Bookings Created";
+                            label = lang === "es" ? "Reservas Creadas" : "Bookings Created";
+                            desc = lang === "es" ? "Citas y reservas agendadas con éxito por los clientes." : "Appointments and bookings created by visitors.";
                             color = "text-brand-green";
                           } else if (conv.event_type === "button_click") {
-                            label = "Button Clicks";
+                            label = lang === "es" ? "Clics en Botones" : "Button Clicks";
+                            desc = lang === "es" ? "Total de clics en botones principales e interactivos (CTA)." : "Total clicks on main interactive buttons and CTAs.";
                             color = "text-slate-700";
                           } else if (conv.event_type === "outbound_link") {
-                            label = "Outbound Links";
+                            label = lang === "es" ? "Enlaces Salientes" : "Outbound Links";
+                            desc = lang === "es" ? "Clics dirigidos hacia enlaces externos, redes sociales o webs de terceros." : "Clicks towards external links or third-party sites.";
                             color = "text-red-500";
+                          } else {
+                            label = conv.event_type.replace(/_/g, " ").toUpperCase();
                           }
                           return (
-                            <div key={idx} className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-center shadow-xs hover:shadow-sm transition-all">
-                              <span className="text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wide">{label}</span>
+                            <div key={idx} className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-center shadow-xs hover:shadow-sm transition-all relative">
+                              <div className="flex items-center justify-center gap-1.5 mb-1">
+                                <span className="text-xs text-slate-500 font-bold uppercase tracking-wide">{label}</span>
+                                <div className="relative group/info cursor-help inline-flex items-center">
+                                  <svg className="w-3.5 h-3.5 text-slate-400 group-hover/info:text-slate-700 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
+                                  </svg>
+                                  <div className="opacity-0 group-hover/info:opacity-100 transition-opacity duration-200 pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-slate-900 text-white text-[10px] font-medium p-2.5 rounded-xl shadow-xl z-30 leading-tight text-center">
+                                    {desc}
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
+                                  </div>
+                                </div>
+                              </div>
                               <span className={`text-2xl font-black font-mono ${color}`}>{conv.count}</span>
                             </div>
                           );
