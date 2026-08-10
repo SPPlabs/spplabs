@@ -2732,53 +2732,298 @@ export default function DashboardClient({
 
                 {/* Token Usage Stats */}
                 <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 mb-8">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-xs font-black text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                      <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                      </svg>
-                      {t.iaTokenUsage}
-                    </h4>
-                    <span className="text-[11px] font-extrabold text-slate-600 bg-white border border-slate-200 px-3 py-1 rounded-xl shadow-2xs font-mono">
-                      {lang === "es" ? "Mes Actual: Julio 2026" : "Current Month: July 2026"}
-                    </span>
-                  </div>
-                  {aiUsage.length === 0 ? (
-                    <p className="text-xs text-slate-400 italic py-4 text-center font-medium">{t.iaNoUsage}</p>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {(() => {
-                        const promptSum = aiUsage.reduce((acc, u) => acc + u.promptTokens, 0);
-                        const completionSum = aiUsage.reduce((acc, u) => acc + u.completionTokens, 0);
-                        const totalSum = aiUsage.reduce((acc, u) => acc + u.totalTokens, 0);
-                        return (
-                          <>
-                            <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs text-center glass-card-hover">
-                              <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaPromptTokens}</span>
-                              <span className="text-2xl font-black font-mono text-slate-900 block">{promptSum.toLocaleString()}</span>
-                              <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                <div className="bg-slate-700 h-full rounded-full" style={{ width: totalSum > 0 ? `${(promptSum / totalSum) * 100}%` : '0%' }}></div>
+                  {(() => {
+                    const now = new Date();
+                    const currentYear = now.getFullYear();
+                    const currentMonthNum = now.getMonth() + 1;
+
+                    const monthsShortEs = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+                    const monthsShortEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    const monthsFullEs = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                    const monthsFullEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+                    const getMonthLabel = (m, y, short = false) => {
+                      const list = lang === "es" ? (short ? monthsShortEs : monthsFullEs) : (short ? monthsShortEn : monthsFullEn);
+                      return `${list[m - 1]} ${y}`;
+                    };
+
+                    const currentMonthLabelStr = getMonthLabel(currentMonthNum, currentYear, false);
+
+                    // Current month record
+                    const currentMonthRecord = aiUsage.find(u => u.year === currentYear && u.month === currentMonthNum) || {
+                      promptTokens: 0,
+                      completionTokens: 0,
+                      totalTokens: 0,
+                    };
+
+                    // All-Time metrics
+                    const allTimePrompt = aiUsage.reduce((acc, u) => acc + u.promptTokens, 0);
+                    const allTimeCompletion = aiUsage.reduce((acc, u) => acc + u.completionTokens, 0);
+                    const allTimeTotal = aiUsage.reduce((acc, u) => acc + u.totalTokens, 0);
+                    const activeMonthsCount = aiUsage.filter(u => u.totalTokens > 0).length || (aiUsage.length > 0 ? aiUsage.length : 1);
+                    const monthlyAverage = Math.round(allTimeTotal / activeMonthsCount);
+
+                    // Chronological usage for charts (oldest to newest)
+                    const chronologicalUsage = [...aiUsage].sort((a, b) => (a.year * 100 + a.month) - (b.year * 100 + b.month));
+                    const maxMonthlyTotal = Math.max(...chronologicalUsage.map(u => u.totalTokens), 1);
+
+                    return (
+                      <>
+                        {/* Section Header */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-200/80">
+                          <div>
+                            <h4 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                              </svg>
+                              {t.iaTokenUsage}
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5 font-medium">{t.iaSubtitle}</p>
+                          </div>
+
+                          <div className="flex items-center gap-2 self-start sm:self-auto">
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1 rounded-xl shadow-2xs font-mono">
+                              <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+                              </span>
+                              {t.iaCurrentMonth}: {currentMonthLabelStr}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Top Highlights Grid: Current Month vs All-Time */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
+                          {/* Current Month Block */}
+                          <div className="lg:col-span-7 bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs">
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                                {t.iaCurrentMonth} ({currentMonthLabelStr})
+                              </span>
+                              <span className="text-[11px] font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-lg">
+                                {currentMonthRecord.totalTokens.toLocaleString()} tokens
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-3">
+                              <div className="bg-slate-50 border border-slate-100 p-3 rounded-xl text-center">
+                                <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaPromptTokens}</span>
+                                <span className="text-base font-black font-mono text-slate-900 block">{currentMonthRecord.promptTokens.toLocaleString()}</span>
+                              </div>
+
+                              <div className="bg-slate-50 border border-slate-100 p-3 rounded-xl text-center">
+                                <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaCompletionTokens}</span>
+                                <span className="text-base font-black font-mono text-slate-900 block">{currentMonthRecord.completionTokens.toLocaleString()}</span>
+                              </div>
+
+                              <div className="bg-blue-50/50 border border-blue-100 p-3 rounded-xl text-center">
+                                <span className="text-blue-600 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaTotalTokens}</span>
+                                <span className="text-base font-black font-mono text-blue-950 block">{currentMonthRecord.totalTokens.toLocaleString()}</span>
                               </div>
                             </div>
-                            <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs text-center glass-card-hover">
-                              <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaCompletionTokens}</span>
-                              <span className="text-2xl font-black font-mono text-slate-900 block">{completionSum.toLocaleString()}</span>
-                              <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                <div className="bg-slate-900 h-full rounded-full" style={{ width: totalSum > 0 ? `${(completionSum / totalSum) * 100}%` : '0%' }}></div>
+
+                            <div className="mt-3">
+                              <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold mb-1">
+                                <span>{t.iaInputCol} ({currentMonthRecord.totalTokens > 0 ? Math.round((currentMonthRecord.promptTokens / currentMonthRecord.totalTokens) * 100) : 0}%)</span>
+                                <span>{t.iaOutputCol} ({currentMonthRecord.totalTokens > 0 ? Math.round((currentMonthRecord.completionTokens / currentMonthRecord.totalTokens) * 100) : 0}%)</span>
+                              </div>
+                              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex">
+                                <div
+                                  className="bg-slate-700 h-full transition-all duration-500"
+                                  style={{ width: currentMonthRecord.totalTokens > 0 ? `${(currentMonthRecord.promptTokens / currentMonthRecord.totalTokens) * 100}%` : '0%' }}
+                                  title={`${t.iaPromptTokens}: ${currentMonthRecord.promptTokens}`}
+                                />
+                                <div
+                                  className="bg-blue-600 h-full transition-all duration-500"
+                                  style={{ width: currentMonthRecord.totalTokens > 0 ? `${(currentMonthRecord.completionTokens / currentMonthRecord.totalTokens) * 100}%` : '0%' }}
+                                  title={`${t.iaCompletionTokens}: ${currentMonthRecord.completionTokens}`}
+                                />
                               </div>
                             </div>
-                            <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs text-center glass-card-hover">
-                              <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaTotalTokens}</span>
-                              <span className="text-2xl font-black font-mono text-slate-950 block">{totalSum.toLocaleString()}</span>
-                              <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                <div className="bg-blue-600 h-full rounded-full w-full"></div>
+                          </div>
+
+                          {/* All-Time Usage Block */}
+                          <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                                  {t.iaAllTimeUsage}
+                                </span>
+                                <span className="text-[10px] font-mono bg-white/10 text-slate-200 px-2 py-0.5 rounded-md">
+                                  {activeMonthsCount} {t.iaActiveMonths.toLowerCase()}
+                                </span>
+                              </div>
+
+                              <div className="mt-2">
+                                <span className="text-3xl font-black font-mono tracking-tight text-white block">
+                                  {allTimeTotal.toLocaleString()}
+                                </span>
+                                <span className="text-[11px] text-slate-400 font-medium block mt-0.5">
+                                  {t.iaMonthlyAverage}: <span className="font-mono text-slate-200 font-bold">{monthlyAverage.toLocaleString()}</span> tokens/mes
+                                </span>
                               </div>
                             </div>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  )}
+
+                            <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-white/10 text-xs">
+                              <div>
+                                <span className="text-[10px] text-slate-400 block uppercase font-bold">{t.iaPromptTokens}</span>
+                                <span className="font-mono font-bold text-slate-200">{allTimePrompt.toLocaleString()}</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-slate-400 block uppercase font-bold">{t.iaCompletionTokens}</span>
+                                <span className="font-mono font-bold text-slate-200">{allTimeCompletion.toLocaleString()}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Visual Usage Over Time Chart */}
+                        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs mb-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                              <svg className="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 005.814-5.519l2.74-1.22" />
+                              </svg>
+                              {t.iaUsageOverTime}
+                            </h5>
+
+                            <div className="flex items-center gap-4 text-[11px] font-bold">
+                              <span className="flex items-center gap-1.5 text-slate-600">
+                                <span className="w-2.5 h-2.5 rounded-sm bg-slate-700 inline-block"></span>
+                                {t.iaInputCol}
+                              </span>
+                              <span className="flex items-center gap-1.5 text-slate-600">
+                                <span className="w-2.5 h-2.5 rounded-sm bg-blue-600 inline-block"></span>
+                                {t.iaOutputCol}
+                              </span>
+                            </div>
+                          </div>
+
+                          {chronologicalUsage.length === 0 ? (
+                            <p className="text-xs text-slate-400 italic py-8 text-center font-medium">{t.iaNoUsageHistory}</p>
+                          ) : (
+                            <div className="pt-4 pb-2">
+                              {/* Visual Chart Container */}
+                              <div className="h-44 flex items-end justify-around gap-2 sm:gap-4 px-2 border-b border-slate-200">
+                                {chronologicalUsage.map((u) => {
+                                  const pct = maxMonthlyTotal > 0 ? (u.totalTokens / maxMonthlyTotal) * 100 : 0;
+                                  const promptPctOfBar = u.totalTokens > 0 ? (u.promptTokens / u.totalTokens) * 100 : 50;
+                                  const isCurrent = u.year === currentYear && u.month === currentMonthNum;
+                                  const monthLabelShort = getMonthLabel(u.month, u.year, true);
+                                  const monthLabelFull = getMonthLabel(u.month, u.year, false);
+
+                                  return (
+                                    <div key={`${u.year}-${u.month}`} className="flex-1 flex flex-col items-center h-full justify-end group relative cursor-pointer max-w-[80px]">
+                                      {/* Tooltip on Hover */}
+                                      <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none absolute -top-20 z-20 bg-slate-900 text-white text-[10px] rounded-xl p-2.5 shadow-xl min-w-[140px] whitespace-nowrap transform -translate-y-2 group-hover:translate-y-0">
+                                        <div className="font-bold border-b border-white/20 pb-1 mb-1 text-slate-200">{monthLabelFull}</div>
+                                        <div className="flex justify-between gap-2 text-slate-300">
+                                          <span>{t.iaInputCol}:</span>
+                                          <span className="font-mono text-white font-bold">{u.promptTokens.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex justify-between gap-2 text-slate-300">
+                                          <span>{t.iaOutputCol}:</span>
+                                          <span className="font-mono text-white font-bold">{u.completionTokens.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex justify-between gap-2 text-blue-300 font-bold border-t border-white/10 pt-1 mt-1">
+                                          <span>{t.iaTotalCol}:</span>
+                                          <span className="font-mono text-white">{u.totalTokens.toLocaleString()}</span>
+                                        </div>
+                                      </div>
+
+                                      {/* Bar Value Header */}
+                                      <span className="text-[10px] font-mono font-bold text-slate-500 mb-1 group-hover:text-slate-900 transition-colors">
+                                        {u.totalTokens > 999 ? `${(u.totalTokens / 1000).toFixed(1)}k` : u.totalTokens}
+                                      </span>
+
+                                      {/* Stacked Vertical Bar */}
+                                      <div className="w-full bg-slate-100 rounded-t-lg overflow-hidden flex flex-col justify-end transition-all group-hover:ring-2 group-hover:ring-blue-500/30" style={{ height: `${Math.max(pct, 6)}%` }}>
+                                        <div
+                                          className="bg-slate-700 w-full transition-all"
+                                          style={{ height: `${promptPctOfBar}%` }}
+                                        />
+                                        <div
+                                          className="bg-blue-600 w-full transition-all"
+                                          style={{ height: `${100 - promptPctOfBar}%` }}
+                                        />
+                                      </div>
+
+                                      {/* Month Label below chart */}
+                                      <span className={`text-[10px] font-bold mt-2 font-mono ${isCurrent ? 'text-blue-700 font-black' : 'text-slate-500'}`}>
+                                        {monthLabelShort}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Monthly Breakdown Table */}
+                        <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs">
+                          <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+                            <h5 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                              {t.iaMonthlyBreakdown}
+                            </h5>
+                            <span className="text-[11px] font-mono text-slate-400 font-medium">
+                              {aiUsage.length} {t.iaActiveMonths.toLowerCase()}
+                            </span>
+                          </div>
+
+                          {aiUsage.length === 0 ? (
+                            <p className="text-xs text-slate-400 italic py-6 text-center font-medium">{t.iaNoUsageHistory}</p>
+                          ) : (
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left text-xs">
+                                <thead>
+                                  <tr className="bg-slate-50 text-slate-400 font-black uppercase text-[9px] tracking-wider border-b border-slate-100">
+                                    <th className="px-5 py-3">{t.iaMonthCol}</th>
+                                    <th className="px-4 py-3 text-right">{t.iaInputCol}</th>
+                                    <th className="px-4 py-3 text-right">{t.iaOutputCol}</th>
+                                    <th className="px-4 py-3 text-right">{t.iaTotalCol}</th>
+                                    <th className="px-5 py-3 text-right">{t.iaShareCol}</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                  {aiUsage.map((u) => {
+                                    const isCurrent = u.year === currentYear && u.month === currentMonthNum;
+                                    const sharePct = allTimeTotal > 0 ? ((u.totalTokens / allTimeTotal) * 100).toFixed(1) : 0;
+                                    const monthName = getMonthLabel(u.month, u.year, false);
+
+                                    return (
+                                      <tr key={u.id || `${u.year}-${u.month}`} className={`hover:bg-slate-50/80 transition-colors ${isCurrent ? 'bg-blue-50/30' : ''}`}>
+                                        <td className="px-5 py-3.5 font-bold text-slate-800 flex items-center gap-2">
+                                          {monthName}
+                                          {isCurrent && (
+                                            <span className="text-[9px] font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">
+                                              {t.iaCurrentMonth}
+                                            </span>
+                                          )}
+                                        </td>
+                                        <td className="px-4 py-3.5 text-right font-mono text-slate-600">{u.promptTokens.toLocaleString()}</td>
+                                        <td className="px-4 py-3.5 text-right font-mono text-slate-600">{u.completionTokens.toLocaleString()}</td>
+                                        <td className="px-4 py-3.5 text-right font-mono font-black text-slate-900">{u.totalTokens.toLocaleString()}</td>
+                                        <td className="px-5 py-3.5 text-right">
+                                          <div className="flex items-center justify-end gap-2">
+                                            <span className="font-mono text-[11px] font-bold text-slate-500">{sharePct}%</span>
+                                            <div className="w-12 bg-slate-100 h-1.5 rounded-full overflow-hidden inline-block">
+                                              <div className="bg-blue-600 h-full rounded-full" style={{ width: `${sharePct}%` }}></div>
+                                            </div>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
 
                 {/* Visitor Chat Conversations History */}
