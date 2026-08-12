@@ -1649,13 +1649,14 @@ export default function DashboardClient({
                     });
                   })()}
 
-                  {session.domain === "spplabs.es" && currentWebsite.domain !== "spplabs.es" && (
+                  {isImpersonating && (
                     <button
                       onClick={() => {
-                        handleInspectUser(session.domain);
+                        router.push("/dashboard?domain=spplabs.es");
+                        setActiveTab("overview");
                         setMobileDrawerOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 p-3.5 rounded-2xl text-xs font-black bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all border border-blue-200 mt-4 cursor-pointer"
+                      className="w-full flex items-center gap-3 p-3.5 rounded-2xl text-xs font-black bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all border border-blue-200 mt-4 cursor-pointer active:scale-98 shadow-2xs"
                     >
                       <svg className="w-5 h-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 016 6v3" />
@@ -1816,11 +1817,12 @@ export default function DashboardClient({
               </div>
 
               {/* Client Directory List */}
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+              <div className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-sm">
                 <h3 className="text-lg font-bold mb-1 text-slate-900">{t.usersTitle}</h3>
                 <p className="text-sm text-slate-500 mb-6">{t.usersSubtitle}</p>
 
-                <div className="overflow-x-auto">
+                {/* DESKTOP TABLE VIEW */}
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full text-left text-sm text-slate-700">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-500 font-bold">
@@ -1879,6 +1881,63 @@ export default function DashboardClient({
                       ))}
                     </tbody>
                   </table>
+                </div>
+
+                {/* MOBILE CARDS VIEW */}
+                <div className="md:hidden space-y-3.5">
+                  {allWebsites.map((web) => (
+                    <div key={web.id} className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 space-y-3 shadow-2xs">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-slate-900 text-sm truncate">{web.displayName}</h4>
+                          <p className="text-xs text-slate-500 font-mono mt-0.5 truncate">{web.domain}</p>
+                        </div>
+                        <div className="shrink-0">
+                          {web.role === "ADMIN" ? (
+                            <span className="bg-brand-blue/15 text-brand-blue text-[11px] px-2.5 py-0.5 rounded-full font-bold">
+                              {t.usersAdminAccount}
+                            </span>
+                          ) : web.passwordHash ? (
+                            <span className="bg-brand-green/15 text-brand-green text-[11px] px-2.5 py-0.5 rounded-full font-bold">
+                              {t.usersRegistered}
+                            </span>
+                          ) : (
+                            <span className="bg-amber-500/15 text-amber-500 text-[11px] px-2.5 py-0.5 rounded-full font-bold">
+                              {t.usersSetupPending}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-200/60">
+                        <span>{t.usersThCreated}: <strong className="text-slate-700">{new Date(web.createdAt).toLocaleDateString()}</strong></span>
+                      </div>
+
+                      {web.role !== "ADMIN" && (
+                        <div className="pt-1 flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              router.push(`/dashboard?domain=${web.domain}`);
+                              setActiveTab("overview");
+                            }}
+                            className="flex-1 bg-slate-900 hover:bg-black text-white text-xs px-3 py-2.5 rounded-xl font-bold transition-all cursor-pointer shadow-sm text-center flex items-center justify-center gap-1.5 active:scale-98"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            {t.usersEnterDashboard}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(web.id)}
+                            className="bg-red-50 hover:bg-red-100 border border-red-200 text-red-650 text-xs px-3 py-2.5 rounded-xl font-bold transition-all cursor-pointer active:scale-98 shrink-0"
+                          >
+                            {t.usersDeleteAccount}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
