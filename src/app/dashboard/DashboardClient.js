@@ -8,6 +8,7 @@ import { translations } from "@/lib/translations";
 import { SppLabsLogo } from "@/components/SppLabsLogo";
 import WorldMap from "@/components/analytics/WorldMap";
 import SpainMap from "@/components/analytics/SpainMap";
+import MonthlyReportsView from "@/components/dashboard/MonthlyReportsView";
 
 function BookingsCalendar({ bookings, lang, onAccept, onReject, onDelete, t, currentWebsiteDomain, router }) {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -1318,6 +1319,15 @@ export default function DashboardClient({
                     </svg>
                   ),
                 },
+                {
+                  id: "informes",
+                  label: t.menuInformes || "Informes Mensuales",
+                  icon: (
+                    <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  ),
+                },
                 ...(session.role === "ADMIN" && !isImpersonating ? [{
                   id: "admin",
                   label: t.menuUsuarios,
@@ -1598,6 +1608,15 @@ export default function DashboardClient({
                         icon: (
                           <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                          </svg>
+                        ),
+                      },
+                      {
+                        id: "informes",
+                        label: t.menuInformes || "Informes Mensuales",
+                        icon: (
+                          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         ),
                       },
@@ -3543,6 +3562,13 @@ export default function DashboardClient({
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* TAB: INFORMES MENSUALES */}
+          {activeTab === "informes" && (
+            <div className="space-y-8 animate-fade-in w-full">
+              <MonthlyReportsView currentWebsiteDomain={currentWebsite.domain} lang={lang} />
             </div>
           )}
         </main>
