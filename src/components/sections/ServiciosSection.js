@@ -121,6 +121,21 @@ export default function ServiciosSection() {
         </svg>
       ),
     },
+    {
+      id: "booster-resenas",
+      category: "growth",
+      title: isEs ? "Booster de Reseñas de Google & Email" : "Google Reviews & Email Booster",
+      description: isEs
+        ? "Multiplique sus valoraciones de 5 estrellas en Google Maps y envíe recordatorios de cita automáticos por email para fidelizar y eliminar ausencias."
+        : "Generate continuous 5-star Google Maps reviews and send automated email reminders to reduce no-shows and build local authority.",
+      tags: ["Google Maps ⭐", "Reseñas 5★", "Email Lifecycle", "Anti No-Show"],
+      badge: isEs ? "+350% Más Reseñas" : "+350% More Reviews",
+      color: "amber",
+      href: "/servicios/booster-resenas",
+      icon: (
+        <span className="text-2xl">⭐</span>
+      ),
+    },
   ];
 
   const filteredServices = selectedCategory === "all"

@@ -52,6 +52,12 @@ export default function sitemap() {
       priority: 0.8,
     },
     {
+      url: `${baseUrl}/servicios/booster-resenas`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
       url: `${baseUrl}/tecnologia`,
       lastModified: currentDate,
       changeFrequency: 'weekly',

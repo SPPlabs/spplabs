@@ -92,6 +92,8 @@ export default function InicioSection() {
                 <span className="text-brand-blue">SEO</span>
                 <span className="text-zinc-350">•</span>
                 <span className="text-brand-green">CRM</span>
+                <span className="text-zinc-350">•</span>
+                <span className="text-amber-500 font-extrabold">RESEÑAS</span>
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-zinc-950 leading-[1.08] mb-8 lowercase font-sans">
@@ -184,6 +186,11 @@ export default function InicioSection() {
                   </svg>
                   <span>CRM</span>
                 </div>
+
+                <div className="flex items-center gap-1.5 sm:gap-2.5 text-xs font-bold tracking-wide shrink-0">
+                  <span className="text-amber-500 text-sm">⭐</span>
+                  <span>Reseñas</span>
+                </div>
               </div>
             </div>
 
@@ -249,7 +256,7 @@ export default function InicioSection() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 justify-items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-6 justify-items-center">
               {/* Card 1 */}
               <div className="flex flex-col items-center">
                 <div className="card-6" aria-hidden="true">
@@ -409,6 +416,36 @@ export default function InicioSection() {
                   </div>
                 </div>
               </div>
+
+              {/* Card 6: Google Reviews & Email Booster */}
+              <div className="flex flex-col items-center">
+                <div className="card-6" aria-hidden="true">
+                  <div className="card-6__holo">
+                    <div className="card-6__layer card-6__layer--back">6</div>
+                    <div className="card-6__layer card-6__layer--mid">6</div>
+                    <div className="card-6__layer card-6__layer--front">6</div>
+                  </div>
+                </div>
+                
+                <div className="service-card">
+                  <div className="service-card-inner p-6 flex flex-col justify-between text-left">
+                    <div>
+                      <div className="text-amber-400 text-2xl mb-4">
+                        <span className="text-3xl">⭐</span>
+                      </div>
+                      <h4 className="text-white text-base font-extrabold mb-2">
+                        {lang === "es" ? "Aumenta tus Reseñas en Google" : "Boost Your Google Reviews"}
+                      </h4>
+                      <p className="text-zinc-400 text-xs leading-relaxed">
+                        {lang === "es"
+                          ? "Multiplica tus valoraciones de 5 estrellas en Google Maps y envía recordatorios automáticos por email tras cada contacto o cita."
+                          : "Automate 5-star Google Maps review requests and smart email booking reminders on autopilot."}
+                      </p>
+                    </div>
+                    <span className="text-amber-400 text-[9px] uppercase font-bold tracking-wider">06 // Reseñas & Email</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -451,6 +488,7 @@ export default function InicioSection() {
                   lang === "es" ? "Clientes y leads organizados" : "Organized clients & leads",
                   lang === "es" ? "Reservas y citas automáticas" : "Automated bookings & scheduling",
                   lang === "es" ? "Chatbot IA integrado" : "Integrated AI Chatbot",
+                  lang === "es" ? "Booster de Reseñas en Google & Email" : "Google Reviews & Email Booster",
                   lang === "es" ? "Reportes y métricas avanzadas" : "Advanced metrics & reports"
                 ].map((item, idx) => (
                   <li key={idx} className="flex items-center gap-3.5 group">
@@ -546,6 +584,18 @@ export default function InicioSection() {
                           <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
                           <span className="relative z-10 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[8.5px] font-black leading-none shadow-[0_0_8px_rgba(239,68,68,0.9)] border border-white/40">
                             5
+                          </span>
+                        </span>
+                      </div>
+
+                      <div className="px-3 py-2 rounded-xl text-xs font-bold text-zinc-600 flex items-center justify-between gap-2 relative">
+                        <div className="flex items-center gap-2.5">
+                          <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
+                          <span>Email & Reseñas</span>
+                        </div>
+                        <span className="relative flex items-center justify-center shrink-0">
+                          <span className="relative z-10 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-amber-500 text-white text-[8.5px] font-black leading-none shadow-[0_0_8px_rgba(245,158,11,0.9)] border border-white/40">
+                            ⭐
                           </span>
                         </span>
                       </div>
