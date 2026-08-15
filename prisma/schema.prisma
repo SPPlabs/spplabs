@@ -250,26 +250,32 @@ enum DeliveryStatus {
 }
 
 model WebsiteEmailConfig {
-  id                    String   @id @default(uuid()) @db.Uuid
-  websiteId             String   @unique @map("website_id") @db.Uuid
-  senderName            String   @default("Atención al Cliente") @map("sender_name")
-  replyToEmail          String?  @map("reply_to_email")
-  googleReviewUrl       String?  @map("google_review_url")
+  id                         String   @id @default(uuid()) @db.Uuid
+  websiteId                  String   @unique @map("website_id") @db.Uuid
+  senderName                 String   @default("Atención al Cliente") @map("sender_name")
+  replyToEmail               String?  @map("reply_to_email")
+  googleReviewUrl            String?  @map("google_review_url")
   
-  enableWelcomeEmail    Boolean  @default(true) @map("enable_welcome_email")
-  enableBookingConfirm  Boolean  @default(true) @map("enable_booking_confirm")
-  enableBookingReminder Boolean  @default(true) @map("enable_booking_reminder")
-  reminderHoursBefore   Int      @default(24) @map("reminder_hours_before")
-  enableReviewRequest   Boolean  @default(true) @map("enable_review_request")
-  reviewDelayHours      Int      @default(2) @map("review_delay_hours")
+  enableWelcomeEmail         Boolean  @default(true) @map("enable_welcome_email")
+  enableBookingConfirm       Boolean  @default(true) @map("enable_booking_confirm")
+  enableBookingReminder      Boolean  @default(true) @map("enable_booking_reminder")
+  reminderHoursBefore        Int      @default(24) @map("reminder_hours_before")
   
-  brandColor            String   @default("#0284c7") @map("brand_color")
-  customLogoUrl         String?  @map("custom_logo_url")
+  // Google Review Booster triggers (Citas y Formularios de Contacto)
+  enableReviewRequest        Boolean  @default(true) @map("enable_review_request")
+  reviewDelayHours           Int      @default(2) @map("review_delay_hours")
+  enableBookingReviewRequest Boolean  @default(true) @map("enable_booking_review_request")
+  bookingReviewDelayHours    Int      @default(2) @map("booking_review_delay_hours")
+  enableContactReviewRequest Boolean  @default(false) @map("enable_contact_review_request")
+  contactReviewDelayHours    Int      @default(24) @map("contact_review_delay_hours")
   
-  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  brandColor                 String   @default("#0284c7") @map("brand_color")
+  customLogoUrl              String?  @map("custom_logo_url")
+  
+  createdAt                  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
-  website               Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  website                    Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
   @@map("website_email_configs")
 }
 

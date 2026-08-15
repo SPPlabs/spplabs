@@ -45,6 +45,10 @@ export async function GET(request) {
         reminderHoursBefore: 24,
         enableReviewRequest: true,
         reviewDelayHours: 2,
+        enableBookingReviewRequest: true,
+        bookingReviewDelayHours: 2,
+        enableContactReviewRequest: false,
+        contactReviewDelayHours: 24,
         brandColor: "#0284c7",
         customLogoUrl: "",
       },
@@ -80,6 +84,10 @@ export async function POST(request) {
       reminderHoursBefore,
       enableReviewRequest,
       reviewDelayHours,
+      enableBookingReviewRequest,
+      bookingReviewDelayHours,
+      enableContactReviewRequest,
+      contactReviewDelayHours,
       brandColor,
       customLogoUrl,
     } = body;
@@ -97,6 +105,11 @@ export async function POST(request) {
       return NextResponse.json({ error: "NotFound", message: "Website not found" }, { status: 404 });
     }
 
+    const isBookingReviewEnabled = enableBookingReviewRequest !== undefined ? Boolean(enableBookingReviewRequest) : (enableReviewRequest !== undefined ? Boolean(enableReviewRequest) : true);
+    const bookingDelay = Number(bookingReviewDelayHours) || Number(reviewDelayHours) || 2;
+    const isContactReviewEnabled = Boolean(enableContactReviewRequest);
+    const contactDelay = Number(contactReviewDelayHours) || 24;
+
     const updatedConfig = await prisma.websiteEmailConfig.upsert({
       where: { websiteId: website.id },
       create: {
@@ -108,8 +121,12 @@ export async function POST(request) {
         enableBookingConfirm: Boolean(enableBookingConfirm),
         enableBookingReminder: Boolean(enableBookingReminder),
         reminderHoursBefore: Number(reminderHoursBefore) || 24,
-        enableReviewRequest: Boolean(enableReviewRequest),
-        reviewDelayHours: Number(reviewDelayHours) || 2,
+        enableReviewRequest: isBookingReviewEnabled,
+        reviewDelayHours: bookingDelay,
+        enableBookingReviewRequest: isBookingReviewEnabled,
+        bookingReviewDelayHours: bookingDelay,
+        enableContactReviewRequest: isContactReviewEnabled,
+        contactReviewDelayHours: contactDelay,
         brandColor: brandColor?.trim() || "#0284c7",
         customLogoUrl: customLogoUrl?.trim() || null,
       },
@@ -121,8 +138,12 @@ export async function POST(request) {
         enableBookingConfirm: Boolean(enableBookingConfirm),
         enableBookingReminder: Boolean(enableBookingReminder),
         reminderHoursBefore: Number(reminderHoursBefore) || 24,
-        enableReviewRequest: Boolean(enableReviewRequest),
-        reviewDelayHours: Number(reviewDelayHours) || 2,
+        enableReviewRequest: isBookingReviewEnabled,
+        reviewDelayHours: bookingDelay,
+        enableBookingReviewRequest: isBookingReviewEnabled,
+        bookingReviewDelayHours: bookingDelay,
+        enableContactReviewRequest: isContactReviewEnabled,
+        contactReviewDelayHours: contactDelay,
         brandColor: brandColor?.trim() || "#0284c7",
         customLogoUrl: customLogoUrl?.trim() || null,
       },

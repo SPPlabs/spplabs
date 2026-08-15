@@ -173,6 +173,26 @@ export async function POST(request) {
             },
           });
         }
+
+        // B. Schedule Google Review Booster for Contact Form (e.g. 24h / 48h after contact)
+        if (emailConfig && emailConfig.enableContactReviewRequest) {
+          const companyName = website.displayName || "Atención al Cliente";
+          const delayHours = emailConfig.contactReviewDelayHours || 24;
+          const reviewScheduledDate = new Date(Date.now() + delayHours * 60 * 60 * 1000);
+
+          await prisma.scheduledEmail.create({
+            data: {
+              websiteId: website.id,
+              recipientEmail: email.trim().toLowerCase(),
+              recipientName: name.trim(),
+              subject: `¿Qué tal fue tu experiencia con ${companyName}? ⭐`,
+              emailType: "GOOGLE_REVIEW_REQUEST",
+              status: "PENDING",
+              scheduledFor: reviewScheduledDate,
+              metadata: { contactId: submission.id, source: "contact_form" },
+            },
+          });
+        }
       } catch (err) {
         console.error("Async contact welcome email error:", err);
       }

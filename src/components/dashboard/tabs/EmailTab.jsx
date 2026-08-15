@@ -26,8 +26,13 @@ export default function EmailTab({
   const [enableBookingConfirm, setEnableBookingConfirm] = useState(true);
   const [enableBookingReminder, setEnableBookingReminder] = useState(true);
   const [reminderHoursBefore, setReminderHoursBefore] = useState(24);
-  const [enableReviewRequest, setEnableReviewRequest] = useState(true);
-  const [reviewDelayHours, setReviewDelayHours] = useState(2);
+  
+  // Google Review Booster Triggers (Citas & Contactos)
+  const [enableBookingReviewRequest, setEnableBookingReviewRequest] = useState(true);
+  const [bookingReviewDelayHours, setBookingReviewDelayHours] = useState(2);
+  const [enableContactReviewRequest, setEnableContactReviewRequest] = useState(false);
+  const [contactReviewDelayHours, setContactReviewDelayHours] = useState(24);
+  
   const [brandColor, setBrandColor] = useState("#0284c7");
 
   // Email Logs State
@@ -57,8 +62,15 @@ export default function EmailTab({
         setEnableBookingConfirm(c.enableBookingConfirm !== undefined ? c.enableBookingConfirm : true);
         setEnableBookingReminder(c.enableBookingReminder !== undefined ? c.enableBookingReminder : true);
         setReminderHoursBefore(c.reminderHoursBefore || 24);
-        setEnableReviewRequest(c.enableReviewRequest !== undefined ? c.enableReviewRequest : true);
-        setReviewDelayHours(c.reviewDelayHours || 2);
+        
+        // Review Triggers
+        const isBookingReview = c.enableBookingReviewRequest !== undefined ? c.enableBookingReviewRequest : (c.enableReviewRequest !== undefined ? c.enableReviewRequest : true);
+        setEnableBookingReviewRequest(isBookingReview);
+        setBookingReviewDelayHours(c.bookingReviewDelayHours || c.reviewDelayHours || 2);
+        
+        setEnableContactReviewRequest(Boolean(c.enableContactReviewRequest));
+        setContactReviewDelayHours(c.contactReviewDelayHours || 24);
+
         setBrandColor(c.brandColor || "#0284c7");
       }
     } catch (err) {
@@ -110,8 +122,12 @@ export default function EmailTab({
           enableBookingConfirm,
           enableBookingReminder,
           reminderHoursBefore: Number(reminderHoursBefore),
-          enableReviewRequest,
-          reviewDelayHours: Number(reviewDelayHours),
+          enableReviewRequest: enableBookingReviewRequest,
+          reviewDelayHours: Number(bookingReviewDelayHours),
+          enableBookingReviewRequest,
+          bookingReviewDelayHours: Number(bookingReviewDelayHours),
+          enableContactReviewRequest,
+          contactReviewDelayHours: Number(contactReviewDelayHours),
           brandColor,
         }),
       });
@@ -287,8 +303,8 @@ export default function EmailTab({
         {/* Left Column: Settings Form */}
         <div className="lg:col-span-7 space-y-6">
           {/* GOOGLE REVIEW BOOSTER CARD */}
-          <div className="bg-gradient-to-br from-amber-500/10 via-white to-amber-500/5 border-2 border-amber-300/80 rounded-3xl p-6 shadow-sm relative overflow-hidden">
-            <div className="flex items-start justify-between gap-4 mb-4">
+          <div className="bg-gradient-to-br from-amber-500/10 via-white to-amber-500/5 border-2 border-amber-300/80 rounded-3xl p-6 shadow-sm relative overflow-hidden space-y-6">
+            <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl font-bold shadow-md">
                   ⭐
@@ -303,50 +319,120 @@ export default function EmailTab({
                 </div>
               </div>
 
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={enableReviewRequest}
-                  onChange={(e) => setEnableReviewRequest(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-              </label>
+              <div className="text-right">
+                <span className="text-[10px] font-mono font-black uppercase bg-amber-100 text-amber-900 border border-amber-200 px-2.5 py-1 rounded-full">
+                  {lang === "es" ? "2 Disparadores Disponibles" : "2 Triggers Available"}
+                </span>
+              </div>
             </div>
 
-            <div className="space-y-4 pt-2">
-              <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-800 mb-1.5">
-                  {lang === "es" ? "Enlace directo de Reseñas de Google Maps" : "Direct Google Maps Review Link"}
-                </label>
-                <input
-                  type="url"
-                  value={googleReviewUrl}
-                  onChange={(e) => setGoogleReviewUrl(e.target.value)}
-                  placeholder="https://g.page/r/XXXXXXXXX/review"
-                  className="w-full h-11 bg-white border border-slate-300 rounded-xl px-4 text-xs font-mono text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all"
-                />
-                <p className="text-[10.5px] text-slate-400 mt-1">
-                  {lang === "es"
-                    ? "Tip: Obtén este enlace directo desde tu panel de Google Business Profile (icono 'Solicitar reseñas')."
-                    : "Tip: Get this direct review link from your Google Business Profile dashboard."}
-                </p>
+            {/* Google Review URL Input */}
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-800 mb-1.5">
+                {lang === "es" ? "Enlace directo de Reseñas de Google Maps" : "Direct Google Maps Review Link"}
+              </label>
+              <input
+                type="url"
+                value={googleReviewUrl}
+                onChange={(e) => setGoogleReviewUrl(e.target.value)}
+                placeholder="https://g.page/r/XXXXXXXXX/review"
+                className="w-full h-11 bg-white border border-slate-300 rounded-xl px-4 text-xs font-mono text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all"
+              />
+              <p className="text-[10.5px] text-slate-400 mt-1">
+                {lang === "es"
+                  ? "Tip: Obtén este enlace directo desde tu panel de Google Business Profile (icono 'Solicitar reseñas')."
+                  : "Tip: Get this direct review link from your Google Business Profile dashboard."}
+              </p>
+            </div>
+
+            {/* The 2 Configurable Options for Review Requests */}
+            <div className="space-y-3 pt-2">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
+                {lang === "es" ? "Opciones de Envío de Reseñas:" : "Review Request Triggers:"}
+              </span>
+
+              {/* OPTION 1: BOOKING / APPOINTMENTS */}
+              <div className="p-4 bg-white/90 border border-amber-200/80 rounded-2xl space-y-3 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="font-extrabold text-sm text-slate-900 flex items-center gap-1.5">
+                      <span>📅</span>
+                      {lang === "es" ? "Tras completar una Cita o Reserva" : "After an Appointment or Booking"}
+                    </span>
+                    <span className="text-xs text-slate-500 block mt-0.5">
+                      {lang === "es" ? "Envía la solicitud de valoración cuando el cliente haya asistido a su cita." : "Sends review request after the client has attended their booking."}
+                    </span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={enableBookingReviewRequest}
+                      onChange={(e) => setEnableBookingReviewRequest(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                  </label>
+                </div>
+
+                {enableBookingReviewRequest && (
+                  <div className="flex items-center justify-between pt-2.5 border-t border-amber-100">
+                    <span className="text-xs font-bold text-slate-700">
+                      {lang === "es" ? "Tiempo de envío post-cita:" : "Send delay after booking:"}
+                    </span>
+                    <select
+                      value={bookingReviewDelayHours}
+                      onChange={(e) => setBookingReviewDelayHours(Number(e.target.value))}
+                      className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
+                    >
+                      <option value={1}>{lang === "es" ? "1 hora después" : "1 hour after"}</option>
+                      <option value={2}>{lang === "es" ? "2 horas después (Recomendado)" : "2 hours after (Recommended)"}</option>
+                      <option value={4}>{lang === "es" ? "4 horas después" : "4 hours after"}</option>
+                      <option value={24}>{lang === "es" ? "24 horas después" : "24 hours after"}</option>
+                    </select>
+                  </div>
+                )}
               </div>
 
-              <div className="flex items-center justify-between gap-4 pt-2 border-t border-amber-200/60">
-                <span className="text-xs font-bold text-slate-700">
-                  {lang === "es" ? "Enviar solicitud tras la cita:" : "Send review request after appointment:"}
-                </span>
-                <select
-                  value={reviewDelayHours}
-                  onChange={(e) => setReviewDelayHours(Number(e.target.value))}
-                  className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
-                >
-                  <option value={1}>{lang === "es" ? "1 hora después" : "1 hour after"}</option>
-                  <option value={2}>{lang === "es" ? "2 horas después (Recomendado)" : "2 hours after (Recommended)"}</option>
-                  <option value={4}>{lang === "es" ? "4 horas después" : "4 hours after"}</option>
-                  <option value={24}>{lang === "es" ? "24 horas después" : "24 hours after"}</option>
-                </select>
+              {/* OPTION 2: CONTACT FORMS */}
+              <div className="p-4 bg-white/90 border border-amber-200/80 rounded-2xl space-y-3 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="font-extrabold text-sm text-slate-900 flex items-center gap-1.5">
+                      <span>📩</span>
+                      {lang === "es" ? "Tras Formulario de Contacto Web" : "After Web Contact Form Submission"}
+                    </span>
+                    <span className="text-xs text-slate-500 block mt-0.5">
+                      {lang === "es" ? "Envía la solicitud de reseña tras responder o atender una consulta web." : "Sends review request after answering a website inquiry."}
+                    </span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={enableContactReviewRequest}
+                      onChange={(e) => setEnableContactReviewRequest(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                  </label>
+                </div>
+
+                {enableContactReviewRequest && (
+                  <div className="flex items-center justify-between pt-2.5 border-t border-amber-100">
+                    <span className="text-xs font-bold text-slate-700">
+                      {lang === "es" ? "Tiempo de envío tras el contacto:" : "Send delay after contact:"}
+                    </span>
+                    <select
+                      value={contactReviewDelayHours}
+                      onChange={(e) => setContactReviewDelayHours(Number(e.target.value))}
+                      className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
+                    >
+                      <option value={12}>{lang === "es" ? "12 horas después" : "12 hours after"}</option>
+                      <option value={24}>{lang === "es" ? "24 horas después (1 día - Recomendado)" : "24 hours after (1 day - Recommended)"}</option>
+                      <option value={48}>{lang === "es" ? "48 horas después (2 días)" : "48 hours after (2 days)"}</option>
+                      <option value={72}>{lang === "es" ? "72 horas después (3 días)" : "72 hours after (3 days)"}</option>
+                    </select>
+                  </div>
+                )}
               </div>
             </div>
           </div>
