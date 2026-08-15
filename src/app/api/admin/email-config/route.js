@@ -106,9 +106,9 @@ export async function POST(request) {
     }
 
     const isBookingReviewEnabled = enableBookingReviewRequest !== undefined ? Boolean(enableBookingReviewRequest) : (enableReviewRequest !== undefined ? Boolean(enableReviewRequest) : true);
-    const bookingDelay = Number(bookingReviewDelayHours) || Number(reviewDelayHours) || 2;
+    const bookingDelay = bookingReviewDelayHours !== undefined ? Number(bookingReviewDelayHours) : (reviewDelayHours !== undefined ? Number(reviewDelayHours) : 2);
     const isContactReviewEnabled = Boolean(enableContactReviewRequest);
-    const contactDelay = Number(contactReviewDelayHours) || 24;
+    const contactDelay = contactReviewDelayHours !== undefined ? Number(contactReviewDelayHours) : 24;
 
     const updatedConfig = await prisma.websiteEmailConfig.upsert({
       where: { websiteId: website.id },
@@ -120,7 +120,7 @@ export async function POST(request) {
         enableWelcomeEmail: Boolean(enableWelcomeEmail),
         enableBookingConfirm: Boolean(enableBookingConfirm),
         enableBookingReminder: Boolean(enableBookingReminder),
-        reminderHoursBefore: Number(reminderHoursBefore) || 24,
+        reminderHoursBefore: reminderHoursBefore !== undefined ? Number(reminderHoursBefore) : 24,
         enableReviewRequest: isBookingReviewEnabled,
         reviewDelayHours: bookingDelay,
         enableBookingReviewRequest: isBookingReviewEnabled,
@@ -137,7 +137,7 @@ export async function POST(request) {
         enableWelcomeEmail: Boolean(enableWelcomeEmail),
         enableBookingConfirm: Boolean(enableBookingConfirm),
         enableBookingReminder: Boolean(enableBookingReminder),
-        reminderHoursBefore: Number(reminderHoursBefore) || 24,
+        reminderHoursBefore: reminderHoursBefore !== undefined ? Number(reminderHoursBefore) : 24,
         enableReviewRequest: isBookingReviewEnabled,
         reviewDelayHours: bookingDelay,
         enableBookingReviewRequest: isBookingReviewEnabled,

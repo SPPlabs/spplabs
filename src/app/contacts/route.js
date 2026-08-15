@@ -174,27 +174,68 @@ export async function POST(request) {
           });
         }
 
-        // B. Schedule Google Review Booster for Contact Form (e.g. 24h / 48h after contact)
+        // B. Schedule or Send Google Review Booster for Contact Form
         if (emailConfig && emailConfig.enableContactReviewRequest) {
           const companyName = website.displayName || "Atención al Cliente";
-          const delayHours = emailConfig.contactReviewDelayHours || 24;
-          const reviewScheduledDate = new Date(Date.now() + delayHours * 60 * 60 * 1000);
+          const delayHours = emailConfig.contactReviewDelayHours !== undefined ? emailConfig.contactReviewDelayHours : 24;
 
-          await prisma.scheduledEmail.create({
-            data: {
-              websiteId: website.id,
-              recipientEmail: email.trim().toLowerCase(),
+          if (delayHours === 0) {
+            // Immediate dispatch
+            const { sendEmail } = await import("@/lib/email");
+            const { generateGoogleReviewHtml } = await import("@/lib/emailTemplates");
+            const brandColor = emailConfig?.brandColor || "#0284c7";
+
+            const reviewHtml = generateGoogleReviewHtml({
               recipientName: name.trim(),
+              companyName,
+              clientDomain: website.domain,
+              googleReviewUrl: emailConfig.googleReviewUrl || `https://${website.domain}`,
+              brandColor,
+            });
+
+            const sendRes = await sendEmail({
+              to: email.trim().toLowerCase(),
               subject: `¿Qué tal fue tu experiencia con ${companyName}? ⭐`,
-              emailType: "GOOGLE_REVIEW_REQUEST",
-              status: "PENDING",
-              scheduledFor: reviewScheduledDate,
-              metadata: { contactId: submission.id, source: "contact_form" },
-            },
-          });
+              html: reviewHtml,
+              senderName: emailConfig?.senderName || companyName,
+              replyTo: emailConfig?.replyToEmail || undefined,
+              clientDomain: website.domain,
+            });
+
+            await prisma.scheduledEmail.create({
+              data: {
+                websiteId: website.id,
+                recipientEmail: email.trim().toLowerCase(),
+                recipientName: name.trim(),
+                subject: `¿Qué tal fue tu experiencia con ${companyName}? ⭐`,
+                emailType: "GOOGLE_REVIEW_REQUEST",
+                status: sendRes.success ? "SENT" : "FAILED",
+                scheduledFor: new Date(),
+                sentAt: sendRes.success ? new Date() : null,
+                error: sendRes.error || null,
+                metadata: { contactId: submission.id, source: "contact_form_immediate" },
+              },
+            });
+          } else {
+            // Delayed dispatch
+            const reviewScheduledDate = new Date(Date.now() + delayHours * 60 * 60 * 1000);
+
+            await prisma.scheduledEmail.create({
+              data: {
+                websiteId: website.id,
+                recipientEmail: email.trim().toLowerCase(),
+                recipientName: name.trim(),
+                subject: `¿Qué tal fue tu experiencia con ${companyName}? ⭐`,
+                emailType: "GOOGLE_REVIEW_REQUEST",
+                status: "PENDING",
+                scheduledFor: reviewScheduledDate,
+                metadata: { contactId: submission.id, source: "contact_form" },
+              },
+            });
+          }
         }
       } catch (err) {
-        console.error("Async contact welcome email error:", err);
+        console.error("Async contact email & review booster error:", err);
       }
     })();
 

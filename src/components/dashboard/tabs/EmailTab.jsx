@@ -426,6 +426,8 @@ export default function EmailTab({
                       onChange={(e) => setContactReviewDelayHours(Number(e.target.value))}
                       className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
                     >
+                      <option value={0}>{lang === "es" ? "⚡ Inmediatamente (al enviar el formulario)" : "⚡ Immediately (upon submission)"}</option>
+                      <option value={1}>{lang === "es" ? "1 hora después" : "1 hour after"}</option>
                       <option value={12}>{lang === "es" ? "12 horas después" : "12 hours after"}</option>
                       <option value={24}>{lang === "es" ? "24 horas después (1 día - Recomendado)" : "24 hours after (1 day - Recommended)"}</option>
                       <option value={48}>{lang === "es" ? "48 horas después (2 días)" : "48 hours after (2 days)"}</option>
