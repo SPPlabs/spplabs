@@ -590,6 +590,13 @@ export default function InicioSection() {
 
                       <div className="px-3 py-2 rounded-xl text-xs font-bold text-zinc-600 flex items-center justify-between gap-2 relative">
                         <div className="flex items-center gap-2.5">
+                          <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                          <span>Informes</span>
+                        </div>
+                      </div>
+
+                      <div className="px-3 py-2 rounded-xl text-xs font-bold text-zinc-600 flex items-center justify-between gap-2 relative">
+                        <div className="flex items-center gap-2.5">
                           <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
                           <span>Email & Reseñas</span>
                         </div>
