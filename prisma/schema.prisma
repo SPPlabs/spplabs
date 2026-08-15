@@ -40,6 +40,8 @@ model Website {
   viewerDashboardStates   WebsiteDashboardState[]   @relation("ViewerWebsite")
   targetDashboardStates   WebsiteDashboardState[]   @relation("TargetWebsite")
   chatConversations       ChatConversation[]
+  emailConfig             WebsiteEmailConfig?
+  scheduledEmails         ScheduledEmail[]
 
   @@map("websites")
 }
@@ -230,5 +232,66 @@ model ChatMessage {
 
   @@index([conversationId])
   @@map("chat_messages")
+}
+
+enum EmailType {
+  WELCOME_CONTACT
+  BOOKING_CONFIRMATION
+  BOOKING_REMINDER
+  GOOGLE_REVIEW_REQUEST
+  TEST_EMAIL
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+model WebsiteEmailConfig {
+  id                    String   @id @default(uuid()) @db.Uuid
+  websiteId             String   @unique @map("website_id") @db.Uuid
+  senderName            String   @default("Atención al Cliente") @map("sender_name")
+  replyToEmail          String?  @map("reply_to_email")
+  googleReviewUrl       String?  @map("google_review_url")
+  
+  enableWelcomeEmail    Boolean  @default(true) @map("enable_welcome_email")
+  enableBookingConfirm  Boolean  @default(true) @map("enable_booking_confirm")
+  enableBookingReminder Boolean  @default(true) @map("enable_booking_reminder")
+  reminderHoursBefore   Int      @default(24) @map("reminder_hours_before")
+  enableReviewRequest   Boolean  @default(true) @map("enable_review_request")
+  reviewDelayHours      Int      @default(2) @map("review_delay_hours")
+  
+  brandColor            String   @default("#0284c7") @map("brand_color")
+  customLogoUrl         String?  @map("custom_logo_url")
+  
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  website               Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  @@map("website_email_configs")
+}
+
+model ScheduledEmail {
+  id              String         @id @default(uuid()) @db.Uuid
+  websiteId       String         @map("website_id") @db.Uuid
+  recipientEmail  String         @map("recipient_email")
+  recipientName   String         @map("recipient_name")
+  subject         String
+  emailType       EmailType      @map("email_type")
+  status          DeliveryStatus @default(PENDING)
+  scheduledFor    DateTime       @map("scheduled_for") @db.Timestamptz
+  sentAt          DateTime?      @map("sent_at") @db.Timestamptz
+  metadata        Json?
+  error           String?
+
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz
+
+  website         Website        @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@index([status, scheduledFor])
+  @@index([websiteId])
+  @@map("scheduled_emails")
 }
 

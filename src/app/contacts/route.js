@@ -127,6 +127,57 @@ export async function POST(request) {
       })
       .catch((e) => console.error("Failed to update API key lastUsedAt:", e));
 
+    // 6. Trigger automated welcome/confirmation email asynchronously
+    (async () => {
+      try {
+        const emailConfig = await prisma.websiteEmailConfig.findUnique({
+          where: { websiteId: website.id },
+        });
+
+        if (!emailConfig || emailConfig.enableWelcomeEmail) {
+          const { sendEmail } = await import("@/lib/email");
+          const { generateWelcomeContactHtml } = await import("@/lib/emailTemplates");
+
+          const companyName = website.displayName || "Atención al Cliente";
+          const brandColor = emailConfig?.brandColor || "#0284c7";
+
+          const html = generateWelcomeContactHtml({
+            recipientName: name.trim(),
+            companyName,
+            clientDomain: website.domain,
+            brandColor,
+            messageSnippet: message.trim().slice(0, 200),
+          });
+
+          const sendRes = await sendEmail({
+            to: email.trim().toLowerCase(),
+            subject: `Hemos recibido tu mensaje - ${companyName}`,
+            html,
+            senderName: emailConfig?.senderName || companyName,
+            replyTo: emailConfig?.replyToEmail || undefined,
+            clientDomain: website.domain,
+          });
+
+          await prisma.scheduledEmail.create({
+            data: {
+              websiteId: website.id,
+              recipientEmail: email.trim().toLowerCase(),
+              recipientName: name.trim(),
+              subject: `Hemos recibido tu mensaje - ${companyName}`,
+              emailType: "WELCOME_CONTACT",
+              status: sendRes.success ? "SENT" : "FAILED",
+              scheduledFor: new Date(),
+              sentAt: sendRes.success ? new Date() : null,
+              error: sendRes.error || null,
+              metadata: { messageId: submission.id },
+            },
+          });
+        }
+      } catch (err) {
+        console.error("Async contact welcome email error:", err);
+      }
+    })();
+
     return jsonResponse({
       success: true,
       message: "Contact form submitted successfully",

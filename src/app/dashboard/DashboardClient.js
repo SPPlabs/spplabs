@@ -14,6 +14,7 @@ import OverviewTab from "@/components/dashboard/tabs/OverviewTab";
 import ClientesTab from "@/components/dashboard/tabs/ClientesTab";
 import AiTab from "@/components/dashboard/tabs/AiTab";
 import NotificationsTab from "@/components/dashboard/tabs/NotificationsTab";
+import EmailTab from "@/components/dashboard/tabs/EmailTab";
 
 export default function DashboardClient({
   session,
@@ -727,6 +728,15 @@ export default function DashboardClient({
                     </svg>
                   ),
                 },
+                {
+                  id: "email",
+                  label: "Email",
+                  icon: (
+                    <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                    </svg>
+                  ),
+                },
                 ...(session.role === "ADMIN" && !isImpersonating ? [{
                   id: "admin",
                   label: t.menuUsuarios,
@@ -1019,6 +1029,15 @@ export default function DashboardClient({
                           </svg>
                         ),
                       },
+                      {
+                        id: "email",
+                        label: "Email",
+                        icon: (
+                          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                          </svg>
+                        ),
+                      },
                       ...(session.role === "ADMIN" && !isImpersonating ? [{
                         id: "admin",
                         label: t.menuUsuarios,
@@ -1254,6 +1273,15 @@ export default function DashboardClient({
             <div className="space-y-8 animate-fade-in w-full">
               <MonthlyReportsView currentWebsiteDomain={currentWebsite.domain} lang={lang} />
             </div>
+          )}
+
+          {/* TAB: EMAIL & GOOGLE REVIEWS */}
+          {activeTab === "email" && (
+            <EmailTab
+              currentWebsite={currentWebsite}
+              t={t}
+              lang={lang}
+            />
           )}
         </main>
       </div>
