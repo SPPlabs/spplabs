@@ -36,14 +36,15 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN groupadd --system --gid 1001 nodejs
 RUN useradd --system --uid 1001 -g nodejs nextjs
 
-# Pre-create model cache directories and set permissions for nextjs process
-RUN mkdir -p /app/.cache/transformers && chown -R nextjs:nodejs /app/.cache
+# Pre-create model cache and upload directories and set permissions for nextjs process
+RUN mkdir -p /app/.cache/transformers /app/public/uploads/logos \
+    && chown -R nextjs:nodejs /app/.cache /app/public
 
-COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+RUN mkdir .next \
+    && chown nextjs:nodejs .next
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
@@ -52,6 +53,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Manually copy the entire onnxruntime-node package to prevent dynamic loading errors for native libraries
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/onnxruntime-node ./node_modules/onnxruntime-node
+
+# Ensure nextjs user owns public and uploads directories
+RUN chown -R nextjs:nodejs /app/public
 
 USER nextjs
 
