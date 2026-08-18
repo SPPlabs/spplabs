@@ -42,6 +42,7 @@ model Website {
   chatConversations       ChatConversation[]
   emailConfig             WebsiteEmailConfig?
   scheduledEmails         ScheduledEmail[]
+  dashboardNotes          DashboardNote[]
 
   @@map("websites")
 }
@@ -299,5 +300,33 @@ model ScheduledEmail {
   @@index([status, scheduledFor])
   @@index([websiteId])
   @@map("scheduled_emails")
+}
+
+enum NoteType {
+  NOTE
+  CLIENT
+  STAFF
+}
+
+model DashboardNote {
+  id           String    @id @default(uuid()) @db.Uuid
+  websiteId    String    @map("website_id") @db.Uuid
+  type         NoteType  @default(NOTE)
+  title        String
+  content      String    @db.Text
+  email        String?
+  phone        String?
+  role         String?
+  tag          String?
+  color        String?
+  pinned       Boolean   @default(false)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  website      Website   @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@index([websiteId])
+  @@index([pinned, updatedAt])
+  @@map("dashboard_notes")
 }
 

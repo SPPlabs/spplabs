@@ -175,6 +175,31 @@ export default async function DashboardPage(props) {
     }));
   }
 
+  // Fetch Dashboard Notes / Directory
+  const rawNotes = await prisma.dashboardNote.findMany({
+    where: { websiteId: currentWebsite.id },
+    orderBy: [
+      { pinned: "desc" },
+      { updatedAt: "desc" },
+    ],
+  });
+
+  const dashboardNotes = rawNotes.map((n) => ({
+    id: n.id,
+    websiteId: n.websiteId,
+    type: n.type,
+    title: n.title,
+    content: n.content,
+    email: n.email,
+    phone: n.phone,
+    role: n.role,
+    tag: n.tag,
+    color: n.color,
+    pinned: n.pinned,
+    createdAt: n.createdAt.toISOString(),
+    updatedAt: n.updatedAt.toISOString(),
+  }));
+
   return (
     <DashboardClient
       session={session}
@@ -187,6 +212,7 @@ export default async function DashboardPage(props) {
       aiUsage={aiUsage}
       notifications={notifications}
       supportRequests={supportRequests}
+      dashboardNotes={dashboardNotes}
     />
   );
 }
