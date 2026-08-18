@@ -408,9 +408,13 @@ export default function AiTab({
 
         {/* Conversation Transcript Modal */}
         {selectedConversation && (
-          <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
-            <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-fade-in flex flex-col max-h-[90vh] sm:max-h-[85vh]">
-              <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+          <div 
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 animate-fade-in"
+            onClick={(e) => { if (e.target === e.currentTarget) setSelectedConversation(null); }}
+          >
+            <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-scale-up flex flex-col max-h-[90vh] sm:max-h-[85vh]">
+              {/* Sticky Header */}
+              <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
                 <div className="min-w-0 pr-2">
                   <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
                     <span>💬</span> Transcripción de la Conversación
@@ -429,11 +433,13 @@ export default function AiTab({
                   type="button"
                   onClick={() => setSelectedConversation(null)}
                   className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-bold text-xs transition-all cursor-pointer shrink-0"
+                  aria-label="Cerrar modal"
                 >
                   ✕
                 </button>
               </div>
 
+              {/* Scrollable Messages Body */}
               <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 bg-slate-100/50">
                 {selectedConversation.messages?.map((msg, idx) => (
                   <div
@@ -461,7 +467,8 @@ export default function AiTab({
                 ))}
               </div>
 
-              <div className="p-4 border-t border-slate-200 bg-white flex justify-end">
+              {/* Sticky Footer */}
+              <div className="p-4 border-t border-slate-200 bg-white flex justify-end shrink-0">
                 <button
                   type="button"
                   onClick={() => setSelectedConversation(null)}

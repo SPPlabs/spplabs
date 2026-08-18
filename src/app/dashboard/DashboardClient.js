@@ -1491,190 +1491,210 @@ export default function DashboardClient({
         </main>
       </div>
 
-      {/* LANGUAGE SETTINGS MODAL */}
+      {/* SETTINGS MODAL */}
       {showSettingsModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden p-6 animate-scale-up">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-bold text-lg text-slate-900">{t.settingsTitle}</h3>
-              <button
-                onClick={() => setShowSettingsModal(false)}
-                className="p-1 hover:bg-slate-100 text-slate-500 hover:text-slate-900 rounded-lg transition-all"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <p className="text-sm text-slate-500 mb-6">{t.settingsSelectLang}</p>
-
-            <div className="space-y-3">
-              <button
-                onClick={() => changeLanguage("es")}
-                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border text-sm font-semibold transition-all ${
-                  lang === "es"
-                    ? "bg-brand-blue/10 border-brand-blue text-brand-blue"
-                    : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                <span>Español (Spanish)</span>
-                {lang === "es" && (
-                  <svg className="w-5 h-5 text-brand-blue" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </button>
-
-              <button
-                onClick={() => changeLanguage("en")}
-                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border text-sm font-semibold transition-all ${
-                  lang === "en"
-                    ? "bg-brand-blue/10 border-brand-blue text-brand-blue"
-                    : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                <span>English (Inglés)</span>
-                {lang === "en" && (
-                  <svg className="w-5 h-5 text-brand-blue" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </button>
-            </div>
-
-            <div className="border-t border-slate-100 pt-6 mt-6">
-              <label className="block text-sm font-bold text-slate-900 mb-2">
-                {lang === "es" ? "Nombre de la Cuenta" : "Account Name"}
-              </label>
-              <p className="text-xs text-slate-500 mb-3">
-                {lang === "es" ? "Nombre visible en tu panel y correos enviados." : "Visible name in your dashboard and sent emails."}
-              </p>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={accountDisplayName}
-                  onChange={(e) => setAccountDisplayName(e.target.value)}
-                  placeholder="SPP Labs"
-                  className="flex-1 h-10 bg-slate-50 border border-slate-200 rounded-xl px-3.5 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={handleSaveAccountName}
-                  disabled={isSavingAccountName || !accountDisplayName.trim()}
-                  className="h-10 px-4 bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center shrink-0 cursor-pointer"
-                >
-                  {isSavingAccountName ? (
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  ) : accountNameSaved ? (
-                    "✓ Guardado"
-                  ) : (
-                    lang === "es" ? "Guardar" : "Save"
-                  )}
-                </button>
+        <div 
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 animate-fade-in"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowSettingsModal(false); }}
+        >
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-scale-up flex flex-col max-h-[90vh] sm:max-h-[85vh]">
+            {/* Sticky Modal Header */}
+            <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="font-extrabold text-base text-slate-900">{t.settingsTitle}</h3>
+                <p className="text-xs text-slate-500 font-medium">{t.settingsSelectLang}</p>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowSettingsModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-bold text-xs transition-all cursor-pointer shrink-0"
+                aria-label="Cerrar modal"
+              >
+                ✕
+              </button>
             </div>
 
-            {/* Business Logo Section */}
-            <div className="border-t border-slate-100 pt-6 mt-6">
-              <label className="block text-sm font-bold text-slate-900 mb-1">
-                {lang === "es" ? "Logo de la Empresa" : "Business Logo"}
-              </label>
-              <p className="text-xs text-slate-500 mb-3">
-                {lang === "es"
-                  ? "Sube tu logo (PNG, JPG, SVG o WebP). Se optimizará y convertirá automáticamente para el panel y los correos."
-                  : "Upload your logo (PNG, JPG, SVG or WebP). It will be automatically optimized and converted for dashboard and emails."}
-              </p>
+            {/* Scrollable Modal Content */}
+            <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-6">
+              {/* Language Selection */}
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+                  {lang === "es" ? "Idioma del Panel" : "Dashboard Language"}
+                </label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => changeLanguage("es")}
+                    className={`flex items-center justify-between px-3.5 py-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                      lang === "es"
+                        ? "bg-brand-blue/10 border-brand-blue text-brand-blue shadow-2xs"
+                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                    }`}
+                  >
+                    <span>🇪🇸 Español</span>
+                    {lang === "es" && (
+                      <svg className="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </button>
 
-              <div className="flex items-center gap-4 bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5">
-                {/* Preview Avatar */}
-                <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 p-1 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
-                  {currentLogoUrl ? (
-                    <img src={currentLogoUrl} alt="Logo" className="w-full h-full object-contain" />
-                  ) : (
-                    <div className="w-full h-full rounded-xl bg-slate-100 text-slate-400 flex flex-col items-center justify-center text-[10px] font-bold">
-                      <span className="text-base mb-0.5">🖼️</span>
-                      <span>Sin logo</span>
-                    </div>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => changeLanguage("en")}
+                    className={`flex items-center justify-between px-3.5 py-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                      lang === "en"
+                        ? "bg-brand-blue/10 border-brand-blue text-brand-blue shadow-2xs"
+                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                    }`}
+                  >
+                    <span>🇬🇧 English</span>
+                    {lang === "en" && (
+                      <svg className="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
+              </div>
 
-                <div className="flex-1 flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <input
-                      ref={logoFileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoFileChange}
-                      className="hidden"
-                      id="logo-file-input"
-                    />
-                    <label
-                      htmlFor="logo-file-input"
-                      className={`px-3.5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-xs ${
-                        isUploadingLogo ? "opacity-50 pointer-events-none" : ""
-                      }`}
-                    >
-                      {isUploadingLogo ? (
-                        <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                      ) : (
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                        </svg>
-                      )}
-                      <span>{currentLogoUrl ? (lang === "es" ? "Cambiar Logo" : "Change Logo") : (lang === "es" ? "Subir Logo" : "Upload Logo")}</span>
-                    </label>
+              {/* Account Display Name */}
+              <div className="border-t border-slate-150 pt-5">
+                <label className="block text-sm font-bold text-slate-900 mb-1">
+                  {lang === "es" ? "Nombre de la Cuenta" : "Account Name"}
+                </label>
+                <p className="text-xs text-slate-500 mb-3 leading-relaxed">
+                  {lang === "es" ? "Nombre visible en tu panel y correos enviados." : "Visible name in your dashboard and sent emails."}
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={accountDisplayName}
+                    onChange={(e) => setAccountDisplayName(e.target.value)}
+                    placeholder="SPP Labs"
+                    className="flex-1 h-10 bg-slate-50 border border-slate-200 rounded-xl px-3.5 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSaveAccountName}
+                    disabled={isSavingAccountName || !accountDisplayName.trim()}
+                    className="h-10 px-4 bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center shrink-0 cursor-pointer"
+                  >
+                    {isSavingAccountName ? (
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    ) : accountNameSaved ? (
+                      "✓ Guardado"
+                    ) : (
+                      lang === "es" ? "Guardar" : "Save"
+                    )}
+                  </button>
+                </div>
+              </div>
 
-                    {currentLogoUrl && (
-                      <button
-                        type="button"
-                        onClick={handleDeleteLogo}
-                        disabled={isUploadingLogo}
-                        className="px-3 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold transition-all cursor-pointer"
-                        title={lang === "es" ? "Eliminar Logo" : "Remove Logo"}
-                      >
-                        {lang === "es" ? "Eliminar" : "Remove"}
-                      </button>
+              {/* Business Logo Section */}
+              <div className="border-t border-slate-150 pt-5">
+                <label className="block text-sm font-bold text-slate-900 mb-1">
+                  {lang === "es" ? "Logo de la Empresa" : "Business Logo"}
+                </label>
+                <p className="text-xs text-slate-500 mb-3 leading-relaxed">
+                  {lang === "es"
+                    ? "Sube tu logo (PNG, JPG, SVG o WebP). Se optimizará y convertirá automáticamente para el panel y los correos."
+                    : "Upload your logo (PNG, JPG, SVG or WebP). It will be automatically optimized and converted for dashboard and emails."}
+                </p>
+
+                <div className="flex items-center gap-4 bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5">
+                  {/* Preview Avatar */}
+                  <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 p-1 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
+                    {currentLogoUrl ? (
+                      <img src={currentLogoUrl} alt="Logo" className="w-full h-full object-contain" />
+                    ) : (
+                      <div className="w-full h-full rounded-xl bg-slate-100 text-slate-400 flex flex-col items-center justify-center text-[10px] font-bold">
+                        <span className="text-base mb-0.5">🖼️</span>
+                        <span>Sin logo</span>
+                      </div>
                     )}
                   </div>
 
-                  {logoMessage.text && (
-                    <span className={`text-[11px] font-semibold ${logoMessage.type === "error" ? "text-rose-600" : "text-emerald-600"}`}>
-                      {logoMessage.text}
-                    </span>
-                  )}
+                  <div className="flex-1 flex flex-col gap-2 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <input
+                        ref={logoFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoFileChange}
+                        className="hidden"
+                        id="logo-file-input"
+                      />
+                      <label
+                        htmlFor="logo-file-input"
+                        className={`px-3.5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-xs ${
+                          isUploadingLogo ? "opacity-50 pointer-events-none" : ""
+                        }`}
+                      >
+                        {isUploadingLogo ? (
+                          <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        ) : (
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                          </svg>
+                        )}
+                        <span>{currentLogoUrl ? (lang === "es" ? "Cambiar Logo" : "Change Logo") : (lang === "es" ? "Subir Logo" : "Upload Logo")}</span>
+                      </label>
+
+                      {currentLogoUrl && (
+                        <button
+                          type="button"
+                          onClick={handleDeleteLogo}
+                          disabled={isUploadingLogo}
+                          className="px-3 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                          title={lang === "es" ? "Eliminar Logo" : "Remove Logo"}
+                        >
+                          {lang === "es" ? "Eliminar" : "Remove"}
+                        </button>
+                      )}
+                    </div>
+
+                    {logoMessage.text && (
+                      <span className={`text-[11px] font-semibold ${logoMessage.type === "error" ? "text-rose-600" : "text-emerald-600"}`}>
+                        {logoMessage.text}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Theme Selection */}
+              <div className="border-t border-slate-150 pt-5">
+                <label className="block text-sm font-bold text-slate-900 mb-2">
+                  {lang === "es" ? "Tema del Dashboard" : "Dashboard Theme"}
+                </label>
+                <div className="flex items-center justify-between bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
+                  <span className="text-xs font-bold text-slate-700">
+                    {theme === "light" 
+                      ? (lang === "es" ? "☀️ Modo Claro" : "☀️ Light Mode") 
+                      : (lang === "es" ? "🌙 Modo Oscuro" : "🌙 Dark Mode")}
+                  </span>
+                  <div className="toggle-switch scale-75 origin-right">
+                    <label className="switch-label">
+                      <input 
+                        type="checkbox" 
+                        className="checkbox" 
+                        checked={theme === "dark"} 
+                        onChange={toggleTheme}
+                      />
+                      <span className="slider" />
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="border-t border-slate-100 pt-6 mt-6">
-              <label className="block text-sm font-bold text-slate-900 mb-3">
-                {lang === "es" ? "Tema del Dashboard" : "Dashboard Theme"}
-              </label>
-              <div className="flex items-center justify-between bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
-                <span className="text-sm text-slate-700 font-semibold">
-                  {theme === "light" 
-                    ? (lang === "es" ? "Modo Claro" : "Light Mode") 
-                    : (lang === "es" ? "Modo Oscuro" : "Dark Mode")}
-                </span>
-                <div className="toggle-switch scale-75 origin-right">
-                  <label className="switch-label">
-                    <input 
-                      type="checkbox" 
-                      className="checkbox" 
-                      checked={theme === "dark"} 
-                      onChange={toggleTheme}
-                    />
-                    <span className="slider" />
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 flex justify-end gap-3">
+            {/* Sticky Modal Footer */}
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end shrink-0">
               <button
+                type="button"
                 onClick={() => setShowSettingsModal(false)}
-                className="h-10 px-5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-lg transition-all"
+                className="h-10 px-6 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
               >
                 {t.settingsSave}
               </button>
