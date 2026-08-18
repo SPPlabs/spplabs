@@ -109,6 +109,136 @@ export default function DashboardClient({
   const [isSavingAccountName, setIsSavingAccountName] = useState(false);
   const [accountNameSaved, setAccountNameSaved] = useState(false);
 
+  // Business Logo state
+  const [currentLogoUrl, setCurrentLogoUrl] = useState(currentWebsite?.logoUrl || null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [logoMessage, setLogoMessage] = useState({ text: "", type: "" });
+  const logoFileInputRef = useRef(null);
+
+  // Helper: compress & convert any image to WebP & PNG in browser Canvas
+  const processImageToOptimizedFormats = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new window.Image();
+        img.onload = () => {
+          const maxDim = 400;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const webpBase64 = canvas.toDataURL("image/webp", 0.9);
+          const pngBase64 = canvas.toDataURL("image/png");
+
+          resolve({ webpBase64, pngBase64 });
+        };
+        img.onerror = () => reject(new Error("Error al procesar la imagen"));
+        img.src = event.target.result;
+      };
+      reader.onerror = () => reject(new Error("Error al leer el archivo"));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleLogoFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingLogo(true);
+    setLogoMessage({ text: "", type: "" });
+
+    try {
+      const { webpBase64, pngBase64 } = await processImageToOptimizedFormats(file);
+
+      const res = await fetch("/api/admin/upload-logo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          domain: currentWebsite.domain,
+          webpBase64,
+          pngBase64,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.logoUrl) {
+        setCurrentLogoUrl(data.logoUrl);
+        setLogoMessage({
+          text: lang === "es" ? "Logo actualizado correctamente" : "Logo updated successfully",
+          type: "success",
+        });
+        setTimeout(() => setLogoMessage({ text: "", type: "" }), 4000);
+      } else {
+        setLogoMessage({
+          text: data.message || "Error al subir el logo",
+          type: "error",
+        });
+      }
+    } catch (err) {
+      console.error("Logo upload error:", err);
+      setLogoMessage({
+        text: lang === "es" ? "Error al procesar la imagen" : "Error processing image",
+        type: "error",
+      });
+    } finally {
+      setIsUploadingLogo(false);
+      if (logoFileInputRef.current) logoFileInputRef.current.value = "";
+    }
+  };
+
+  const handleDeleteLogo = async () => {
+    if (!confirm(lang === "es" ? "¿Seguro que deseas eliminar el logo de la empresa?" : "Are you sure you want to remove the business logo?")) return;
+
+    setIsUploadingLogo(true);
+    setLogoMessage({ text: "", type: "" });
+
+    try {
+      const res = await fetch(`/api/admin/upload-logo?domain=${encodeURIComponent(currentWebsite.domain)}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setCurrentLogoUrl(null);
+        setLogoMessage({
+          text: lang === "es" ? "Logo eliminado correctamente" : "Logo removed successfully",
+          type: "success",
+        });
+        setTimeout(() => setLogoMessage({ text: "", type: "" }), 4000);
+      } else {
+        const data = await res.json();
+        setLogoMessage({
+          text: data.message || "Error al eliminar el logo",
+          type: "error",
+        });
+      }
+    } catch (err) {
+      console.error("Logo delete error:", err);
+      setLogoMessage({
+        text: lang === "es" ? "Error de conexión" : "Connection error",
+        type: "error",
+      });
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
   // RAG Chatbot plain text info prompt
   const [chatbotContent, setChatbotContent] = useState(chatbotKnowledge?.content || "");
   const [iaSaving, setIaSaving] = useState(false);
@@ -851,19 +981,30 @@ export default function DashboardClient({
           {sidebarOpen ? (
             <>
               {/* Business Info / Profile rectangle */}
-              <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3.5 flex items-center justify-between shadow-sm">
-                <div className="overflow-hidden mr-2">
-                  <span className="font-bold text-xs text-slate-800 block truncate" title={currentWebsite.displayName}>
-                    {currentWebsite.displayName}
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-mono block truncate" title={currentWebsite.domain}>
-                    {currentWebsite.domain}
-                  </span>
+              <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3 flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-2.5 overflow-hidden mr-2">
+                  {currentLogoUrl ? (
+                    <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 p-0.5 overflow-hidden flex items-center justify-center shrink-0 shadow-2xs">
+                      <img src={currentLogoUrl} alt={accountDisplayName || currentWebsite.displayName} className="w-full h-full object-contain" />
+                    </div>
+                  ) : (
+                    <div className="w-9 h-9 rounded-xl bg-slate-900 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                      {(accountDisplayName || currentWebsite.displayName)?.slice(0, 2).toUpperCase() || "SP"}
+                    </div>
+                  )}
+                  <div className="overflow-hidden">
+                    <span className="font-bold text-xs text-slate-800 block truncate" title={accountDisplayName || currentWebsite.displayName}>
+                      {accountDisplayName || currentWebsite.displayName}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-mono block truncate" title={currentWebsite.domain}>
+                      {currentWebsite.domain}
+                    </span>
+                  </div>
                 </div>
                 <button
                   onClick={() => setShowSettingsModal(true)}
                   className="p-2 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-lg transition-all cursor-pointer border border-transparent hover:border-slate-300/40 shrink-0"
-                  title={lang === "es" ? "Ajustes de Idioma" : "Language Settings"}
+                  title={lang === "es" ? "Ajustes de Cuenta" : "Account Settings"}
                 >
                   <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -887,13 +1028,14 @@ export default function DashboardClient({
             <div className="flex flex-col gap-2 items-center">
               <button
                 onClick={() => setShowSettingsModal(true)}
-                className="w-full flex items-center justify-center p-3 bg-slate-50 border border-slate-200/60 rounded-xl hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
-                title={lang === "es" ? "Ajustes de Idioma" : "Language Settings"}
+                className="w-full flex items-center justify-center p-2 bg-slate-50 border border-slate-200/60 rounded-xl hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all cursor-pointer overflow-hidden"
+                title={lang === "es" ? "Ajustes de Cuenta" : "Account Settings"}
               >
-                <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+                {currentLogoUrl ? (
+                  <img src={currentLogoUrl} alt="Logo" className="w-6 h-6 object-contain" />
+                ) : (
+                  <span className="font-bold text-xs text-slate-700">{(accountDisplayName || currentWebsite.displayName)?.slice(0, 2).toUpperCase() || "SP"}</span>
+                )}
               </button>
               <button
                 onClick={handleLogout}
@@ -1430,6 +1572,78 @@ export default function DashboardClient({
                     lang === "es" ? "Guardar" : "Save"
                   )}
                 </button>
+              </div>
+            </div>
+
+            {/* Business Logo Section */}
+            <div className="border-t border-slate-100 pt-6 mt-6">
+              <label className="block text-sm font-bold text-slate-900 mb-1">
+                {lang === "es" ? "Logo de la Empresa" : "Business Logo"}
+              </label>
+              <p className="text-xs text-slate-500 mb-3">
+                {lang === "es"
+                  ? "Sube tu logo (PNG, JPG, SVG o WebP). Se optimizará y convertirá automáticamente para el panel y los correos."
+                  : "Upload your logo (PNG, JPG, SVG or WebP). It will be automatically optimized and converted for dashboard and emails."}
+              </p>
+
+              <div className="flex items-center gap-4 bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5">
+                {/* Preview Avatar */}
+                <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 p-1 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
+                  {currentLogoUrl ? (
+                    <img src={currentLogoUrl} alt="Logo" className="w-full h-full object-contain" />
+                  ) : (
+                    <div className="w-full h-full rounded-xl bg-slate-100 text-slate-400 flex flex-col items-center justify-center text-[10px] font-bold">
+                      <span className="text-base mb-0.5">🖼️</span>
+                      <span>Sin logo</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={logoFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoFileChange}
+                      className="hidden"
+                      id="logo-file-input"
+                    />
+                    <label
+                      htmlFor="logo-file-input"
+                      className={`px-3.5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-xs ${
+                        isUploadingLogo ? "opacity-50 pointer-events-none" : ""
+                      }`}
+                    >
+                      {isUploadingLogo ? (
+                        <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      ) : (
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                      )}
+                      <span>{currentLogoUrl ? (lang === "es" ? "Cambiar Logo" : "Change Logo") : (lang === "es" ? "Subir Logo" : "Upload Logo")}</span>
+                    </label>
+
+                    {currentLogoUrl && (
+                      <button
+                        type="button"
+                        onClick={handleDeleteLogo}
+                        disabled={isUploadingLogo}
+                        className="px-3 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                        title={lang === "es" ? "Eliminar Logo" : "Remove Logo"}
+                      >
+                        {lang === "es" ? "Eliminar" : "Remove"}
+                      </button>
+                    )}
+                  </div>
+
+                  {logoMessage.text && (
+                    <span className={`text-[11px] font-semibold ${logoMessage.type === "error" ? "text-rose-600" : "text-emerald-600"}`}>
+                      {logoMessage.text}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 

@@ -15,6 +15,7 @@ services:
 
     volumes:
       - transformers-cache:/app/.cache/transformers
+      - uploads-data:/app/public/uploads
 
     labels:
       - "traefik.enable=true"
@@ -30,3 +31,4 @@ networks:
 
 volumes:
   transformers-cache:
+  uploads-data:

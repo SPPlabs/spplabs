@@ -16,7 +16,19 @@ function getBaseStyles(brandColor = "#0284c7") {
   `;
 }
 
-function renderHeader(companyName, clientDomain, brandColor = "#0284c7") {
+function renderHeader(companyName, clientDomain, brandColor = "#0284c7", customLogoUrl = null) {
+  let logoImgHtml = "";
+  if (customLogoUrl && customLogoUrl.trim()) {
+    const rawUrl = customLogoUrl.trim();
+    const absoluteLogoUrl = rawUrl.startsWith("http://") || rawUrl.startsWith("https://")
+      ? rawUrl
+      : `https://${clientDomain || "spplabs.es"}${rawUrl.startsWith("/") ? "" : "/"}${rawUrl}`;
+
+    logoImgHtml = `
+      <img src="${absoluteLogoUrl}" alt="${companyName || "Logo"}" style="max-height: 42px; max-width: 140px; width: auto; height: auto; object-fit: contain; display: block; margin-bottom: 8px;" />
+    `;
+  }
+
   return `
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #0f172a; border-radius: 20px 20px 0 0; padding: 24px 32px;">
       <tr>
@@ -24,7 +36,8 @@ function renderHeader(companyName, clientDomain, brandColor = "#0284c7") {
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             <tr>
               <td>
-                <span style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px; display: inline-block;">
+                ${logoImgHtml}
+                <span style="font-size: ${logoImgHtml ? "16px" : "20px"}; font-weight: 900; color: #ffffff; letter-spacing: -0.5px; display: inline-block;">
                   ${companyName || clientDomain || "SPP Labs"}
                 </span>
                 <span style="display: block; font-size: 11px; font-family: monospace; color: #94a3b8; margin-top: 2px;">
@@ -60,7 +73,7 @@ function renderFooter(companyName, clientDomain) {
   `;
 }
 
-export function generateWelcomeContactHtml({ recipientName, companyName, clientDomain, brandColor = "#0284c7", messageSnippet }) {
+export function generateWelcomeContactHtml({ recipientName, companyName, clientDomain, brandColor = "#0284c7", messageSnippet, customLogoUrl = null }) {
   return `
 <!DOCTYPE html>
 <html lang="es">
@@ -76,7 +89,7 @@ export function generateWelcomeContactHtml({ recipientName, companyName, clientD
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 580px; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
           <tr>
             <td>
-              ${renderHeader(companyName, clientDomain, brandColor)}
+              ${renderHeader(companyName, clientDomain, brandColor, customLogoUrl)}
 
               <div style="padding: 32px;">
                 <div style="display: inline-block; padding: 6px 12px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; font-size: 12px; font-weight: 700; color: #166534; margin-bottom: 20px;">
@@ -124,7 +137,7 @@ export function generateWelcomeContactHtml({ recipientName, companyName, clientD
   `;
 }
 
-export function generateBookingConfirmationHtml({ recipientName, companyName, clientDomain, dateStr, timeStr, brandColor = "#0284c7" }) {
+export function generateBookingConfirmationHtml({ recipientName, companyName, clientDomain, dateStr, timeStr, brandColor = "#0284c7", customLogoUrl = null }) {
   return `
 <!DOCTYPE html>
 <html lang="es">
@@ -140,7 +153,7 @@ export function generateBookingConfirmationHtml({ recipientName, companyName, cl
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 580px; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
           <tr>
             <td>
-              ${renderHeader(companyName, clientDomain, brandColor)}
+              ${renderHeader(companyName, clientDomain, brandColor, customLogoUrl)}
 
               <div style="padding: 32px;">
                 <div style="display: inline-block; padding: 6px 12px; background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; font-size: 12px; font-weight: 700; color: #1e40af; margin-bottom: 20px;">
@@ -187,7 +200,7 @@ export function generateBookingConfirmationHtml({ recipientName, companyName, cl
   `;
 }
 
-export function generateBookingReminderHtml({ recipientName, companyName, clientDomain, dateStr, timeStr, brandColor = "#0284c7" }) {
+export function generateBookingReminderHtml({ recipientName, companyName, clientDomain, dateStr, timeStr, brandColor = "#0284c7", customLogoUrl = null }) {
   return `
 <!DOCTYPE html>
 <html lang="es">
@@ -203,7 +216,7 @@ export function generateBookingReminderHtml({ recipientName, companyName, client
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 580px; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
           <tr>
             <td>
-              ${renderHeader(companyName, clientDomain, brandColor)}
+              ${renderHeader(companyName, clientDomain, brandColor, customLogoUrl)}
 
               <div style="padding: 32px;">
                 <div style="display: inline-block; padding: 6px 12px; background-color: #fef3c7; border: 1px solid #fde68a; border-radius: 12px; font-size: 12px; font-weight: 700; color: #92400e; margin-bottom: 20px;">
@@ -241,7 +254,7 @@ export function generateBookingReminderHtml({ recipientName, companyName, client
   `;
 }
 
-export function generateGoogleReviewHtml({ recipientName, companyName, clientDomain, googleReviewUrl, brandColor = "#0284c7" }) {
+export function generateGoogleReviewHtml({ recipientName, companyName, clientDomain, googleReviewUrl, brandColor = "#0284c7", customLogoUrl = null }) {
   const reviewLink = googleReviewUrl && googleReviewUrl.trim() !== "" ? googleReviewUrl.trim() : `https://${clientDomain}`;
 
   return `
@@ -259,7 +272,7 @@ export function generateGoogleReviewHtml({ recipientName, companyName, clientDom
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 580px; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
           <tr>
             <td>
-              ${renderHeader(companyName, clientDomain, brandColor)}
+              ${renderHeader(companyName, clientDomain, brandColor, customLogoUrl)}
 
               <div style="padding: 32px; text-align: center;">
                 <div style="font-size: 32px; margin-bottom: 12px;">
@@ -301,7 +314,7 @@ export function generateGoogleReviewHtml({ recipientName, companyName, clientDom
   `;
 }
 
-export function generateTestEmailHtml({ companyName, clientDomain, brandColor = "#0284c7" }) {
+export function generateTestEmailHtml({ companyName, clientDomain, brandColor = "#0284c7", customLogoUrl = null }) {
   return `
 <!DOCTYPE html>
 <html lang="es">
@@ -317,7 +330,7 @@ export function generateTestEmailHtml({ companyName, clientDomain, brandColor = 
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 580px; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
           <tr>
             <td>
-              ${renderHeader(companyName, clientDomain, brandColor)}
+              ${renderHeader(companyName, clientDomain, brandColor, customLogoUrl)}
 
               <div style="padding: 32px; text-align: center;">
                 <div style="display: inline-block; padding: 6px 12px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; font-size: 12px; font-weight: 700; color: #166534; margin-bottom: 16px;">

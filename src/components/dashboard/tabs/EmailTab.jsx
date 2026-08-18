@@ -189,6 +189,7 @@ export default function EmailTab({
   const getPreviewHtml = () => {
     const compName = senderName || currentWebsite?.displayName || "Empresa Demo";
     const dom = currentWebsite?.domain || "spplabs.es";
+    const logo = currentWebsite?.logoUrl || null;
 
     if (previewTab === "welcome") {
       return generateWelcomeContactHtml({
@@ -197,6 +198,7 @@ export default function EmailTab({
         clientDomain: dom,
         brandColor,
         messageSnippet: "Hola, me gustaría solicitar más información sobre sus servicios de consultoría...",
+        customLogoUrl: logo,
       });
     }
 
@@ -208,6 +210,7 @@ export default function EmailTab({
         dateStr: "18 de agosto de 2026",
         timeStr: "11:30",
         brandColor,
+        customLogoUrl: logo,
       });
     }
 
@@ -219,6 +222,7 @@ export default function EmailTab({
         dateStr: "Mañana, 18 de agosto de 2026",
         timeStr: "11:30",
         brandColor,
+        customLogoUrl: logo,
       });
     }
 
@@ -229,6 +233,7 @@ export default function EmailTab({
       clientDomain: dom,
       googleReviewUrl: googleReviewUrl || "https://g.page/r/example/review",
       brandColor,
+      customLogoUrl: logo,
     });
   };
 

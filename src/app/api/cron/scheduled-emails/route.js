@@ -73,6 +73,8 @@ async function handleCronDispatch(request) {
         let html = "";
         const meta = (item.metadata && typeof item.metadata === "object") ? item.metadata : {};
 
+        const customLogoUrl = config.customLogoUrl || website?.logoUrl || null;
+
         if (item.emailType === "WELCOME_CONTACT") {
           html = generateWelcomeContactHtml({
             recipientName: item.recipientName,
@@ -80,6 +82,7 @@ async function handleCronDispatch(request) {
             clientDomain: website?.domain,
             brandColor: config.brandColor,
             messageSnippet: meta.messageSnippet || "",
+            customLogoUrl,
           });
         } else if (item.emailType === "BOOKING_CONFIRMATION") {
           html = generateBookingConfirmationHtml({
@@ -89,6 +92,7 @@ async function handleCronDispatch(request) {
             dateStr: meta.dateStr || "",
             timeStr: meta.timeStr || "",
             brandColor: config.brandColor,
+            customLogoUrl,
           });
         } else if (item.emailType === "BOOKING_REMINDER") {
           html = generateBookingReminderHtml({
@@ -98,6 +102,7 @@ async function handleCronDispatch(request) {
             dateStr: meta.dateStr || "",
             timeStr: meta.timeStr || "",
             brandColor: config.brandColor,
+            customLogoUrl,
           });
         } else if (item.emailType === "GOOGLE_REVIEW_REQUEST") {
           html = generateGoogleReviewHtml({
@@ -106,6 +111,7 @@ async function handleCronDispatch(request) {
             clientDomain: website?.domain,
             googleReviewUrl: config.googleReviewUrl || `https://${website?.domain}`,
             brandColor: config.brandColor,
+            customLogoUrl,
           });
         }
 

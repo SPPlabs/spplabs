@@ -93,6 +93,7 @@ export async function POST(request) {
       companyName: website.displayName,
       clientDomain: website.domain,
       brandColor: config.brandColor,
+      customLogoUrl: config.customLogoUrl || website.logoUrl || null,
     });
 
     const sendResult = await sendEmail({
