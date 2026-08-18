@@ -74,7 +74,17 @@ export default function BoosterResenasServicePage() {
           {/* Hero Header */}
           <div className="text-center max-w-4xl mx-auto mb-16 space-y-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 border border-amber-200/80 text-amber-800 text-xs font-black uppercase tracking-wider font-mono shadow-2xs">
-              <span className="text-sm">⭐</span>
+              <svg
+                className="w-4 h-4 text-amber-500 shrink-0"
+                viewBox="0 0 24 24"
+                fill="white"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
               {isEs ? "Potenciador de Reseñas de Google & Email" : "Google Reviews Booster & Email Lifecycle"}
             </div>
 

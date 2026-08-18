@@ -176,7 +176,13 @@ export default function NotificationsTab({
                       </div>
                     </div>
                     <span className="text-[10px] text-slate-400 font-mono font-bold self-start sm:self-center">
-                      {new Date(pet.createdAt).toLocaleString()}
+                      {new Date(pet.createdAt).toLocaleString("es-ES", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
                   </div>
 

@@ -27,7 +27,7 @@ async function main() {
     website = await prisma.website.create({
       data: {
         domain: adminDomain,
-        displayName: "SPP Labs Admin",
+        displayName: "SPP Labs",
         passwordHash: hashedPassword,
         role: "ADMIN",
         registeredAt: new Date(),
@@ -39,7 +39,11 @@ async function main() {
     console.log(`Password: ${adminPassword}`);
     console.log("=========================================");
   } else {
-    console.log(`Admin account already exists: ${adminDomain}`);
+    website = await prisma.website.update({
+      where: { domain: adminDomain },
+      data: { displayName: "SPP Labs" },
+    });
+    console.log(`Admin account exists and updated displayName to 'SPP Labs': ${adminDomain}`);
   }
 
   // Seed default API Key for spplabs.es if not present

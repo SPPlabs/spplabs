@@ -93,7 +93,7 @@ export default function InicioSection() {
                 <span className="text-zinc-350">•</span>
                 <span className="text-brand-green">CRM</span>
                 <span className="text-zinc-350">•</span>
-                <span className="text-amber-500 font-extrabold">RESEÑAS</span>
+                <span className="text-yellow-400 font-extrabold">RESEÑAS</span>
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-zinc-950 leading-[1.08] mb-8 lowercase font-sans">
@@ -188,7 +188,17 @@ export default function InicioSection() {
                 </div>
 
                 <div className="flex items-center gap-1.5 sm:gap-2.5 text-xs font-bold tracking-wide shrink-0">
-                  <span className="text-amber-500 text-sm">⭐</span>
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="white"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
                   <span>Reseñas</span>
                 </div>
               </div>
@@ -430,8 +440,18 @@ export default function InicioSection() {
                 <div className="service-card">
                   <div className="service-card-inner p-6 flex flex-col justify-between text-left">
                     <div>
-                      <div className="text-amber-400 text-2xl mb-4">
-                        <span className="text-3xl">⭐</span>
+                      <div className="text-amber-400 mb-4">
+                        <svg
+                          className="w-8 h-8 text-amber-400"
+                          viewBox="0 0 24 24"
+                          fill="white"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
                       </div>
                       <h4 className="text-white text-base font-extrabold mb-2">
                         {lang === "es" ? "Aumenta tus Reseñas en Google" : "Boost Your Google Reviews"}
@@ -602,7 +622,9 @@ export default function InicioSection() {
                         </div>
                         <span className="relative flex items-center justify-center shrink-0">
                           <span className="relative z-10 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-amber-500 text-white text-[8.5px] font-black leading-none shadow-[0_0_8px_rgba(245,158,11,0.9)] border border-white/40">
-                            ⭐
+                            <svg className="w-2.5 h-2.5 text-amber-300" viewBox="0 0 24 24" fill="white" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg>
                           </span>
                         </span>
                       </div>

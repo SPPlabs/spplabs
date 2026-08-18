@@ -368,7 +368,13 @@ export default function AiTab({
                         {conv.messageCount} msgs
                       </span>
                       <span className="text-[10px] text-slate-400 font-mono sm:ml-auto">
-                        {new Date(conv.lastMessageAt).toLocaleString("es-ES")}
+                        {new Date(conv.lastMessageAt).toLocaleString("es-ES", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </span>
                     </div>
                     <p className="text-xs text-slate-600 truncate font-medium">
@@ -410,7 +416,13 @@ export default function AiTab({
                     <span>💬</span> Transcripción de la Conversación
                   </h3>
                   <p className="text-xs text-slate-500 font-mono mt-0.5 truncate">
-                    Visitante: {selectedConversation.visitorName || selectedConversation.visitorId} • {new Date(selectedConversation.startedAt).toLocaleString("es-ES")}
+                    Visitante: {selectedConversation.visitorName || selectedConversation.visitorId} • {new Date(selectedConversation.startedAt).toLocaleString("es-ES", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </p>
                 </div>
                 <button

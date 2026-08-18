@@ -226,7 +226,13 @@ export default function OverviewTab({
                     </span>
                   </div>
                   <span className="text-[10px] text-slate-500 font-mono block mb-2">
-                    {new Date(conv.lastMessageAt).toLocaleString("es-ES")}
+                    {new Date(conv.lastMessageAt).toLocaleString("es-ES", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </span>
                   <p className="text-slate-600 text-xs bg-white p-2 rounded-lg border border-slate-200 line-clamp-2 italic">
                     "{conv.firstMessageSnippet}"

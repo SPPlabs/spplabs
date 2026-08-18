@@ -34,18 +34,20 @@ export default function ClientesTab({
                     <span className="text-xs text-brand-blue font-semibold">{form.email}</span>
                   </div>
                   <div className="text-right text-xs text-slate-500 font-mono">
-                    {new Date(form.createdAt).toLocaleString()}
+                    {new Date(form.createdAt).toLocaleString(lang === "es" ? "es-ES" : "en-US", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mb-4 border-t border-slate-200 pt-4">
+                <div className="text-xs mb-4 border-t border-slate-200 pt-4">
                   <div>
                     <span className="text-slate-550 font-bold block uppercase tracking-wider text-[10px]">{t.clientesPhone}</span>
                     <span className="text-slate-700 font-mono">{form.phone || "N/A"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-550 font-bold block uppercase tracking-wider text-[10px]">ID</span>
-                    <span className="text-slate-700 font-mono">{form.id}</span>
                   </div>
                 </div>
 

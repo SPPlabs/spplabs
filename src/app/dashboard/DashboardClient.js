@@ -102,6 +102,11 @@ export default function DashboardClient({
   const [createdCredentials, setCreatedCredentials] = useState(null);
   const [createError, setCreateError] = useState("");
 
+  // Account display name state
+  const [accountDisplayName, setAccountDisplayName] = useState(currentWebsite?.displayName || "");
+  const [isSavingAccountName, setIsSavingAccountName] = useState(false);
+  const [accountNameSaved, setAccountNameSaved] = useState(false);
+
   // RAG Chatbot plain text info prompt
   const [chatbotContent, setChatbotContent] = useState(chatbotKnowledge?.content || "");
   const [iaSaving, setIaSaving] = useState(false);
@@ -437,6 +442,33 @@ export default function DashboardClient({
       setCreateError(err.message);
     } finally {
       setCreateLoading(false);
+    }
+  };
+
+  // Handle updating account display name
+  const handleSaveAccountName = async (e) => {
+    if (e) e.preventDefault();
+    if (!accountDisplayName.trim()) return;
+    setIsSavingAccountName(true);
+    try {
+      const res = await fetch("/api/admin/website-profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          domain: currentWebsite.domain,
+          displayName: accountDisplayName.trim(),
+        }),
+      });
+      if (res.ok) {
+        currentWebsite.displayName = accountDisplayName.trim();
+        setAccountNameSaved(true);
+        setTimeout(() => setAccountNameSaved(false), 2500);
+        router.refresh();
+      }
+    } catch (err) {
+      console.error("Save account name error:", err);
+    } finally {
+      setIsSavingAccountName(false);
     }
   };
 
@@ -1336,6 +1368,38 @@ export default function DashboardClient({
                   </svg>
                 )}
               </button>
+            </div>
+
+            <div className="border-t border-slate-100 pt-6 mt-6">
+              <label className="block text-sm font-bold text-slate-900 mb-2">
+                {lang === "es" ? "Nombre de la Cuenta" : "Account Name"}
+              </label>
+              <p className="text-xs text-slate-500 mb-3">
+                {lang === "es" ? "Nombre visible en tu panel y correos enviados." : "Visible name in your dashboard and sent emails."}
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={accountDisplayName}
+                  onChange={(e) => setAccountDisplayName(e.target.value)}
+                  placeholder="SPP Labs"
+                  className="flex-1 h-10 bg-slate-50 border border-slate-200 rounded-xl px-3.5 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={handleSaveAccountName}
+                  disabled={isSavingAccountName || !accountDisplayName.trim()}
+                  className="h-10 px-4 bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center shrink-0 cursor-pointer"
+                >
+                  {isSavingAccountName ? (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  ) : accountNameSaved ? (
+                    "✓ Guardado"
+                  ) : (
+                    lang === "es" ? "Guardar" : "Save"
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="border-t border-slate-100 pt-6 mt-6">

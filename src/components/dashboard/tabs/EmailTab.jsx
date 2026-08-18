@@ -753,7 +753,13 @@ export default function EmailTab({
                       <td className="py-3 font-mono text-slate-600">{log.recipientEmail}</td>
                       <td className="py-3 text-slate-800 truncate max-w-[200px]">{log.subject}</td>
                       <td className="py-3 font-mono text-[11px] text-slate-500">
-                        {new Date(log.sentAt || log.scheduledFor).toLocaleString("es-ES")}
+                        {new Date(log.sentAt || log.scheduledFor).toLocaleString("es-ES", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </td>
                       <td className="py-3 text-right">
                         <span className={`px-2.5 py-0.5 rounded-full border text-[10px] font-black ${badge}`}>
