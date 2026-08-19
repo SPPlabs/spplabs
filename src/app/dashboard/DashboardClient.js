@@ -1300,13 +1300,24 @@ export default function DashboardClient({
 
               <div className="space-y-3 pt-4 border-t border-slate-100">
                 <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex items-center justify-between shadow-2xs">
-                  <div className="overflow-hidden mr-2">
-                    <span className="font-bold text-xs text-slate-800 block truncate" title={currentWebsite.displayName}>
-                      {currentWebsite.displayName}
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-mono block truncate" title={currentWebsite.domain}>
-                      {currentWebsite.domain}
-                    </span>
+                  <div className="flex items-center gap-2.5 overflow-hidden mr-2">
+                    {currentLogoUrl ? (
+                      <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 p-0.5 overflow-hidden flex items-center justify-center shrink-0 shadow-2xs">
+                        <img src={currentLogoUrl} alt={accountDisplayName || currentWebsite.displayName} className="w-full h-full object-contain" />
+                      </div>
+                    ) : (
+                      <div className="w-9 h-9 rounded-xl bg-slate-900 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                        {(accountDisplayName || currentWebsite.displayName)?.slice(0, 2).toUpperCase() || "SP"}
+                      </div>
+                    )}
+                    <div className="overflow-hidden">
+                      <span className="font-bold text-xs text-slate-800 block truncate" title={accountDisplayName || currentWebsite.displayName}>
+                        {accountDisplayName || currentWebsite.displayName}
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-mono block truncate" title={currentWebsite.domain}>
+                        {currentWebsite.domain}
+                      </span>
+                    </div>
                   </div>
                   <button
                     onClick={() => {
@@ -1314,7 +1325,7 @@ export default function DashboardClient({
                       setMobileDrawerOpen(false);
                     }}
                     className="p-2 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-lg transition-all cursor-pointer border border-transparent hover:border-slate-300/40 shrink-0"
-                    title={lang === "es" ? "Ajustes de Idioma" : "Language Settings"}
+                    title={lang === "es" ? "Ajustes de Cuenta" : "Account Settings"}
                   >
                     <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />

@@ -274,24 +274,16 @@ export default function ServiciosSection() {
               </div>
 
               <div>
-                <div className="flex flex-wrap gap-1.5 mb-6">
-                  {service.tags.map((tag, idx) => (
-                    <span
-                      key={idx}
-                      className="text-[11px] font-mono font-semibold text-slate-600 bg-white border border-slate-200 px-2.5 py-0.5 rounded-lg"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="pt-4 border-t border-slate-200/80 flex items-center justify-between">
+                <div className="pt-4 border-t border-slate-200/80 flex items-center justify-between gap-3">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">SPP Labs</span>
                   <Link
                     href={service.href}
-                    className="text-xs font-black text-slate-900 hover:text-blue-600 transition-colors flex items-center gap-1 cursor-pointer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black text-slate-900 bg-white border border-slate-200 shadow-2xs hover:bg-slate-950 hover:text-white hover:border-slate-950 hover:shadow-md transition-all duration-300 group/btn cursor-pointer active:scale-95"
                   >
-                    {isEs ? "Saber más →" : "Learn more →"}
+                    <span>{isEs ? "Saber más" : "Learn more"}</span>
+                    <svg className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
                   </Link>
                 </div>
               </div>
