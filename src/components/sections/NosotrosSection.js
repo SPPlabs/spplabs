@@ -43,7 +43,7 @@ export default function NosotrosSection() {
                 <span className="w-5 h-5 rounded-full bg-brand-blue/10 text-brand-blue font-black flex items-center justify-center shrink-0 text-xs">✓</span>
                 <div>
                   <span className="text-sm font-bold text-black block">{lang === "es" ? "Velocidad Sub-Milisegundo" : "Sub-Millisecond Performance"}</span>
-                  <span className="text-xs text-zinc-500 block">{lang === "es" ? "Analíticas impulsadas por ClickHouse." : "Analytics powered directly by ClickHouse nodes."}</span>
+                  <span className="text-xs text-zinc-500 block">{lang === "es" ? "Analíticas y métricas en tiempo real." : "Real-time analytics and instant metrics."}</span>
                 </div>
               </li>
               <li className="flex gap-3">
