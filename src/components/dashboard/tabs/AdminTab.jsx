@@ -16,21 +16,25 @@ export default function AdminTab({
   handleDeleteUser,
 }) {
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-10 animate-fade-in w-full max-w-full">
       {/* Provision Website Form */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-        <h3 className="text-lg font-bold mb-1 text-slate-900">Provisionar Sitio Cliente</h3>
-        <p className="text-sm text-slate-500 mb-6">{t.usersSubtitle}</p>
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs">
+        <div className="mb-6 pb-4 border-b border-slate-100">
+          <h3 className="text-xl font-black text-slate-950 flex items-center gap-2">
+            <span>⚡</span> Provisionar Sitio Cliente
+          </h3>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">{t.usersSubtitle}</p>
+        </div>
         
         {createError && (
-          <div className="bg-red-50 border border-red-200 text-red-800 text-sm p-4 rounded-xl mb-6">
+          <div className="bg-red-50 border border-red-200 text-red-800 text-xs font-bold p-4 rounded-xl mb-6">
             {createError}
           </div>
         )}
 
         <form onSubmit={handleCreateClient} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
               {t.loginDomain}
             </label>
             <input
@@ -39,12 +43,12 @@ export default function AdminTab({
               placeholder="clientdomain.com"
               value={newDomain}
               onChange={(e) => setNewDomain(e.target.value)}
-              className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white transition-all"
+              className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-4 text-xs font-mono text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
               {t.usersThName}
             </label>
             <input
@@ -53,7 +57,7 @@ export default function AdminTab({
               placeholder="ACME Corporation"
               value={newDisplayName}
               onChange={(e) => setNewDisplayName(e.target.value)}
-              className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white transition-all"
+              className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-4 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
             />
           </div>
 
@@ -61,7 +65,7 @@ export default function AdminTab({
             <button
               type="submit"
               disabled={createLoading}
-              className="w-full md:w-auto h-11 px-8 bg-brand-blue hover:bg-brand-blue-dark text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 flex items-center justify-center cursor-pointer"
+              className="w-full md:w-auto h-11 px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-xs transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center"
             >
               {createLoading ? (
                 <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
@@ -74,17 +78,15 @@ export default function AdminTab({
 
         {/* Display Credentials After Creation */}
         {createdCredentials && (
-          <div className="mt-8 bg-slate-50 border border-brand-green/30 rounded-2xl p-6 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-brand-green/5 rounded-bl-full"></div>
-            
-            <div className="flex items-center gap-2 text-brand-green font-bold text-sm mb-4">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+          <div className="mt-8 bg-slate-50 border border-emerald-300 rounded-2xl p-6 shadow-xs relative overflow-hidden">
+            <div className="flex items-center gap-2 text-emerald-800 font-extrabold text-sm mb-4">
+              <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               ¡Cliente provisionado exitosamente!
             </div>
 
-            <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+            <p className="text-xs text-slate-500 mb-4 leading-relaxed font-medium">
               <span className="font-bold text-red-500">ADVERTENCIA:</span> Copie la clave API ahora. Está encriptada usando Argon2id y no se volverá a mostrar.
             </p>
 
@@ -92,12 +94,12 @@ export default function AdminTab({
               <div>
                 <span className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">{t.signupToken}</span>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 bg-white border border-slate-200 px-3 py-2 rounded-lg text-xs font-mono text-slate-900 select-all">
+                  <code className="flex-1 bg-white border border-slate-200 px-3 py-2 rounded-xl text-xs font-mono text-slate-900 select-all">
                     {createdCredentials.signupToken}
                   </code>
                   <button
                     onClick={() => navigator.clipboard.writeText(createdCredentials.signupToken)}
-                    className="bg-white hover:bg-slate-100 border border-slate-200 text-xs px-3 py-2 rounded-lg font-bold transition-all active:scale-95 cursor-pointer"
+                    className="bg-white hover:bg-slate-100 border border-slate-200 text-xs px-3.5 py-2 rounded-xl font-bold transition-all active:scale-95 cursor-pointer shadow-2xs"
                   >
                     Copiar
                   </button>
@@ -107,12 +109,12 @@ export default function AdminTab({
               <div>
                 <span className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Clave API</span>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 bg-white border border-slate-200 px-3 py-2 rounded-lg text-xs font-mono text-brand-green select-all">
+                  <code className="flex-1 bg-white border border-slate-200 px-3 py-2 rounded-xl text-xs font-mono text-emerald-700 font-bold select-all">
                     {createdCredentials.rawApiKey}
                   </code>
                   <button
                     onClick={() => navigator.clipboard.writeText(createdCredentials.rawApiKey)}
-                    className="bg-white hover:bg-slate-100 border border-slate-200 text-xs px-3 py-2 rounded-lg font-bold transition-all active:scale-95 cursor-pointer"
+                    className="bg-white hover:bg-slate-100 border border-slate-200 text-xs px-3.5 py-2 rounded-xl font-bold transition-all active:scale-95 cursor-pointer shadow-2xs"
                   >
                     Copiar
                   </button>
@@ -124,9 +126,18 @@ export default function AdminTab({
       </div>
 
       {/* Client Directory List */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-sm">
-        <h3 className="text-lg font-bold mb-1 text-slate-900">{t.usersTitle}</h3>
-        <p className="text-sm text-slate-500 mb-6">{t.usersSubtitle}</p>
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 pb-4 border-b border-slate-100">
+          <div>
+            <h3 className="text-xl font-black text-slate-950 flex items-center gap-2">
+              <span>👥</span> {t.usersTitle}
+            </h3>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">{t.usersSubtitle}</p>
+          </div>
+          <span className="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-full font-bold border border-slate-200 font-mono self-start sm:self-auto">
+            {allWebsites.length} {lang === "es" ? "empresas" : "businesses"}
+          </span>
+        </div>
 
         {/* DESKTOP TABLE VIEW */}
         <div className="hidden md:block overflow-x-auto">

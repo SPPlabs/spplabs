@@ -238,9 +238,9 @@ export default function EmailTab({
   };
 
   return (
-    <div className="space-y-8 animate-fade-in w-full max-w-full">
+    <div className="space-y-10 animate-fade-in w-full max-w-full">
       {/* Header Banner */}
-      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm w-full">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-4 border-b border-slate-200/80">
         <div>
           <span className="bg-blue-50 text-blue-700 text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider font-mono border border-blue-200/60 inline-flex items-center gap-1.5">
             <span>✉️</span>
@@ -261,7 +261,7 @@ export default function EmailTab({
           <button
             onClick={fetchLogs}
             disabled={logsLoading}
-            className="p-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 rounded-xl transition-all cursor-pointer shadow-xs"
+            className="p-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl transition-all cursor-pointer shadow-xs"
             title="Actualizar registros"
           >
             <svg className={`w-5 h-5 ${logsLoading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -272,7 +272,7 @@ export default function EmailTab({
           <button
             onClick={handleSaveConfig}
             disabled={saving}
-            className="px-6 py-2.5 bg-slate-950 hover:bg-black text-white text-xs font-black rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
+            className="px-6 py-2.5 bg-slate-950 hover:bg-black text-white text-xs font-black rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
           >
             {saving ? (
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>

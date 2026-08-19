@@ -54,50 +54,48 @@ export default function AiTab({
   const maxMonthlyTotal = Math.max(...chronologicalUsage.map(u => u.totalTokens), 1);
 
   return (
-    <div className="space-y-8 animate-fade-in w-full">
-      <div className="bg-white border border-slate-200/80 rounded-3xl p-6 md:p-8 shadow-sm">
-        {/* Section Header */}
-        <div className="flex items-start justify-between gap-4 mb-6 pb-6 border-b border-slate-100">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md shrink-0">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5a2.25 2.25 0 01.659 1.591v3.159a2.25 2.25 0 01-2.25 2.25H6.591A2.25 2.25 0 014.34 19.34v-3.159c0-.597.237-1.17.659-1.591L9.75 9.5" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-xl font-black text-slate-950 tracking-tight">{t.iaTitle}</h3>
-              <p className="text-sm text-slate-500 font-medium mt-0.5">{t.iaSubtitle}</p>
-            </div>
+    <div className="space-y-10 animate-fade-in w-full max-w-full">
+      {/* Section Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-slate-950 text-white flex items-center justify-center shadow-sm shrink-0">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5a2.25 2.25 0 01.659 1.591v3.159a2.25 2.25 0 01-2.25 2.25H6.591A2.25 2.25 0 014.34 19.34v-3.159c0-.597.237-1.17.659-1.591L9.75 9.5" />
+            </svg>
           </div>
-          <span className="bg-slate-100 text-slate-800 text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider font-mono border border-slate-200 shrink-0">
-            RAG v2.0
-          </span>
+          <div>
+            <h3 className="text-2xl font-black text-slate-950 tracking-tight">{t.iaTitle}</h3>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">{t.iaSubtitle}</p>
+          </div>
         </div>
+        <span className="bg-slate-100 text-slate-800 text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider font-mono border border-slate-200 shrink-0 self-start sm:self-auto">
+          RAG v2.0
+        </span>
+      </div>
 
-        {/* Token Usage Stats */}
-        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 mb-8">
-          {/* Section Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-200/80">
-            <div>
-              <h4 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                </svg>
-                {t.iaTokenUsage}
-              </h4>
-              <p className="text-xs text-slate-500 mt-0.5 font-medium">{t.iaSubtitle}</p>
-            </div>
-
-            <div className="flex items-center gap-2 self-start sm:self-auto">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1 rounded-xl shadow-2xs font-mono">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
-                </span>
-                {t.iaCurrentMonth}: {currentMonthLabelStr}
-              </span>
-            </div>
+      {/* Token Usage Stats Section */}
+      <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <h4 className="text-lg font-black text-slate-950 flex items-center gap-2">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+              </svg>
+              {t.iaTokenUsage}
+            </h4>
+            <p className="text-xs text-slate-500 mt-0.5 font-medium">{t.iaSubtitle}</p>
           </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1 rounded-xl shadow-2xs font-mono">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+              </span>
+              {t.iaCurrentMonth}: {currentMonthLabelStr}
+            </span>
+          </div>
+        </div>
 
           {/* Top Highlights Grid: Current Month vs All-Time */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
@@ -565,7 +563,6 @@ export default function AiTab({
             </button>
           </div>
         </form>
-      </div>
     </div>
   );
 }
