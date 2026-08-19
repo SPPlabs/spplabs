@@ -1353,6 +1353,7 @@ export default function DashboardClient({
           {activeTab === "admin" && session.role === "ADMIN" && (
             <AdminTab
               t={t}
+              lang={lang}
               newDomain={newDomain}
               setNewDomain={setNewDomain}
               newDisplayName={newDisplayName}

@@ -2,6 +2,7 @@
 
 export default function AdminTab({
   t,
+  lang = "es",
   newDomain,
   setNewDomain,
   newDisplayName,
@@ -10,7 +11,7 @@ export default function AdminTab({
   handleCreateClient,
   createError,
   createdCredentials,
-  allWebsites,
+  allWebsites = [],
   router,
   setActiveTab,
   handleDeleteUser,
