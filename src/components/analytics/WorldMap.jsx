@@ -142,7 +142,7 @@ export default function WorldMap({ countries = [], lang = "es" }) {
               {lang === "es" ? "Mapa Global de Visitas" : "Global Visitor Map"}
             </h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              {lang === "es" ? "Superposición de métricas en mapa real" : "Real ClickHouse visitor overlay"}
+              {lang === "es" ? "Superposición de métricas en mapa real" : "Real-time visitor overlay"}
             </p>
           </div>
           <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-700">
@@ -234,7 +234,7 @@ export default function WorldMap({ countries = [], lang = "es" }) {
       <div className="w-full lg:w-2/5 flex flex-col justify-between min-h-[420px]">
         <div className="flex items-center justify-between mb-3 shrink-0">
           <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            {lang === "es" ? "Desglose por País (ClickHouse)" : "Country Breakdown (ClickHouse)"}
+            {lang === "es" ? "Desglose por País" : "Country Breakdown"}
           </h4>
           <span className="text-[11px] font-mono text-slate-400 font-semibold">{validCountries.length} países</span>
         </div>

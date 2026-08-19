@@ -154,7 +154,7 @@ export default function SpainMap({ spainCities = [], lang = "es" }) {
               {lang === "es" ? "Mapa de Ciudades en España" : "Spain City Visitor Map"}
             </h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              {lang === "es" ? "Geolocalización ClickHouse en mapa oficial" : "ClickHouse geolocation overlay"}
+              {lang === "es" ? "Geolocalización en mapa oficial" : "Geolocation overlay"}
             </p>
           </div>
           <span className="bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 text-xs px-3 py-1.5 rounded-xl font-bold border border-sky-200 dark:border-sky-800 font-mono">
@@ -247,7 +247,7 @@ export default function SpainMap({ spainCities = [], lang = "es" }) {
       <div className="w-full lg:w-2/5 flex flex-col justify-between min-h-[420px]">
         <div className="flex items-center justify-between mb-3 shrink-0">
           <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            {lang === "es" ? "Top Ciudades en España (ClickHouse)" : "Top Spain Cities (ClickHouse)"}
+            {lang === "es" ? "Top Ciudades en España" : "Top Spain Cities"}
           </h4>
           <span className="text-[11px] font-mono text-slate-400 font-semibold">{validSpainCities.length} ciudades</span>
         </div>

@@ -191,7 +191,7 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
         <div className="bg-white border border-slate-200 rounded-3xl p-16 text-center shadow-xs">
           <div className="w-10 h-10 border-4 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-sm font-extrabold text-slate-700">Cargando informe mensual...</p>
-          <p className="text-xs text-slate-400 mt-1">Consolidando métricas de ClickHouse y CRM</p>
+          <p className="text-xs text-slate-400 mt-1">Consolidando métricas analíticas y CRM</p>
         </div>
       )}
 
