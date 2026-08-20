@@ -1,5 +1,7 @@
 "use client";
 
+import { BoltIcon, UsersIcon } from "@/components/dashboard/DashboardIcons";
+
 export default function AdminTab({
   t,
   lang = "es",
@@ -22,7 +24,10 @@ export default function AdminTab({
       <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs">
         <div className="mb-6 pb-4 border-b border-slate-100">
           <h3 className="text-xl font-black text-slate-950 flex items-center gap-2">
-            <span>⚡</span> Provisionar Sitio Cliente
+            <span className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <BoltIcon className="w-4.5 h-4.5" />
+            </span>
+            <span>Provisionar Sitio Cliente</span>
           </h3>
           <p className="text-xs text-slate-500 font-medium mt-0.5">{t.usersSubtitle}</p>
         </div>
@@ -131,7 +136,10 @@ export default function AdminTab({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 pb-4 border-b border-slate-100">
           <div>
             <h3 className="text-xl font-black text-slate-950 flex items-center gap-2">
-              <span>👥</span> {t.usersTitle}
+              <span className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                <UsersIcon className="w-4.5 h-4.5" />
+              </span>
+              <span>{t.usersTitle}</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium mt-0.5">{t.usersSubtitle}</p>
           </div>

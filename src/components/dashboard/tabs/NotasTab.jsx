@@ -1,6 +1,17 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import {
+  DocumentTextIcon,
+  UsersIcon,
+  UserCheckIcon,
+  BriefcaseIcon,
+  MailIcon,
+  PhoneIcon,
+  PinIcon,
+  TrashIcon,
+  CloseIcon,
+} from "@/components/dashboard/DashboardIcons";
 
 export default function NotasTab({
   t,
@@ -152,26 +163,25 @@ export default function NotasTab({
         email: formEmail.trim() || null,
         phone: formPhone.trim() || null,
         role: formRole.trim() || null,
-        tag: formTag.trim() || null,
+        tag: formTag.trim() || "General",
         color: formColor,
         pinned: formPinned,
       };
 
-      if (isEditing) {
+      if (isEditing && editingNoteId) {
         payload.id = editingNoteId;
         const res = await fetch("/api/admin/notes", {
-          method: "PATCH",
+          method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
         const data = await res.json();
-        if (res.ok && data.note) {
-          setNotes((prev) =>
-            prev.map((n) => (n.id === editingNoteId ? data.note : n)).sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0))
-          );
+        if (data.success) {
+          setNotes((prev) => prev.map((n) => (n.id === editingNoteId ? data.note : n)));
           setIsFormModalOpen(false);
+          router.refresh();
         } else {
-          alert(data.error || "Error al actualizar la nota");
+          alert(data.message || "Error al actualizar la nota");
         }
       } else {
         const res = await fetch("/api/admin/notes", {
@@ -180,16 +190,17 @@ export default function NotasTab({
           body: JSON.stringify(payload),
         });
         const data = await res.json();
-        if (res.ok && data.note) {
-          setNotes((prev) => [data.note, ...prev].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)));
+        if (data.success) {
+          setNotes((prev) => [data.note, ...prev]);
           setIsFormModalOpen(false);
+          router.refresh();
         } else {
-          alert(data.error || "Error al crear la nota");
+          alert(data.message || "Error al crear la nota");
         }
       }
     } catch (err) {
-      console.error(err);
-      alert("Error de conexión al guardar la nota");
+      console.error("Save note error:", err);
+      alert("Error al guardar la nota");
     } finally {
       setIsSubmitting(false);
     }
@@ -197,44 +208,43 @@ export default function NotasTab({
 
   // Toggle Pin directly from card
   const handleTogglePin = async (note, e) => {
-    e.stopPropagation();
-    const newPinned = !note.pinned;
+    if (e) e.stopPropagation();
     try {
-      // Optimistic update
-      setNotes((prev) =>
-        prev
-          .map((n) => (n.id === note.id ? { ...n, pinned: newPinned } : n))
-          .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0))
-      );
-
-      await fetch("/api/admin/notes", {
-        method: "PATCH",
+      const newPinned = !note.pinned;
+      const res = await fetch("/api/admin/notes", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          domain: currentWebsite.domain,
           id: note.id,
           pinned: newPinned,
         }),
       });
+      const data = await res.json();
+      if (data.success) {
+        setNotes((prev) => prev.map((n) => (n.id === note.id ? { ...n, pinned: newPinned } : n)));
+        if (viewingNote && viewingNote.id === note.id) {
+          setViewingNote((prev) => ({ ...prev, pinned: newPinned }));
+        }
+      }
     } catch (err) {
-      console.error("Toggle pin error:", err);
+      console.error("Pin toggle error:", err);
     }
   };
 
   // Delete note
-  const handleDeleteNote = async (id, e) => {
-    if (e) e.stopPropagation();
+  const handleDeleteNote = async (id) => {
     try {
-      const res = await fetch(`/api/admin/notes?domain=${encodeURIComponent(currentWebsite.domain)}&id=${id}`, {
+      const res = await fetch(`/api/admin/notes?id=${id}`, {
         method: "DELETE",
       });
-      if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
         setNotes((prev) => prev.filter((n) => n.id !== id));
         if (viewingNote?.id === id) setViewingNote(null);
         setDeleteConfirmId(null);
+        router.refresh();
       } else {
-        const data = await res.json();
-        alert(data.error || "Error al eliminar la nota");
+        alert(data.message || "Error al eliminar");
       }
     } catch (err) {
       console.error("Delete note error:", err);
@@ -243,7 +253,7 @@ export default function NotasTab({
   };
 
   // Helper styles based on color & type
-  const getCardColorClasses = (color, pinned) => {
+  const getCardColorClasses = (color) => {
     const base = "bg-white transition-all duration-200";
     switch (color) {
       case "blue":
@@ -267,20 +277,23 @@ export default function NotasTab({
     switch (type) {
       case "CLIENT":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
-            <span>👥</span> {isEs ? "Cliente" : "Client"}
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
+            <UsersIcon className="w-3 h-3 text-blue-600" />
+            <span>{isEs ? "Cliente" : "Client"}</span>
           </span>
         );
       case "STAFF":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
-            <span>👔</span> {isEs ? "Equipo" : "Staff"}
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <UserCheckIcon className="w-3 h-3 text-emerald-600" />
+            <span>{isEs ? "Equipo" : "Staff"}</span>
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
-            <span>📝</span> {isEs ? "Nota" : "Note"}
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
+            <DocumentTextIcon className="w-3 h-3 text-indigo-600" />
+            <span>{isEs ? "Nota" : "Note"}</span>
           </span>
         );
     }
@@ -315,8 +328,10 @@ export default function NotasTab({
       <div className="pb-4 border-b border-slate-200/80">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">📝</span>
+            <div className="flex items-center gap-2.5 mb-1">
+              <span className="w-9 h-9 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <DocumentTextIcon className="w-5 h-5" />
+              </span>
               <h2 className="text-2xl font-black text-slate-950 tracking-tight">
                 {isEs ? "Notas y Directorio" : "Notes & Directory"}
               </h2>
@@ -367,7 +382,8 @@ export default function NotasTab({
                   : "bg-indigo-50/60 border border-indigo-200/60 text-indigo-700 hover:bg-indigo-100/60"
               }`}
             >
-              <span>📝</span> {isEs ? "Notas" : "Notes"} ({counts.note})
+              <DocumentTextIcon className="w-3.5 h-3.5" />
+              <span>{isEs ? "Notas" : "Notes"} ({counts.note})</span>
             </button>
 
             <button
@@ -379,7 +395,8 @@ export default function NotasTab({
                   : "bg-blue-50/60 border border-blue-200/60 text-blue-700 hover:bg-blue-100/60"
               }`}
             >
-              <span>👥</span> {isEs ? "Clientes" : "Clients"} ({counts.client})
+              <UsersIcon className="w-3.5 h-3.5" />
+              <span>{isEs ? "Clientes" : "Clients"} ({counts.client})</span>
             </button>
 
             <button
@@ -391,7 +408,8 @@ export default function NotasTab({
                   : "bg-emerald-50/60 border border-emerald-200/60 text-emerald-700 hover:bg-emerald-100/60"
               }`}
             >
-              <span>👔</span> {isEs ? "Equipo" : "Staff"} ({counts.staff})
+              <UserCheckIcon className="w-3.5 h-3.5" />
+              <span>{isEs ? "Equipo" : "Staff"} ({counts.staff})</span>
             </button>
           </div>
 
@@ -418,8 +436,9 @@ export default function NotasTab({
                 type="button"
                 onClick={() => setSearchQuery("")}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer text-xs"
+                aria-label="Limpiar búsqueda"
               >
-                ✕
+                <CloseIcon className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
@@ -449,7 +468,7 @@ export default function NotasTab({
                 onClick={() => setSelectedTagFilter(tag)}
                 className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer shrink-0 ${
                   selectedTagFilter === tag
-                    ? "bg-slate-800 text-white font-black"
+                    ? "bg-indigo-600 text-white"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
@@ -463,8 +482,8 @@ export default function NotasTab({
       {/* Grid of Notes */}
       {filteredNotes.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center shadow-sm">
-          <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-3xl mx-auto mb-4">
-            📝
+          <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-4">
+            <DocumentTextIcon className="w-8 h-8" />
           </div>
           <h3 className="text-base font-bold text-slate-900 mb-1">
             {isEs ? "No hay notas que coincidan" : "No matching notes"}
@@ -486,7 +505,7 @@ export default function NotasTab({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {filteredNotes.map((note) => {
-            const cardClasses = getCardColorClasses(note.color, note.pinned);
+            const cardClasses = getCardColorClasses(note.color);
             const isPinned = Boolean(note.pinned);
 
             return (
@@ -503,7 +522,8 @@ export default function NotasTab({
                       {getTagBadge(note.tag)}
                       {isPinned && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">
-                          📌 {isEs ? "Fijada" : "Pinned"}
+                          <PinIcon className="w-2.5 h-2.5 text-amber-700" />
+                          <span>{isEs ? "Fijada" : "Pinned"}</span>
                         </span>
                       )}
                     </div>
@@ -520,9 +540,7 @@ export default function NotasTab({
                         }`}
                         title={isPinned ? (isEs ? "Desfijar nota" : "Unpin note") : (isEs ? "Fijar al inicio" : "Pin to top")}
                       >
-                        <svg className="w-4 h-4" fill={isPinned ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-                        </svg>
+                        <PinIcon className="w-4 h-4" />
                       </button>
 
                       {/* Edit Button */}
@@ -547,9 +565,7 @@ export default function NotasTab({
                         className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                         title={isEs ? "Eliminar" : "Delete"}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                        </svg>
+                        <TrashIcon className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -564,13 +580,13 @@ export default function NotasTab({
                     <div className="space-y-1 mb-3 pt-1 border-t border-slate-100 text-[11px] text-slate-600">
                       {note.role && (
                         <div className="flex items-center gap-1.5 font-semibold text-slate-800">
-                          <span>💼</span>
+                          <BriefcaseIcon className="w-3.5 h-3.5 text-slate-500" />
                           <span className="truncate">{note.role}</span>
                         </div>
                       )}
                       {note.email && (
                         <div className="flex items-center gap-1.5 text-slate-500 font-mono">
-                          <span>✉️</span>
+                          <MailIcon className="w-3.5 h-3.5 text-slate-400" />
                           <a
                             href={`mailto:${note.email}`}
                             onClick={(e) => e.stopPropagation()}
@@ -582,7 +598,7 @@ export default function NotasTab({
                       )}
                       {note.phone && (
                         <div className="flex items-center gap-1.5 text-slate-500 font-mono">
-                          <span>📞</span>
+                          <PhoneIcon className="w-3.5 h-3.5 text-slate-400" />
                           <a
                             href={`tel:${note.phone}`}
                             onClick={(e) => e.stopPropagation()}
@@ -644,8 +660,9 @@ export default function NotasTab({
                 type="button"
                 onClick={() => setIsFormModalOpen(false)}
                 className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center text-xs font-bold transition-all cursor-pointer"
+                aria-label="Cerrar modal"
               >
-                ✕
+                <CloseIcon className="w-4 h-4" />
               </button>
             </div>
 
@@ -669,7 +686,7 @@ export default function NotasTab({
                         : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
-                    <span>📝</span>
+                    <DocumentTextIcon className="w-4 h-4" />
                     <span>{isEs ? "Nota" : "Note"}</span>
                   </button>
 
@@ -685,7 +702,7 @@ export default function NotasTab({
                         : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
-                    <span>👥</span>
+                    <UsersIcon className="w-4 h-4" />
                     <span>{isEs ? "Cliente" : "Client"}</span>
                   </button>
 
@@ -701,7 +718,7 @@ export default function NotasTab({
                         : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
-                    <span>👔</span>
+                    <UserCheckIcon className="w-4 h-4" />
                     <span>{isEs ? "Equipo" : "Staff"}</span>
                   </button>
                 </div>
@@ -850,8 +867,9 @@ export default function NotasTab({
               {/* Pin Toggle */}
               <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-bold text-slate-800 block">
-                    📌 {isEs ? "Fijar al inicio" : "Pin to top"}
+                  <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <PinIcon className="w-3.5 h-3.5 text-amber-600" />
+                    <span>{isEs ? "Fijar al inicio" : "Pin to top"}</span>
                   </span>
                   <span className="text-[10px] text-slate-400 block">
                     {isEs ? "Mantiene esta nota siempre en los primeros puestos." : "Keep this note at the top of the list."}
@@ -902,7 +920,8 @@ export default function NotasTab({
                 {getTagBadge(viewingNote.tag)}
                 {viewingNote.pinned && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">
-                    📌 {isEs ? "Fijada" : "Pinned"}
+                    <PinIcon className="w-2.5 h-2.5 text-amber-700" />
+                    <span>{isEs ? "Fijada" : "Pinned"}</span>
                   </span>
                 )}
               </div>
@@ -910,8 +929,9 @@ export default function NotasTab({
                 type="button"
                 onClick={() => setViewingNote(null)}
                 className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center text-xs font-bold transition-all cursor-pointer"
+                aria-label="Cerrar modal"
               >
-                ✕
+                <CloseIcon className="w-4 h-4" />
               </button>
             </div>
 
@@ -926,13 +946,13 @@ export default function NotasTab({
                 <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2 text-xs">
                   {viewingNote.role && (
                     <div className="flex items-center gap-2 font-bold text-slate-800">
-                      <span>💼</span>
+                      <BriefcaseIcon className="w-4 h-4 text-slate-500" />
                       <span>{viewingNote.role}</span>
                     </div>
                   )}
                   {viewingNote.email && (
                     <div className="flex items-center gap-2 text-slate-600 font-mono">
-                      <span>✉️</span>
+                      <MailIcon className="w-4 h-4 text-slate-400" />
                       <a href={`mailto:${viewingNote.email}`} className="text-brand-blue hover:underline">
                         {viewingNote.email}
                       </a>
@@ -940,7 +960,7 @@ export default function NotasTab({
                   )}
                   {viewingNote.phone && (
                     <div className="flex items-center gap-2 text-slate-600 font-mono">
-                      <span>📞</span>
+                      <PhoneIcon className="w-4 h-4 text-slate-400" />
                       <a href={`tel:${viewingNote.phone}`} className="text-brand-blue hover:underline">
                         {viewingNote.phone}
                       </a>
@@ -995,9 +1015,7 @@ export default function NotasTab({
                 onClick={() => setDeleteConfirmId(viewingNote.id)}
                 className="px-3.5 py-2 text-rose-600 hover:bg-rose-100/70 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                </svg>
+                <TrashIcon className="w-4 h-4" />
                 <span>{isEs ? "Eliminar" : "Delete"}</span>
               </button>
 
@@ -1022,8 +1040,8 @@ export default function NotasTab({
       {deleteConfirmId && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-scale-up text-center">
-            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4 text-xl">
-              🗑️
+            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4">
+              <TrashIcon className="w-6 h-6" />
             </div>
             <h3 className="font-extrabold text-slate-900 text-base mb-1">
               {isEs ? "¿Eliminar esta entrada?" : "Delete this entry?"}

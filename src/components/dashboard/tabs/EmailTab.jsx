@@ -7,6 +7,20 @@ import {
   generateBookingReminderHtml,
   generateGoogleReviewHtml,
 } from "@/lib/emailTemplates";
+import {
+  MailIcon,
+  StarIcon,
+  CalendarIcon,
+  InboxIcon,
+  BoltIcon,
+  PaletteIcon,
+  PaperAirplaneIcon,
+  EyeIcon,
+  ClockIcon,
+  HandWaveIcon,
+  CheckIcon,
+  CloseIcon,
+} from "@/components/dashboard/DashboardIcons";
 
 export default function EmailTab({
   currentWebsite,
@@ -243,8 +257,8 @@ export default function EmailTab({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-4 border-b border-slate-200/80">
         <div>
           <span className="bg-blue-50 text-blue-700 text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider font-mono border border-blue-200/60 inline-flex items-center gap-1.5">
-            <span>✉️</span>
-            {lang === "es" ? "Automatizaciones de Email & Reseñas Google" : "Email & Google Reviews Automation"}
+            <MailIcon className="w-3.5 h-3.5" />
+            <span>{lang === "es" ? "Automatizaciones de Email & Reseñas Google" : "Email & Google Reviews Automation"}</span>
           </span>
           <h2 className="text-3xl font-black mt-3 text-slate-950 tracking-tight">
             {lang === "es" ? "Email & Google Review Booster" : "Email & Google Review Booster"}
@@ -278,10 +292,8 @@ export default function EmailTab({
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
             ) : (
               <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </svg>
-                {lang === "es" ? "Guardar Ajustes" : "Save Settings"}
+                <CheckIcon className="w-4 h-4" />
+                <span>{lang === "es" ? "Guardar Ajustes" : "Save Settings"}</span>
               </>
             )}
           </button>
@@ -290,10 +302,8 @@ export default function EmailTab({
 
       {saveSuccess && (
         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black p-4 rounded-2xl flex items-center gap-2 animate-fade-in shadow-xs">
-          <svg className="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          {lang === "es" ? "¡Configuración de correo guardada exitosamente!" : "Email settings saved successfully!"}
+          <CheckIcon className="w-5 h-5 text-emerald-600 shrink-0" />
+          <span>{lang === "es" ? "¡Configuración de correo guardada exitosamente!" : "Email settings saved successfully!"}</span>
         </div>
       )}
 
@@ -311,8 +321,8 @@ export default function EmailTab({
           <div className="bg-gradient-to-br from-amber-500/10 via-white to-amber-500/5 border-2 border-amber-300/80 rounded-3xl p-6 shadow-sm relative overflow-hidden space-y-6">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl font-bold shadow-md">
-                  ⭐
+                <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md">
+                  <StarIcon className="w-6 h-6 text-white" filled={true} />
                 </div>
                 <div>
                   <h3 className="text-base font-black text-slate-950">
@@ -360,9 +370,9 @@ export default function EmailTab({
               <div className="p-4 bg-white/90 border border-amber-200/80 rounded-2xl space-y-3 shadow-xs">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="font-extrabold text-sm text-slate-900 flex items-center gap-1.5">
-                      <span>📅</span>
-                      {lang === "es" ? "Tras completar una Cita o Reserva" : "After an Appointment or Booking"}
+                    <span className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+                      <CalendarIcon className="w-4 h-4 text-amber-600" />
+                      <span>{lang === "es" ? "Tras completar una Cita o Reserva" : "After an Appointment or Booking"}</span>
                     </span>
                     <span className="text-xs text-slate-500 block mt-0.5">
                       {lang === "es" ? "Envía la solicitud de valoración cuando el cliente haya asistido a su cita." : "Sends review request after the client has attended their booking."}
@@ -402,9 +412,9 @@ export default function EmailTab({
               <div className="p-4 bg-white/90 border border-amber-200/80 rounded-2xl space-y-3 shadow-xs">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="font-extrabold text-sm text-slate-900 flex items-center gap-1.5">
-                      <span>📩</span>
-                      {lang === "es" ? "Tras Formulario de Contacto Web" : "After Web Contact Form Submission"}
+                    <span className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+                      <InboxIcon className="w-4 h-4 text-amber-600" />
+                      <span>{lang === "es" ? "Tras Formulario de Contacto Web" : "After Web Contact Form Submission"}</span>
                     </span>
                     <span className="text-xs text-slate-500 block mt-0.5">
                       {lang === "es" ? "Envía la solicitud de reseña tras responder o atender una consulta web." : "Sends review request after answering a website inquiry."}
@@ -431,7 +441,7 @@ export default function EmailTab({
                       onChange={(e) => setContactReviewDelayHours(Number(e.target.value))}
                       className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
                     >
-                      <option value={0}>{lang === "es" ? "⚡ Inmediatamente (al enviar el formulario)" : "⚡ Immediately (upon submission)"}</option>
+                      <option value={0}>{lang === "es" ? "Inmediatamente (al enviar el formulario)" : "Immediately (upon submission)"}</option>
                       <option value={1}>{lang === "es" ? "1 hora después" : "1 hour after"}</option>
                       <option value={12}>{lang === "es" ? "12 horas después" : "12 hours after"}</option>
                       <option value={24}>{lang === "es" ? "24 horas después (1 día - Recomendado)" : "24 hours after (1 day - Recommended)"}</option>
@@ -447,8 +457,8 @@ export default function EmailTab({
           {/* AUTOMATION TRIGGERS CARD */}
           <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-6">
             <h3 className="text-base font-black text-slate-950 pb-3 border-b border-slate-100 flex items-center gap-2">
-              <span>⚡</span>
-              {lang === "es" ? "Secuencias de Comunicación Automatizadas" : "Automated Communication Sequences"}
+              <BoltIcon className="w-5 h-5 text-amber-500" />
+              <span>{lang === "es" ? "Secuencias de Comunicación Automatizadas" : "Automated Communication Sequences"}</span>
             </h3>
 
             {/* Trigger 1: Welcome Contact Email */}
@@ -479,7 +489,7 @@ export default function EmailTab({
                   {lang === "es" ? "Confirmación Inmediata de Reserva" : "Instant Booking Confirmation"}
                 </span>
                 <span className="text-xs text-slate-500">
-                  {lang === "es" ? "Envía los detalles de fecha y hora reservada al cliente." : "Sends booking date and time details to the client."}
+                  {lang === "es" ? "Envía fecha, hora y detalles de la cita al agendarse." : "Sends date, time and booking details immediately."}
                 </span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -493,15 +503,15 @@ export default function EmailTab({
               </label>
             </div>
 
-            {/* Trigger 3: Appointment Reminder */}
+            {/* Trigger 3: Booking Reminder */}
             <div className="p-4 bg-slate-50 border border-slate-200/70 rounded-2xl space-y-3">
               <div className="flex items-center justify-between">
                 <div>
                   <span className="font-extrabold text-sm text-slate-900 block">
-                    {lang === "es" ? "Recordatorio Automático de Cita" : "Automated Appointment Reminder"}
+                    {lang === "es" ? "Recordatorio Automático Anti No-Show" : "Anti No-Show Booking Reminder"}
                   </span>
                   <span className="text-xs text-slate-500">
-                    {lang === "es" ? "Reduce no-shows recordando la cita con antelación." : "Reduces no-shows by reminding clients in advance."}
+                    {lang === "es" ? "Reduce cancelaciones enviando un aviso antes de la cita." : "Reduces no-shows by alerting the client prior to their visit."}
                   </span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -516,7 +526,7 @@ export default function EmailTab({
               </div>
 
               {enableBookingReminder && (
-                <div className="flex items-center justify-between pt-3 border-t border-slate-200/60">
+                <div className="flex items-center justify-between pt-2.5 border-t border-slate-200">
                   <span className="text-xs font-bold text-slate-600">
                     {lang === "es" ? "Antelación del recordatorio:" : "Reminder notice:"}
                   </span>
@@ -538,8 +548,8 @@ export default function EmailTab({
           {/* SENDER & BRANDING CARD */}
           <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
             <h3 className="text-base font-black text-slate-950 pb-3 border-b border-slate-100 flex items-center gap-2">
-              <span>🎨</span>
-              {lang === "es" ? "Identidad de Remitente & Marca" : "Sender & Brand Identity"}
+              <PaletteIcon className="w-5 h-5 text-indigo-500" />
+              <span>{lang === "es" ? "Identidad de Remitente & Marca" : "Sender & Brand Identity"}</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -595,6 +605,7 @@ export default function EmailTab({
                       onClick={() => setBrandColor(c)}
                       className="w-6 h-6 rounded-full border-2 border-white shadow-xs cursor-pointer"
                       style={{ backgroundColor: c }}
+                      aria-label={`Color ${c}`}
                     />
                   ))}
                 </div>
@@ -608,8 +619,8 @@ export default function EmailTab({
           {/* SEND TEST EMAIL BOX */}
           <div className="bg-slate-950 text-white rounded-3xl p-6 shadow-md space-y-4">
             <h4 className="text-sm font-black uppercase tracking-wider flex items-center gap-2">
-              <span>🚀</span>
-              {lang === "es" ? "Enviar Correo de Prueba" : "Send Test Email"}
+              <PaperAirplaneIcon className="w-4 h-4 text-blue-400" />
+              <span>{lang === "es" ? "Enviar Correo de Prueba" : "Send Test Email"}</span>
             </h4>
             <p className="text-xs text-slate-400 font-medium leading-relaxed">
               {lang === "es"
@@ -639,7 +650,8 @@ export default function EmailTab({
               <div className={`text-xs p-3 rounded-xl font-bold flex items-center gap-2 ${
                 testResult.success ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
               }`}>
-                {testResult.success ? "✓" : "✕"} {testResult.message}
+                {testResult.success ? <CheckIcon className="w-4 h-4 shrink-0" /> : <CloseIcon className="w-4 h-4 shrink-0" />}
+                <span>{testResult.message}</span>
                 {testResult.mock && <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-mono">DEV MOCK</span>}
               </div>
             )}
@@ -649,8 +661,8 @@ export default function EmailTab({
           <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
-                <span>👁️</span>
-                {lang === "es" ? "Previsualizador en Vivo" : "Live Email Preview"}
+                <EyeIcon className="w-4 h-4 text-slate-700" />
+                <span>{lang === "es" ? "Previsualizador en Vivo" : "Live Email Preview"}</span>
               </h4>
               <span className="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-bold">
                 HTML Responsive
@@ -661,35 +673,39 @@ export default function EmailTab({
             <div className="grid grid-cols-2 gap-1.5 bg-slate-100 p-1.5 rounded-2xl text-[11px] font-bold">
               <button
                 onClick={() => setPreviewTab("review")}
-                className={`py-2 px-2.5 rounded-xl transition-all cursor-pointer text-center ${
+                className={`py-2 px-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   previewTab === "review" ? "bg-white text-slate-950 shadow-xs font-black" : "text-slate-600 hover:text-slate-950"
                 }`}
               >
-                ⭐ Google Review
+                <StarIcon className="w-3.5 h-3.5 text-amber-500" filled={true} />
+                <span>Google Review</span>
               </button>
               <button
                 onClick={() => setPreviewTab("reminder")}
-                className={`py-2 px-2.5 rounded-xl transition-all cursor-pointer text-center ${
+                className={`py-2 px-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   previewTab === "reminder" ? "bg-white text-slate-950 shadow-xs font-black" : "text-slate-600 hover:text-slate-950"
                 }`}
               >
-                ⏰ Recordatorio Cita
+                <ClockIcon className="w-3.5 h-3.5 text-indigo-500" />
+                <span>Recordatorio Cita</span>
               </button>
               <button
                 onClick={() => setPreviewTab("booking")}
-                className={`py-2 px-2.5 rounded-xl transition-all cursor-pointer text-center ${
+                className={`py-2 px-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   previewTab === "booking" ? "bg-white text-slate-950 shadow-xs font-black" : "text-slate-600 hover:text-slate-950"
                 }`}
               >
-                📅 Confirmar Cita
+                <CalendarIcon className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Confirmar Cita</span>
               </button>
               <button
                 onClick={() => setPreviewTab("welcome")}
-                className={`py-2 px-2.5 rounded-xl transition-all cursor-pointer text-center ${
+                className={`py-2 px-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   previewTab === "welcome" ? "bg-white text-slate-950 shadow-xs font-black" : "text-slate-600 hover:text-slate-950"
                 }`}
               >
-                👋 Bienvenida Contacto
+                <HandWaveIcon className="w-3.5 h-3.5 text-blue-500" />
+                <span>Bienvenida Contacto</span>
               </button>
             </div>
 
@@ -710,8 +726,8 @@ export default function EmailTab({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-base font-black text-slate-950 flex items-center gap-2">
-              <span>📬</span>
-              {lang === "es" ? "Bandeja de Salida & Historial de Envíos" : "Outbox & Delivery Logs"}
+              <InboxIcon className="w-5 h-5 text-slate-800" />
+              <span>{lang === "es" ? "Bandeja de Salida & Historial de Envíos" : "Outbox & Delivery Logs"}</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
               {lang === "es" ? "Trazabilidad de correos enviados y programados para esta empresa" : "Traceability of sent and scheduled emails for this business"}
@@ -746,15 +762,32 @@ export default function EmailTab({
                   if (log.status === "FAILED") badge = "bg-rose-50 text-rose-700 border-rose-200";
 
                   let typeLabel = log.emailType;
-                  if (log.emailType === "GOOGLE_REVIEW_REQUEST") typeLabel = "⭐ Google Review";
-                  if (log.emailType === "BOOKING_REMINDER") typeLabel = "⏰ Recordatorio";
-                  if (log.emailType === "BOOKING_CONFIRMATION") typeLabel = "📅 Cita Confirmada";
-                  if (log.emailType === "WELCOME_CONTACT") typeLabel = "👋 Bienvenida";
-                  if (log.emailType === "TEST_EMAIL") typeLabel = "🚀 Prueba";
+                  let typeIcon = null;
+                  if (log.emailType === "GOOGLE_REVIEW_REQUEST") {
+                    typeLabel = "Google Review";
+                    typeIcon = <StarIcon className="w-3.5 h-3.5 text-amber-500" filled={true} />;
+                  } else if (log.emailType === "BOOKING_REMINDER") {
+                    typeLabel = "Recordatorio";
+                    typeIcon = <ClockIcon className="w-3.5 h-3.5 text-indigo-500" />;
+                  } else if (log.emailType === "BOOKING_CONFIRMATION") {
+                    typeLabel = "Cita Confirmada";
+                    typeIcon = <CalendarIcon className="w-3.5 h-3.5 text-emerald-500" />;
+                  } else if (log.emailType === "WELCOME_CONTACT") {
+                    typeLabel = "Bienvenida";
+                    typeIcon = <HandWaveIcon className="w-3.5 h-3.5 text-blue-500" />;
+                  } else if (log.emailType === "TEST_EMAIL") {
+                    typeLabel = "Prueba";
+                    typeIcon = <PaperAirplaneIcon className="w-3.5 h-3.5 text-slate-500" />;
+                  }
 
                   return (
                     <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3 font-bold text-slate-900">{typeLabel}</td>
+                      <td className="py-3 font-bold text-slate-900">
+                        <span className="inline-flex items-center gap-1.5">
+                          {typeIcon}
+                          <span>{typeLabel}</span>
+                        </span>
+                      </td>
                       <td className="py-3 font-mono text-slate-600">{log.recipientEmail}</td>
                       <td className="py-3 text-slate-800 truncate max-w-[200px]">{log.subject}</td>
                       <td className="py-3 font-mono text-[11px] text-slate-500">

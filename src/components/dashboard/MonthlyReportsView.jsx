@@ -1,6 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import {
+  TableIcon,
+  DownloadIcon,
+  AlertTriangleIcon,
+  UsersIcon,
+  InboxIcon,
+  CalendarIcon,
+  ClockIcon,
+  BotIcon,
+  SparklesIcon,
+  LightbulbIcon,
+} from "@/components/dashboard/DashboardIcons";
 
 export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }) {
   const now = new Date();
@@ -171,17 +183,19 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
           <button
             onClick={handleExportCsv}
             disabled={loading || !data}
-            className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs disabled:opacity-50"
+            className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center gap-2 shadow-2xs disabled:opacity-50"
           >
-            <span>📊</span> Exportar CSV
+            <TableIcon className="w-4 h-4 text-slate-700" />
+            <span>Exportar CSV</span>
           </button>
 
           <button
             onClick={handlePrintPdf}
             disabled={loading || !data}
-            className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+            className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center gap-2 shadow-sm disabled:opacity-50"
           >
-            <span>📥</span> Descargar PDF
+            <DownloadIcon className="w-4 h-4 text-white" />
+            <span>Descargar PDF</span>
           </button>
         </div>
       </div>
@@ -198,7 +212,7 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
       {/* Error State */}
       {error && !loading && (
         <div className="bg-rose-50 border border-rose-200 rounded-3xl p-8 text-center text-rose-900 shadow-xs">
-          <span className="text-2xl block mb-2">⚠️</span>
+          <AlertTriangleIcon className="w-10 h-10 text-rose-500 mx-auto mb-2" />
           <p className="text-sm font-bold">{error}</p>
           <button
             onClick={fetchReport}
@@ -226,7 +240,9 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
             <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-slate-400 uppercase tracking-wider">Visitantes Únicos</span>
-                <span className="w-8 h-8 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold">👥</span>
+                <span className="w-8 h-8 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <UsersIcon className="w-4.5 h-4.5" />
+                </span>
               </div>
               <div className="mt-4 flex items-baseline justify-between">
                 <span className="text-3xl font-black text-slate-900 tracking-tight">{data.overview.unique_visitors.toLocaleString()}</span>
@@ -245,7 +261,9 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
             <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-slate-400 uppercase tracking-wider">Leads & Contactos</span>
-                <span className="w-8 h-8 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-bold">📥</span>
+                <span className="w-8 h-8 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <InboxIcon className="w-4.5 h-4.5" />
+                </span>
               </div>
               <div className="mt-4 flex items-baseline justify-between">
                 <span className="text-3xl font-black text-slate-900 tracking-tight">{data.overview.total_leads}</span>
@@ -262,13 +280,16 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
             <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-slate-400 uppercase tracking-wider">Citas Confirmadas</span>
-                <span className="w-8 h-8 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-bold">📅</span>
+                <span className="w-8 h-8 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                  <CalendarIcon className="w-4.5 h-4.5" />
+                </span>
               </div>
               <div className="mt-4 flex items-baseline justify-between">
                 <span className="text-3xl font-black text-slate-900 tracking-tight">{data.crm.confirmed_bookings}</span>
                 {data.crm.off_hours_bookings > 0 && (
-                  <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
-                    ⚡ {data.crm.off_hours_bookings} fuera horario
+                  <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 inline-flex items-center gap-1">
+                    <ClockIcon className="w-3 h-3 text-purple-600" />
+                    <span>{data.crm.off_hours_bookings} fuera horario</span>
                   </span>
                 )}
               </div>
@@ -281,7 +302,9 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
             <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-slate-400 uppercase tracking-wider">Asistencia Virtual IA</span>
-                <span className="w-8 h-8 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-sm font-bold">🤖</span>
+                <span className="w-8 h-8 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                  <BotIcon className="w-4.5 h-4.5" />
+                </span>
               </div>
               <div className="mt-4 flex items-baseline justify-between">
                 <span className="text-3xl font-black text-slate-900 tracking-tight">{data.crm.chat_conversations}</span>
@@ -306,8 +329,8 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
                   AI Insights & Resumen de Progreso ({data.monthName} {data.year})
                 </h3>
               </div>
-              <span className="w-9 h-9 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-lg">
-                ✨
+              <span className="w-9 h-9 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-indigo-300">
+                <SparklesIcon className="w-5 h-5" />
               </span>
             </div>
 
@@ -328,7 +351,8 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
                   </div>
                   <div className="mt-4 pt-3 border-t border-white/10">
                     <p className="text-[11px] font-semibold text-emerald-300 flex items-start gap-1.5">
-                      <span>💡</span> <span>{item.action}</span>
+                      <LightbulbIcon className="w-3.5 h-3.5 text-emerald-300 shrink-0 mt-0.5" />
+                      <span>{item.action}</span>
                     </p>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import BookingsCalendar from "@/components/dashboard/BookingsCalendar";
+import { MailIcon, CalendarIcon } from "@/components/dashboard/DashboardIcons";
 
 export default function ClientesTab({
   t,
@@ -20,7 +21,10 @@ export default function ClientesTab({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 pb-3 border-b border-slate-200/80">
           <div>
             <h3 className="text-xl font-black text-slate-950 flex items-center gap-2">
-              <span>✉️</span> {t.clientesContactForms}
+              <span className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                <MailIcon className="w-4.5 h-4.5" />
+              </span>
+              <span>{t.clientesContactForms}</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium mt-0.5">{t.clientesSubtitle}</p>
           </div>
@@ -97,7 +101,10 @@ export default function ClientesTab({
       <div className="pt-2 border-t border-slate-200/80">
         <div className="mb-6">
           <h3 className="text-xl font-black text-slate-950 flex items-center gap-2">
-            <span>📅</span> {t.clientesBookings}
+            <span className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <CalendarIcon className="w-4.5 h-4.5" />
+            </span>
+            <span>{t.clientesBookings}</span>
           </h3>
           <p className="text-xs text-slate-500 font-medium mt-0.5">{t.clientesSubtitle}</p>
         </div>
@@ -116,4 +123,3 @@ export default function ClientesTab({
     </div>
   );
 }
-

@@ -1,5 +1,7 @@
 "use client";
 
+import { CalendarIcon, MailIcon, MegaphoneIcon, BotIcon, ClockIcon, UserIcon } from "@/components/dashboard/DashboardIcons";
+
 export default function OverviewTab({
   currentWebsite,
   t,
@@ -68,7 +70,9 @@ export default function OverviewTab({
               ? "border-l-amber-500 border-slate-200/90 text-amber-900" 
               : "border-l-slate-400 border-slate-200/90 text-slate-800"
           }`}>
-            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200/60 flex items-center justify-center text-xl shrink-0">📅</div>
+            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200/60 flex items-center justify-center text-amber-600 shrink-0">
+              <CalendarIcon className="w-5 h-5" />
+            </div>
             <div>
               <span className="text-xs font-bold uppercase tracking-wider block text-slate-500">
                 {lang === "es" ? "Reservas Pendientes" : "Pending Bookings"}
@@ -88,7 +92,9 @@ export default function OverviewTab({
               ? "border-l-blue-600 border-slate-200/90 text-blue-900" 
               : "border-l-slate-400 border-slate-200/90 text-slate-800"
           }`}>
-            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200/60 flex items-center justify-center text-xl shrink-0">✉️</div>
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200/60 flex items-center justify-center text-blue-600 shrink-0">
+              <MailIcon className="w-5 h-5" />
+            </div>
             <div>
               <span className="text-xs font-bold uppercase tracking-wider block text-slate-500">
                 {lang === "es" ? "Mensajes Nuevos (48h)" : "New Messages (48h)"}
@@ -104,7 +110,9 @@ export default function OverviewTab({
 
           {/* Alert: Announcements */}
           <div className="p-5 rounded-2xl border-l-4 border-l-purple-600 border border-slate-200/90 text-slate-800 flex items-center gap-4 bg-white shadow-xs">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200/60 flex items-center justify-center text-xl shrink-0">📢</div>
+            <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200/60 flex items-center justify-center text-purple-600 shrink-0">
+              <MegaphoneIcon className="w-5 h-5" />
+            </div>
             <div>
               <span className="text-xs font-bold uppercase tracking-wider block text-slate-500">
                 {lang === "es" ? "Comunicados de SPP Labs" : "SPP Labs Announcements"}
@@ -127,7 +135,10 @@ export default function OverviewTab({
           <div>
             <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
               <h3 className="font-extrabold text-base text-slate-950 flex items-center gap-2">
-                <span>✉️</span> {t.clientesContactForms}
+                <span className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <MailIcon className="w-4 h-4" />
+                </span>
+                <span>{t.clientesContactForms}</span>
               </h3>
               <button
                 onClick={() => setActiveTab("clientes")}
@@ -167,7 +178,10 @@ export default function OverviewTab({
           <div>
             <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
               <h3 className="font-extrabold text-base text-slate-950 flex items-center gap-2">
-                <span>📅</span> {t.clientesBookings}
+                <span className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <CalendarIcon className="w-4 h-4" />
+                </span>
+                <span>{t.clientesBookings}</span>
               </h3>
               <button
                 onClick={() => setActiveTab("clientes")}
@@ -199,8 +213,14 @@ export default function OverviewTab({
                         </span>
                       </div>
                       <div className="flex items-center gap-3 text-[11px] font-mono text-slate-500 mb-1">
-                        <span>📅 {new Date(booking.date).toLocaleDateString()}</span>
-                        <span>⏰ {booking.time}</span>
+                        <span className="inline-flex items-center gap-1">
+                          <CalendarIcon className="w-3.5 h-3.5 text-slate-400" />
+                          {new Date(booking.date).toLocaleDateString()}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <ClockIcon className="w-3.5 h-3.5 text-slate-400" />
+                          {booking.time}
+                        </span>
                       </div>
                       {booking.message && (
                         <p className="text-slate-500 text-xs line-clamp-1 italic pl-2.5 border-l-2 border-slate-200">
@@ -220,7 +240,10 @@ export default function OverviewTab({
           <div>
             <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
               <h3 className="font-extrabold text-base text-slate-950 flex items-center gap-2">
-                <span>🤖</span> {t.overviewAiConversations}
+                <span className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                  <BotIcon className="w-4 h-4" />
+                </span>
+                <span>{t.overviewAiConversations}</span>
               </h3>
               <button
                 onClick={() => setActiveTab("ia")}
@@ -239,7 +262,10 @@ export default function OverviewTab({
                 {conversationsList.slice(0, 3).map((conv) => (
                   <div key={conv.id} className="py-3.5 first:pt-0 last:pb-0">
                     <div className="flex justify-between items-start mb-1">
-                      <span className="font-bold text-xs text-slate-900 truncate max-w-[160px]">👤 {conv.visitorName || conv.visitorId}</span>
+                      <span className="font-bold text-xs text-slate-900 truncate max-w-[160px] inline-flex items-center gap-1.5">
+                        <UserIcon className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate">{conv.visitorName || conv.visitorId}</span>
+                      </span>
                       <span className="text-[9px] bg-indigo-50 border border-indigo-200/60 text-indigo-700 font-bold px-2 py-0.5 rounded-md">
                         {conv.messageCount} msgs
                       </span>
@@ -267,4 +293,3 @@ export default function OverviewTab({
     </div>
   );
 }
-

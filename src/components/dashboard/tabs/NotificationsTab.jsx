@@ -1,5 +1,7 @@
 "use client";
 
+import { MegaphoneIcon, InboxIcon, ChatBubbleIcon } from "@/components/dashboard/DashboardIcons";
+
 export default function NotificationsTab({
   t,
   lang,
@@ -32,7 +34,10 @@ export default function NotificationsTab({
         <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs">
           <div className="mb-6 pb-4 border-b border-slate-100">
             <h3 className="text-xl font-black text-slate-950 flex items-center gap-2">
-              <span>📢</span> {t.adminNotifTitle}
+              <span className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                <MegaphoneIcon className="w-4.5 h-4.5" />
+              </span>
+              <span>{t.adminNotifTitle}</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium mt-0.5">{t.adminNotifDesc}</p>
           </div>
@@ -97,7 +102,10 @@ export default function NotificationsTab({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 pb-3 border-b border-slate-200/80">
           <div>
             <h3 className="text-xl font-black text-slate-950 flex items-center gap-2">
-              <span>📢</span> {t.notifAnnouncements}
+              <span className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                <MegaphoneIcon className="w-4.5 h-4.5" />
+              </span>
+              <span>{t.notifAnnouncements}</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium mt-0.5">{t.notifSubtitle}</p>
           </div>
@@ -166,8 +174,10 @@ export default function NotificationsTab({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 pb-3 border-b border-slate-200/80">
               <div>
                 <h3 className="text-xl font-black text-slate-950 flex items-center gap-2">
-                  <span>📩</span>
-                  {lang === "es" ? "Peticiones y Solicitudes de Clientes" : "Client Support Petitions Inbox"}
+                  <span className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <InboxIcon className="w-4.5 h-4.5" />
+                  </span>
+                  <span>{lang === "es" ? "Peticiones y Solicitudes de Clientes" : "Client Support Petitions Inbox"}</span>
                 </h3>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
                   {lang === "es" ? "Mensajes directos y solicitudes de soporte enviados por los clientes" : "Direct petitions and support requests sent by clients"}
@@ -189,8 +199,8 @@ export default function NotificationsTab({
                     <div>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-3 border-b border-slate-100">
                         <div className="flex items-center gap-2.5">
-                          <span className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs shrink-0">
-                            💬
+                          <span className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 font-bold flex items-center justify-center shrink-0">
+                            <ChatBubbleIcon className="w-4 h-4 text-blue-600" />
                           </span>
                           <div>
                             <span className="font-extrabold text-sm text-slate-950 block">{pet.displayName || pet.domain}</span>
@@ -221,7 +231,7 @@ export default function NotificationsTab({
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                         </svg>
-                        {lang === "es" ? "Resolver / Marcar Leído" : "Resolve / Mark Read"}
+                        <span>{lang === "es" ? "Resolver / Marcar Leído" : "Resolve / Mark Read"}</span>
                       </button>
                     </div>
                   </div>
@@ -234,7 +244,10 @@ export default function NotificationsTab({
           <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs">
             <div className="mb-6 pb-4 border-b border-slate-100">
               <h3 className="text-xl font-black text-slate-950 flex items-center gap-2">
-                <span>💬</span> {t.notifCreatePetition}
+                <span className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <ChatBubbleIcon className="w-4.5 h-4.5" />
+                </span>
+                <span>{t.notifCreatePetition}</span>
               </h3>
               <p className="text-xs text-slate-500 font-medium mt-0.5">{t.notifSubtitle}</p>
             </div>
@@ -283,7 +296,7 @@ export default function NotificationsTab({
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                           </svg>
-                          {lang === "es" ? "Eliminar" : "Delete"}
+                          <span>{lang === "es" ? "Eliminar" : "Delete"}</span>
                         </button>
                       </div>
                     </div>

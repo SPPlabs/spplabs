@@ -16,6 +16,15 @@ import NotasTab from "@/components/dashboard/tabs/NotasTab";
 import AiTab from "@/components/dashboard/tabs/AiTab";
 import NotificationsTab from "@/components/dashboard/tabs/NotificationsTab";
 import EmailTab from "@/components/dashboard/tabs/EmailTab";
+import {
+  SpainFlagIcon,
+  UkFlagIcon,
+  PhotoIcon,
+  SunIcon,
+  MoonIcon,
+  CheckIcon,
+  CloseIcon,
+} from "@/components/dashboard/DashboardIcons";
 
 export default function DashboardClient({
   session,
@@ -1134,9 +1143,10 @@ export default function DashboardClient({
                   </Link>
                   <button
                     onClick={() => setMobileDrawerOpen(false)}
-                    className="p-2 text-slate-400 hover:text-slate-800 rounded-full hover:bg-slate-100 transition-all cursor-pointer font-bold"
+                    className="p-2 text-slate-400 hover:text-slate-800 rounded-full hover:bg-slate-100 transition-all cursor-pointer"
+                    aria-label="Cerrar menú"
                   >
-                    ✕
+                    <CloseIcon className="w-5 h-5" />
                   </button>
                 </div>
 
@@ -1522,7 +1532,7 @@ export default function DashboardClient({
                 className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-bold text-xs transition-all cursor-pointer shrink-0"
                 aria-label="Cerrar modal"
               >
-                ✕
+                <CloseIcon className="w-4 h-4" />
               </button>
             </div>
 
@@ -1543,7 +1553,10 @@ export default function DashboardClient({
                         : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
                     }`}
                   >
-                    <span>🇪🇸 Español</span>
+                    <span className="flex items-center gap-2">
+                      <SpainFlagIcon className="w-4 h-3 rounded-xs shadow-2xs" />
+                      <span>Español</span>
+                    </span>
                     {lang === "es" && (
                       <svg className="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -1560,7 +1573,10 @@ export default function DashboardClient({
                         : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
                     }`}
                   >
-                    <span>🇬🇧 English</span>
+                    <span className="flex items-center gap-2">
+                      <UkFlagIcon className="w-4 h-3 rounded-xs shadow-2xs" />
+                      <span>English</span>
+                    </span>
                     {lang === "en" && (
                       <svg className="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -1595,7 +1611,10 @@ export default function DashboardClient({
                     {isSavingAccountName ? (
                       <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     ) : accountNameSaved ? (
-                      "✓ Guardado"
+                      <span className="flex items-center gap-1">
+                        <CheckIcon className="w-3.5 h-3.5" />
+                        <span>Guardado</span>
+                      </span>
                     ) : (
                       lang === "es" ? "Guardar" : "Save"
                     )}
@@ -1621,7 +1640,7 @@ export default function DashboardClient({
                       <img src={currentLogoUrl} alt="Logo" className="w-full h-full object-contain" />
                     ) : (
                       <div className="w-full h-full rounded-xl bg-slate-100 text-slate-400 flex flex-col items-center justify-center text-[10px] font-bold">
-                        <span className="text-base mb-0.5">🖼️</span>
+                        <PhotoIcon className="w-5 h-5 mb-0.5 text-slate-400" />
                         <span>Sin logo</span>
                       </div>
                     )}
@@ -1681,10 +1700,18 @@ export default function DashboardClient({
                   {lang === "es" ? "Tema del Dashboard" : "Dashboard Theme"}
                 </label>
                 <div className="flex items-center justify-between bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
-                  <span className="text-xs font-bold text-slate-700">
-                    {theme === "light" 
-                      ? (lang === "es" ? "☀️ Modo Claro" : "☀️ Light Mode") 
-                      : (lang === "es" ? "🌙 Modo Oscuro" : "🌙 Dark Mode")}
+                  <span className="text-xs font-bold text-slate-700 flex items-center gap-2">
+                    {theme === "light" ? (
+                      <>
+                        <SunIcon className="w-4 h-4 text-amber-500" />
+                        <span>{lang === "es" ? "Modo Claro" : "Light Mode"}</span>
+                      </>
+                    ) : (
+                      <>
+                        <MoonIcon className="w-4 h-4 text-indigo-400" />
+                        <span>{lang === "es" ? "Modo Oscuro" : "Dark Mode"}</span>
+                      </>
+                    )}
                   </span>
                   <div className="toggle-switch scale-75 origin-right">
                     <label className="switch-label">

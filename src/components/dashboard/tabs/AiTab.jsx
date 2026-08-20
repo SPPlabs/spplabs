@@ -1,5 +1,7 @@
 "use client";
 
+import { UserIcon, ChatBubbleIcon, CloseIcon } from "@/components/dashboard/DashboardIcons";
+
 export default function AiTab({
   t,
   lang,
@@ -359,8 +361,9 @@ export default function AiTab({
                 <div key={conv.id} className="p-4 hover:bg-slate-50/80 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="min-w-0 flex-1 cursor-pointer" onClick={() => setSelectedConversation(conv)}>
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <span className="text-xs font-black text-slate-900 font-mono truncate max-w-[200px] sm:max-w-none">
-                        👤 {conv.visitorName || conv.visitorId}
+                      <span className="text-xs font-black text-slate-900 font-mono truncate max-w-[200px] sm:max-w-none inline-flex items-center gap-1.5">
+                        <UserIcon className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate">{conv.visitorName || conv.visitorId}</span>
                       </span>
                       <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">
                         {conv.messageCount} msgs
@@ -415,7 +418,8 @@ export default function AiTab({
               <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
                 <div className="min-w-0 pr-2">
                   <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
-                    <span>💬</span> Transcripción de la Conversación
+                    <ChatBubbleIcon className="w-4.5 h-4.5 text-blue-600" />
+                    <span>Transcripción de la Conversación</span>
                   </h3>
                   <p className="text-xs text-slate-500 font-mono mt-0.5 truncate">
                     Visitante: {selectedConversation.visitorName || selectedConversation.visitorId} • {new Date(selectedConversation.startedAt).toLocaleString("es-ES", {
@@ -433,7 +437,7 @@ export default function AiTab({
                   className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-bold text-xs transition-all cursor-pointer shrink-0"
                   aria-label="Cerrar modal"
                 >
-                  ✕
+                  <CloseIcon className="w-4 h-4" />
                 </button>
               </div>
 
