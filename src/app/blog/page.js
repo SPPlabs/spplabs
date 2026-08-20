@@ -31,7 +31,7 @@ export default function BlogHubPage() {
     });
   }, [selectedCategory, searchQuery]);
 
-  const featuredArticle = blogArticles[0]; // ¿Cuánto cuesta una página web en España en 2026?
+  const featuredArticle = blogArticles[0];
 
   return (
     <MainLayout activePage="blog">
@@ -53,7 +53,7 @@ export default function BlogHubPage() {
           <div className="text-center max-w-4xl mx-auto mb-16 space-y-5">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 text-xs font-black uppercase tracking-wider font-mono shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping"></span>
-              <span>{isEs ? "Guías Prácticas & Estrategia Digital 2026" : "Actionable Guides & Digital Strategy 2026"}</span>
+              <span>{isEs ? "Guías Prácticas & Estrategia Digital" : "Actionable Guides & Digital Strategy"}</span>
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-black text-slate-950 tracking-tight leading-tight">
