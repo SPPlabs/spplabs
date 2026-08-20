@@ -143,6 +143,15 @@ export async function POST(request) {
       },
     });
 
+    // Increment aggregated monthly metrics asynchronously (immune to future deletions)
+    import("@/lib/monthlyMetrics").then(({ incrementMonthlyBookings }) => {
+      const created = new Date();
+      const hour = created.getHours();
+      const day = created.getDay();
+      const isOffHours = hour < 9 || hour >= 19 || day === 0 || day === 6;
+      incrementMonthlyBookings(website.id, { date: created, isOffHours, status: "PENDING" });
+    }).catch(e => console.error("Failed to increment monthly booking metrics:", e));
+
     // 5. Update API Key last used timestamp (asynchronously)
     prisma.websiteApiKey
       .update({

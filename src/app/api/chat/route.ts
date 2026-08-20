@@ -308,6 +308,11 @@ export async function POST(request: NextRequest): Promise<Response> {
             status: "ACTIVE",
           },
         });
+
+        // Increment monthly chat conversations metric asynchronously
+        import("@/lib/monthlyMetrics").then(({ incrementMonthlyChatConversations }) => {
+          incrementMonthlyChatConversations(website.id, new Date());
+        }).catch(e => logger.error("Failed to increment monthly chat metrics:", e));
       } catch (e: unknown) {
         logger.error("Failed to create ChatConversation:", e);
       }

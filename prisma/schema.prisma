@@ -44,6 +44,7 @@ model Website {
   emailConfig             WebsiteEmailConfig?
   scheduledEmails         ScheduledEmail[]
   dashboardNotes          DashboardNote[]
+  monthlyMetrics          WebsiteMonthlyMetrics[]
 
   @@map("websites")
 }
@@ -330,4 +331,25 @@ model DashboardNote {
   @@index([pinned, updatedAt])
   @@map("dashboard_notes")
 }
+
+model WebsiteMonthlyMetrics {
+  id                 String   @id @default(uuid()) @db.Uuid
+  websiteId          String   @map("website_id") @db.Uuid
+  year               Int
+  month              Int
+  contactFormsCount  Int      @default(0) @map("contact_forms_count")
+  totalBookingsCount Int      @default(0) @map("total_bookings_count")
+  confirmedBookings  Int      @default(0) @map("confirmed_bookings")
+  pendingBookings    Int      @default(0) @map("pending_bookings")
+  cancelledBookings  Int      @default(0) @map("cancelled_bookings")
+  offHoursBookings   Int      @default(0) @map("off_hours_bookings")
+  chatConversations  Int      @default(0) @map("chat_conversations")
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  website            Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@unique([websiteId, year, month])
+  @@map("website_monthly_metrics")
+}
+
 

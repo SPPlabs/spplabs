@@ -119,6 +119,11 @@ export async function POST(request) {
       },
     });
 
+    // Increment aggregated monthly metrics asynchronously (immune to future deletions)
+    import("@/lib/monthlyMetrics").then(({ incrementMonthlyContactForms }) => {
+      incrementMonthlyContactForms(website.id, new Date());
+    }).catch(e => console.error("Failed to increment monthly contact metrics:", e));
+
     // 5. Update API Key last used timestamp (non-blocking / asynchronous update)
     prisma.websiteApiKey
       .update({

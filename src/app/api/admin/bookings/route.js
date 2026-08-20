@@ -56,6 +56,15 @@ export async function PATCH(request) {
       data: { status },
     });
 
+    // Update monthly metrics aggregate asynchronously
+    import("@/lib/monthlyMetrics").then(({ updateMonthlyBookingStatus }) => {
+      updateMonthlyBookingStatus(booking.websiteId, {
+        date: booking.createdAt,
+        fromStatus: booking.status,
+        toStatus: status,
+      });
+    }).catch(e => console.error("Failed to update monthly booking status metric:", e));
+
     return NextResponse.json({ success: true, data: updatedBooking });
   } catch (error) {
     console.error("PATCH booking status error:", error);
@@ -172,6 +181,15 @@ export async function POST(request) {
         status: status || "CONFIRMED",
       },
     });
+
+    // Increment aggregated monthly metrics asynchronously
+    import("@/lib/monthlyMetrics").then(({ incrementMonthlyBookings }) => {
+      incrementMonthlyBookings(website.id, {
+        date: new Date(),
+        isOffHours: false,
+        status: status || "CONFIRMED",
+      });
+    }).catch(e => console.error("Failed to increment monthly booking metrics on POST:", e));
 
     return NextResponse.json({ success: true, data: newBooking });
   } catch (error) {

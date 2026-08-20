@@ -206,8 +206,8 @@ export async function GET(request) {
       { website_id: targetDomain }
     );
 
-    // 4. Query PostgreSQL (Prisma) for CRM Data during the target month
-    const [contactFormsCount, bookings, chatConversationsCount, aiTokenUsage] = await Promise.all([
+    // 4. Query PostgreSQL (Prisma) for CRM Data & Aggregated Monthly Metrics
+    const [liveContactFormsCount, liveBookings, liveChatConversationsCount, aiTokenUsage, monthlyMetrics] = await Promise.all([
       prisma.contactForm.count({
         where: {
           websiteId: website.id,
@@ -235,20 +235,71 @@ export async function GET(request) {
           },
         },
       }),
+      prisma.websiteMonthlyMetrics.findUnique({
+        where: {
+          websiteId_year_month: {
+            websiteId: website.id,
+            year: targetYear,
+            month: targetMonth,
+          },
+        },
+      }),
     ]);
 
-    // Calculate CRM Booking metrics
-    const totalBookings = bookings.length;
-    const confirmedBookings = bookings.filter(b => b.status === "CONFIRMED").length;
-    const pendingBookings = bookings.filter(b => b.status === "PENDING").length;
-
-    // Estimate off-hours activity (bookings created outside 09:00 - 19:00 or weekends)
-    const offHoursBookings = bookings.filter(b => {
+    // Live bookings metrics
+    const liveConfirmed = liveBookings.filter(b => b.status === "CONFIRMED").length;
+    const livePending = liveBookings.filter(b => b.status === "PENDING").length;
+    const liveOffHours = liveBookings.filter(b => {
       const created = new Date(b.createdAt);
       const hour = created.getHours();
       const day = created.getDay(); // 0 is Sunday, 6 is Saturday
       return hour < 9 || hour >= 19 || day === 0 || day === 6;
     }).length;
+
+    // Combined metrics: Protected against user deletions using aggregated metrics
+    const contactFormsCount = Math.max(monthlyMetrics?.contactFormsCount || 0, liveContactFormsCount);
+    const totalBookings = Math.max(monthlyMetrics?.totalBookingsCount || 0, liveBookings.length);
+    const confirmedBookings = Math.max(monthlyMetrics?.confirmedBookings || 0, liveConfirmed);
+    const pendingBookings = Math.max(monthlyMetrics?.pendingBookings || 0, livePending);
+    const offHoursBookings = Math.max(monthlyMetrics?.offHoursBookings || 0, liveOffHours);
+    const chatConversationsCount = Math.max(monthlyMetrics?.chatConversations || 0, liveChatConversationsCount);
+
+    // Auto-seed/sync baseline into websiteMonthlyMetrics if live data is higher
+    if (
+      !monthlyMetrics ||
+      liveContactFormsCount > (monthlyMetrics.contactFormsCount || 0) ||
+      liveBookings.length > (monthlyMetrics.totalBookingsCount || 0) ||
+      liveChatConversationsCount > (monthlyMetrics.chatConversations || 0)
+    ) {
+      prisma.websiteMonthlyMetrics.upsert({
+        where: {
+          websiteId_year_month: {
+            websiteId: website.id,
+            year: targetYear,
+            month: targetMonth,
+          },
+        },
+        update: {
+          contactFormsCount,
+          totalBookingsCount: totalBookings,
+          confirmedBookings,
+          pendingBookings,
+          offHoursBookings,
+          chatConversations: chatConversationsCount,
+        },
+        create: {
+          websiteId: website.id,
+          year: targetYear,
+          month: targetMonth,
+          contactFormsCount,
+          totalBookingsCount: totalBookings,
+          confirmedBookings,
+          pendingBookings,
+          offHoursBookings,
+          chatConversations: chatConversationsCount,
+        },
+      }).catch(err => console.error("Auto-sync baseline monthly metrics error:", err));
+    }
 
     // Overview Stats formatting
     const currStats = overview[0] || { visitors: 0, unique_visitors: 0, sessions: 0, avg_duration_raw: 0 };
