@@ -15,6 +15,7 @@ export default function Header({ activePage }) {
     { id: "servicios", href: "/servicios", labelEs: "Servicios", labelEn: "Servicios" },
     { id: "tecnologia", href: "/tecnologia", labelEs: "Tecnología", labelEn: "Tecnología" },
     { id: "nosotros", href: "/nosotros", labelEs: "Nosotros", labelEn: "Nosotros" },
+    { id: "blog", href: "/blog", labelEs: "Blog", labelEn: "Blog" },
     { id: "contacto", href: "/contacto", labelEs: "Contacto", labelEn: "Contacto" }
   ];
 
@@ -96,14 +97,14 @@ export default function Header({ activePage }) {
 
       {/* Mobile Horizontal Web Sections Sub-Banner Navigation Bar */}
       <div className="md:hidden border-t border-zinc-150/70 bg-white/95 backdrop-blur-md px-3 py-2">
-        <div className="max-w-md mx-auto grid grid-cols-5 gap-1 bg-zinc-100/80 p-1 rounded-xl border border-zinc-200/60 shadow-xs">
+        <div className="max-w-md mx-auto grid grid-cols-6 gap-1 bg-zinc-100/80 p-1 rounded-xl border border-zinc-200/60 shadow-xs">
           {navItems.map((item) => {
             const active = activePage === item.id;
             return (
               <Link
                 key={item.id}
                 href={item.href}
-                className={`py-1.5 px-0.5 rounded-lg text-[10px] sm:text-xs font-extrabold tracking-tight transition-all duration-200 cursor-pointer text-center truncate ${
+                className={`py-1.5 px-0.5 rounded-lg text-[10px] font-extrabold tracking-tight transition-all duration-200 cursor-pointer text-center truncate ${
                   active
                     ? "bg-gradient-to-r from-brand-blue to-brand-green text-white shadow-xs"
                     : "text-zinc-650 hover:text-black hover:bg-zinc-200/50"

@@ -1,8 +1,10 @@
+import { blogArticles } from "@/lib/blogData";
+
 export default function sitemap() {
   const baseUrl = 'https://spplabs.es';
   const currentDate = new Date().toISOString();
 
-  return [
+  const staticRoutes = [
     {
       url: `${baseUrl}/`,
       lastModified: currentDate,
@@ -70,6 +72,12 @@ export default function sitemap() {
       priority: 0.8,
     },
     {
+      url: `${baseUrl}/blog`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
       url: `${baseUrl}/contacto`,
       lastModified: currentDate,
       changeFrequency: 'weekly',
@@ -94,4 +102,13 @@ export default function sitemap() {
       priority: 0.3,
     },
   ];
+
+  const blogRoutes = blogArticles.map((article) => ({
+    url: `${baseUrl}/blog/${article.slug}`,
+    lastModified: `${article.publishedAt}T00:00:00.000Z`,
+    changeFrequency: 'monthly',
+    priority: 0.8,
+  }));
+
+  return [...staticRoutes, ...blogRoutes];
 }
