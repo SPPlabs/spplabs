@@ -28,7 +28,7 @@ export default function Footer() {
           </div>
           <span className="text-xs text-zinc-400 font-medium">
             <span className="hidden sm:inline">| </span>
-            {lang === "es" ? "© 2026 SPP Labs Inc. Todos los derechos reservados." : "© 2026 SPP Labs Inc. All rights reserved."}
+            {lang === "es" ? "© 2026 SPP Labs. Todos los derechos reservados." : "© 2026 SPP Labs. All rights reserved."}
           </span>
         </Link>
 
