@@ -118,10 +118,10 @@ export const config = {
      * - api/auth (authentication endpoints)
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico, logo.webp (static assets)
+     * - favicon*, icon-*, apple-touch-icon*, logo.webp (static assets)
      * - tracker.js (analytics tracker script served from /public)
      */
-    "/((?!api/auth|_next/static|_next/image|favicon\\.ico|logo\\.webp|tracker\\.js).*)",
+    "/((?!api/auth|_next/static|_next/image|favicon.*|icon-.*|apple-touch-icon.*|logo\\.webp|tracker\\.js).*)",
   ],
 };
 
