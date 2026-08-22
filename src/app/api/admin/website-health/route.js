@@ -7,69 +7,88 @@ import { verifyJWT } from "@/lib/jwt";
 const healthCache = new Map();
 const CACHE_TTL_MS = 60 * 1000; // 1 minute cache
 
+const BROWSER_HEADERS = {
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+};
+
 async function checkSingleDomain(domain) {
   const cleanDomain = domain.trim().toLowerCase();
-  const targetUrl = cleanDomain.startsWith("http") ? cleanDomain : `https://${cleanDomain}`;
   const startTime = Date.now();
 
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 second timeout
+  // Try HTTPS first, then fallback to HTTP if HTTPS fails
+  const protocols = ["https://", "http://"];
 
-    let res;
+  for (const protocol of protocols) {
+    const targetUrl = cleanDomain.startsWith("http") ? cleanDomain : `${protocol}${cleanDomain}`;
+    
     try {
-      // 1. Try HEAD request first for speed
-      res = await fetch(targetUrl, {
-        method: "HEAD",
-        signal: controller.signal,
-        headers: {
-          "User-Agent": "SPPLabs-UptimeBot/1.0 (+https://spplabs.es)",
-        },
-      });
-    } catch (headErr) {
-      // If HEAD network failed or timed out, rethrow
-      if (headErr.name === "AbortError") {
-        throw new Error("Timeout (>4s)");
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
+      let res;
+      try {
+        res = await fetch(targetUrl, {
+          method: "GET",
+          redirect: "follow",
+          signal: controller.signal,
+          headers: BROWSER_HEADERS,
+        });
+      } finally {
+        clearTimeout(timeoutId);
       }
-      throw headErr;
-    } finally {
-      clearTimeout(timeoutId);
+
+      const latencyMs = Date.now() - startTime;
+      // Any response from 200 to 499 means the server is reachable and active
+      const isOnline = res.status >= 200 && res.status < 500;
+
+      return {
+        domain: cleanDomain,
+        isOnline,
+        statusCode: res.status,
+        latencyMs,
+        error: isOnline ? null : `HTTP ${res.status}`,
+        checkedAt: new Date().toISOString(),
+      };
+    } catch (err) {
+      // If HTTPS fails and we still have HTTP to try, continue loop
+      if (protocol === "https://" && !err.name.includes("AbortError")) {
+        continue;
+      }
+
+      const latencyMs = Date.now() - startTime;
+      let errorMessage = err.message || "Unreachable";
+
+      if (err.name === "AbortError" || errorMessage.includes("Timeout")) {
+        errorMessage = "Timeout (>8s)";
+      } else if (errorMessage.includes("ENOTFOUND") || errorMessage.includes("getaddrinfo")) {
+        errorMessage = "DNS Inaccesible";
+      } else if (errorMessage.includes("CERT_") || errorMessage.includes("SSL") || errorMessage.includes("certificate")) {
+        errorMessage = "Error SSL";
+      } else if (errorMessage.includes("ECONNREFUSED")) {
+        errorMessage = "Conexión rechazada";
+      }
+
+      return {
+        domain: cleanDomain,
+        isOnline: false,
+        statusCode: 0,
+        latencyMs,
+        error: errorMessage,
+        checkedAt: new Date().toISOString(),
+      };
     }
-
-    const latencyMs = Date.now() - startTime;
-    const isOnline = res.status >= 200 && res.status < 400;
-
-    return {
-      domain: cleanDomain,
-      isOnline,
-      statusCode: res.status,
-      latencyMs,
-      error: isOnline ? null : `HTTP ${res.status}`,
-      checkedAt: new Date().toISOString(),
-    };
-  } catch (err) {
-    const latencyMs = Date.now() - startTime;
-    let errorMessage = err.message || "Unreachable";
-
-    if (err.name === "AbortError" || errorMessage.includes("Timeout")) {
-      errorMessage = "Timeout (>4s)";
-    } else if (errorMessage.includes("ENOTFOUND") || errorMessage.includes("getaddrinfo")) {
-      errorMessage = "DNS Inaccesible";
-    } else if (errorMessage.includes("CERT_") || errorMessage.includes("SSL") || errorMessage.includes("certificate")) {
-      errorMessage = "Error SSL";
-    } else if (errorMessage.includes("ECONNREFUSED")) {
-      errorMessage = "Conexión rechazada";
-    }
-
-    return {
-      domain: cleanDomain,
-      isOnline: false,
-      statusCode: 0,
-      latencyMs,
-      error: errorMessage,
-      checkedAt: new Date().toISOString(),
-    };
   }
+
+  return {
+    domain: cleanDomain,
+    isOnline: false,
+    statusCode: 0,
+    latencyMs: Date.now() - startTime,
+    error: "Inaccesible",
+    checkedAt: new Date().toISOString(),
+  };
 }
 
 export async function GET(request) {
@@ -115,7 +134,7 @@ export async function GET(request) {
     }
 
     if (domainsNeedingCheck.length > 0) {
-      // Run checks in parallel (max 10 concurrent)
+      // Check in parallel
       const checkPromises = domainsNeedingCheck.map(async (domain) => {
         const health = await checkSingleDomain(domain);
         healthCache.set(domain, { data: health, cachedAt: Date.now() });

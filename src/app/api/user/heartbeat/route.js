@@ -13,17 +13,31 @@ export async function POST() {
     }
 
     const session = await verifyJWT(sessionToken);
-    if (!session || !session.websiteId) {
+    if (!session) {
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
+    }
+
+    const websiteId = session.id || session.websiteId;
+    const domain = session.domain ? session.domain.trim().toLowerCase() : null;
+
+    if (!websiteId && !domain) {
+      return NextResponse.json({ error: "Missing website identifier in session" }, { status: 400 });
     }
 
     const now = new Date();
 
-    // Update lastActiveAt timestamp in PostgreSQL
-    await prisma.website.update({
-      where: { id: session.websiteId },
-      data: { lastActiveAt: now },
-    });
+    // Update lastActiveAt in PostgreSQL (search by id or by unique domain)
+    if (websiteId) {
+      await prisma.website.update({
+        where: { id: websiteId },
+        data: { lastActiveAt: now },
+      });
+    } else if (domain) {
+      await prisma.website.update({
+        where: { domain },
+        data: { lastActiveAt: now },
+      });
+    }
 
     return NextResponse.json({
       success: true,

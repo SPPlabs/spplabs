@@ -47,6 +47,14 @@ export async function POST(request) {
       role: website.role,
     });
 
+    // Update lastActiveAt timestamp upon successful login
+    await prisma.website
+      .update({
+        where: { id: website.id },
+        data: { lastActiveAt: new Date() },
+      })
+      .catch((e) => console.error("Failed to update lastActiveAt on login:", e));
+
     // Set cookie (HttpOnly, Secure, SameSite=Lax)
     const cookieStore = await cookies();
     cookieStore.set("spp_session", token, {
