@@ -22,6 +22,8 @@ export async function proxy(request) {
     let limit = 60;
     if (path === "/api/chat") {
       limit = 15;
+    } else if (path === "/api/analytics") {
+      limit = 300;
     } else if (path.startsWith("/api/admin/")) {
       limit = 200;
     }

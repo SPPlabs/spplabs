@@ -93,6 +93,7 @@ export default function PoliticaDePrivacidadPage() {
               <h3 className="font-bold text-black pt-2">2.5. Analítica de Navegación e Interacción</h3>
               <p><strong>Datos recabados:</strong> Identificador seudónimo de visitante, identificador de sesión, páginas visitadas, sistema operativo, dispositivo, navegador e interacción de eventos.</p>
               <p><strong>Tratamiento de la Dirección IP:</strong> Las direcciones IP no se almacenan en texto plano en los registros analíticos, sino que se transforman mediante un proceso criptográfico irreversible antes de su almacenamiento.</p>
+              <p><strong>Geolocalización:</strong> La resolución geográfica aproximada (país y ciudad) se realiza de forma local utilizando la base de datos IP de <a href="https://db-ip.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium">DB-IP</a> bajo licencia Creative Commons Attribution 4.0.</p>
             </div>
           </section>
 

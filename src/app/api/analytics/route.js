@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyApiKey } from "@/lib/crypto";
 import { clickhouseInsert } from "@/lib/clickhouse";
+import { resolveIpGeo } from "@/lib/geo";
 import crypto from "crypto";
 
 const corsHeaders = {
@@ -106,31 +107,27 @@ export async function POST(request) {
     const cleanIp = ip.split(",")[0].trim();
     const ipHash = crypto.createHash("sha256").update(cleanIp).digest("hex");
 
-    // 4. Resolve Geo headers (standard for Vercel/proxies or fallback)
-    let country = request.headers.get("x-vercel-ip-country") || body.country;
-    let region = request.headers.get("x-vercel-ip-country-region") || body.region;
-    let city = request.headers.get("x-vercel-ip-city") || body.city;
+    // 4. Resolve Geo headers (Cloudflare, Vercel, body payload, or local DB-IP database)
+    let country =
+      request.headers.get("cf-ipcountry") ||
+      request.headers.get("x-vercel-ip-country") ||
+      body.country;
+    let region =
+      request.headers.get("cf-region") ||
+      request.headers.get("x-vercel-ip-country-region") ||
+      body.region;
+    let city =
+      request.headers.get("cf-ipcity") ||
+      request.headers.get("x-vercel-ip-city") ||
+      body.city;
 
-    // Fallback: If geo headers are missing, query a free geolocation API using the client IP.
-    // If the request comes from localhost/loopback, query without IP to geolocate the server's public IP.
-    if (!city) {
-      try {
-        const queryIp = (cleanIp && cleanIp !== "127.0.0.1" && cleanIp !== "::1") ? cleanIp : "";
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1000); // 1s timeout to keep it fast
-        const geoRes = await fetch(`http://ip-api.com/json/${queryIp}`, { signal: controller.signal });
-        clearTimeout(timeoutId);
-
-        if (geoRes.ok) {
-          const geoData = await geoRes.json();
-          if (geoData && geoData.status === "success") {
-            country = geoData.country || country;
-            region = geoData.regionName || region;
-            city = geoData.city || city;
-          }
-        }
-      } catch (err) {
-        console.error("Local IP-based geo fallback lookup failed:", err);
+    // Fallback: If city or country is missing, resolve locally using DB-IP database (0ms network overhead)
+    if (!city || !country || city === "Unknown" || country === "Unknown") {
+      const localGeo = await resolveIpGeo(cleanIp);
+      if (localGeo) {
+        country = country && country !== "Unknown" ? country : localGeo.country;
+        region = region && region !== "Unknown" ? region : localGeo.region;
+        city = city && city !== "Unknown" ? city : localGeo.city;
       }
     }
 

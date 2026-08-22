@@ -13,9 +13,13 @@ services:
     networks:
       - proxy
 
+    environment:
+      - GEOIP_DB_PATH=/opt/geoip/dbip
+
     volumes:
       - transformers-cache:/app/.cache/transformers
       - uploads-data:/app/public/uploads
+      - /opt/geoip/dbip:/opt/geoip/dbip:ro
 
     labels:
       - "traefik.enable=true"

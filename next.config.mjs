@@ -3,7 +3,8 @@ const nextConfig = {
   output: "standalone",
   serverExternalPackages: [
     "@huggingface/transformers",
-    "onnxruntime-node"
+    "onnxruntime-node",
+    "maxmind"
   ]
 };
 
