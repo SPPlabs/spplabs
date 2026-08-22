@@ -25,6 +25,7 @@ model Website {
   passwordHash            String?                   @map("password_hash")
   role                    WebsiteRole
   registeredAt            DateTime?                 @map("registered_at") @db.Timestamptz
+  lastActiveAt            DateTime?                 @map("last_active_at") @db.Timestamptz
   createdAt               DateTime                  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt               DateTime                  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
   logoUrl                 String?                   @map("logo_url")

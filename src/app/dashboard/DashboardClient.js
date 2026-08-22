@@ -92,12 +92,48 @@ export default function DashboardClient({
   const [activeTab, setActiveTab] = useState(defaultTab);
   const mainContainerRef = useRef(null);
 
+  // Background heartbeat to track user dashboard activity
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    if (mainContainerRef.current) {
-      mainContainerRef.current.scrollTop = 0;
+    const sendHeartbeat = () => {
+      fetch("/api/user/heartbeat", { method: "POST" }).catch(() => {});
+    };
+
+    sendHeartbeat();
+    window.addEventListener("focus", sendHeartbeat);
+
+    const interval = setInterval(sendHeartbeat, 45 * 1000);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", sendHeartbeat);
+    };
+  }, []);
+
+  // Admin Website Health Uptime state
+  const [websiteHealth, setWebsiteHealth] = useState({});
+  const [healthLoading, setHealthLoading] = useState(false);
+
+  const fetchWebsiteHealth = async (forceRefresh = false) => {
+    if (session?.role !== "ADMIN") return;
+    setHealthLoading(true);
+    try {
+      const res = await fetch(`/api/admin/website-health${forceRefresh ? "?refresh=true" : ""}`);
+      if (res.ok) {
+        const data = await res.json();
+        setWebsiteHealth(data.results || {});
+      }
+    } catch (err) {
+      console.error("[Health Check Fetch Error]:", err);
+    } finally {
+      setHealthLoading(false);
     }
-  }, [activeTab]);
+  };
+
+  useEffect(() => {
+    if (activeTab === "admin" && session?.role === "ADMIN") {
+      fetchWebsiteHealth();
+    }
+  }, [activeTab, session?.role]);
 
   const handleNavigate = (tab) => {
     setActiveTab(tab);
@@ -1376,6 +1412,9 @@ export default function DashboardClient({
               router={router}
               setActiveTab={setActiveTab}
               handleDeleteUser={handleDeleteUser}
+              websiteHealth={websiteHealth}
+              healthLoading={healthLoading}
+              fetchWebsiteHealth={fetchWebsiteHealth}
             />
           )}
 
