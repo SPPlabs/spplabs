@@ -418,33 +418,44 @@ export async function GET(request) {
       prev_chats: prevCrm.chatConversations,
     } : null;
 
-    // 5. Positive ROI AI Insights Generator
-    // Generate motivational, positive, value-oriented insights based on actual numbers
-    const positiveInsights = generatePositiveInsights({
-      websiteDisplayName: website.displayName,
-      domain: targetDomain,
-      monthName: getMonthNameEs(targetMonth),
-      year: targetYear,
-      totalVisitors,
-      uniqueVisitors,
-      totalSessions,
-      contactFormsCount,
-      totalBookings,
-      confirmedBookings,
-      offHoursBookings,
-      chatConversationsCount,
-      aiTokenUsage,
-      topPages,
-      referrers,
-      devices,
-      leadConversionRate,
-    });
+    // 5. Positive ROI AI Insights with PostgreSQL Lazy Caching (Approach A)
+    let finalInsights = null;
 
-    // Option: Try invoking LLM for ultra-polished synthesis if available, fallback to structured generator
-    let finalInsights = positiveInsights;
-    try {
-      if (process.env.OPENAI_API_KEY || process.env.VLLM_SERVER_URL) {
-        const llmPrompt = `Eres un consultor ejecutivo de marketing digital y negocios. Analiza estos datos mensuales del sitio web "${website.displayName}" (${targetDomain}) para el mes de ${getMonthNameEs(targetMonth)} ${targetYear}:
+    if (
+      monthlyMetrics?.aiInsights &&
+      Array.isArray(monthlyMetrics.aiInsights) &&
+      monthlyMetrics.aiInsights.length > 0
+    ) {
+      // ⚡ Cached in PostgreSQL: Instant (0ms), 0 LLM API calls spent
+      finalInsights = monthlyMetrics.aiInsights;
+    } else {
+      // Generate positive insights baseline
+      const positiveInsights = generatePositiveInsights({
+        websiteDisplayName: website.displayName,
+        domain: targetDomain,
+        monthName: getMonthNameEs(targetMonth),
+        year: targetYear,
+        totalVisitors,
+        uniqueVisitors,
+        totalSessions,
+        contactFormsCount,
+        totalBookings,
+        confirmedBookings,
+        offHoursBookings,
+        chatConversationsCount,
+        aiTokenUsage,
+        topPages,
+        referrers,
+        devices,
+        leadConversionRate,
+      });
+
+      finalInsights = positiveInsights;
+
+      // Try invoking LLM for ultra-polished synthesis if available
+      try {
+        if (process.env.OPENAI_API_KEY || process.env.VLLM_SERVER_URL) {
+          const llmPrompt = `Eres un consultor ejecutivo de marketing digital y negocios. Analiza estos datos mensuales del sitio web "${website.displayName}" (${targetDomain}) para el mes de ${getMonthNameEs(targetMonth)} ${targetYear}:
 - Visitantes Únicos: ${uniqueVisitors}
 - Total Visitas: ${totalVisitors}
 - Formularios de Contacto: ${contactFormsCount}
@@ -465,23 +476,52 @@ Genera 3 o 4 logros y recomendaciones clave orientadas a DESTACAR LOS BUENOS RES
   }
 ]`;
 
-        const llmResponse = await generateChatCompletion({
-          messages: [{ role: "user", content: llmPrompt }],
-          max_tokens: 600,
-          temperature: 0.3,
-        });
+          const llmResponse = await generateChatCompletion({
+            messages: [{ role: "user", content: llmPrompt }],
+            max_tokens: 600,
+            temperature: 0.3,
+          });
 
-        const rawText = llmResponse.choices?.[0]?.message?.content || "";
-        const jsonMatch = rawText.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            finalInsights = parsed;
+          const rawText = llmResponse.choices?.[0]?.message?.content || "";
+          const jsonMatch = rawText.match(/\[[\s\S]*\]/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              finalInsights = parsed;
+            }
           }
         }
+      } catch (err) {
+        console.log("LLM insight synthesis fallback used:", err.message || err);
       }
-    } catch (err) {
-      console.log("LLM insight synthesis fallback used:", err.message || err);
+
+      // Persist generated insights in PostgreSQL so all subsequent views are instant
+      prisma.websiteMonthlyMetrics
+        .upsert({
+          where: {
+            websiteId_year_month: {
+              websiteId: website.id,
+              year: targetYear,
+              month: targetMonth,
+            },
+          },
+          update: {
+            aiInsights: finalInsights,
+          },
+          create: {
+            websiteId: website.id,
+            year: targetYear,
+            month: targetMonth,
+            contactFormsCount,
+            totalBookingsCount: totalBookings,
+            confirmedBookings,
+            pendingBookings,
+            offHoursBookings,
+            chatConversations: chatConversationsCount,
+            aiInsights: finalInsights,
+          },
+        })
+        .catch((e) => console.error("Failed to cache monthly aiInsights in DB:", e));
     }
 
     return NextResponse.json({

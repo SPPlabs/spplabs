@@ -345,6 +345,7 @@ model WebsiteMonthlyMetrics {
   cancelledBookings  Int      @default(0) @map("cancelled_bookings")
   offHoursBookings   Int      @default(0) @map("off_hours_bookings")
   chatConversations  Int      @default(0) @map("chat_conversations")
+  aiInsights         Json?    @map("ai_insights")
   updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   website            Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
