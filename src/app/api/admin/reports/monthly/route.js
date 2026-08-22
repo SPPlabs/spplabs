@@ -37,11 +37,41 @@ export async function GET(request) {
       return NextResponse.json({ error: "NotFound", message: "Domain not registered" }, { status: 404 });
     }
 
-    // 2. Parse year and month parameters (Default to current date)
+    // 2. Parse year and month parameters
     const now = new Date();
-    const targetYear = parseInt(url.searchParams.get("year") || String(now.getFullYear()), 10);
-    const targetMonth = parseInt(url.searchParams.get("month") || String(now.getMonth() + 1), 10);
+    const currentCalYear = now.getFullYear();
+    const currentCalMonth = now.getMonth() + 1; // 1-12
+
+    const targetYear = parseInt(url.searchParams.get("year") || String(currentCalMonth === 1 ? currentCalYear - 1 : currentCalYear), 10);
+    const targetMonth = parseInt(url.searchParams.get("month") || String(currentCalMonth === 1 ? 12 : currentCalMonth - 1), 10);
     const enableCompare = url.searchParams.get("compare") === "true";
+
+    // Rule: Current in-progress month cannot be viewed as a finalized monthly report
+    const isCurrentMonth = targetYear === currentCalYear && targetMonth === currentCalMonth;
+    const isFutureMonth = targetYear > currentCalYear || (targetYear === currentCalYear && targetMonth > currentCalMonth);
+
+    if (isCurrentMonth || isFutureMonth) {
+      const nextMonthNum = targetMonth === 12 ? 1 : targetMonth + 1;
+      const nextYearNum = targetMonth === 12 ? targetYear + 1 : targetYear;
+      return NextResponse.json({
+        success: true,
+        isInProgress: true,
+        isCurrentMonth,
+        isFutureMonth,
+        domain: targetDomain,
+        displayName: website.displayName,
+        year: targetYear,
+        month: targetMonth,
+        monthName: getMonthNameEs(targetMonth),
+        currentMonth: currentCalMonth,
+        currentMonthName: getMonthNameEs(currentCalMonth),
+        currentYear: currentCalYear,
+        availableAt: `1 de ${getMonthNameEs(nextMonthNum)} de ${nextYearNum}`,
+        message: isCurrentMonth
+          ? `El informe de ${getMonthNameEs(targetMonth)} ${targetYear} está en curso. Los informes consolidados se cierran y publican automáticamente al finalizar el mes natural.`
+          : `El periodo seleccionado (${getMonthNameEs(targetMonth)} ${targetYear}) es futuro y aún no dispone de datos.`,
+      });
+    }
 
     // Build date boundaries for target month
     const startDateObj = new Date(Date.UTC(targetYear, targetMonth - 1, 1, 0, 0, 0));
@@ -316,6 +346,48 @@ export async function GET(request) {
     const totalLeads = contactFormsCount + totalBookings;
     const leadConversionRate = uniqueVisitors > 0 ? ((totalLeads / uniqueVisitors) * 100).toFixed(1) : "0.0";
 
+    // Fetch previous month CRM stats if comparison is enabled
+    let prevCrm = { contactFormsCount: 0, totalBookings: 0, confirmedBookings: 0, chatConversations: 0 };
+    if (enableCompare) {
+      const [prevLiveForms, prevLiveBookingsList, prevLiveChats, prevMonthly] = await Promise.all([
+        prisma.contactForm.count({
+          where: {
+            websiteId: website.id,
+            createdAt: { gte: prevStartDateObj, lte: prevEndDateObj },
+          },
+        }),
+        prisma.booking.findMany({
+          where: {
+            websiteId: website.id,
+            createdAt: { gte: prevStartDateObj, lte: prevEndDateObj },
+          },
+        }),
+        prisma.chatConversation.count({
+          where: {
+            websiteId: website.id,
+            startedAt: { gte: prevStartDateObj, lte: prevEndDateObj },
+          },
+        }),
+        prisma.websiteMonthlyMetrics.findUnique({
+          where: {
+            websiteId_year_month: {
+              websiteId: website.id,
+              year: prevYear,
+              month: prevMonth,
+            },
+          },
+        }),
+      ]);
+
+      const prevConfirmedCount = prevLiveBookingsList.filter(b => b.status === "CONFIRMED").length;
+      prevCrm = {
+        contactFormsCount: Math.max(prevMonthly?.contactFormsCount || 0, prevLiveForms),
+        totalBookings: Math.max(prevMonthly?.totalBookingsCount || 0, prevLiveBookingsList.length),
+        confirmedBookings: Math.max(prevMonthly?.confirmedBookings || 0, prevConfirmedCount),
+        chatConversations: Math.max(prevMonthly?.chatConversations || 0, prevLiveChats),
+      };
+    }
+
     // Growth calculation (only computed if comparison enabled)
     const calcGrowth = (curr, prev) => {
       const c = Number(curr || 0);
@@ -325,13 +397,25 @@ export async function GET(request) {
       return pct >= 0 ? `+${pct.toFixed(1)}%` : `${pct.toFixed(1)}%`;
     };
 
+    const prevTotalLeads = prevCrm.contactFormsCount + prevCrm.totalBookings;
     const comparisonData = enableCompare ? {
+      prev_month_num: prevMonth,
+      prev_year: prevYear,
+      prev_month_name: getMonthNameEs(prevMonth),
       visitors_growth: calcGrowth(totalVisitors, prevStats.visitors),
       unique_growth: calcGrowth(uniqueVisitors, prevStats.unique_visitors),
       sessions_growth: calcGrowth(totalSessions, prevStats.sessions),
+      leads_growth: calcGrowth(totalLeads, prevTotalLeads),
+      bookings_growth: calcGrowth(confirmedBookings, prevCrm.confirmedBookings),
+      forms_growth: calcGrowth(contactFormsCount, prevCrm.contactFormsCount),
+      chats_growth: calcGrowth(chatConversationsCount, prevCrm.chatConversations),
       prev_visitors: Number(prevStats.visitors || 0),
       prev_unique: Number(prevStats.unique_visitors || 0),
       prev_sessions: Number(prevStats.sessions || 0),
+      prev_leads: prevTotalLeads,
+      prev_bookings: prevCrm.confirmedBookings,
+      prev_forms: prevCrm.contactFormsCount,
+      prev_chats: prevCrm.chatConversations,
     } : null;
 
     // 5. Positive ROI AI Insights Generator
