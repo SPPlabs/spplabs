@@ -70,9 +70,6 @@ export default function AiTab({
             <p className="text-xs text-slate-500 font-medium mt-0.5">{t.iaSubtitle}</p>
           </div>
         </div>
-        <span className="bg-slate-100 text-slate-800 text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider font-mono border border-slate-200 shrink-0 self-start sm:self-auto">
-          RAG v2.0
-        </span>
       </div>
 
       {/* Token Usage Stats Section */}
