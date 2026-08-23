@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import MainLayout from "@/components/MainLayout";
 import { blogArticles } from "@/lib/blogData";
+import { getBreadcrumbSchema, getAlternates } from "@/lib/schemas";
 
 export async function generateStaticParams() {
   return blogArticles.map((article) => ({
@@ -25,9 +26,7 @@ export async function generateMetadata({ params }) {
     title: article.metaTitle,
     description: article.metaDescription,
     keywords: [article.primaryKeyword, ...article.secondaryKeywords].join(", "),
-    alternates: {
-      canonical: url,
-    },
+    alternates: getAlternates(`/blog/${article.slug}`),
     openGraph: {
       title: article.metaTitle,
       description: article.metaDescription,
@@ -37,13 +36,73 @@ export async function generateMetadata({ params }) {
       authors: [article.author.name],
       siteName: "SPP Labs",
       locale: "es_ES",
+      images: [
+        {
+          url: "/logo.webp",
+          width: 1200,
+          height: 630,
+          alt: article.metaTitle,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: article.metaTitle,
       description: article.metaDescription,
+      images: ["/logo.webp"],
     },
   };
+}
+
+function parseFormattedText(text) {
+  if (!text) return text;
+  const regex = /\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*/g;
+  const elements = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      elements.push(text.substring(lastIndex, match.index));
+    }
+    if (match[1] && match[2]) {
+      const linkText = match[1];
+      const linkUrl = match[2];
+      const isInternal = linkUrl.startsWith("/");
+      elements.push(
+        isInternal ? (
+          <Link
+            key={match.index}
+            href={linkUrl}
+            className="text-blue-600 hover:text-blue-800 underline font-bold decoration-blue-300 hover:decoration-blue-700 transition-colors"
+          >
+            {linkText}
+          </Link>
+        ) : (
+          <a
+            key={match.index}
+            href={linkUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline font-bold decoration-blue-300 hover:decoration-blue-700 transition-colors"
+          >
+            {linkText}
+          </a>
+        )
+      );
+    } else if (match[3]) {
+      elements.push(
+        <strong key={match.index} className="font-bold text-slate-900">
+          {match[3]}
+        </strong>
+      );
+    }
+    lastIndex = regex.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    elements.push(text.substring(lastIndex));
+  }
+  return elements;
 }
 
 export default async function BlogArticlePage({ params }) {
@@ -229,7 +288,7 @@ export default async function BlogArticlePage({ params }) {
                 </h2>
 
                 <div className="text-sm sm:text-base text-slate-700 leading-relaxed whitespace-pre-line font-medium space-y-4">
-                  {sec.content}
+                  {parseFormattedText(sec.content)}
                 </div>
 
                 {/* Optional Table if section has structured comparison */}

@@ -123,7 +123,8 @@ export default function SignupPage() {
             className="w-14 h-14 sm:w-16 sm:h-16 object-contain mb-3"
           />
           <SppLabsLogo inline={true} className="text-slate-950" style={{ fontSize: "1.75rem" }} />
-          <p className="text-slate-500 text-xs sm:text-sm mt-3 text-center">{t.signupSubtitle}</p>
+          <h1 className="text-lg font-black text-slate-900 mt-3 text-center">{t.signupTitle}</h1>
+          <p className="text-slate-500 text-xs sm:text-sm mt-1 text-center">{t.signupSubtitle}</p>
         </div>
 
         {error && (

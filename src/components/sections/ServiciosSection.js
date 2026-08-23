@@ -219,9 +219,9 @@ export default function ServiciosSection() {
           <span className="text-xs font-bold uppercase tracking-widest text-brand-blue bg-brand-blue/5 border border-brand-blue/10 px-4 py-1.5 rounded-full inline-block font-mono shadow-2xs">
             {isEs ? "Soluciones de Ingeniería Digital" : "Digital Engineering Solutions"}
           </span>
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-950 leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-950 leading-tight">
             {isEs ? "Servicios Tecnológicos para Escalar Tu Empresa" : "High-Performance Engineering Services"}
-          </h2>
+          </h1>
           <p className="text-slate-600 text-base md:text-lg leading-relaxed font-medium">
             {isEs
               ? "Diseñamos aplicaciones web, arquitecturas analíticas, paneles CRM y asistentes de IA diseñados para acelerar la captación de clientes y asegurar la operación digital de su negocio."

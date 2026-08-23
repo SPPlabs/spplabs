@@ -47,7 +47,7 @@ export const blogArticles = [
 
 Sin embargo, cuando un empresario o autónomo en España busca **cuánto cuesta una página web**, suele encontrarse con una disparidad de presupuestos desconcertante: ofertas desde 0 € en constructores genéricos hasta presupuestos de más de 12.000 € en agencias de marketing tradicionales.
 
-Para entender qué estás pagando realmente, es fundamental analizar no solo el coste inicial, sino el **Coste Total de Propiedad (TCO)** a lo largo de los años.`,
+Para entender qué estás pagando realmente en un servicio de [diseño y desarrollo de páginas web](/servicios/desarrollo-web), es fundamental analizar no solo el coste inicial, sino el **Coste Total de Propiedad (TCO)** a lo largo de los años.`,
       },
       {
         h2: "Comparativa de precios de páginas web por modelo",
@@ -82,7 +82,7 @@ Para entender qué estás pagando realmente, es fundamental analizar no solo el 
 ### Modelo Todo en Uno SPP Labs (Coste a 3 años):
 - **Pago inicial de desarrollo:** 0 €
 - **Cuota única con TODO incluido:** 197 €/mes × 36 meses = **7.092 € + IVA**
-- **Servicios incluidos:** Web Next.js ultra rápida + Alojamiento Edge + Chatbot IA + CRM + Motor de Reservas + Review Booster + SEO Local + Soporte Continuo.
+- **Servicios incluidos:** Web Next.js ultra rápida + Alojamiento Edge + [Chatbot de IA 24/7](/servicios/chatbot-ia) + [Software CRM integrado](/servicios/crm-dashboard) + Motor de Reservas + Review Booster + SEO Local + Soporte Continuo.
 - **AHORRO NETO PARA TU EMPRESA:** **Más de 6.150 €** con mayor velocidad, cero quebraderos de cabeza y un único socio tecnológico.`,
       },
       {
@@ -103,7 +103,7 @@ Con nuestra cuota de **197 €/mes + IVA**, tu negocio dispone de:
 - **CRM y Libreta de Clientes integrada:** Centraliza todos tus contactos y notas sin pagar licencias adicionales.
 - **Sistema de Reservas propio:** Sin comisiones ni intermediarios.
 - **Google Review Booster:** Automatiza la captación de reseñas de 5 estrellas tras cada servicio.
-- **Mantenimiento y soporte proactivo:** Nos encargamos de todo para que tú solo te centres en facturar.`,
+- **Mantenimiento y soporte proactivo:** Nos encargamos de todo para que tú solo te centres en facturar. Puedes [solicitar una propuesta web a medida](/contacto) para analizar tu proyecto.`,
       },
     ],
     faqs: [
@@ -172,7 +172,7 @@ Si te preguntas **qué debe tener una página web** profesional para que realmen
         content: `Para que una web empresarial posicione en los primeros resultados de búsqueda y convierta a los visitantes en clientes de pago, debe cumplir con estos 12 pilares:
 
 ### 1. Velocidad de carga extrema (Sub-0.5s)
-Más del 60% del tráfico web en España proviene de smartphones con conexiones móviles. Si tu página tarda más de 2 segundos en cargar, perderás más del 40% de tus potenciales clientes antes de que vean tu oferta. Las tecnologías modernas como Next.js y Server Components son el estándar obligatorio.
+Más del 60% del tráfico web en España proviene de smartphones con conexiones móviles. Si tu página tarda más de 2 segundos en cargar, perderás más del 40% de tus potenciales clientes antes de que vean tu oferta. El [desarrollo web en Next.js y React](/servicios/desarrollo-web) es hoy en día el estándar de rendimiento óptimo.
 
 ### 2. Diseño Mobile-First intuitivo
 El diseño debe adaptarse a pantallas táctiles: botones de llamada accesibles con un solo pulgar, tipografías legibles y eliminación de elementos visuales superfluos que distraigan de la acción principal.
@@ -187,10 +187,10 @@ Marcado semántico estructurado para que Google y los buscadores de IA entiendan
 Formularios sin campos innecesarios que capturen el nombre, teléfono y email, enviando alertas inmediatas al equipo comercial.
 
 ### 6. Sistema de reservas y calendario interactivo
-Permite a tus clientes agendar citas o demostraciones sin llamadas telefónicas ni esperas, sincronizado en tiempo real.
+Permite a tus clientes agendar citas o demostraciones sin llamadas telefónicas ni esperas mediante un [sistema de reservas online](/servicios/sistema-reservas) sincronizado en tiempo real.
 
 ### 7. Asistente virtual y Chatbot con IA
-Un chatbot entrenado con la información de tu negocio capaz de responder precios aproximados, dudas frecuentes y captar el contacto de los visitantes que navegan fuera del horario comercial.
+Un [chatbot con IA para empresas](/servicios/chatbot-ia) entrenado con la información de tu negocio capaz de responder precios aproximados, dudas frecuentes y captar el contacto de los visitantes que navegan fuera del horario comercial.
 
 ### 8. Integración nativa con CRM
 Todos los datos de leads, contactos y citas deben quedar registrados en una base de datos unificada, evitando pérdidas de información en bandejas de correo desordenadas.
@@ -273,7 +273,7 @@ Todo configurado, mantenido y optimizado día a día para que tu empresa lidere 
         h2: "Aparecer en Google vs. Aparecer arriba en Google",
         content: `Cuando un empresario se plantea **cómo aparecer en Google con su negocio**, el primer paso es comprender una distinción crucial:
 1. **Estar indexado:** Significa que Google sabe que tu página existe si alguien escribe exactamente tu nombre o tu dominio web.
-2. **Posicionar en las primeras posiciones:** Significa que cuando alguien busca tus servicios en tu ciudad (por ejemplo: *"clínica dental en Valencia"* o *"empresa de reformas en Madrid"*), tu negocio aparece entre las tres primeras opciones del mapa o de la búsqueda orgánica.
+2. **Posicionar en las primeras posiciones:** Significa que cuando alguien busca tus servicios en tu ciudad (por ejemplo: *"clínica dental en Valencia"* o *"empresa de reformas en Madrid"*), tu negocio aparece entre las tres primeras opciones del mapa o de la búsqueda orgánica mediante una estrategia sólida de [posicionamiento SEO orgánico](/servicios/posicionamiento-seo).
 
 La indexación no genera clientes por sí sola; lo que genera facturación real es la visibilidad en las búsquedas con alta intención de compra.`,
       },
@@ -298,7 +298,7 @@ La indexación no genera clientes por sí sola; lo que genera facturación real 
       },
       {
         h2: "Paso 2: La página web como pilar de autoridad y relevancia",
-        content: `Google no posiciona fichas de Google Maps de forma aislada. Su algoritmo cruza continuamente la información de tu Perfil de Empresa con el contenido y la calidad técnica de tu página web oficial:
+        content: `Google no posiciona fichas de Google Maps de forma aislada. Su algoritmo cruza continuamente la información de tu Perfil de Empresa con el contenido y la calidad técnica de tu [página web corporativa](/servicios/desarrollo-web):
 
 - **SEO On-Page por servicio y ubicación:** Cada servicio principal debe contar con su propia sección optimizada (título H1, estructura de encabezados H2/H3, textos explicativos y llamadas a la acción).
 - **Coherencia NAP (Name, Address, Phone):** Tu nombre, dirección y teléfono deben coincidir letra por letra en tu web, Google Maps y directorios profesionales.
@@ -310,7 +310,7 @@ La indexación no genera clientes por sí sola; lo que genera facturación real 
         content: `Tener 20 reseñas de hace tres años ya no es suficiente. El algoritmo de Google premia tres factores en las valoraciones:
 1. **Volumen total:** Cantidad total de reseñas frente a tus competidores directos.
 2. **Frescura:** Recibir opiniones nuevas cada semana o cada mes de forma regular.
-3. **Menciones de palabras clave en los comentarios:** Cuando tus clientes mencionan en sus opiniones el servicio exacto recibido (ej. *"me arreglaron el aire acondicionado muy rápido"*), Google asocia tu empresa con esa búsqueda.`,
+3. **Menciones de palabras clave en los comentarios:** Cuando tus clientes mencionan en sus opiniones el servicio exacto recibido (ej. *"me arreglaron el aire acondicionado muy rápido"*), Google asocia tu empresa con esa búsqueda. Puedes apoyarte en un [booster de reseñas automatizado](/servicios/booster-resenas) para mantener este flujo activo sin esfuerzo manual.`,
       },
       {
         h2: "Gestiona todo tu posicionamiento con SPP Labs",
@@ -388,7 +388,7 @@ Publica novedades, promociones o consejos cada 7-10 días. Esto demuestra a Goog
 Responde a todas las valoraciones en menos de 48 horas. En tus respuestas, agradece al cliente e incluye de forma natural el nombre del servicio prestado y tu ciudad.
 
 ### 5. Activar el botón de Reserva Directa y Mensajes
-Conecta tu sistema de citas para que el usuario pueda agendar su visita sin salir de la experiencia digital.`,
+Conecta un [sistema de reservas online integrado](/servicios/sistema-reservas) para que el usuario pueda agendar su visita sin salir de la experiencia digital.`,
       },
       {
         h2: "Errores críticos que hunden tu visibilidad en Maps",
@@ -396,11 +396,11 @@ Conecta tu sistema de citas para que el usuario pueda agendar su visita sin sali
 - **Hacer 'keyword stuffing' en el nombre:** Poner *"Clínica Dental Pérez - Implantes Baratos Madrid"* provocará que tus competidores te denuncien y Google suspenda tu ficha.
 - **Tener datos contradictorios en internet:** Si tu dirección en la web pone *Calle Mayor 12, 1ºA* y en Google Maps pone *C/ Mayor nº 12*, generas desconfianza algorítmica.
 - **Comprar reseñas falsas:** Los filtros de inteligencia artificial de Google detectan y eliminan reseñas fraudulentas, penalizando la visibilidad del perfil.
-- **Enlazar a una web lenta o rota:** Si el usuario pulsa en tu sitio web y tarda en cargar, volverá a Maps y elegirá a tu competidor.`,
+- **Enlazar a una web lenta o rota:** Si el usuario pulsa en tu sitio web y tarda en cargar, volverá a Maps y elegirá a tu competidor. Asegúrate de contar con un [desarrollo web optimizado para móviles](/servicios/desarrollo-web).`,
       },
       {
         h2: "El ecosistema SPP Labs: Web ultrarrápida + Maps + Review Booster",
-        content: `Tu presencia en Google Maps no debe ser un elemento aislado. En **SPP Labs (spplabs.es)** conectamos tu ficha de Google Maps con una web de alto rendimiento, un sistema de reservas directo y nuestro **Google Review Booster automatizado**.
+        content: `Tu presencia en Google Maps no debe ser un elemento aislado. En **SPP Labs (spplabs.es)** conectamos tu ficha de Google Maps con una web de alto rendimiento, un sistema de reservas directo y nuestro [Google Review Booster](/servicios/booster-resenas).
 
 Por una cuota única de **197 €/mes + IVA**, optimizamos toda tu infraestructura digital para que tu negocio lidere las búsquedas locales en tu sector.`,
       },
@@ -455,7 +455,7 @@ A continuación te explicamos **cómo conseguir reseñas en Google** de forma é
       },
       {
         h2: "El embudo inteligente de satisfacción del cliente",
-        content: `Para proteger tu reputación y maximizar las opiniones positivas, la solicitud de reseñas debe estructurarse mediante un flujo inteligente:
+        content: `Para proteger tu reputación y maximizar las opiniones positivas mediante un [sistema automatizado de reseñas](/servicios/booster-resenas), la solicitud de feedback debe estructurarse mediante un flujo inteligente:
 
 - **Paso 1: Valoración de satisfacción inicial:** Se envía un mensaje amigable preguntando al cliente cómo fue su experiencia.
 - **Paso 2 (Experiencia positiva - 4 o 5 estrellas):** Se le redirige directamente al formulario de Google Maps con el enlace abierto para que complete la reseña pública en 2 clics.
@@ -466,7 +466,7 @@ A continuación te explicamos **cómo conseguir reseñas en Google** de forma é
         content: `El principal motivo por el que los clientes satisfechos no dejan una reseña no es la falta de ganas, sino la fricción y el olvido. Si pides una reseña una semana después de haber terminado el trabajo, el cliente ya está inmerso en su rutina y la probabilidad de respuesta cae un 85%.
 
 El momento ideal para solicitar una valoración es el **pico de satisfacción del cliente**:
-- En una clínica o centro de estética: Entre 2 y 4 horas después de finalizar la cita.
+- En una clínica o centro de estética: Entre 2 y 4 horas después de finalizar la cita gestionada en tu [sistema de reservas](/servicios/sistema-reservas).
 - En una empresa de reformas o servicios técnicos: En el momento de la entrega final del trabajo.
 - En un restaurante o comercio: Justo al finalizar la experiencia o en el ticket digital.
 - En un servicio B2B / consultoría: Tras alcanzar el primer hito de éxito acordado.`,
@@ -475,7 +475,7 @@ El momento ideal para solicitar una valoración es el **pico de satisfacción de
         h2: "Por qué pagar softwares externos de reseñas es un gasto innecesario",
         content: `Existen plataformas en el mercado que cobran entre 80 € y 180 € al mes únicamente por enviar mensajes automatizados de solicitud de reseñas. Contratar una herramienta de este tipo por separado añade otra factura mensual y requiere complejas integraciones vía Zapier con tu web y tu base de datos.
 
-En **SPP Labs (spplabs.es)** incluimos el sistema **Google Review Booster** de forma 100% nativa dentro de nuestra cuota de **197 €/mes + IVA**, ahorrándote costes adicionales y funcionando de forma totalmente transparente junto a tu CRM y sistema de reservas.`,
+En **SPP Labs (spplabs.es)** incluimos el sistema **Google Review Booster** de forma 100% nativa dentro de nuestra cuota de **197 €/mes + IVA**, ahorrándote costes adicionales y funcionando de forma totalmente transparente junto a tu [panel de control CRM](/servicios/crm-dashboard).`,
       },
       {
         h2: "Cómo funciona el Review Booster de SPP Labs en piloto automático",
@@ -578,9 +578,9 @@ La clave de un buen **mensaje para pedir una reseña en Google** se resume en tr
         h2: "Automatiza el envío de plantillas con SPP Labs Review Booster",
         content: `Enviar estos mensajes a mano uno por uno consume tiempo y es fácil de olvidar en el día a día.
 
-Con **SPP Labs (spplabs.es)**, el envío de estas solicitudes se realiza automáticamente a través de nuestro módulo **Google Review Booster**. Cada vez que un cliente completa una reserva en tu web o es registrado en tu CRM, el sistema le envía la plantilla correspondiente con su enlace directo.
+Con **SPP Labs (spplabs.es)**, el envío de estas solicitudes se realiza automáticamente a través de nuestro módulo [Booster de Reseñas de Google y Email](/servicios/booster-resenas). Cada vez que un cliente completa una reserva en tu web o es registrado en tu CRM, el sistema le envía la plantilla correspondiente con su enlace directo.
 
-Todo integrado por **197 €/mes + IVA** junto a tu web, CRM y chatbot con IA.`,
+Todo integrado por **197 €/mes + IVA** junto a tu web, CRM y chatbot con IA. Puedes [contactar con nuestro equipo](/contacto) para implementarlo en tu negocio.`,
       },
     ],
     faqs: [
@@ -627,7 +627,7 @@ Todo integrado por **197 €/mes + IVA** junto a tu web, CRM y chatbot con IA.`,
         h2: "De los chatbots rígidos a los asistentes inteligentes",
         content: `Durante años, la experiencia de interactuar con un chatbot en una página web era frustrante: menús con botones numéricos, respuestas prefabricadas y el inevitable mensaje *"No te he entendido, por favor elige una opción del 1 al 4"*.
 
-Hoy en día, la madurez de los modelos de lenguaje natural (LLM) ha cambiado por completo las reglas del juego. Un **chatbot con IA para empresas** no sigue árboles de decisión rígidos: comprende el lenguaje cotidiano, interpreta el contexto de la consulta y responde de forma natural utilizando exclusivamente la información verificada de tu negocio.`,
+Hoy en día, la madurez de los modelos de lenguaje natural (LLM) ha cambiado por completo las reglas del juego. Un [chatbot con IA para empresas](/servicios/chatbot-ia) no sigue árboles de decisión rígidos: comprende el lenguaje cotidiano, interpreta el contexto de la consulta y responde de forma natural utilizando exclusivamente la información verificada de tu negocio.`,
       },
       {
         h2: "Por qué responder en menos de 60 segundos multiplica tus ventas",
@@ -649,7 +649,7 @@ Cuando un visitante escribe una pregunta compleja como: *"¿Hacéis presupuestos
         h2: "Ejemplos reales de aplicación por sector",
         content: `### 1. Restaurantes y Hostelería
 - **Pregunta del usuario:** *"¿Tenéis opciones sin gluten en el menú del día y se puede reservar mesa para 6 personas este viernes?"*
-- **Respuesta del chatbot IA:** Confirma los platos adaptados a celíacos, explica la política de mesas y abre el calendario de reservas dentro de la propia conversación.
+- **Respuesta del chatbot IA:** Confirma los platos adaptados a celíacos, explica la política de mesas y abre el [calendario de reservas](/servicios/sistema-reservas) dentro de la propia conversación.
 
 ### 2. Clínicas de Salud y Fisioterapia
 - **Pregunta del usuario:** *"Tengo dolor en la zona lumbar desde hace tres días, ¿qué especialista me puede atender y cuánto cuesta la primera sesión?"*
@@ -669,7 +669,7 @@ Cuando un visitante escribe una pregunta compleja como: *"¿Hacéis presupuestos
 
 En **SPP Labs (spplabs.es)** incluimos un **Chatbot con IA de última generación** dentro de nuestra suscripción todo en uno de **197 €/mes + IVA**.
 
-Nosotros nos encargamos de entrenarlo con los datos de tu empresa, integrarlo en tu web, conectarlo a tu libreta de clientes y mantenerlo actualizado periódicamente sin costes adicionales por uso de tokens.`,
+Nosotros nos encargamos de entrenarlo con los datos de tu empresa, integrarlo en tu web, conectarlo a tu [panel de control CRM](/servicios/crm-dashboard) y mantenerlo actualizado periódicamente sin costes adicionales por uso de tokens.`,
       },
     ],
     faqs: [
@@ -716,7 +716,7 @@ Nosotros nos encargamos de entrenarlo con los datos de tu empresa, integrarlo en
         h2: "El coste real de implementar Inteligencia Artificial en tu empresa",
         content: `La inteligencia artificial ha dejado de ser una tecnología reservada a multinacionales para convertirse en una ventaja competitiva accesible a cualquier negocio local o pyme. Sin embargo, al investigar **cuánto cuesta un chatbot con IA**, muchas empresas se encuentran con estructuras de precios confusas: costes por mensaje, licencias mensuales, tarifas de configuración inicial y gastos por consumo de API.
 
-Para tomar una decisión informada, es necesario comparar las opciones que existen en el mercado español actual y evaluar su rentabilidad real.`,
+Para tomar una decisión informada, es necesario comparar las opciones que existen en el mercado español actual y evaluar la rentabilidad real de un [asistente virtual con IA integrado](/servicios/chatbot-ia).`,
       },
       {
         h2: "Desglose de la factura oculta de un Chatbot SaaS independiente",
@@ -745,7 +745,7 @@ Para tomar una decisión informada, es necesario comparar las opciones que exist
         h2: "¿Por qué pagar por piezas sueltas cuando puedes tener el sistema completo?",
         content: `Tener un chatbot potente en una web lenta o mal posicionada no genera clientes porque nadie llega a interactuar con él. De igual modo, tener una web con muchas visitas pero sin un sistema de captación y CRM hace que pierdas más del 80% de los contactos interesados.
 
-En **SPP Labs (spplabs.es)** no vendemos software aislado. Por **197 €/mes + IVA**, te proporcionamos la infraestructura digital completa: tu web ultrarrápida, chatbot con IA configurado, CRM centralizado, sistema de reservas y posicionamiento SEO.`,
+En **SPP Labs (spplabs.es)** no vendemos software aislado. Por **197 €/mes + IVA**, te proporcionamos el [catálogo completo de soluciones digitales](/servicios): tu web ultrarrápida, chatbot con IA configurado, CRM centralizado, sistema de reservas y posicionamiento SEO. Si deseas una demostración personalizada, puedes [contactar con nosotros](/contacto).`,
       },
     ],
     faqs: [
@@ -806,7 +806,7 @@ Este desorden provoca la pérdida de entre un **20% y un 40% de las ventas poten
 - Si recibes 30 consultas al mes y el valor medio de tu servicio es de 150 €.
 - Si por falta de seguimiento se te escapan solo 5 clientes al mes, estás perdiendo **750 € al mes (9.000 € al año)** en facturación directa.
 
-Un CRM amortiza su coste desde el primer mes simplemente asegurando que ningún cliente potencial quede sin respuesta o sin seguimiento.`,
+Un [sistema CRM y panel de control](/servicios/crm-dashboard) amortiza su coste desde el primer mes simplemente asegurando que ningún cliente potencial quede sin respuesta o sin seguimiento.`,
       },
       {
         h2: "¿Qué es exactamente un CRM y para qué sirve?",
@@ -819,10 +819,10 @@ $$\\text{Visitante Web} \\longrightarrow \\text{Lead / Contacto} \\longrightarro
       {
         h2: "Las 5 funciones esenciales de un CRM para una pequeña empresa",
         content: `1. **Ficha unificada de cliente:** Historial con nombre, teléfono, email, notas de preferencias, servicios contratados y fechas de atención.
-2. **Captura automática desde la web:** Cada formulario enviado, cita reservada o conversación del chatbot de IA se registra automáticamente sin necesidad de teclear a mano.
+2. **Captura automática desde la web:** Cada formulario enviado desde tu [página web corporativa](/servicios/desarrollo-web) se registra automáticamente sin necesidad de teclear a mano.
 3. **Control de estados y seguimiento:** Identifica al instante qué prospectos están en fase de contacto inicial, presupuesto presentado o cita confirmada.
 4. **Directorio y asignación al equipo:** Gestiona notas internas entre empleados para que cualquier miembro del equipo conozca el historial del cliente al atenderle.
-5. **Trazabilidad de comunicaciones:** Registro de correos electrónicos de bienvenida, confirmaciones de citas y solicitudes de reseñas automáticas.`,
+5. **Trazabilidad de reservas:** Sincronización directa con tu [sistema de reservas online](/servicios/sistema-reservas) para emitir recordatorios y confirmaciones automáticas.`,
       },
       {
         h2: "El CRM integrado de SPP Labs: Sencillo, potente y sin coste extra",
@@ -881,7 +881,7 @@ Sin pagar licencias por usuario, sin herramientas de terceros y con sincronizaci
 - Pérdida de oportunidades de venta repetida.
 - Imposibilidad de que varios empleados atiendan al mismo cliente con la misma calidad.
 
-Aprender **cómo gestionar los clientes de una empresa** con un sistema digital adecuado es el paso indispensable para escalar un negocio de forma ordenada.`,
+Aprender **cómo gestionar los clientes de una empresa** con un [software CRM para pymes](/servicios/crm-dashboard) es el paso indispensable para escalar un negocio de forma ordenada.`,
       },
       {
         h2: "Comparativa: Excel vs. WhatsApp Business vs. CRM Integrado",
@@ -900,11 +900,11 @@ Aprender **cómo gestionar los clientes de una empresa** con un sistema digital 
         h2: "El flujo de trabajo automatizado con SPP Labs",
         content: `Una gestión moderna de clientes debe operar como un engranaje continuo:
 
-1. **Entrada automática:** Un usuario escribe al chatbot de IA o completa el formulario web → Se crea automáticamente su ficha en el CRM.
+1. **Entrada automática:** Un usuario escribe al [chatbot con IA](/servicios/chatbot-ia) o completa el formulario web → Se crea automáticamente su ficha en el CRM.
 2. **Notificación en tiempo real:** Tu equipo recibe la alerta instantánea con los datos clave del cliente.
 3. **Notas y citas asignadas:** Se agenda la cita en el calendario sincronizado y se añaden notas de seguimiento internas.
 4. **Recordatorio anti no-show:** El sistema avisa al cliente por correo antes de su visita.
-5. **Solicitud de reseña en Google:** Tras la cita, el Review Booster solicita su valoración de 5 estrellas en Maps.`,
+5. **Solicitud de reseña en Google:** Tras la cita, el [Booster de Reseñas](/servicios/booster-resenas) solicita su valoración de 5 estrellas en Maps.`,
       },
       {
         h2: "La solución de SPP Labs: Tu infraestructura completa",
@@ -968,7 +968,7 @@ Todo integrado dentro de tu suscripción de **197 €/mes + IVA**, permitiéndot
 
 Ante esta realidad, muchos empresarios se preguntan: **¿cómo aparecer en ChatGPT cuando alguien busca mis servicios?**
 
-Para responder con rigor, es imprescindible separar los trucos falsos de la realidad técnica contrastada.`,
+Para responder con rigor, es imprescindible recurrir a técnicas probadas de [optimización GEO para buscadores de IA](/servicios/optimizacion-geo), separando los trucos falsos de la realidad técnica contrastada.`,
       },
       {
         h2: "Desmontando los mitos: Lo que NO funciona para aparecer en ChatGPT",
@@ -983,10 +983,10 @@ Para responder con rigor, es imprescindible separar los trucos falsos de la real
         content: `Para que ChatGPT o SearchGPT mencionen a tu empresa cuando un usuario solicita una recomendación, el modelo evalúa tres pilares fundamentales:
 
 ### 1. Rastreo web y arquitectura técnica limpia
-Tu página web debe ser accesible para los bots de IA (sin bloqueos en robots.txt), con código HTML5 semántico, textos claros y tiempos de carga instantáneos. Si tu web está construida con tecnologías obsoletas o pesadas que ocultan el contenido detrás de scripts lentos, los bots de IA no podrán indexar tu información.
+Tu página web debe ser accesible para los bots de IA (sin bloqueos en robots.txt), con código HTML5 semántico, textos claros y tiempos de carga instantáneos. Un [desarrollo web ultrarrápido en Next.js](/servicios/desarrollo-web) garantiza una indexación fluida por parte de los crawlers.
 
 ### 2. Claridad de Entidad y Coherencia de Datos (Entity SEO)
-La IA no solo busca palabras clave; busca **entidades verificadas**. Debe quedar meridianamente claro quién eres, qué servicios exactos ofreces, en qué ciudad operas y cuáles son tus datos de contacto oficiales en tu web, Google Maps y directorios del sector.
+La IA no solo busca palabras clave; busca **entidades verificadas**. Debe quedar meridianamente claro quién eres, qué servicios exactos ofreces, en qué ciudad operas y cuáles son tus datos de contacto oficiales mediante una estrategia de [posicionamiento SEO técnico](/servicios/posicionamiento-seo) y Schema.org.
 
 ### 3. Reputación online y volumen de opiniones reales
 Los modelos de IA analizan el sentimiento general de tu marca en internet. Los negocios con decenas de reseñas positivas en Google Maps, testimonios reales y menciones en medios locales tienen una probabilidad infinitamente mayor de ser citados como empresas recomendadas.
@@ -1049,9 +1049,7 @@ Por **197 €/mes + IVA**, optimizamos tus datos estructurados, aceleramos tus t
 
 Sin embargo, en el panorama actual convivimos con un nuevo actor protagonista: **GEO (Generative Engine Optimization)** o la optimización para motores de búsqueda generativa (Google AI Overviews, ChatGPT Search, Perplexity, Microsoft Copilot).
 
-¿Significa esto que el SEO ha muerto? En absoluto. De hecho, Google y los principales laboratorios de IA confirman que el SEO técnico sigue siendo la base sobre la que se construye la búsqueda generativa.
-
-Analizamos en profundidad las diferencias y cómo tu empresa debe posicionarse para ganar en ambos terrenos.`,
+¿Significa esto que el SEO ha muerto? En absoluto. La combinación entre un buen [posicionamiento SEO orgánico](/servicios/posicionamiento-seo) y una estrategia de [optimización GEO para IA](/servicios/optimizacion-geo) es la clave para dominar ambos canales.`,
       },
       {
         h2: "Tabla comparativa: SEO tradicional frente a GEO",
@@ -1081,11 +1079,11 @@ Por tanto, la fórmula del éxito actual no es elegir entre SEO o GEO, sino cont
       },
       {
         h2: "Cómo preparar la presencia digital de tu empresa para SEO + GEO",
-        content: `1. **Velocidad y código limpio:** Utiliza frameworks modernos (Next.js 16) con renderizado en servidor y eliminación de scripts pesados.
+        content: `1. **Velocidad y código limpio:** Utiliza [páginas web de alto rendimiento](/servicios/desarrollo-web) con renderizado en servidor y eliminación de scripts pesados.
 2. **Estructura semántica de preguntas y respuestas:** Incluye secciones de FAQ con respuestas directas y fundamentadas en datos reales de tu negocio.
 3. **Optimización de Entidad (Entity SEO):** Coherencia total de tu nombre, dirección, teléfono y catálogo de servicios en toda la web.
 4. **Reseñas verificadas constantes:** Mantén un flujo continuo de opiniones en Google Maps para nutrir los algoritmos de reputación.
-5. **Captación integrada:** Asegúrate de que cualquier usuario que llegue (ya sea por un enlace de Google o por una recomendación de ChatGPT) pueda interactuar de inmediato con tu chatbot con IA o reservar su cita en segundos.`,
+5. **Captación integrada:** Asegúrate de que cualquier usuario que llegue pueda interactuar de inmediato con un [chatbot con IA](/servicios/chatbot-ia) o reservar su cita en segundos.`,
       },
       {
         h2: "SPP Labs: El ecosistema digital preparado para el futuro",
@@ -1097,7 +1095,7 @@ Dentro de nuestra cuota única de **197 €/mes + IVA**, tu empresa cuenta con:
 - Chatbot con IA integrado para atender y convertir visitas en clientes 24/7.
 - CRM centralizado para gestionar todas las reservas y contactos generados.
 
-El ecosistema digital definitivo para que tu empresa lidere su sector hoy y en el futuro.`,
+El ecosistema digital definitivo para que tu empresa lidere su sector hoy y en el futuro. Puedes [solicitar información técnica](/contacto) para empezar.`,
       },
     ],
     faqs: [

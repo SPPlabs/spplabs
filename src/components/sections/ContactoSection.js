@@ -203,9 +203,9 @@ export default function ContactoSection() {
           <span className="text-xs font-bold uppercase tracking-widest text-brand-blue bg-brand-blue/5 border border-brand-blue/10 px-3.5 py-1.5 rounded-full mb-4 inline-block">
             {lang === "es" ? "Contacto Directo" : "Contact Center"}
           </span>
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-black mt-2 leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-black mt-2 leading-tight">
             {lang === "es" ? "Agende su Cita o Envíenos un Mensaje" : "Request a Meeting or Message Us"}
-          </h2>
+          </h1>
           <p className="text-zinc-650 mt-4 text-sm leading-relaxed">
             {lang === "es"
               ? "Seleccione una fecha para una agendar una llamada de consultoría, o escríbanos sus requerimientos técnicos o un mensaje directamente."

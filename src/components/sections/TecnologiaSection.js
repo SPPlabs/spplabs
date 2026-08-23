@@ -13,9 +13,9 @@ export default function TecnologiaSection() {
           <span className="text-xs font-bold uppercase tracking-widest text-brand-green bg-brand-green/5 border border-brand-green/10 px-3.5 py-1.5 rounded-full mb-4 inline-block">
             {lang === "es" ? "Ecosistema Tecnológico" : "Tech Ecosystem"}
           </span>
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-black mt-3 leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-black mt-3 leading-tight">
             {lang === "es" ? "Nuestras Tecnologías Integradas" : "Our Integrated Tech Stack"}
-          </h2>
+          </h1>
           <p className="text-zinc-650 mt-4 text-base md:text-lg leading-relaxed">
             {lang === "es"
               ? "Bases de datos ultra-rápidas, aceleración por hardware, contenedores aislados y orquestación de inteligencia artificial ejecutadas en nuestros servidores de SPP labs"

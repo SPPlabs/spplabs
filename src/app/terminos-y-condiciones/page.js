@@ -1,10 +1,62 @@
 import Link from "next/link";
 import Image from "next/image";
 import { SppLabsLogo } from "@/components/SppLabsLogo";
+import { getBreadcrumbSchema, getPageSchema, BASE_URL, getAlternates } from "@/lib/schemas";
+
+export const metadata = {
+  title: "Términos y Condiciones | SPP Labs",
+  description:
+    "Términos y condiciones legales de uso y contratación de servicios en SPP Labs.",
+  alternates: getAlternates("/terminos-y-condiciones"),
+  openGraph: {
+    title: "Términos y Condiciones | SPP Labs",
+    description:
+      "Términos y condiciones legales de uso y contratación de servicios en SPP Labs.",
+    url: `${BASE_URL}/terminos-y-condiciones`,
+    siteName: "SPP Labs",
+    locale: "es_ES",
+    type: "website",
+    images: [
+      {
+        url: "/logo.webp",
+        width: 1200,
+        height: 630,
+        alt: "Términos y Condiciones | SPP Labs",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Términos y Condiciones | SPP Labs",
+    description:
+      "Términos y condiciones legales de uso y contratación de servicios en SPP Labs.",
+    images: ["/logo.webp"],
+  },
+};
 
 export default function TerminosYCondicionesPage() {
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: "Inicio", item: "/" },
+    { name: "Términos y Condiciones", item: "/terminos-y-condiciones" },
+  ]);
+
+  const pageSchema = getPageSchema({
+    type: "WebPage",
+    name: "Términos y Condiciones de Uso y Contratación de SPP Labs",
+    description: "Términos y condiciones legales de uso y contratación de servicios en SPP Labs.",
+    url: "/terminos-y-condiciones",
+  });
+
   return (
     <div className="min-h-screen bg-zinc-50 text-black font-sans flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pageSchema) }}
+      />
       {/* Top Header Navigation */}
       <header className="bg-white border-b border-zinc-200 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">

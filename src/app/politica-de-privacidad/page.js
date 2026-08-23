@@ -1,10 +1,62 @@
 import Link from "next/link";
 import Image from "next/image";
 import { SppLabsLogo } from "@/components/SppLabsLogo";
+import { getBreadcrumbSchema, getPageSchema, BASE_URL, getAlternates } from "@/lib/schemas";
+
+export const metadata = {
+  title: "Política de Privacidad | SPP Labs",
+  description:
+    "Información sobre el tratamiento y protección de datos personales conforme al RGPD en SPP Labs.",
+  alternates: getAlternates("/politica-de-privacidad"),
+  openGraph: {
+    title: "Política de Privacidad | SPP Labs",
+    description:
+      "Información sobre el tratamiento y protección de datos personales conforme al RGPD en SPP Labs.",
+    url: `${BASE_URL}/politica-de-privacidad`,
+    siteName: "SPP Labs",
+    locale: "es_ES",
+    type: "website",
+    images: [
+      {
+        url: "/logo.webp",
+        width: 1200,
+        height: 630,
+        alt: "Política de Privacidad | SPP Labs",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Política de Privacidad | SPP Labs",
+    description:
+      "Información sobre el tratamiento y protección de datos personales conforme al RGPD en SPP Labs.",
+    images: ["/logo.webp"],
+  },
+};
 
 export default function PoliticaDePrivacidadPage() {
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: "Inicio", item: "/" },
+    { name: "Política de Privacidad", item: "/politica-de-privacidad" },
+  ]);
+
+  const pageSchema = getPageSchema({
+    type: "WebPage",
+    name: "Política de Privacidad de SPP Labs",
+    description: "Información sobre el tratamiento y protección de datos personales conforme al RGPD en SPP Labs.",
+    url: "/politica-de-privacidad",
+  });
+
   return (
     <div className="min-h-screen bg-zinc-50 text-black font-sans flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pageSchema) }}
+      />
       {/* Top Header Navigation */}
       <header className="bg-white border-b border-zinc-200 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
