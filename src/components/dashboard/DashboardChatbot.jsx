@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
 import { Message } from "@/components/chatbot/Message";
 import { TypingIndicator } from "@/components/chatbot/TypingIndicator";
 import { BotIcon, RefreshIcon, SendIcon } from "@/components/dashboard/DashboardIcons";
@@ -51,6 +50,7 @@ export default function DashboardChatbot({
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState(null);
+  const [logoError, setLogoError] = useState(false);
 
   const scrollRef = useRef(null);
   const abortControllerRef = useRef(null);
@@ -255,13 +255,13 @@ export default function DashboardChatbot({
       {/* Top Header Information & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
         <div className="flex items-center gap-3.5">
-          {logoUrl ? (
+          {logoUrl && !logoError ? (
             <div className="w-11 h-11 rounded-2xl overflow-hidden border border-slate-200/80 bg-white p-1 shadow-2xs shrink-0 flex items-center justify-center">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={logoUrl}
                 alt={websiteName}
-                width={36}
-                height={36}
+                onError={() => setLogoError(true)}
                 className="w-full h-full object-contain rounded-xl"
               />
             </div>
