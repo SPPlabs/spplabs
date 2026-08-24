@@ -213,11 +213,11 @@ export async function POST(request: NextRequest): Promise<Response> {
         const cookieStore = await cookies();
         const sessionToken = cookieStore.get("spp_session")?.value;
         if (sessionToken) {
-          const session = await verifyJWT(sessionToken);
+          const session = (await verifyJWT(sessionToken)) as Record<string, any> | null;
           if (session) {
             if (
               session.role === "ADMIN" ||
-              session.domain?.toLowerCase() === website.domain.toLowerCase() ||
+              (typeof session.domain === "string" && session.domain.toLowerCase() === website.domain.toLowerCase()) ||
               session.websiteId === website.id ||
               session.id === website.userId
             ) {
