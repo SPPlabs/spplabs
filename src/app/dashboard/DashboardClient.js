@@ -1031,19 +1031,19 @@ export default function DashboardClient({
                 <div className="flex items-center gap-2.5 overflow-hidden mr-2">
                   {currentLogoUrl ? (
                     <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 p-0.5 overflow-hidden flex items-center justify-center shrink-0 shadow-2xs">
-                      <img src={currentLogoUrl} alt={accountDisplayName || currentWebsite.displayName} className="w-full h-full object-contain" />
+                      <img src={currentLogoUrl} alt={accountDisplayName || currentWebsite?.displayName || "Empresa"} className="w-full h-full object-contain" />
                     </div>
                   ) : (
                     <div className="w-9 h-9 rounded-xl bg-slate-900 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
-                      {(accountDisplayName || currentWebsite.displayName)?.slice(0, 2).toUpperCase() || "SP"}
+                      {(accountDisplayName || currentWebsite?.displayName)?.slice(0, 2).toUpperCase() || "SP"}
                     </div>
                   )}
                   <div className="overflow-hidden">
-                    <span className="font-bold text-xs text-slate-800 block truncate" title={accountDisplayName || currentWebsite.displayName}>
-                      {accountDisplayName || currentWebsite.displayName}
+                    <span className="font-bold text-xs text-slate-800 block truncate" title={accountDisplayName || currentWebsite?.displayName || "Empresa"}>
+                      {accountDisplayName || currentWebsite?.displayName || "Empresa"}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-mono block truncate" title={currentWebsite.domain}>
-                      {currentWebsite.domain}
+                    <span className="text-[10px] text-slate-500 font-mono block truncate" title={currentWebsite?.domain || ""}>
+                      {currentWebsite?.domain || ""}
                     </span>
                   </div>
                 </div>
@@ -1080,7 +1080,7 @@ export default function DashboardClient({
                 {currentLogoUrl ? (
                   <img src={currentLogoUrl} alt="Logo" className="w-6 h-6 object-contain" />
                 ) : (
-                  <span className="font-bold text-xs text-slate-700">{(accountDisplayName || currentWebsite.displayName)?.slice(0, 2).toUpperCase() || "SP"}</span>
+                  <span className="font-bold text-xs text-slate-700">{(accountDisplayName || currentWebsite?.displayName)?.slice(0, 2).toUpperCase() || "SP"}</span>
                 )}
               </button>
               <button
@@ -1350,19 +1350,19 @@ export default function DashboardClient({
                   <div className="flex items-center gap-2.5 overflow-hidden mr-2">
                     {currentLogoUrl ? (
                       <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 p-0.5 overflow-hidden flex items-center justify-center shrink-0 shadow-2xs">
-                        <img src={currentLogoUrl} alt={accountDisplayName || currentWebsite.displayName} className="w-full h-full object-contain" />
+                        <img src={currentLogoUrl} alt={accountDisplayName || currentWebsite?.displayName || "Empresa"} className="w-full h-full object-contain" />
                       </div>
                     ) : (
                       <div className="w-9 h-9 rounded-xl bg-slate-900 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
-                        {(accountDisplayName || currentWebsite.displayName)?.slice(0, 2).toUpperCase() || "SP"}
+                        {(accountDisplayName || currentWebsite?.displayName)?.slice(0, 2).toUpperCase() || "SP"}
                       </div>
                     )}
                     <div className="overflow-hidden">
-                      <span className="font-bold text-xs text-slate-800 block truncate" title={accountDisplayName || currentWebsite.displayName}>
-                        {accountDisplayName || currentWebsite.displayName}
+                      <span className="font-bold text-xs text-slate-800 block truncate" title={accountDisplayName || currentWebsite?.displayName || "Empresa"}>
+                        {accountDisplayName || currentWebsite?.displayName || "Empresa"}
                       </span>
-                      <span className="text-[10px] text-slate-500 font-mono block truncate" title={currentWebsite.domain}>
-                        {currentWebsite.domain}
+                      <span className="text-[10px] text-slate-500 font-mono block truncate" title={currentWebsite?.domain || ""}>
+                        {currentWebsite?.domain || ""}
                       </span>
                     </div>
                   </div>

@@ -47,6 +47,8 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
     { num: 12, name: "Diciembre" },
   ];
 
+  const yearsList = [2026, 2025, 2024];
+
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const fetchReport = useCallback(() => {
@@ -163,7 +165,7 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
   return (
     <div className="space-y-8 w-full max-w-7xl mx-auto print:p-0 print:m-0 print:max-w-none animate-fade-in">
       {/* Printable Header styling standard */}
-      <style jsx global>{`
+      <style>{`
         @media print {
           body {
             background-color: #ffffff !important;
