@@ -1,11 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import {
+  ClipboardIcon,
+  ClipboardCheckIcon,
+  DownloadIcon,
+  CalendarDaysIcon,
+} from "@/components/dashboard/DashboardIcons";
+import {
+  copyTextToClipboard,
+  formatBookingToText,
+  formatBookingsListToText,
+  exportBookingsToCsv,
+  exportBookingIcsFile,
+  exportCalendarIcsFile,
+} from "@/lib/exportUtils";
 
-export default function BookingsCalendar({ bookings, lang, onAccept, onReject, onDelete, t, currentWebsiteDomain, router }) {
+export default function BookingsCalendar({ bookings = [], lang = "es", onAccept, onReject, onDelete, t = {}, currentWebsiteDomain, router }) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDayBookings, setSelectedDayBookings] = useState([]);
   const [selectedDateStr, setSelectedDateStr] = useState("");
+  const [copiedId, setCopiedId] = useState(null);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [formTime, setFormTime] = useState("09:00");
@@ -75,11 +89,14 @@ export default function BookingsCalendar({ bookings, lang, onAccept, onReject, o
     bookingsMap[dateStr].push(b);
   });
 
-  useEffect(() => {
-    if (selectedDateStr) {
-      setSelectedDayBookings(bookingsMap[selectedDateStr] || []);
-    }
-  }, [bookings, selectedDateStr]);
+  // Filter bookings belonging to the currently viewed month
+  const currentMonthBookings = bookings.filter(b => {
+    const d = new Date(b.date);
+    return d.getFullYear() === year && d.getMonth() === month;
+  });
+
+  // Compute selected day bookings directly from bookingsMap
+  const selectedDayBookings = selectedDateStr ? (bookingsMap[selectedDateStr] || []) : [];
 
   const monthsEs = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
   const monthsEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -95,7 +112,45 @@ export default function BookingsCalendar({ bookings, lang, onAccept, onReject, o
   const handleDayClick = (day) => {
     const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     setSelectedDateStr(formattedDate);
-    setSelectedDayBookings(bookingsMap[formattedDate] || []);
+  };
+
+  // Copy single booking to clipboard
+  const handleCopySingleBooking = async (b) => {
+    const text = formatBookingToText(b, lang);
+    const ok = await copyTextToClipboard(text);
+    if (ok) {
+      setCopiedId(b.id);
+      setTimeout(() => setCopiedId(null), 2500);
+    }
+  };
+
+  // Export single booking as .ics file
+  const handleExportSingleBookingIcs = (b) => {
+    exportBookingIcsFile(b, currentWebsiteDomain || "SPP Labs");
+  };
+
+  // Copy month bookings
+  const handleCopyMonthBookings = async () => {
+    const listToCopy = currentMonthBookings.length > 0 ? currentMonthBookings : bookings;
+    const title = `${monthLabel} ${year}`;
+    const text = formatBookingsListToText(listToCopy, lang, title);
+    const ok = await copyTextToClipboard(text);
+    if (ok) {
+      setCopiedId("month-bookings");
+      setTimeout(() => setCopiedId(null), 2500);
+    }
+  };
+
+  // Export month or all bookings to .ics
+  const handleExportMonthIcs = () => {
+    const listToExport = currentMonthBookings.length > 0 ? currentMonthBookings : bookings;
+    exportCalendarIcsFile(listToExport, currentWebsiteDomain || "SPP Labs", `calendario_${monthLabel.toLowerCase()}_${year}`);
+  };
+
+  // Export month or all bookings to CSV
+  const handleExportMonthCsv = () => {
+    const listToExport = currentMonthBookings.length > 0 ? currentMonthBookings : bookings;
+    exportBookingsToCsv(listToExport, currentWebsiteDomain || "spplabs", `${monthLabel.toLowerCase()}_${year}`);
   };
 
   const weekdayHeaders = lang === "es" 
@@ -104,22 +159,82 @@ export default function BookingsCalendar({ bookings, lang, onAccept, onReject, o
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm lg:col-span-7 w-full">
-        <div className="flex items-center justify-between mb-6">
-          <h4 className="font-extrabold text-lg text-slate-900">{monthLabel} {year}</h4>
-          <div className="flex gap-2">
-            <button
-              onClick={handlePrevMonth}
-              className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl transition-all cursor-pointer text-sm font-bold"
-            >
-              &larr;
-            </button>
-            <button
-              onClick={handleNextMonth}
-              className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl transition-all cursor-pointer text-sm font-bold"
-            >
-              &rarr;
-            </button>
+      {/* Calendar Left Main Grid */}
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm lg:col-span-7 w-full space-y-6">
+        {/* Calendar Header with Navigation and Export Actions */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div>
+            <h4 className="font-extrabold text-lg text-slate-900 flex items-center gap-2">
+              <CalendarDaysIcon className="w-5 h-5 text-emerald-600" />
+              <span>{monthLabel} {year}</span>
+            </h4>
+            <span className="text-xs text-slate-400 font-mono">
+              {currentMonthBookings.length} {lang === "es" ? "citas este mes" : "bookings this month"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            {bookings.length > 0 && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleCopyMonthBookings}
+                  className="px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                  title={lang === "es" ? "Copiar citas del mes al portapapeles" : "Copy month bookings to clipboard"}
+                >
+                  {copiedId === "month-bookings" ? (
+                    <>
+                      <ClipboardCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-600">{lang === "es" ? "¡Copiado!" : "Copied!"}</span>
+                    </>
+                  ) : (
+                    <>
+                      <ClipboardIcon className="w-3.5 h-3.5 text-slate-500" />
+                      <span>{lang === "es" ? "Copiar Citas" : "Copy"}</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportMonthIcs}
+                  className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                  title={lang === "es" ? "Exportar a formato iCal (.ics) para Google/Apple Calendar" : "Export to iCal (.ics) for Google/Apple Calendar"}
+                >
+                  <DownloadIcon className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>.ics</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportMonthCsv}
+                  className="px-2.5 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                  title={lang === "es" ? "Exportar en formato CSV / Excel" : "Export as CSV / Excel"}
+                >
+                  <DownloadIcon className="w-3.5 h-3.5" />
+                  <span>CSV</span>
+                </button>
+              </>
+            )}
+
+            <div className="flex gap-1 ml-1">
+              <button
+                type="button"
+                onClick={handlePrevMonth}
+                className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl transition-all cursor-pointer text-sm font-bold"
+                aria-label="Mes anterior"
+              >
+                &larr;
+              </button>
+              <button
+                type="button"
+                onClick={handleNextMonth}
+                className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl transition-all cursor-pointer text-sm font-bold"
+                aria-label="Mes siguiente"
+              >
+                &rarr;
+              </button>
+            </div>
           </div>
         </div>
 
@@ -184,6 +299,7 @@ export default function BookingsCalendar({ bookings, lang, onAccept, onReject, o
         </div>
       </div>
 
+      {/* Selected Day Details Panel */}
       <div className="lg:col-span-5 space-y-4 w-full">
         <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm min-h-[300px] w-full">
           <h4 className="font-extrabold text-base text-slate-900 mb-4 border-b border-slate-100 pb-3 flex justify-between items-center">
@@ -208,51 +324,97 @@ export default function BookingsCalendar({ bookings, lang, onAccept, onReject, o
               {lang === "es" ? "No hay reservas programadas para este día." : "No bookings scheduled for this day."}
             </p>
           ) : (
-            <div className="space-y-4 max-h-[350px] overflow-y-auto pr-1">
+            <div className="space-y-4 max-h-[380px] overflow-y-auto pr-1">
               {selectedDayBookings.map((b) => {
                 let statusBadge = "bg-amber-50 border-amber-200 text-amber-700";
                 if (b.status === "CONFIRMED") statusBadge = "bg-emerald-50 border-emerald-200 text-emerald-700";
                 if (b.status === "CANCELLED") statusBadge = "bg-rose-50 border-rose-200 text-rose-700";
 
                 return (
-                  <div key={b.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                  <div key={b.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 shadow-2xs">
                     <div className="flex justify-between items-start">
                       <div>
                         <span className="font-bold text-slate-950 block">{b.name}</span>
-                        <span className="text-xs text-slate-400 font-mono">{b.time}</span>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-slate-500 font-mono font-bold">{b.time}</span>
+                          {b.phone && (
+                            <span className="text-[11px] text-slate-400 font-mono">· {b.phone}</span>
+                          )}
+                        </div>
+                        {b.email && (
+                          <span className="text-[11px] text-blue-600 block truncate max-w-[200px]">{b.email}</span>
+                        )}
                       </div>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusBadge}`}>
                         {b.status}
                       </span>
                     </div>
 
-                    <p className="text-xs text-slate-600 bg-white p-2 border border-slate-200 rounded-lg italic">
-                      "{b.message || "Sin comentarios."}"
+                    <p className="text-xs text-slate-600 bg-white p-2.5 border border-slate-200/80 rounded-xl italic leading-relaxed">
+                      {`"${b.message || "Sin comentarios."}"`}
                     </p>
 
-                    <div className="flex gap-2 pt-2 border-t border-slate-200/50">
-                      {b.status === "PENDING" && (
-                        <>
-                          <button
-                            onClick={() => onAccept(b.id, "CONFIRMED")}
-                            className="bg-brand-green hover:bg-brand-green-dark text-white font-bold text-[10px] px-2.5 py-1 rounded cursor-pointer"
-                          >
-                            {t.clientesAccept}
-                          </button>
-                          <button
-                            onClick={() => onReject(b.id, "CANCELLED")}
-                            className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10px] px-2.5 py-1 rounded cursor-pointer"
-                          >
-                            {t.clientesReject}
-                          </button>
-                        </>
-                      )}
-                      <button
-                        onClick={() => onDelete(b.id)}
-                        className="ml-auto text-red-650 hover:bg-red-50 font-semibold text-[10px] px-2.5 py-1 rounded border border-red-100"
-                      >
-                        {t.clientesDelete}
-                      </button>
+                    {/* Booking Actions Row: Copy, Export .ics, Status buttons & Delete */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-200/50">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleCopySingleBooking(b)}
+                          className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                          title={lang === "es" ? "Copiar detalles de la cita al portapapeles" : "Copy booking details"}
+                        >
+                          {copiedId === b.id ? (
+                            <>
+                              <ClipboardCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
+                              <span className="text-emerald-600 font-black">{lang === "es" ? "¡Copiado!" : "Copied!"}</span>
+                            </>
+                          ) : (
+                            <>
+                              <ClipboardIcon className="w-3.5 h-3.5 text-slate-500" />
+                              <span>{lang === "es" ? "Copiar" : "Copy"}</span>
+                            </>
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleExportSingleBookingIcs(b)}
+                          className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                          title={lang === "es" ? "Descargar evento .ics para calendario" : "Download .ics event"}
+                        >
+                          <DownloadIcon className="w-3.5 h-3.5 text-slate-500" />
+                          <span>.ics</span>
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 ml-auto">
+                        {b.status === "PENDING" && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => onAccept(b.id, "CONFIRMED")}
+                              className="bg-brand-green hover:bg-brand-green-dark text-white font-bold text-[10px] px-2.5 py-1 rounded-lg cursor-pointer transition-all"
+                            >
+                              {t.clientesAccept || "Aceptar"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => onReject(b.id, "CANCELLED")}
+                              className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg cursor-pointer transition-all"
+                            >
+                              {t.clientesReject || "Rechazar"}
+                            </button>
+                          </>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => onDelete(b.id)}
+                          className="text-red-650 hover:bg-red-50 font-semibold text-[10px] px-2 py-1 rounded-lg border border-red-100 transition-all cursor-pointer"
+                          title={t.clientesDelete || "Eliminar"}
+                        >
+                          {t.clientesDelete || "Eliminar"}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -270,8 +432,9 @@ export default function BookingsCalendar({ bookings, lang, onAccept, onReject, o
                 {lang === "es" ? "Nueva Cita:" : "New Event:"} {selectedDateStr}
               </h5>
               <button
+                type="button"
                 onClick={() => setShowAddModal(false)}
-                className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-705 cursor-pointer"
+                className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-700 cursor-pointer"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

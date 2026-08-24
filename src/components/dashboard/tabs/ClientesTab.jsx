@@ -1,7 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import BookingsCalendar from "@/components/dashboard/BookingsCalendar";
-import { MailIcon, CalendarIcon } from "@/components/dashboard/DashboardIcons";
+import { MailIcon, CalendarIcon, ClipboardIcon, ClipboardCheckIcon, DownloadIcon } from "@/components/dashboard/DashboardIcons";
+import {
+  copyTextToClipboard,
+  formatContactToText,
+  formatContactsListToText,
+  exportContactsToCsv,
+} from "@/lib/exportUtils";
 
 export default function ClientesTab({
   t,
@@ -14,11 +21,35 @@ export default function ClientesTab({
   currentWebsite,
   router,
 }) {
+  const [copiedId, setCopiedId] = useState(null);
+
+  const handleCopySingleContact = async (form) => {
+    const text = formatContactToText(form, lang);
+    const ok = await copyTextToClipboard(text);
+    if (ok) {
+      setCopiedId(form.id);
+      setTimeout(() => setCopiedId(null), 2500);
+    }
+  };
+
+  const handleCopyAllContacts = async () => {
+    const text = formatContactsListToText(contactForms, lang, currentWebsite?.domain);
+    const ok = await copyTextToClipboard(text);
+    if (ok) {
+      setCopiedId("all-contacts");
+      setTimeout(() => setCopiedId(null), 2500);
+    }
+  };
+
+  const handleExportContactsCsv = () => {
+    exportContactsToCsv(contactForms, currentWebsite?.domain || "empresa");
+  };
+
   return (
     <div className="space-y-10 animate-fade-in w-full max-w-full">
       {/* Contact Submissions Section */}
       <div>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 pb-3 border-b border-slate-200/80">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-3 border-b border-slate-200/80">
           <div>
             <h3 className="text-xl font-black text-slate-950 flex items-center gap-2">
               <span className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -28,9 +59,45 @@ export default function ClientesTab({
             </h3>
             <p className="text-xs text-slate-500 font-medium mt-0.5">{t.clientesSubtitle}</p>
           </div>
-          <span className="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-full font-bold border border-slate-200 font-mono self-start sm:self-auto">
-            {contactForms.length} {lang === "es" ? "mensajes" : "messages"}
-          </span>
+
+          <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+            <span className="bg-slate-100 text-slate-700 text-xs px-3 py-1.5 rounded-xl font-bold border border-slate-200 font-mono">
+              {contactForms.length} {lang === "es" ? "mensajes" : "messages"}
+            </span>
+
+            {contactForms.length > 0 && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleCopyAllContacts}
+                  className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                  title={lang === "es" ? "Copiar todos los mensajes al portapapeles" : "Copy all messages to clipboard"}
+                >
+                  {copiedId === "all-contacts" ? (
+                    <>
+                      <ClipboardCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-600">{lang === "es" ? "¡Copiado!" : "Copied!"}</span>
+                    </>
+                  ) : (
+                    <>
+                      <ClipboardIcon className="w-3.5 h-3.5 text-slate-500" />
+                      <span>{lang === "es" ? "Copiar Todo" : "Copy All"}</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportContactsCsv}
+                  className="px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                  title={lang === "es" ? "Descargar en formato CSV / Excel" : "Download as CSV / Excel"}
+                >
+                  <DownloadIcon className="w-3.5 h-3.5" />
+                  <span>{lang === "es" ? "Exportar CSV" : "Export CSV"}</span>
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         {contactForms.length === 0 ? (
@@ -80,7 +147,26 @@ export default function ClientesTab({
                 </div>
 
                 {/* Footer Action Bar */}
-                <div className="flex justify-end pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between pt-3 border-t border-slate-100 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleCopySingleContact(form)}
+                    className="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                    title={lang === "es" ? "Copiar datos del contacto al portapapeles" : "Copy contact details to clipboard"}
+                  >
+                    {copiedId === form.id ? (
+                      <>
+                        <ClipboardCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-emerald-600 font-black">{lang === "es" ? "¡Copiado!" : "Copied!"}</span>
+                      </>
+                    ) : (
+                      <>
+                        <ClipboardIcon className="w-3.5 h-3.5 text-slate-500" />
+                        <span>{lang === "es" ? "Copiar Datos" : "Copy"}</span>
+                      </>
+                    )}
+                  </button>
+
                   <button
                     onClick={() => handleDeleteContact(form.id)}
                     className="px-3 py-1.5 border border-slate-200 hover:border-red-200 hover:bg-red-50 text-slate-500 hover:text-red-600 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"

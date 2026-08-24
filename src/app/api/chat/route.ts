@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
+import { cookies } from "next/headers";
 import { prisma, withRLS } from "@/lib/prisma";
 import { verifyApiKey } from "@/lib/crypto";
+import { verifyJWT } from "@/lib/jwt";
 import { retrieveContext, buildContext, generateChatCompletion, ragPromptTemplate } from "@/core/services/ai";
 import { logger } from "@/core/logger";
 
@@ -147,7 +149,8 @@ export async function POST(request: NextRequest): Promise<Response> {
     return jsonResponse({ error: "Invalid JSON payload" }, 400, corsHeaders);
   }
 
-  const { website_id: clientWebsiteId, message } = body;
+  const { website_id: clientWebsiteId, message, preview_mode } = body;
+  const isPreviewMode = Boolean(preview_mode || body.previewMode || body.is_dashboard_test);
 
   // 2. Validate Inputs
   if (!clientWebsiteId || typeof clientWebsiteId !== "string" || clientWebsiteId.trim() === "") {
@@ -162,19 +165,8 @@ export async function POST(request: NextRequest): Promise<Response> {
     return jsonResponse({ error: "Bad Request", message: "El mensaje excede el límite máximo de 150 caracteres." }, 400, corsHeaders);
   }
 
-  // 3. Validate and Extract Bearer API Key from Authorization Header
-  const authHeader = request.headers.get("authorization") || "";
-  if (!authHeader.startsWith("Bearer ")) {
-    return jsonResponse({ error: "Unauthorized", message: "API key is required in Authorization header." }, 401, corsHeaders);
-  }
-
-  const apiKey = authHeader.substring(7).trim();
-  if (!apiKey) {
-    return jsonResponse({ error: "Unauthorized", message: "API key is required in Authorization header." }, 401, corsHeaders);
-  }
-
   try {
-    // 4. Look up Website by Domain (or UUID if provided)
+    // 3. Look up Website by Domain (or UUID if provided)
     const targetDomain = clientWebsiteId.trim().toLowerCase();
     const website = await prisma.website.findFirst({
       where: {
@@ -192,40 +184,71 @@ export async function POST(request: NextRequest): Promise<Response> {
       return jsonResponse({ error: "Not Found", message: "website/account not found." }, 404, corsHeaders);
     }
 
-    // 5. Verify the API Key against the retrieved website's keys
     let isAuthenticated = false;
+    let isDashboardSession = false;
     let authenticatedKeyRecord: any = null;
 
-    for (const keyRecord of website.apiKeys) {
-      // Skip expired keys
-      if (keyRecord.expiresAt && new Date(keyRecord.expiresAt) < new Date()) {
-        continue;
-      }
-
-      const isMatch = await verifyApiKey(apiKey, keyRecord.keyHash);
-      if (isMatch) {
-        isAuthenticated = true;
-        authenticatedKeyRecord = keyRecord;
-        break;
+    // 4. Check Bearer API Key from Authorization Header (Public website widgets)
+    const authHeader = request.headers.get("authorization") || "";
+    if (authHeader.startsWith("Bearer ")) {
+      const apiKey = authHeader.substring(7).trim();
+      if (apiKey) {
+        for (const keyRecord of website.apiKeys) {
+          if (keyRecord.expiresAt && new Date(keyRecord.expiresAt) < new Date()) {
+            continue;
+          }
+          const isMatch = await verifyApiKey(apiKey, keyRecord.keyHash);
+          if (isMatch) {
+            isAuthenticated = true;
+            authenticatedKeyRecord = keyRecord;
+            break;
+          }
+        }
       }
     }
 
-    // 6. If authentication fails, reject immediately to prevent DoS/timing attacks.
+    // 5. Check Dashboard Session Cookie (Dashboard internal testing & preview)
     if (!isAuthenticated) {
-      return jsonResponse({ error: "Unauthorized", message: "invalid API key." }, 401, corsHeaders);
+      try {
+        const cookieStore = await cookies();
+        const sessionToken = cookieStore.get("spp_session")?.value;
+        if (sessionToken) {
+          const session = await verifyJWT(sessionToken);
+          if (session) {
+            if (
+              session.role === "ADMIN" ||
+              session.domain?.toLowerCase() === website.domain.toLowerCase() ||
+              session.websiteId === website.id ||
+              session.id === website.userId
+            ) {
+              isAuthenticated = true;
+              isDashboardSession = true;
+            }
+          }
+        }
+      } catch (sessionErr) {
+        logger.warn("Dashboard session auth check error in /api/chat:", sessionErr);
+      }
     }
 
-    // Update API Key lastUsedAt asynchronously
-    const db = withRLS(website.id);
-    db.websiteApiKey
-      .update({
-        where: { id: authenticatedKeyRecord.id },
-        data: { lastUsedAt: new Date() },
-      })
-      .catch((e: unknown) => logger.error("Failed to update API key lastUsedAt:", e));
+    // 6. If authentication fails, reject immediately
+    if (!isAuthenticated) {
+      return jsonResponse({ error: "Unauthorized", message: "API key or active dashboard session is required." }, 401, corsHeaders);
+    }
 
-    // 7. CORS origin checks (after verification of the credentials)
-    if (origin) {
+    // Update API Key lastUsedAt asynchronously if Bearer key was used
+    if (authenticatedKeyRecord) {
+      const db = withRLS(website.id);
+      db.websiteApiKey
+        .update({
+          where: { id: authenticatedKeyRecord.id },
+          data: { lastUsedAt: new Date() },
+        })
+        .catch((e: unknown) => logger.error("Failed to update API key lastUsedAt:", e));
+    }
+
+    // 7. CORS origin checks (only enforced for external origin requests)
+    if (origin && !isDashboardSession) {
       let isOriginAllowed = false;
       try {
         const originUrl = new URL(origin);
@@ -254,82 +277,81 @@ export async function POST(request: NextRequest): Promise<Response> {
       };
     }
 
-
-    // TODO: [Future Rate Limiting Insertion Point]
-    // Insert rate limiting execution here utilizing the authenticated website.id.
-    // Order: Authentication -> Rate Limiting -> RAG Retrieval -> LLM Generation -> Token Tracking.
     // 8. RAG context retrieval (strictly isolated by the validated website.id)
     const rawContexts = await retrieveContext(website.id, message);
     const context = buildContext(rawContexts);
 
-    // Record Visitor Message into PostgreSQL using withRLS
-    let conversationId = body.conversation_id || body.conversationId;
-    const visitorId = body.visitor_id || body.visitorId || (globalThis.crypto?.randomUUID ? `visitor_${globalThis.crypto.randomUUID()}` : `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
+    // Record Visitor Message into PostgreSQL (skipped for preview mode to avoid polluting visitor transcripts & reports)
+    const shouldRecordConversation = !isPreviewMode;
+    let activeConversation = null;
     const rlsDb = withRLS(website.id);
 
-    let activeConversation = null;
-    
-    // 1. Try finding conversation by conversationId if provided
-    if (conversationId && isValidUuid(conversationId)) {
-      try {
-        activeConversation = await rlsDb.chatConversation.findUnique({
-          where: { id: conversationId },
-        });
-      } catch (e: unknown) {
-        logger.warn("Conversation lookup warning:", e);
+    if (shouldRecordConversation) {
+      let conversationId = body.conversation_id || body.conversationId;
+      const visitorId = body.visitor_id || body.visitorId || (globalThis.crypto?.randomUUID ? `visitor_${globalThis.crypto.randomUUID()}` : `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
+
+      // 1. Try finding conversation by conversationId if provided
+      if (conversationId && isValidUuid(conversationId)) {
+        try {
+          activeConversation = await rlsDb.chatConversation.findUnique({
+            where: { id: conversationId },
+          });
+        } catch (e: unknown) {
+          logger.warn("Conversation lookup warning:", e);
+        }
       }
-    }
 
-    // 2. Fallback: Find existing active conversation for this visitorId & websiteId
-    if (!activeConversation && visitorId) {
-      try {
-        activeConversation = await rlsDb.chatConversation.findFirst({
-          where: {
-            websiteId: website.id,
-            visitorId: visitorId,
-            status: "ACTIVE",
-          },
-          orderBy: { lastMessageAt: "desc" },
-        });
-      } catch (e: unknown) {
-        logger.warn("Visitor active conversation lookup warning:", e);
+      // 2. Fallback: Find existing active conversation for this visitorId & websiteId
+      if (!activeConversation && visitorId) {
+        try {
+          activeConversation = await rlsDb.chatConversation.findFirst({
+            where: {
+              websiteId: website.id,
+              visitorId: visitorId,
+              status: "ACTIVE",
+            },
+            orderBy: { lastMessageAt: "desc" },
+          });
+        } catch (e: unknown) {
+          logger.warn("Visitor active conversation lookup warning:", e);
+        }
       }
-    }
 
-    // 3. Create a new conversation thread if none exists
-    if (!activeConversation) {
-      try {
-        activeConversation = await rlsDb.chatConversation.create({
-          data: {
-            websiteId: website.id,
-            visitorId: visitorId,
-            visitorName: body.visitor_name || body.visitorName || null,
-            visitorEmail: body.visitor_email || body.visitorEmail || null,
-            status: "ACTIVE",
-          },
-        });
+      // 3. Create a new conversation thread if none exists
+      if (!activeConversation) {
+        try {
+          activeConversation = await rlsDb.chatConversation.create({
+            data: {
+              websiteId: website.id,
+              visitorId: visitorId,
+              visitorName: body.visitor_name || body.visitorName || null,
+              visitorEmail: body.visitor_email || body.visitorEmail || null,
+              status: "ACTIVE",
+            },
+          });
 
-        // Increment monthly chat conversations metric asynchronously
-        import("@/lib/monthlyMetrics").then(({ incrementMonthlyChatConversations }) => {
-          incrementMonthlyChatConversations(website.id, new Date());
-        }).catch(e => logger.error("Failed to increment monthly chat metrics:", e));
-      } catch (e: unknown) {
-        logger.error("Failed to create ChatConversation:", e);
+          // Increment monthly chat conversations metric asynchronously
+          import("@/lib/monthlyMetrics").then(({ incrementMonthlyChatConversations }) => {
+            incrementMonthlyChatConversations(website.id, new Date());
+          }).catch(e => logger.error("Failed to increment monthly chat metrics:", e));
+        } catch (e: unknown) {
+          logger.error("Failed to create ChatConversation:", e);
+        }
       }
-    }
 
-    if (activeConversation) {
-      try {
-        await rlsDb.chatMessage.create({
-          data: {
-            conversationId: activeConversation.id,
-            sender: "VISITOR",
-            content: message.trim(),
-            tokens: 0,
-          },
-        });
-      } catch (e) {
-        logger.error("Failed to save VISITOR message:", e);
+      if (activeConversation) {
+        try {
+          await rlsDb.chatMessage.create({
+            data: {
+              conversationId: activeConversation.id,
+              sender: "VISITOR",
+              content: message.trim(),
+              tokens: 0,
+            },
+          });
+        } catch (e) {
+          logger.error("Failed to save VISITOR message:", e);
+        }
       }
     }
 

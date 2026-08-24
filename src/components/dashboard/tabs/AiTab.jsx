@@ -1,6 +1,7 @@
 "use client";
 
 import { UserIcon, ChatBubbleIcon, CloseIcon } from "@/components/dashboard/DashboardIcons";
+import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 
 export default function AiTab({
   t,
@@ -376,7 +377,7 @@ export default function AiTab({
                       </span>
                     </div>
                     <p className="text-xs text-slate-600 truncate font-medium">
-                      "{conv.firstMessageSnippet}"
+                      {`"${conv.firstMessageSnippet}"`}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 self-end sm:self-center pt-1 sm:pt-0">
@@ -564,6 +565,31 @@ export default function AiTab({
             </button>
           </div>
         </form>
+
+      {/* Live Chatbot Preview / Simulator Section */}
+      <div className="pt-6 border-t border-slate-200/80 space-y-4">
+        <div>
+          <h4 className="text-lg font-black text-slate-950 flex items-center gap-2">
+            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a.596.596 0 0 1-.744-.555c0-.125.034-.249.098-.35a6.046 6.046 0 0 0 .865-2.222A8.134 8.134 0 0 1 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+            </svg>
+            <span>{lang === "es" ? "Simulador del Chatbot en Vivo" : "Live Chatbot Simulator"}</span>
+          </h4>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            {lang === "es"
+              ? "Prueba e interactúa con el mismo chatbot que verán tus visitantes en tu página web con la base de conocimiento activa."
+              : "Test and interact with the same chatbot your visitors will see on your website with the active knowledge base."}
+          </p>
+        </div>
+
+        <DashboardChatbot
+          key={currentWebsite?.domain || "default"}
+          currentWebsite={currentWebsite}
+          lang={lang}
+          t={t}
+          chatbotKnowledge={chatbotKnowledge}
+        />
+      </div>
     </div>
   );
 }

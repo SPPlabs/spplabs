@@ -1,6 +1,21 @@
 "use client";
 
-import { CalendarIcon, MailIcon, MegaphoneIcon, BotIcon, ClockIcon, UserIcon } from "@/components/dashboard/DashboardIcons";
+import { useState, useEffect } from "react";
+import {
+  CalendarIcon,
+  MailIcon,
+  MegaphoneIcon,
+  BotIcon,
+  ClockIcon,
+  UserIcon,
+  ClipboardIcon,
+  ClipboardCheckIcon,
+} from "@/components/dashboard/DashboardIcons";
+import {
+  copyTextToClipboard,
+  formatContactToText,
+  formatBookingToText,
+} from "@/lib/exportUtils";
 
 export default function OverviewTab({
   currentWebsite,
@@ -12,12 +27,28 @@ export default function OverviewTab({
   announcementsList,
   setActiveTab,
 }) {
-  const pendingBookingsCount = bookings.filter(b => b.status === "PENDING").length;
-  const recentContactsCount = contactForms.filter(c => {
-    const created = new Date(c.createdAt).getTime();
-    return Date.now() - created < 48 * 60 * 60 * 1000;
-  }).length;
+  const [copiedId, setCopiedId] = useState(null);
+  const pendingBookingsCount = bookings.filter((b) => b.status === "PENDING").length;
+  const recentContactsCount = contactForms.length;
   const announcementsCount = announcementsList.length;
+
+  const handleCopyContact = async (form) => {
+    const text = formatContactToText(form, lang);
+    const ok = await copyTextToClipboard(text);
+    if (ok) {
+      setCopiedId(form.id);
+      setTimeout(() => setCopiedId(null), 2500);
+    }
+  };
+
+  const handleCopyBooking = async (b) => {
+    const text = formatBookingToText(b, lang);
+    const ok = await copyTextToClipboard(text);
+    if (ok) {
+      setCopiedId(b.id);
+      setTimeout(() => setCopiedId(null), 2500);
+    }
+  };
 
   return (
     <div className="space-y-8 animate-fade-in w-full max-w-full">
@@ -155,12 +186,26 @@ export default function OverviewTab({
             ) : (
               <div className="divide-y divide-slate-100">
                 {contactForms.slice(0, 3).map((form) => (
-                  <div key={form.id} className="py-3.5 first:pt-0 last:pb-0">
+                  <div key={form.id} className="py-3.5 first:pt-0 last:pb-0 group">
                     <div className="flex justify-between items-start mb-1">
                       <span className="font-bold text-xs text-slate-900">{form.name}</span>
-                      <span className="text-[10px] text-slate-400 font-mono">
-                        {new Date(form.createdAt).toLocaleDateString()}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          {new Date(form.createdAt).toLocaleDateString()}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyContact(form)}
+                          className="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-700 rounded transition-colors cursor-pointer"
+                          title={lang === "es" ? "Copiar datos del contacto" : "Copy contact details"}
+                        >
+                          {copiedId === form.id ? (
+                            <ClipboardCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
+                          ) : (
+                            <ClipboardIcon className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     <span className="text-blue-600 block text-[11px] font-semibold truncate mb-1.5">{form.email}</span>
                     <p className="text-slate-600 text-xs line-clamp-2 pl-2.5 border-l-2 border-slate-200">
@@ -205,12 +250,26 @@ export default function OverviewTab({
                     badgeColor = "bg-rose-50 border-rose-200 text-rose-700";
                   }
                   return (
-                    <div key={booking.id} className="py-3.5 first:pt-0 last:pb-0">
+                    <div key={booking.id} className="py-3.5 first:pt-0 last:pb-0 group">
                       <div className="flex justify-between items-start mb-1.5">
                         <span className="font-bold text-xs text-slate-900">{booking.name}</span>
-                        <span className={`font-bold text-[9px] px-2 py-0.5 rounded-md border ${badgeColor}`}>
-                          {booking.status === "CONFIRMED" ? t.clientesAccept : booking.status === "CANCELLED" ? t.clientesReject : "PENDIENTE"}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`font-bold text-[9px] px-2 py-0.5 rounded-md border ${badgeColor}`}>
+                            {booking.status === "CONFIRMED" ? t.clientesAccept : booking.status === "CANCELLED" ? t.clientesReject : "PENDIENTE"}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyBooking(booking)}
+                            className="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-700 rounded transition-colors cursor-pointer"
+                            title={lang === "es" ? "Copiar detalles de la cita" : "Copy booking details"}
+                          >
+                            {copiedId === booking.id ? (
+                              <ClipboardCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
+                            ) : (
+                              <ClipboardIcon className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
                       </div>
                       <div className="flex items-center gap-3 text-[11px] font-mono text-slate-500 mb-1">
                         <span className="inline-flex items-center gap-1">
@@ -224,7 +283,7 @@ export default function OverviewTab({
                       </div>
                       {booking.message && (
                         <p className="text-slate-500 text-xs line-clamp-1 italic pl-2.5 border-l-2 border-slate-200">
-                          "{booking.message}"
+                          {`"${booking.message}"`}
                         </p>
                       )}
                     </div>
@@ -280,7 +339,7 @@ export default function OverviewTab({
                     </span>
                     {conv.firstMessageSnippet && (
                       <p className="text-slate-600 text-xs line-clamp-2 pl-2.5 border-l-2 border-slate-200 italic">
-                        "{conv.firstMessageSnippet}"
+                        {`"${conv.firstMessageSnippet}"`}
                       </p>
                     )}
                   </div>

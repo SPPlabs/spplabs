@@ -25,7 +25,7 @@ function renderHeader(companyName, clientDomain, brandColor = "#0284c7", customL
       : `https://${clientDomain || "spplabs.es"}${rawUrl.startsWith("/") ? "" : "/"}${rawUrl}`;
 
     logoImgHtml = `
-      <img src="${absoluteLogoUrl}" alt="${companyName || "Logo"}" style="max-height: 42px; max-width: 140px; width: auto; height: auto; object-fit: contain; display: block; margin-bottom: 8px;" />
+      <img src="${absoluteLogoUrl}" alt="${companyName || "Logo"}" style="max-height: 42px; max-width: 140px; width: auto; height: auto; object-fit: contain; display: block; margin-bottom: 8px; border-radius: 8px;" />
     `;
   }
 
