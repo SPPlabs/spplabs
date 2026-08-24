@@ -237,7 +237,15 @@ export async function GET(request) {
     );
 
     // 4. Query PostgreSQL (Prisma) for CRM Data & Aggregated Monthly Metrics
-    const [liveContactFormsCount, liveBookings, liveChatConversationsCount, aiTokenUsage, monthlyMetrics] = await Promise.all([
+    const [
+      liveContactFormsCount,
+      liveBookings,
+      liveChatConversationsCount,
+      aiTokenUsage,
+      monthlyMetrics,
+      liveSentEmailsCount,
+      liveReviewEmailsCount,
+    ] = await Promise.all([
       prisma.contactForm.count({
         where: {
           websiteId: website.id,
@@ -272,6 +280,21 @@ export async function GET(request) {
             year: targetYear,
             month: targetMonth,
           },
+        },
+      }),
+      prisma.scheduledEmail.count({
+        where: {
+          websiteId: website.id,
+          status: "SENT",
+          sentAt: { gte: startDateObj, lte: endDateObj },
+        },
+      }),
+      prisma.scheduledEmail.count({
+        where: {
+          websiteId: website.id,
+          status: "SENT",
+          emailType: "GOOGLE_REVIEW_REQUEST",
+          sentAt: { gte: startDateObj, lte: endDateObj },
         },
       }),
     ]);
@@ -347,9 +370,9 @@ export async function GET(request) {
     const leadConversionRate = uniqueVisitors > 0 ? ((totalLeads / uniqueVisitors) * 100).toFixed(1) : "0.0";
 
     // Fetch previous month CRM stats if comparison is enabled
-    let prevCrm = { contactFormsCount: 0, totalBookings: 0, confirmedBookings: 0, chatConversations: 0 };
+    let prevCrm = { contactFormsCount: 0, totalBookings: 0, confirmedBookings: 0, chatConversations: 0, emailsSent: 0 };
     if (enableCompare) {
-      const [prevLiveForms, prevLiveBookingsList, prevLiveChats, prevMonthly] = await Promise.all([
+      const [prevLiveForms, prevLiveBookingsList, prevLiveChats, prevMonthly, prevLiveEmails] = await Promise.all([
         prisma.contactForm.count({
           where: {
             websiteId: website.id,
@@ -377,6 +400,13 @@ export async function GET(request) {
             },
           },
         }),
+        prisma.scheduledEmail.count({
+          where: {
+            websiteId: website.id,
+            status: "SENT",
+            sentAt: { gte: prevStartDateObj, lte: prevEndDateObj },
+          },
+        }),
       ]);
 
       const prevConfirmedCount = prevLiveBookingsList.filter(b => b.status === "CONFIRMED").length;
@@ -385,6 +415,7 @@ export async function GET(request) {
         totalBookings: Math.max(prevMonthly?.totalBookingsCount || 0, prevLiveBookingsList.length),
         confirmedBookings: Math.max(prevMonthly?.confirmedBookings || 0, prevConfirmedCount),
         chatConversations: Math.max(prevMonthly?.chatConversations || 0, prevLiveChats),
+        emailsSent: prevLiveEmails,
       };
     }
 
@@ -409,6 +440,7 @@ export async function GET(request) {
       bookings_growth: calcGrowth(confirmedBookings, prevCrm.confirmedBookings),
       forms_growth: calcGrowth(contactFormsCount, prevCrm.contactFormsCount),
       chats_growth: calcGrowth(chatConversationsCount, prevCrm.chatConversations),
+      emails_growth: calcGrowth(liveSentEmailsCount, prevCrm.emailsSent),
       prev_visitors: Number(prevStats.visitors || 0),
       prev_unique: Number(prevStats.unique_visitors || 0),
       prev_sessions: Number(prevStats.sessions || 0),
@@ -416,6 +448,7 @@ export async function GET(request) {
       prev_bookings: prevCrm.confirmedBookings,
       prev_forms: prevCrm.contactFormsCount,
       prev_chats: prevCrm.chatConversations,
+      prev_emails: prevCrm.emailsSent,
     } : null;
 
     // 5. Positive ROI AI Insights with PostgreSQL Lazy Caching (Approach A)
@@ -549,6 +582,8 @@ Genera 3 o 4 logros y recomendaciones clave orientadas a DESTACAR LOS BUENOS RES
           off_hours_bookings: offHoursBookings,
           chat_conversations: chatConversationsCount,
           total_tokens: aiTokenUsage ? Number(aiTokenUsage.totalTokens) : 0,
+          emails_sent: liveSentEmailsCount,
+          review_requests_sent: liveReviewEmailsCount,
         },
         comparison: comparisonData,
         dailyTrend: dailyTrend.map(t => ({

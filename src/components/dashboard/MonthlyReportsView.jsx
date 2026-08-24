@@ -12,6 +12,7 @@ import {
   BotIcon,
   SparklesIcon,
   LightbulbIcon,
+  MailIcon,
 } from "@/components/dashboard/DashboardIcons";
 
 export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }) {
@@ -46,34 +47,39 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
     { num: 12, name: "Diciembre" },
   ];
 
-  const yearsList = [2026, 2025, 2024];
-
   useEffect(() => {
-    fetchReport();
-  }, [selectedYear, selectedMonth, enableCompare, currentWebsiteDomain]);
-
-  const fetchReport = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch(
-        `/api/admin/reports/monthly?domain=${encodeURIComponent(
-          currentWebsiteDomain || ""
-        )}&year=${selectedYear}&month=${selectedMonth}&compare=${enableCompare}`
-      );
-      const json = await res.json();
-      if (res.ok && json.success) {
-        setData(json.data || json);
-      } else {
-        setError(json.message || "Error al cargar los datos del informe.");
+    let isCancelled = false;
+    const fetchReport = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetch(
+          `/api/admin/reports/monthly?domain=${encodeURIComponent(
+            currentWebsiteDomain || ""
+          )}&year=${selectedYear}&month=${selectedMonth}&compare=${enableCompare}`
+        );
+        const json = await res.json();
+        if (isCancelled) return;
+        if (res.ok && json.success) {
+          setData(json.data || json);
+        } else {
+          setError(json.message || "Error al cargar los datos del informe.");
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          console.error(err);
+          setError("Error de conexión al cargar el informe.");
+        }
+      } finally {
+        if (!isCancelled) setLoading(false);
       }
-    } catch (err) {
-      console.error(err);
-      setError("Error de conexión al cargar el informe.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchReport();
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedYear, selectedMonth, enableCompare, currentWebsiteDomain]);
 
   const handlePrintPdf = () => {
     window.print();
@@ -95,6 +101,8 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
       ["Citas Confirmadas", data.crm.confirmed_bookings],
       ["Citas Fuera de Horario (24/7)", data.crm.off_hours_bookings],
       ["Chats Asistente IA", data.crm.chat_conversations],
+      ["Correos Automáticos Enviados", data.crm.emails_sent || 0],
+      ["Solicitudes Reseñas Google", data.crm.review_requests_sent || 0],
     ];
 
     let csvContent = "data:text/csv;charset=utf-8," + rows.map((e) => e.join(",")).join("\n");
@@ -346,7 +354,7 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 {/* Metric 1 */}
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5">
                   <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Visitantes Únicos</span>
@@ -396,7 +404,7 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
                 </div>
 
                 {/* Metric 5 */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 col-span-2 sm:col-span-1">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5">
                   <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Sesiones Totales</span>
                   <div className="flex items-baseline gap-2 mt-1">
                     <span className="text-lg font-black text-white">{data.overview.sessions.toLocaleString()}</span>
@@ -406,12 +414,24 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
                   </div>
                   <span className="block text-[10px] text-slate-400 mt-0.5">Ant: {data.comparison.prev_sessions}</span>
                 </div>
+
+                {/* Metric 6 */}
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Emails Enviados</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-lg font-black text-white">{data.crm.emails_sent || 0}</span>
+                    <span className={`text-xs font-black ${(data.comparison.emails_growth || "+0%").startsWith("+") ? "text-emerald-400" : "text-rose-400"}`}>
+                      {data.comparison.emails_growth || "0%"}
+                    </span>
+                  </div>
+                  <span className="block text-[10px] text-slate-400 mt-0.5">Ant: {data.comparison.prev_emails || 0}</span>
+                </div>
               </div>
             </div>
           )}
 
           {/* Section 1: Executive KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
             {/* Card 1: Unique Visitors */}
             <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all">
               <div className="flex items-center justify-between">
@@ -496,6 +516,29 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
               </div>
               <p className="text-[11px] font-extrabold text-slate-500 mt-2">
                 Atención continua a visitantes
+              </p>
+            </div>
+
+            {/* Card 5: Automated Emails & Google Reviews */}
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-wider">Emails & Reseñas</span>
+                <span className="w-8 h-8 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                  <MailIcon className="w-4.5 h-4.5" />
+                </span>
+              </div>
+              <div className="mt-4 flex items-baseline justify-between flex-wrap gap-2">
+                <span className="text-3xl font-black text-slate-900 tracking-tight">{(data.crm.emails_sent || 0).toLocaleString()}</span>
+                {enableCompare && data.comparison ? (
+                  renderComparisonDelta(data.comparison.emails_growth, data.comparison.prev_emails, data.comparison.prev_month_name)
+                ) : (
+                  <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                    {data.crm.review_requests_sent || 0} reseñas
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] font-extrabold text-slate-500 mt-2">
+                {data.crm.review_requests_sent || 0} solicitudes Google Booster
               </p>
             </div>
           </div>

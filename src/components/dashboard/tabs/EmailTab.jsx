@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   generateWelcomeContactHtml,
   generateBookingConfirmationHtml,
@@ -49,8 +49,9 @@ export default function EmailTab({
   
   const [brandColor, setBrandColor] = useState("#0284c7");
 
-  // Email Logs State
+  // Email Logs & Stats State
   const [emailLogs, setEmailLogs] = useState([]);
+  const [emailStats, setEmailStats] = useState(null);
   const [logsLoading, setLogsLoading] = useState(false);
 
   // Test Email State
@@ -61,47 +62,18 @@ export default function EmailTab({
   // Template Preview Active Tab
   const [previewTab, setPreviewTab] = useState("review"); // 'welcome' | 'booking' | 'reminder' | 'review'
 
-  // Fetch email config
-  const fetchConfig = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/admin/email-config?domain=${currentWebsite?.domain}`);
-      const data = await res.json();
-      if (data.success && data.data) {
-        const c = data.data;
-        setSenderName(c.senderName || currentWebsite?.displayName || "");
-        setReplyToEmail(c.replyToEmail || "");
-        setGoogleReviewUrl(c.googleReviewUrl || "");
-        setEnableWelcomeEmail(c.enableWelcomeEmail !== undefined ? c.enableWelcomeEmail : true);
-        setEnableBookingConfirm(c.enableBookingConfirm !== undefined ? c.enableBookingConfirm : true);
-        setEnableBookingReminder(c.enableBookingReminder !== undefined ? c.enableBookingReminder : true);
-        setReminderHoursBefore(c.reminderHoursBefore || 24);
-        
-        // Review Triggers
-        const isBookingReview = c.enableBookingReviewRequest !== undefined ? c.enableBookingReviewRequest : (c.enableReviewRequest !== undefined ? c.enableReviewRequest : true);
-        setEnableBookingReviewRequest(isBookingReview);
-        setBookingReviewDelayHours(c.bookingReviewDelayHours || c.reviewDelayHours || 2);
-        
-        setEnableContactReviewRequest(Boolean(c.enableContactReviewRequest));
-        setContactReviewDelayHours(c.contactReviewDelayHours || 24);
-
-        setBrandColor(c.brandColor || "#0284c7");
-      }
-    } catch (err) {
-      console.error("Fetch email config error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch email logs
+  // Helper to refresh logs & stats
   const fetchLogs = async () => {
+    if (!currentWebsite?.domain) return;
     setLogsLoading(true);
     try {
-      const res = await fetch(`/api/admin/email-logs?domain=${currentWebsite?.domain}`);
+      const res = await fetch(`/api/admin/email-logs?domain=${currentWebsite.domain}`);
       const data = await res.json();
       if (data.success) {
         setEmailLogs(data.data || []);
+        if (data.stats) {
+          setEmailStats(data.stats);
+        }
       }
     } catch (err) {
       console.error("Fetch email logs error:", err);
@@ -111,11 +83,71 @@ export default function EmailTab({
   };
 
   useEffect(() => {
-    if (currentWebsite?.domain) {
-      fetchConfig();
-      fetchLogs();
-    }
-  }, [currentWebsite?.domain]);
+    if (!currentWebsite?.domain) return;
+    let isCancelled = false;
+
+    const loadInitialData = async () => {
+      setLoading(true);
+      setLogsLoading(true);
+      try {
+        const [configRes, logsRes] = await Promise.all([
+          fetch(`/api/admin/email-config?domain=${currentWebsite.domain}`),
+          fetch(`/api/admin/email-logs?domain=${currentWebsite.domain}`),
+        ]);
+
+        if (isCancelled) return;
+
+        const [configData, logsData] = await Promise.all([
+          configRes.json(),
+          logsRes.json(),
+        ]);
+
+        if (isCancelled) return;
+
+        if (configData.success && configData.data) {
+          const c = configData.data;
+          setSenderName(c.senderName || currentWebsite?.displayName || "");
+          setReplyToEmail(c.replyToEmail || "");
+          setGoogleReviewUrl(c.googleReviewUrl || "");
+          setEnableWelcomeEmail(c.enableWelcomeEmail !== undefined ? c.enableWelcomeEmail : true);
+          setEnableBookingConfirm(c.enableBookingConfirm !== undefined ? c.enableBookingConfirm : true);
+          setEnableBookingReminder(c.enableBookingReminder !== undefined ? c.enableBookingReminder : true);
+          setReminderHoursBefore(c.reminderHoursBefore || 24);
+
+          const isBookingReview = c.enableBookingReviewRequest !== undefined ? c.enableBookingReviewRequest : (c.enableReviewRequest !== undefined ? c.enableReviewRequest : true);
+          setEnableBookingReviewRequest(isBookingReview);
+          setBookingReviewDelayHours(c.bookingReviewDelayHours || c.reviewDelayHours || 2);
+
+          setEnableContactReviewRequest(Boolean(c.enableContactReviewRequest));
+          setContactReviewDelayHours(c.contactReviewDelayHours || 24);
+
+          setBrandColor(c.brandColor || "#0284c7");
+        }
+
+        if (logsData.success) {
+          setEmailLogs(logsData.data || []);
+          if (logsData.stats) {
+            setEmailStats(logsData.stats);
+          }
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          console.error("Load email data error:", err);
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+          setLogsLoading(false);
+        }
+      }
+    };
+
+    loadInitialData();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentWebsite?.domain, currentWebsite?.displayName]);
 
   const handleSaveConfig = async (e) => {
     e?.preventDefault();
@@ -811,6 +843,195 @@ export default function EmailTab({
             </table>
           </div>
         )}
+      </div>
+
+      {/* SECTION: EMAIL & GOOGLE REVIEWS ANALYTICS */}
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div>
+            <h3 className="text-xl font-black text-slate-950 flex items-center gap-2">
+              <span className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <MailIcon className="w-4.5 h-4.5" />
+              </span>
+              <span>{lang === "es" ? "Analíticas de Correos & Reseñas de Google" : "Email & Google Reviews Analytics"}</span>
+            </h3>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              {lang === "es"
+                ? "Métricas consolidadas de correos automatizados, tasa de entrega y solicitudes de reseñas de clientes."
+                : "Consolidated metrics for automated emails, delivery rate, and client review requests."}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl font-mono">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>{lang === "es" ? "Tasa de Entrega:" : "Delivery Rate:"} {emailStats?.deliveryRate || "100.0"}%</span>
+            </span>
+          </div>
+        </div>
+
+        {/* 4 Main KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* KPI 1: Sent This Month */}
+          <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-5 shadow-2xs relative overflow-hidden group hover:border-slate-300 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                {lang === "es" ? "Enviados Este Mes" : "Sent This Month"}
+              </span>
+              <span className="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                <PaperAirplaneIcon className="w-3.5 h-3.5" />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                {(emailStats?.sentThisMonth ?? 0).toLocaleString()}
+              </span>
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                {lang === "es" ? "Mes en curso" : "Current month"}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium mt-1.5">
+              {lang === "es" ? "Confirmaciones, avisos y reseñas" : "Confirmations, alerts & reviews"}
+            </p>
+          </div>
+
+          {/* KPI 2: All-Time Sent */}
+          <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-5 shadow-2xs relative overflow-hidden group hover:border-slate-300 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                {lang === "es" ? "Total Histórico" : "All-Time Sent"}
+              </span>
+              <span className="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <CheckIcon className="w-3.5 h-3.5" />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                {(emailStats?.sentAllTime ?? 0).toLocaleString()}
+              </span>
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                {emailStats?.deliveryRate || "100.0"}% {lang === "es" ? "éxito" : "success"}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium mt-1.5">
+              {lang === "es" ? "Correos totales entregados" : "Total delivered emails"}
+            </p>
+          </div>
+
+          {/* KPI 3: Google Review Booster */}
+          <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-5 shadow-2xs relative overflow-hidden group hover:border-slate-300 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                {lang === "es" ? "Booster Reseñas Google" : "Google Review Booster"}
+              </span>
+              <span className="w-7 h-7 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center">
+                <StarIcon className="w-3.5 h-3.5" filled={true} />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                {(emailStats?.reviewRequestsThisMonth ?? 0).toLocaleString()}
+              </span>
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                {(emailStats?.reviewRequestsAllTime ?? 0)} {lang === "es" ? "total" : "total"}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium mt-1.5">
+              {lang === "es" ? "Solicitudes de 5 estrellas enviadas" : "5-star requests sent to clients"}
+            </p>
+          </div>
+
+          {/* KPI 4: Pending / Scheduled */}
+          <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-5 shadow-2xs relative overflow-hidden group hover:border-slate-300 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                {lang === "es" ? "En Cola / Programados" : "Scheduled in Queue"}
+              </span>
+              <span className="w-7 h-7 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <ClockIcon className="w-3.5 h-3.5" />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                {(emailStats?.pendingCount ?? 0).toLocaleString()}
+              </span>
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                {lang === "es" ? "En espera" : "Pending"}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium mt-1.5">
+              {lang === "es" ? "Listos para su hora programada" : "Ready for their scheduled trigger"}
+            </p>
+          </div>
+        </div>
+
+        {/* Breakdown by Email Type Cards */}
+        <div className="pt-2">
+          <span className="text-xs font-black uppercase tracking-wider text-slate-400 block mb-3">
+            {lang === "es" ? "Desglose de Envíos este Mes por Tipo:" : "Monthly Deliveries by Type:"}
+          </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="bg-amber-50/60 border border-amber-200/70 rounded-2xl p-3.5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="w-7 h-7 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                  <StarIcon className="w-3.5 h-3.5" filled={true} />
+                </span>
+                <div>
+                  <span className="text-xs font-extrabold text-slate-900 block">Google Review</span>
+                  <span className="text-[10px] text-slate-500 font-medium">{lang === "es" ? "Solicitudes enviadas" : "Requests sent"}</span>
+                </div>
+              </div>
+              <span className="text-base font-black text-amber-800 font-mono">
+                {emailStats?.reviewRequestsThisMonth ?? 0}
+              </span>
+            </div>
+
+            <div className="bg-emerald-50/60 border border-emerald-200/70 rounded-2xl p-3.5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                  <CalendarIcon className="w-3.5 h-3.5" />
+                </span>
+                <div>
+                  <span className="text-xs font-extrabold text-slate-900 block">{lang === "es" ? "Confirmación Cita" : "Booking Confirm"}</span>
+                  <span className="text-[10px] text-slate-500 font-medium">{lang === "es" ? "Citas recibidas" : "Bookings received"}</span>
+                </div>
+              </div>
+              <span className="text-base font-black text-emerald-800 font-mono">
+                {emailStats?.bookingConfirmsThisMonth ?? 0}
+              </span>
+            </div>
+
+            <div className="bg-indigo-50/60 border border-indigo-200/70 rounded-2xl p-3.5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="w-7 h-7 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                  <ClockIcon className="w-3.5 h-3.5" />
+                </span>
+                <div>
+                  <span className="text-xs font-extrabold text-slate-900 block">{lang === "es" ? "Recordatorio Cita" : "Anti No-Show"}</span>
+                  <span className="text-[10px] text-slate-500 font-medium">{lang === "es" ? "Avisos previos" : "Prior alerts"}</span>
+                </div>
+              </div>
+              <span className="text-base font-black text-indigo-800 font-mono">
+                {emailStats?.bookingRemindersThisMonth ?? 0}
+              </span>
+            </div>
+
+            <div className="bg-blue-50/60 border border-blue-200/70 rounded-2xl p-3.5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="w-7 h-7 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                  <HandWaveIcon className="w-3.5 h-3.5" />
+                </span>
+                <div>
+                  <span className="text-xs font-extrabold text-slate-900 block">{lang === "es" ? "Bienvenida Contacto" : "Welcome Contact"}</span>
+                  <span className="text-[10px] text-slate-500 font-medium">{lang === "es" ? "Formularios web" : "Web inquiries"}</span>
+                </div>
+              </div>
+              <span className="text-base font-black text-blue-800 font-mono">
+                {emailStats?.welcomeContactsThisMonth ?? 0}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

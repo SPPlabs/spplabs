@@ -34,15 +34,102 @@ export async function GET(request) {
       return NextResponse.json({ error: "NotFound", message: "Website not found" }, { status: 404 });
     }
 
-    const logs = await prisma.scheduledEmail.findMany({
-      where: { websiteId: website.id },
-      orderBy: { createdAt: "desc" },
-      take: 50,
-    });
+    const now = new Date();
+    const startOfMonth = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0));
+    const endOfMonth = new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999));
+
+    const [
+      logs,
+      sentAllTime,
+      sentThisMonth,
+      failedAllTime,
+      pendingCount,
+      reviewRequestsThisMonth,
+      reviewRequestsAllTime,
+      bookingConfirmsThisMonth,
+      bookingRemindersThisMonth,
+      welcomeContactsThisMonth,
+    ] = await Promise.all([
+      prisma.scheduledEmail.findMany({
+        where: { websiteId: website.id },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+      }),
+      prisma.scheduledEmail.count({
+        where: { websiteId: website.id, status: "SENT" },
+      }),
+      prisma.scheduledEmail.count({
+        where: {
+          websiteId: website.id,
+          status: "SENT",
+          sentAt: { gte: startOfMonth, lte: endOfMonth },
+        },
+      }),
+      prisma.scheduledEmail.count({
+        where: { websiteId: website.id, status: "FAILED" },
+      }),
+      prisma.scheduledEmail.count({
+        where: { websiteId: website.id, status: "PENDING" },
+      }),
+      prisma.scheduledEmail.count({
+        where: {
+          websiteId: website.id,
+          status: "SENT",
+          emailType: "GOOGLE_REVIEW_REQUEST",
+          sentAt: { gte: startOfMonth, lte: endOfMonth },
+        },
+      }),
+      prisma.scheduledEmail.count({
+        where: {
+          websiteId: website.id,
+          status: "SENT",
+          emailType: "GOOGLE_REVIEW_REQUEST",
+        },
+      }),
+      prisma.scheduledEmail.count({
+        where: {
+          websiteId: website.id,
+          status: "SENT",
+          emailType: "BOOKING_CONFIRMATION",
+          sentAt: { gte: startOfMonth, lte: endOfMonth },
+        },
+      }),
+      prisma.scheduledEmail.count({
+        where: {
+          websiteId: website.id,
+          status: "SENT",
+          emailType: "BOOKING_REMINDER",
+          sentAt: { gte: startOfMonth, lte: endOfMonth },
+        },
+      }),
+      prisma.scheduledEmail.count({
+        where: {
+          websiteId: website.id,
+          status: "SENT",
+          emailType: "WELCOME_CONTACT",
+          sentAt: { gte: startOfMonth, lte: endOfMonth },
+        },
+      }),
+    ]);
+
+    const totalAttempted = sentAllTime + failedAllTime;
+    const deliveryRate = totalAttempted > 0 ? ((sentAllTime / totalAttempted) * 100).toFixed(1) : "100.0";
 
     return NextResponse.json({
       success: true,
       data: logs,
+      stats: {
+        sentThisMonth,
+        sentAllTime,
+        failedAllTime,
+        pendingCount,
+        deliveryRate,
+        reviewRequestsThisMonth,
+        reviewRequestsAllTime,
+        bookingConfirmsThisMonth,
+        bookingRemindersThisMonth,
+        welcomeContactsThisMonth,
+      },
     });
   } catch (error) {
     console.error("GET email-logs error:", error);
