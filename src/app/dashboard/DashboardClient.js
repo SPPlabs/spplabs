@@ -90,6 +90,7 @@ export default function DashboardClient({
   // Active navigation tab state - Everyone (admin or client) defaults to Resumen ("overview")
   const defaultTab = "overview";
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const [nowTimestamp] = useState(() => Date.now());
   const mainContainerRef = useRef(null);
 
   // Background heartbeat to track user dashboard activity
@@ -868,7 +869,7 @@ export default function DashboardClient({
               const pendingBookingsCount = bookings.filter(b => b.status === "PENDING" || b.status === "pending" || (!b.status && b.status !== "CONFIRMED" && b.status !== "CANCELLED")).length;
               const recentContactsCount = contactForms.filter(c => {
                 const created = new Date(c.createdAt).getTime();
-                return Date.now() - created < 48 * 60 * 60 * 1000;
+                return nowTimestamp - created < 48 * 60 * 60 * 1000;
               }).length;
 
               const overviewNotifCount = clearedTabs.has("overview") ? 0 : (pendingBookingsCount + recentContactsCount + announcementsList.length);
@@ -1104,7 +1105,7 @@ export default function DashboardClient({
           const pendingBookingsCount = bookings.filter(b => b.status === "PENDING" || b.status === "pending" || (!b.status && b.status !== "CONFIRMED" && b.status !== "CANCELLED")).length;
           const recentContactsCount = contactForms.filter(c => {
             const created = new Date(c.createdAt).getTime();
-            return Date.now() - created < 48 * 60 * 60 * 1000;
+            return nowTimestamp - created < 48 * 60 * 60 * 1000;
           }).length;
 
           const overviewNotifCount = clearedTabs.has("overview") ? 0 : (pendingBookingsCount + recentContactsCount + announcementsList.length);
@@ -1537,7 +1538,7 @@ export default function DashboardClient({
           {/* TAB: INFORMES MENSUALES */}
           {activeTab === "informes" && (
             <div className="space-y-8 animate-fade-in w-full">
-              <MonthlyReportsView currentWebsiteDomain={currentWebsite.domain} lang={lang} />
+              <MonthlyReportsView currentWebsiteDomain={currentWebsite?.domain || ""} lang={lang} />
             </div>
           )}
 

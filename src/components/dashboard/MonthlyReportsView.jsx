@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   TableIcon,
   DownloadIcon,
@@ -47,9 +47,15 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
     { num: 12, name: "Diciembre" },
   ];
 
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const fetchReport = useCallback(() => {
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
+
   useEffect(() => {
     let isCancelled = false;
-    const fetchReport = async () => {
+    const loadReport = async () => {
       setLoading(true);
       setError("");
       try {
@@ -67,19 +73,22 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
         }
       } catch (err) {
         if (!isCancelled) {
-          console.error(err);
+          console.error("fetchReport error:", err);
           setError("Error de conexión al cargar el informe.");
         }
       } finally {
-        if (!isCancelled) setLoading(false);
+        if (!isCancelled) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchReport();
+    loadReport();
+
     return () => {
       isCancelled = true;
     };
-  }, [selectedYear, selectedMonth, enableCompare, currentWebsiteDomain]);
+  }, [currentWebsiteDomain, selectedYear, selectedMonth, enableCompare, refreshTrigger]);
 
   const handlePrintPdf = () => {
     window.print();
@@ -89,20 +98,20 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
     if (!data || data.isInProgress) return;
     const rows = [
       ["Concepto", "Valor"],
-      ["Dominio", data.domain],
-      ["Periodo", `${data.monthName} ${data.year}`],
-      ["Visitas Totales", data.overview.visitors],
-      ["Visitantes Únicos", data.overview.unique_visitors],
-      ["Sesiones Totales", data.overview.sessions],
-      ["Tasa de Rebote (%)", `${data.overview.bounce_rate}%`],
-      ["Duración Media (seg)", data.overview.avg_duration],
-      ["Formularios Recibidos", data.crm.contact_forms],
-      ["Citas Solicitadas", data.crm.total_bookings],
-      ["Citas Confirmadas", data.crm.confirmed_bookings],
-      ["Citas Fuera de Horario (24/7)", data.crm.off_hours_bookings],
-      ["Chats Asistente IA", data.crm.chat_conversations],
-      ["Correos Automáticos Enviados", data.crm.emails_sent || 0],
-      ["Solicitudes Reseñas Google", data.crm.review_requests_sent || 0],
+      ["Dominio", data?.domain || ""],
+      ["Periodo", `${data?.monthName || ""} ${data?.year || ""}`],
+      ["Visitas Totales", data?.overview?.visitors || 0],
+      ["Visitantes Únicos", data?.overview?.unique_visitors || 0],
+      ["Sesiones Totales", data?.overview?.sessions || 0],
+      ["Tasa de Rebote (%)", `${data?.overview?.bounce_rate || 0}%`],
+      ["Duración Media (seg)", data?.overview?.avg_duration || 0],
+      ["Formularios Recibidos", data?.crm?.contact_forms || 0],
+      ["Citas Solicitadas", data?.crm?.total_bookings || 0],
+      ["Citas Confirmadas", data?.crm?.confirmed_bookings || 0],
+      ["Citas Fuera de Horario (24/7)", data?.crm?.off_hours_bookings || 0],
+      ["Chats Asistente IA", data?.crm?.chat_conversations || 0],
+      ["Correos Automáticos Enviados", data?.crm?.emails_sent || 0],
+      ["Solicitudes Reseñas Google", data?.crm?.review_requests_sent || 0],
     ];
 
     let csvContent = "data:text/csv;charset=utf-8," + rows.map((e) => e.join(",")).join("\n");
