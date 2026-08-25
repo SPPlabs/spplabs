@@ -64,9 +64,40 @@ export async function POST(request) {
       );
     }
 
-    if (!name || !email || !message) {
+    const trimmedName = typeof name === "string" ? name.trim() : "";
+    const trimmedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+    const trimmedPhone = typeof phone === "string" ? phone.trim() : "";
+    const trimmedMessage = typeof message === "string" ? message.trim() : "";
+
+    // Field content and character limit validations
+    if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 100) {
       return jsonResponse(
-        { error: "Bad Request", message: "name, email, and message are required" },
+        { error: "Bad Request", message: "Name must be between 2 and 100 characters." },
+        { status: 400 }
+      );
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!trimmedEmail || trimmedEmail.length > 120 || !emailRegex.test(trimmedEmail)) {
+      return jsonResponse(
+        { error: "Bad Request", message: "A valid email address is required (max 120 characters)." },
+        { status: 400 }
+      );
+    }
+
+    if (trimmedPhone) {
+      const phoneRegex = /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]{4,20}$/;
+      if (trimmedPhone.length < 6 || trimmedPhone.length > 30 || !phoneRegex.test(trimmedPhone)) {
+        return jsonResponse(
+          { error: "Bad Request", message: "Phone number format is invalid (6 to 30 characters)." },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (!trimmedMessage || trimmedMessage.length < 5 || trimmedMessage.length > 3000) {
+      return jsonResponse(
+        { error: "Bad Request", message: "Message must be between 5 and 3,000 characters." },
         { status: 400 }
       );
     }
@@ -112,10 +143,10 @@ export async function POST(request) {
     const submission = await db.contactForm.create({
       data: {
         websiteId: website.id,
-        name: name.trim(),
-        phone: (phone || "").trim(),
-        email: email.trim().toLowerCase(),
-        message: message.trim(),
+        name: trimmedName,
+        phone: trimmedPhone,
+        email: trimmedEmail,
+        message: trimmedMessage,
       },
     });
 

@@ -144,8 +144,40 @@ export async function POST(request) {
     }
 
     const { date, time, name, phone, email, message, status, targetWebsiteDomain } = body;
-    if (!date || !time || !name || !email) {
-      return NextResponse.json({ error: "Bad Request", message: "date, time, name, and email are required" }, { status: 400 });
+
+    const trimmedName = typeof name === "string" ? name.trim() : "";
+    const trimmedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+    const trimmedPhone = typeof phone === "string" ? phone.trim() : "";
+    const trimmedMessage = typeof message === "string" ? message.trim() : "";
+    const trimmedTime = typeof time === "string" ? time.trim() : "";
+
+    if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 100) {
+      return NextResponse.json({ error: "Bad Request", message: "Name must be between 2 and 100 characters" }, { status: 400 });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!trimmedEmail || trimmedEmail.length > 120 || !emailRegex.test(trimmedEmail)) {
+      return NextResponse.json({ error: "Bad Request", message: "Valid email address is required (max 120 chars)" }, { status: 400 });
+    }
+
+    if (trimmedPhone) {
+      const phoneRegex = /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]{4,20}$/;
+      if (trimmedPhone.length < 6 || trimmedPhone.length > 30 || !phoneRegex.test(trimmedPhone)) {
+        return NextResponse.json({ error: "Bad Request", message: "Phone number format is invalid (6 to 30 chars)" }, { status: 400 });
+      }
+    }
+
+    const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+    if (!trimmedTime || !timeRegex.test(trimmedTime)) {
+      return NextResponse.json({ error: "Bad Request", message: "Time format must be HH:mm (e.g. 09:30, 16:00)" }, { status: 400 });
+    }
+
+    if (trimmedMessage && trimmedMessage.length > 1000) {
+      return NextResponse.json({ error: "Bad Request", message: "Message cannot exceed 1,000 characters" }, { status: 400 });
+    }
+
+    if (!date) {
+      return NextResponse.json({ error: "Bad Request", message: "date is required" }, { status: 400 });
     }
 
     // Resolve target website
@@ -173,11 +205,11 @@ export async function POST(request) {
       data: {
         websiteId: website.id,
         date: parsedDate,
-        time: time.trim(),
-        name: name.trim(),
-        phone: (phone || "").trim(),
-        email: email.trim().toLowerCase(),
-        message: (message || "").trim(),
+        time: trimmedTime,
+        name: trimmedName,
+        phone: trimmedPhone,
+        email: trimmedEmail,
+        message: trimmedMessage,
         status: status || "CONFIRMED",
       },
     });

@@ -251,6 +251,8 @@ export default function ContactoSection() {
                     <input
                       type="text"
                       required
+                      minLength={2}
+                      maxLength={100}
                       value={bookingName}
                       onChange={(e) => setBookingName(e.target.value)}
                       placeholder="Jane Smith"
@@ -264,6 +266,7 @@ export default function ContactoSection() {
                       <input
                         type="email"
                         required
+                        maxLength={120}
                         value={bookingEmail}
                         onChange={(e) => setBookingEmail(e.target.value)}
                         placeholder="jane@example.com"
@@ -273,8 +276,10 @@ export default function ContactoSection() {
                     <div>
                       <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Teléfono" : "Phone"}</label>
                       <input
-                        type="text"
+                        type="tel"
                         required
+                        minLength={6}
+                        maxLength={30}
                         value={bookingPhone}
                         onChange={(e) => setBookingPhone(e.target.value)}
                         placeholder="+34 611 111 111"
@@ -438,6 +443,8 @@ export default function ContactoSection() {
                   <input
                     type="text"
                     required
+                    minLength={2}
+                    maxLength={100}
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
                     placeholder="John Doe"
@@ -450,6 +457,7 @@ export default function ContactoSection() {
                   <input
                     type="email"
                     required
+                    maxLength={120}
                     value={contactEmail}
                     onChange={(e) => setContactEmail(e.target.value)}
                     placeholder="john@example.com"
@@ -460,7 +468,8 @@ export default function ContactoSection() {
                 <div>
                   <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Teléfono (Opcional)" : "Phone (Optional)"}</label>
                   <input
-                    type="text"
+                    type="tel"
+                    maxLength={30}
                     value={contactPhone}
                     onChange={(e) => setContactPhone(e.target.value)}
                     placeholder="+34 600 000 000"
@@ -472,6 +481,8 @@ export default function ContactoSection() {
                   <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Mensaje" : "Message"}</label>
                   <textarea
                     required
+                    minLength={5}
+                    maxLength={3000}
                     value={contactMessage}
                     onChange={(e) => setContactMessage(e.target.value)}
                     placeholder={lang === "es" ? "Cuéntenos sobre los requisitos de su proyecto..." : "Tell us about your project requirements..."}
