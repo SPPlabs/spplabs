@@ -46,6 +46,40 @@ export default function SignupPage() {
       return;
     }
 
+    // Client-side password policy validation
+    if (password.length < 8 || password.length > 14) {
+      setError(
+        lang === "es"
+          ? "La contraseña debe tener entre 8 y 14 caracteres."
+          : "Password must be between 8 and 14 characters long."
+      );
+      return;
+    }
+    if (!/[A-Z]/.test(password)) {
+      setError(
+        lang === "es"
+          ? "La contraseña debe incluir al menos 1 letra mayúscula."
+          : "Password must include at least 1 uppercase letter."
+      );
+      return;
+    }
+    if (!/[a-z]/.test(password)) {
+      setError(
+        lang === "es"
+          ? "La contraseña debe incluir al menos 1 letra minúscula."
+          : "Password must include at least 1 lowercase letter."
+      );
+      return;
+    }
+    if (!/\d/.test(password)) {
+      setError(
+        lang === "es"
+          ? "La contraseña debe incluir al menos 1 número."
+          : "Password must include at least 1 number."
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -70,6 +104,12 @@ export default function SignupPage() {
       setLoading(false);
     }
   };
+
+  const hasMinLength = password.length >= 8;
+  const hasNumber = /\d/.test(password);
+  const hasUpper = /[A-Z]/.test(password);
+  const hasLower = /[a-z]/.test(password);
+  const isMaxReached = password.length >= 14;
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden bg-slate-50 text-slate-900 flex flex-col justify-center items-center py-6 sm:py-12 px-4 selection:bg-brand-blue selection:text-white">
@@ -187,10 +227,11 @@ export default function SignupPage() {
               <input
                 type={showPassword ? "text" : "password"}
                 required
+                maxLength={14}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-20 text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white transition-all"
+                className={`w-full h-12 bg-slate-50 border ${isMaxReached ? "border-amber-400 focus:border-amber-500" : "border-slate-200 focus:border-brand-blue"} rounded-xl pl-4 pr-20 text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white transition-all`}
               />
 
               {/* Eye toggle button to the left of the lock logo */}
@@ -219,6 +260,34 @@ export default function SignupPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
+            </div>
+
+            {/* Live Requirements Pills & Max Length Blinking Indicator */}
+            <div className="mt-2.5 space-y-2">
+              <div className="flex flex-wrap gap-1.5 text-[11px]">
+                <span className={`px-2 py-0.5 rounded-md font-semibold transition-all ${hasMinLength ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-400"}`}>
+                  {hasMinLength ? "✓" : "•"} {lang === "es" ? "8+ caracteres" : "8+ chars"}
+                </span>
+                <span className={`px-2 py-0.5 rounded-md font-semibold transition-all ${hasUpper ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-400"}`}>
+                  {hasUpper ? "✓" : "•"} {lang === "es" ? "1 mayúscula" : "1 uppercase"}
+                </span>
+                <span className={`px-2 py-0.5 rounded-md font-semibold transition-all ${hasLower ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-400"}`}>
+                  {hasLower ? "✓" : "•"} {lang === "es" ? "1 minúscula" : "1 lowercase"}
+                </span>
+                <span className={`px-2 py-0.5 rounded-md font-semibold transition-all ${hasNumber ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-400"}`}>
+                  {hasNumber ? "✓" : "•"} {lang === "es" ? "1 número" : "1 number"}
+                </span>
+              </div>
+
+              {/* Blinks only when max length of 14 is reached */}
+              {isMaxReached && (
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-300 px-2.5 py-1 rounded-lg animate-pulse">
+                  <svg className="w-3.5 h-3.5 shrink-0 text-amber-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <span>{lang === "es" ? "Límite máximo alcanzado (14 caracteres)" : "Maximum limit reached (14 characters)"}</span>
+                </div>
+              )}
             </div>
           </div>
 

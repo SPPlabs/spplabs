@@ -22,6 +22,8 @@ export async function proxy(request) {
     let limit = 60;
     if (path === "/api/chat") {
       limit = 15;
+    } else if (path.startsWith("/api/auth/")) {
+      limit = 10;
     } else if (path === "/api/analytics") {
       limit = 300;
     } else if (path.startsWith("/api/admin/")) {
@@ -33,6 +35,8 @@ export async function proxy(request) {
     if (isRateLimited(key, limit)) {
       const message = path === "/api/chat"
         ? "Has enviado demasiados mensajes. Por favor, espera un momento antes de volver a intentarlo."
+        : path.startsWith("/api/auth/")
+        ? "Demasiados intentos de autenticación. Por favor, espere un momento antes de reintentar."
         : "Demasiadas peticiones. Por favor, inténtelo de nuevo más tarde.";
 
       return new NextResponse(
@@ -117,13 +121,12 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api/auth (authentication endpoints)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon*, icon-*, apple-touch-icon*, logo.webp (static assets)
      * - tracker.js (analytics tracker script served from /public)
      */
-    "/((?!api/auth|_next/static|_next/image|favicon.*|icon-.*|apple-touch-icon.*|logo\\.webp|tracker\\.js).*)",
+    "/((?!_next/static|_next/image|favicon.*|icon-.*|apple-touch-icon.*|logo\\.webp|tracker\\.js).*)",
   ],
 };
 

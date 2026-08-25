@@ -2,6 +2,13 @@ import { hash, verify } from "@node-rs/argon2";
 import { randomBytes } from "crypto";
 
 /**
+ * Pre-computed Argon2id hash with identical parameters (m=65536, t=3, p=4)
+ * used for timing-safe password verification when accounts do not exist.
+ */
+export const DUMMY_PASSWORD_HASH =
+  "$argon2id$v=19$m=65536,t=3,p=4$LLLmVoH8b2mB9qWg0TwVqQ$nZP5/Vk87fM6TBCEGySE1XJSQeYTXtqheMKyJHFjGn0";
+
+/**
  * Hashes a plaintext password using Argon2id.
  */
 export async function hashPassword(password) {

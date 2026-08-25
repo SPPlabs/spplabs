@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { verifyPassword } from "@/lib/crypto";
+import { verifyPassword, DUMMY_PASSWORD_HASH } from "@/lib/crypto";
 import { signJWT } from "@/lib/jwt";
 
 export async function POST(request) {
@@ -24,16 +24,12 @@ export async function POST(request) {
       where: { domain: normalizedDomain },
     });
 
-    if (!website || !website.passwordHash) {
-      return NextResponse.json(
-        { error: "Invalid domain or password" },
-        { status: 401 }
-      );
-    }
+    // Timing attack mitigation: always execute Argon2id verification
+    // even if website or passwordHash is null, ensuring consistent response latency
+    const hashToVerify = website?.passwordHash || DUMMY_PASSWORD_HASH;
+    const isPasswordValid = await verifyPassword(password, hashToVerify);
 
-    // Verify password
-    const isPasswordValid = await verifyPassword(password, website.passwordHash);
-    if (!isPasswordValid) {
+    if (!website || !website.passwordHash || !isPasswordValid) {
       return NextResponse.json(
         { error: "Invalid domain or password" },
         { status: 401 }

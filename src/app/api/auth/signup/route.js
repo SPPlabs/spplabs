@@ -16,6 +16,25 @@ export async function POST(request) {
       );
     }
 
+    // Password policy validation: 8-14 chars, >=1 number, >=1 uppercase, >=1 lowercase
+    if (typeof password !== "string" || password.length < 8 || password.length > 14) {
+      return NextResponse.json(
+        { error: "La contraseña debe tener entre 8 y 14 caracteres" },
+        { status: 400 }
+      );
+    }
+
+    const hasNumber = /\d/.test(password);
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+
+    if (!hasNumber || !hasUpper || !hasLower) {
+      return NextResponse.json(
+        { error: "La contraseña debe contener al menos 1 número, 1 letra mayúscula y 1 letra minúscula" },
+        { status: 400 }
+      );
+    }
+
     const normalizedDomain = domain.trim().toLowerCase();
     const cleanToken = token.trim();
 
