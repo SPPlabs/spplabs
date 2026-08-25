@@ -16,10 +16,10 @@ export async function POST(request) {
       );
     }
 
-    // Password policy validation: 8-14 chars, >=1 number, >=1 uppercase, >=1 lowercase
-    if (typeof password !== "string" || password.length < 8 || password.length > 14) {
+    // Password policy validation: 8-16 chars, >=1 number, >=1 uppercase, >=1 lowercase
+    if (typeof password !== "string" || password.length < 8 || password.length > 16) {
       return NextResponse.json(
-        { error: "La contraseña debe tener entre 8 y 14 caracteres" },
+        { error: "La contraseña debe tener entre 8 y 16 caracteres" },
         { status: 400 }
       );
     }

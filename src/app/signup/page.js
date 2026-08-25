@@ -47,11 +47,11 @@ export default function SignupPage() {
     }
 
     // Client-side password policy validation
-    if (password.length < 8 || password.length > 14) {
+    if (password.length < 8 || password.length > 16) {
       setError(
         lang === "es"
-          ? "La contraseña debe tener entre 8 y 14 caracteres."
-          : "Password must be between 8 and 14 characters long."
+          ? "La contraseña debe tener entre 8 y 16 caracteres."
+          : "Password must be between 8 and 16 characters long."
       );
       return;
     }
@@ -109,7 +109,7 @@ export default function SignupPage() {
   const hasNumber = /\d/.test(password);
   const hasUpper = /[A-Z]/.test(password);
   const hasLower = /[a-z]/.test(password);
-  const isMaxReached = password.length >= 14;
+  const isMaxReached = password.length >= 16;
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden bg-slate-50 text-slate-900 flex flex-col justify-center items-center py-6 sm:py-12 px-4 selection:bg-brand-blue selection:text-white">
@@ -227,7 +227,7 @@ export default function SignupPage() {
               <input
                 type={showPassword ? "text" : "password"}
                 required
-                maxLength={14}
+                maxLength={16}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -279,13 +279,13 @@ export default function SignupPage() {
                 </span>
               </div>
 
-              {/* Blinks only when max length of 14 is reached */}
+              {/* Blinks only when max length of 16 is reached */}
               {isMaxReached && (
                 <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-300 px-2.5 py-1 rounded-lg animate-pulse">
                   <svg className="w-3.5 h-3.5 shrink-0 text-amber-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
-                  <span>{lang === "es" ? "Límite máximo alcanzado (14 caracteres)" : "Maximum limit reached (14 characters)"}</span>
+                  <span>{lang === "es" ? "Límite máximo alcanzado (16 caracteres)" : "Maximum limit reached (16 characters)"}</span>
                 </div>
               )}
             </div>
