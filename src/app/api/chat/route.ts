@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { prisma, withRLS } from "@/lib/prisma";
-import { verifyApiKey } from "@/lib/crypto";
+import { verifyApiKey, hashApiKey, isLegacyApiKeyHash } from "@/lib/crypto";
 import { verifyJWT } from "@/lib/jwt";
 import { retrieveContext, buildContext, generateChatCompletion, ragPromptTemplate } from "@/core/services/ai";
 import { logger } from "@/core/logger";
@@ -189,6 +189,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     let authenticatedKeyRecord: any = null;
 
     // 4. Check Bearer API Key from Authorization Header (Public website widgets)
+    let rawBearerApiKey = "";
     const authHeader = request.headers.get("authorization") || "";
     if (authHeader.startsWith("Bearer ")) {
       const apiKey = authHeader.substring(7).trim();
@@ -201,6 +202,7 @@ export async function POST(request: NextRequest): Promise<Response> {
           if (isMatch) {
             isAuthenticated = true;
             authenticatedKeyRecord = keyRecord;
+            rawBearerApiKey = apiKey;
             break;
           }
         }
@@ -236,15 +238,20 @@ export async function POST(request: NextRequest): Promise<Response> {
       return jsonResponse({ error: "Unauthorized", message: "API key or active dashboard session is required." }, 401, corsHeaders);
     }
 
-    // Update API Key lastUsedAt asynchronously if Bearer key was used
+    // Update API Key lastUsedAt and lazily upgrade legacy Argon2id hashes to SHA-256
     if (authenticatedKeyRecord) {
       const db = withRLS(website.id);
+      const updateData: { lastUsedAt: Date; keyHash?: string } = { lastUsedAt: new Date() };
+      if (rawBearerApiKey && isLegacyApiKeyHash(authenticatedKeyRecord.keyHash)) {
+        updateData.keyHash = hashApiKey(rawBearerApiKey);
+      }
+
       db.websiteApiKey
         .update({
           where: { id: authenticatedKeyRecord.id },
-          data: { lastUsedAt: new Date() },
+          data: updateData,
         })
-        .catch((e: unknown) => logger.error("Failed to update API key lastUsedAt:", e));
+        .catch((e: unknown) => logger.error("Failed to update API key lastUsedAt/keyHash:", e));
     }
 
     // 7. CORS origin checks (only enforced for external origin requests)

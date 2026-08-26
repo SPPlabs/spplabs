@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifyApiKey } from "@/lib/crypto";
+import { verifyApiKey, hashApiKey, isLegacyApiKeyHash } from "@/lib/crypto";
 import { clickhouseInsert } from "@/lib/clickhouse";
 import { resolveIpGeo } from "@/lib/geo";
 import crypto from "crypto";
@@ -174,13 +174,18 @@ export async function POST(request) {
     // Write to ClickHouse
     await clickhouseInsert("analytics_events", [eventRow]);
 
-    // Async update lastUsedAt on PostgreSQL (non-blocking)
+    // Async update lastUsedAt and lazily upgrade legacy Argon2id hashes to SHA-256
+    const keyUpdateData = { lastUsedAt: new Date() };
+    if (isLegacyApiKeyHash(activeKey.keyHash)) {
+      keyUpdateData.keyHash = hashApiKey(apiKey);
+    }
+
     prisma.websiteApiKey
       .update({
         where: { id: activeKey.id },
-        data: { lastUsedAt: new Date() },
+        data: keyUpdateData,
       })
-      .catch((e) => console.error("Failed to update API key lastUsedAt:", e));
+      .catch((e) => console.error("Failed to update API key lastUsedAt/keyHash:", e));
 
     return jsonResponse({
       success: true,

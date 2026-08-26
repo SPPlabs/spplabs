@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { verifyApiKey } from "@/lib/crypto";
+import { verifyApiKey, hashApiKey, isLegacyApiKeyHash } from "@/lib/crypto";
 import { prisma, withRLS } from "@/lib/prisma";
 
 const corsHeaders = {
@@ -155,13 +155,18 @@ export async function POST(request) {
       incrementMonthlyContactForms(website.id, new Date());
     }).catch(e => console.error("Failed to increment monthly contact metrics:", e));
 
-    // 5. Update API Key last used timestamp (non-blocking / asynchronous update)
+    // 5. Update API Key last used timestamp and lazily upgrade legacy Argon2id hashes to SHA-256
+    const keyUpdateData = { lastUsedAt: new Date() };
+    if (isLegacyApiKeyHash(activeKey.keyHash)) {
+      keyUpdateData.keyHash = hashApiKey(apiKey);
+    }
+
     prisma.websiteApiKey
       .update({
         where: { id: activeKey.id },
-        data: { lastUsedAt: new Date() },
+        data: keyUpdateData,
       })
-      .catch((e) => console.error("Failed to update API key lastUsedAt:", e));
+      .catch((e) => console.error("Failed to update API key lastUsedAt/keyHash:", e));
 
     // 6. Trigger automated welcome/confirmation email asynchronously
     (async () => {

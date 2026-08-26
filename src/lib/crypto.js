@@ -1,5 +1,5 @@
 import { hash, verify } from "@node-rs/argon2";
-import { randomBytes } from "crypto";
+import crypto, { randomBytes } from "crypto";
 
 /**
  * Pre-computed Argon2id hash with identical parameters (m=65536, t=3, p=4)
@@ -10,6 +10,7 @@ export const DUMMY_PASSWORD_HASH =
 
 /**
  * Hashes a plaintext password using Argon2id.
+ * Used exclusively for human passwords (login / signup).
  */
 export async function hashPassword(password) {
   return hash(password, {
@@ -32,24 +33,60 @@ export async function verifyPassword(password, hashedPassword) {
 }
 
 /**
- * Hashes a raw API key using Argon2id.
+ * Hashes a raw API key using fast SHA-256 with a type prefix.
+ * High-entropy API keys (192 bits) are mathematically immune to brute-force,
+ * making sub-millisecond, zero-memory SHA-256 the optimal industry standard.
  */
-export async function hashApiKey(apiKey) {
-  return hash(apiKey, {
-    memoryCost: 65536,
-    timeCost: 3,
-    parallelism: 4,
-  });
+export function hashApiKey(apiKey) {
+  if (!apiKey || typeof apiKey !== "string") {
+    throw new Error("API key is required for hashing");
+  }
+  const digest = crypto.createHash("sha256").update(apiKey.trim()).digest("hex");
+  return `sha256:${digest}`;
 }
 
 /**
- * Verifies a raw API key against an Argon2id hash.
+ * Helper to check whether a stored API key hash was created with legacy Argon2id.
+ */
+export function isLegacyApiKeyHash(storedHash) {
+  return typeof storedHash === "string" && storedHash.startsWith("$argon2id$");
+}
+
+/**
+ * Verifies a raw API key against a stored hash.
+ * Supports modern SHA-256 hashes (constant-time comparison) and legacy Argon2id hashes (with backwards compatibility).
  */
 export async function verifyApiKey(apiKey, hashedApiKey) {
   if (!apiKey || !hashedApiKey) return false;
+
+  const cleanApiKey = apiKey.trim();
+
+  // 1. Backwards compatibility for legacy Argon2id hashes
+  if (isLegacyApiKeyHash(hashedApiKey)) {
+    try {
+      return await verify(hashedApiKey, cleanApiKey);
+    } catch {
+      return false;
+    }
+  }
+
+  // 2. Modern SHA-256 verification with timing attack protection
   try {
-    return await verify(hashedApiKey, apiKey);
-  } catch (e) {
+    const cleanStoredHash = hashedApiKey.startsWith("sha256:")
+      ? hashedApiKey.slice(7)
+      : hashedApiKey;
+
+    const inputHash = crypto.createHash("sha256").update(cleanApiKey).digest("hex");
+
+    if (inputHash.length !== cleanStoredHash.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(
+      Buffer.from(inputHash, "utf8"),
+      Buffer.from(cleanStoredHash, "utf8")
+    );
+  } catch {
     return false;
   }
 }
@@ -67,3 +104,4 @@ export function generateToken() {
 export function generateApiKey() {
   return "spp_api_" + randomBytes(24).toString("hex");
 }
+
