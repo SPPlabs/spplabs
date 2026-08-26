@@ -2,13 +2,13 @@
 // Artículos del Blog de SPP Labs optimizados para SEO y conversión de clientes (España)
 
 export const blogCategories = [
-  { id: "todos", label: "Todos los artículos", count: 12 },
-  { id: "paginas-web", label: "Páginas Web", count: 2, iconName: "GlobeAltIcon", color: "blue" },
-  { id: "seo-local", label: "SEO Local y Google", count: 2, iconName: "MapPinIcon", color: "emerald" },
-  { id: "resenas-google", label: "Reseñas de Google", count: 2, iconName: "StarIcon", color: "amber" },
-  { id: "ia-chatbots", label: "IA y Chatbots", count: 2, iconName: "BotIcon", color: "purple" },
-  { id: "crm-captacion", label: "CRM y Clientes", count: 2, iconName: "UsersIcon", color: "indigo" },
-  { id: "geo-buscadores-ia", label: "GEO y ChatGPT", count: 2, iconName: "SparklesIcon", color: "cyan" },
+  { id: "todos", label: "Todos los artículos", count: 24 },
+  { id: "paginas-web", label: "Páginas Web", count: 4, iconName: "GlobeAltIcon", color: "blue" },
+  { id: "seo-local", label: "SEO Local y Google", count: 4, iconName: "MapPinIcon", color: "emerald" },
+  { id: "resenas-google", label: "Reseñas de Google", count: 4, iconName: "StarIcon", color: "amber" },
+  { id: "ia-chatbots", label: "IA y Chatbots", count: 4, iconName: "BotIcon", color: "purple" },
+  { id: "crm-captacion", label: "CRM y Clientes", count: 4, iconName: "UsersIcon", color: "indigo" },
+  { id: "geo-buscadores-ia", label: "GEO y ChatGPT", count: 4, iconName: "SparklesIcon", color: "cyan" },
 ];
 
 export const blogArticles = [
@@ -1109,4 +1109,931 @@ El ecosistema digital definitivo para que tu empresa lidere su sector hoy y en e
       },
     ],
   },
+  {
+    slug: "por-que-wordpress-es-lento-y-como-mejorar-la-velocidad",
+    title: "¿Por qué WordPress es lento y cómo afecta a las ventas de tu empresa?",
+    metaTitle: "¿Por qué WordPress es Lento y Cómo Solucionarlo? | SPP Labs",
+    metaDescription: "Descubre por qué las páginas web en WordPress cargan lento, cómo perjudica tu posicionamiento en Google y por qué Next.js es la solución definitiva.",
+    primaryKeyword: "por qué WordPress es lento",
+    secondaryKeywords: [
+      "hacer WordPress más rápido",
+      "velocidad de carga WordPress",
+      "WordPress lento solución",
+      "Core Web Vitals empresas",
+      "PageSpeed WordPress bajo",
+      "Next.js vs WordPress",
+      "optimizar velocidad web",
+      "mejorar velocidad de carga web",
+    ],
+    category: {
+      id: "paginas-web",
+      label: "Páginas Web",
+      color: "blue",
+    },
+    publishedAt: "2026-08-22",
+    readTime: "9 min de lectura",
+    author: {
+      name: "Equipo de Arquitectura Web SPP Labs",
+      role: "Especialistas en Rendimiento Web y Core Web Vitals",
+    },
+    excerpt: "Analizamos las razones técnicas por las que las webs en WordPress pierden clientes por lentitud y por qué la arquitectura moderna de Next.js es la alternativa más rentable.",
+    sections: [
+      {
+        h2: "El coste invisible de una página web lenta",
+        content: `Más del **53% de los usuarios móviles abandonan una página web si tarda más de 3 segundos en cargar**. En el mercado español, donde más del 70% de las consultas a negocios locales se realizan desde smartphones con conexiones variables, la velocidad no es un detalle estético: es un factor directo de facturación.
+
+Cuando una empresa encarga una web basada en WordPress con maquetadores visuales pesados (como Elementor o Divi) y acumula entre 20 y 40 plugins, el resultado habitual es una experiencia frustrante: pantallas en blanco de varios segundos, saltos de diseño molestos (CLS) y puntuaciones inferiores a 40/100 en Google PageSpeed.
+
+Si te preguntas **por qué WordPress es lento** y qué puedes hacer para que tu web convierta visitas en clientes de verdad, es fundamental entender qué ocurre por dentro a nivel técnico.`,
+      },
+      {
+        h2: "Las 4 causas técnicas de la lentitud en WordPress",
+        content: `1. **Sobrecarga de consultas a base de datos (PHP + MySQL):** Cada vez que un usuario visita una página de WordPress, el servidor debe ejecutar múltiples scripts de PHP y realizar decenas de llamadas a la base de datos MySQL antes de enviar el primer byte (TTFB elevado).
+2. **Exceso de plugins y scripts de terceros:** Cada plugin añade sus propias hojas de estilo CSS y archivos JavaScript, bloqueando el renderizado en el navegador del cliente.
+3. **Maquetadores visuales con código redundante:** Los editores de arrastrar y soltar generan miles de líneas de código HTML anidado que sobrecargan la CPU de los teléfonos móviles.
+4. **Vulnerabilidades constantes y parches:** El mantenimiento de plugins obliga a continuas actualizaciones que a menudo rompen la maquetación o ralentizan el servidor.`,
+      },
+      {
+        h2: "Tabla comparativa: WordPress Tradicional vs. Next.js en SPP Labs",
+        content: `Comparamos el rendimiento y la operativa entre ambos modelos:`,
+        table: {
+          headers: ["Parámetro Técnico", "WordPress con Plugins", "Next.js 16 (SPP Labs)"],
+          rows: [
+            ["Tiempo de Carga Inicial", "2.8 - 6.5 segundos (Pesado)", "0.3 - 0.6 segundos (Instantáneo)"],
+            ["Puntuación Google PageSpeed", "30 - 60 / 100", "98 - 100 / 100"],
+            ["Renderizado de Páginas", "Dinámico lento en cada petición", "Server-Side Rendering (SSR) y Edge Cache"],
+            ["Seguridad y Vulnerabilidades", "Alta exposición a ataques de bots", "Arquitectura estática y compilada sin fugas"],
+            ["Mantenimiento Requerido", "Actualizaciones manuales semanales", "Cero preocupaciones (Gestionado al 100%)"],
+            ["Herramientas Incluidas", "Plugins de pago aparte para cada función", "Web + IA + CRM + Reservas + Reseñas integradas"],
+          ],
+        },
+      },
+      {
+        h2: "Cómo influye la velocidad en tu posición en Google (SEO)",
+        content: `Google utiliza los **Core Web Vitals** (LCP, INP, CLS) como factor directo de posicionamiento orgánico. Una web rápida no solo reduce la tasa de rebote, sino que facilita que el robot de Google rastree e indexe más páginas de tus servicios en menos tiempo.
+
+Al migrar a un [desarrollo web profesional en Next.js](/servicios/desarrollo-web), tu empresa obtiene una ventaja competitiva inmediata frente a competidores locales cuyas webs siguen lastradas por plantillas obsoletas. Puedes complementar esta velocidad con una estrategia sólida de [posicionamiento SEO orgánico](/servicios/posicionamiento-seo) para liderar las búsquedas en tu zona.`,
+      },
+      {
+        h2: "La solución de SPP Labs: Rendimiento extremo por 197 €/mes",
+        content: `En **SPP Labs (spplabs.es)** no utilizamos plantillas prefabricadas de WordPress ni cargamos tu web con plugins inestables.
+
+Construimos tu infraestructura digital sobre **Next.js 16 y React 19**, garantizando tiempos de respuesta ultrarrápidos y máxima seguridad. Todo incluido dentro de nuestra cuota fija de **197 €/mes + IVA**, con soporte técnico continuo para que nunca tengas que preocuparte por caídas o actualizaciones. Puedes [solicitar una propuesta a medida](/contacto) para analizar tu caso.`,
+      },
+    ],
+    faqs: [
+      {
+        q: "¿Se puede hacer que una web en WordPress cargue en menos de 1 segundo?",
+        a: "Es extremadamente complejo y costoso en WordPress, ya que requiere servidores dedicados de alto coste, plugins avanzados de caché y optimización continua de bases de datos. En frameworks modernos como Next.js, la velocidad sub-segundo viene garantizada por arquitectura nativa.",
+      },
+      {
+        q: "¿Tener una web rápida ayuda a que los usuarios llamen o pidan cita?",
+        a: "Totalmente. Cada segundo de retraso en la carga reduce las conversiones comerciales en torno a un 7%. Una web fluida genera confianza instantánea y retiene al usuario.",
+      },
+    ],
+  },
+  {
+    slug: "errores-comunes-diseno-web-empresas-pierden-clientes",
+    title: "Los 7 errores en el diseño de una página web que hacen que pierdas clientes",
+    metaTitle: "Los 7 Errores de Diseño Web que Hacen Perder Clientes | SPP Labs",
+    metaDescription: "Guía con los 7 errores más comunes en páginas web corporativas y cómo corregirlos para convertir visitas en llamadas, citas y ventas.",
+    primaryKeyword: "errores en el diseño de una página web",
+    secondaryKeywords: [
+      "errores diseño web",
+      "por qué mi web no vende",
+      "mejorar conversión página web",
+      "diseño web orientado a ventas",
+      "optimizar web empresas",
+      "rediseño página web pyme",
+      "consejos web comercial",
+      "captar clientes página web",
+    ],
+    category: {
+      id: "paginas-web",
+      label: "Páginas Web",
+      color: "blue",
+    },
+    publishedAt: "2026-08-23",
+    readTime: "8 min de lectura",
+    author: {
+      name: "Equipo de UX y Conversión Digital SPP Labs",
+      role: "Consultores en Diseño Web Comercial y Experiencia de Usuario",
+    },
+    excerpt: "Repasamos los fallos habituales que convierten una web empresarial en un folleto invisible y cómo transformarla en un motor activo de captación de clientes.",
+    sections: [
+      {
+        h2: "¿Por qué muchas webs empresariales reciben visitas pero no generan llamadas?",
+        content: `Muchos empresarios invierten en una página web con la ilusión de que automáticamente empezarán a sonar los teléfonos y llegarán mensajes de nuevos clientes. Sin embargo, tras meses online, la realidad suele ser decepcionante: visitas escasas y apenas alguna consulta esporádica.
+
+El problema rara vez radica en el producto o servicio que ofrece la empresa, sino en **errores en el diseño de una página web** que generan fricción, desconfianza o aburrimiento en el usuario.
+
+A continuación analizamos los 7 errores más graves y cómo solucionarlos para que tu web funcione como un verdadero canal comercial.`,
+      },
+      {
+        h2: "Los 7 errores críticos que hunden la conversión web",
+        content: `### 1. No tener una propuesta de valor clara en la cabecera
+Si un visitante entra en tu página y en los primeros 3 segundos solo lee *"Bienvenidos a nuestra empresa familiar"* o frases vacías como *"Calidad y compromiso"*, se irá a la competencia. Debes indicar con precisión qué problema resuelves, en qué ciudad y para quién.
+
+### 2. Formularios de contacto interminables
+Pedir dirección completa, código postal, motivo detallado y campos innecesarios reduce drásticamente las respuestas. Un formulario debe solicitar únicamente lo imprescindible: nombre, teléfono o email y un breve mensaje.
+
+### 3. No atender fuera del horario comercial
+Más del 45% de los clientes potenciales navegan por las tardes o fines de semana. Si solo tienes un formulario pasivo, pierdes la oportunidad de interactuar en caliente con un [chatbot con IA para empresas](/servicios/chatbot-ia) que responda preguntas frecuentes y registre su contacto.
+
+### 4. Ausencia de un calendario de reservas interactivo
+Obligar al cliente a llamar por teléfono para consultar disponibilidad crea fricción innecesaria. Contar con un [sistema de reservas online](/servicios/sistema-reservas) permite que el usuario elija su hueco horario en segundos.
+
+### 5. Datos dispersos y falta de gestión en CRM
+Recibir mensajes por email sin centralizarlos en un [panel CRM unificado](/servicios/crm-dashboard) provoca que las consultas se queden sin respuesta o se pierda el seguimiento del cliente.
+
+### 6. Falta de prueba social y reseñas verificadas
+No mostrar valoraciones reales de Google Maps transmite frialdad. Los clientes necesitan comprobar la experiencia de otros usuarios antes de dar el paso.
+
+### 7. Carga lenta y diseño no adaptado a smartphones
+Botones diminutos, textos difíciles de leer en móvil y tiempos de carga superiores a 2 segundos arruinan la experiencia de usuario y provocan abandonos masivos.`,
+      },
+      {
+        h2: "Checklist de Corrección Rápida para tu Página Web",
+        content: `Comprueba si tu sitio web actual cumple con estos criterios esenciales:
+- [x] Encabezado claro con llamada a la acción visible (Botón "Contactar" o "Reservar Cita").
+- [x] Carga instantánea en smartphones con conexión móvil.
+- [x] Asistente virtual para responder dudas básicas fuera de horario.
+- [x] Reseñas de Google y testimonios reales visibles.
+- [x] Datos de contacto (teléfono, email, ubicación física) accesibles con un clic.`,
+      },
+      {
+        h2: "Transforma tu web en un canal comercial con SPP Labs",
+        content: `En **SPP Labs (spplabs.es)** diseñamos páginas web concebidas desde el primer píxel para convertir visitantes en clientes fieles.
+
+Por una cuota transparente de **197 €/mes + IVA**, te entregamos una web de última generación con [desarrollo web en Next.js](/servicios/desarrollo-web), asistente de IA 24/7, CRM integrado, motor de reservas y optimización para buscadores. Puedes [contactar con nuestros especialistas](/contacto) para auditar tu presencia digital.`,
+      },
+    ],
+    faqs: [
+      {
+        q: "¿Cuántos campos debe tener un formulario de contacto web?",
+        a: "Lo ideal son entre 3 y 4 campos: Nombre, Teléfono o Email, y Mensaje breve. Cuantos menos campos obligatorios solicites, mayor será la tasa de conversión.",
+      },
+      {
+        q: "¿Por qué es importante que la web tenga un asistente de IA?",
+        a: "Porque resuelve dudas inmediatas sobre horarios, ubicación o servicios de forma natural y permite captar el contacto de usuarios interesados que navegan cuando tu oficina está cerrada.",
+      },
+    ],
+  },
+  {
+    slug: "como-optimizar-google-business-profile-paso-a-paso",
+    title: "Guía definitiva para optimizar tu Perfil de Empresa en Google",
+    metaTitle: "Cómo Optimizar tu Perfil de Empresa en Google (Guía Práctica) | SPP Labs",
+    metaDescription: "Aprende cómo configurar y optimizar tu ficha de Google Business Profile para dominar las búsquedas locales en Google Maps y recibir más llamadas.",
+    primaryKeyword: "cómo optimizar Google Business Profile",
+    secondaryKeywords: [
+      "optimizar perfil de empresa Google",
+      "Google Business Profile consejos",
+      "posicionar ficha Google Maps",
+      "completar ficha Google negocio",
+      "SEO local Google Maps",
+      "conseguir clientes Google Business",
+      "ficha de Google para pymes",
+      "posicionamiento local España",
+    ],
+    category: {
+      id: "seo-local",
+      label: "SEO Local y Google",
+      color: "emerald",
+    },
+    publishedAt: "2026-08-24",
+    readTime: "9 min de lectura",
+    author: {
+      name: "Equipo de SEO Local SPP Labs",
+      role: "Especialistas en Google Business Profile y Posicionamiento Geográfico",
+    },
+    excerpt: "Domina el Local Pack de Google Maps con esta guía detallada para completar, verificar y optimizar la ficha de tu negocio paso a paso.",
+    sections: [
+      {
+        h2: "El escaparate más importante para los negocios locales",
+        content: `Cuando un usuario en tu ciudad busca un servicio profesional urgente o un comercio cercano, el primer elemento visual que muestra Google en su pantalla es el mapa con los perfiles locales destacados.
+
+Tu Perfil de Empresa en Google (anteriormente conocido como *Google My Business*) no es solo un mapa con tu dirección: es tu canal de captación directa más potente. Una ficha bien optimizada genera llamadas telefónicas, solicitudes de cómo llegar y visitas directas a tu sitio web sin necesidad de invertir en publicidad de pago.
+
+Aprender **cómo optimizar Google Business Profile** de forma rigurosa es el primer paso para superar a tu competencia local.`,
+      },
+      {
+        h2: "Paso 1: Elección estratégica de categorías primarias y secundarias",
+        content: `La categoría principal es el factor individual con mayor peso en el algoritmo de búsqueda de Google Maps:
+- **Categoría principal exacta:** Selecciona la actividad central que define tu modelo de negocio (ej. *"Clínica dental"*, *"Abogado de lesiones personales"*, *"Taller de chapa y pintura"*).
+- **Categorías secundarias complementarias:** Añade hasta 4 o 5 categorías adicionales que cubran especialidades reales que ofrezcas (ej. *"Ortodoncista"*, *"Clínica de periodoncia"*).
+- **Evita el error común:** No selecciones categorías irrelevantes que no correspondan con tu actividad, ya que diluirán tu relevancia algorítmica.`,
+      },
+      {
+        h2: "Paso 2: Coherencia total de datos de contacto (NAP)",
+        content: `El acrónimo **NAP (Name, Address, Phone)** hace referencia a la consistencia de tu Nombre comercial, Dirección física y Teléfono:
+- El nombre debe ser exactamente el nombre legal o comercial de tu empresa, sin añadir palabras clave artificiales.
+- La dirección debe coincidir exactamente con la que figura en tu [página web corporativa](/servicios/desarrollo-web) y en directorios de confianza.
+- El teléfono debe ser un número local verificado para reforzar tu pertenencia geográfica.`,
+      },
+      {
+        h2: "Paso 3: Catálogo de servicios y fotos de alta calidad periódicas",
+        content: `Las fichas activas reciben un trato prioritario por parte de Google:
+1. **Listado detallado de servicios:** Rellena cada servicio con una descripción explicativa de 150 palabras, destacando los beneficios y el alcance del trabajo.
+2. **Fotografías reales del equipo e instalaciones:** Sube fotos con buena iluminación del exterior, recepción, equipo de trabajo y proyectos realizados.
+3. **Publicaciones semanales (Updates):** Comparte novedades o artículos de tu blog cada 7-10 días para indicar al algoritmo que tu negocio está plenamente operativo.`,
+      },
+      {
+        h2: "Paso 4: El papel determinante de las reseñas continuas",
+        content: `Google valora la frescura y la regularidad con la que recibes nuevas valoraciones. Contar con un [booster de reseñas de Google](/servicios/booster-resenas) te permite automatizar la solicitud de opiniones positivas por correo electrónico tras cada servicio prestado.
+
+Asimismo, responder al 100% de las reseñas recibidas (tanto positivas como negativas) en menos de 48 horas refuerza la autoridad de tu perfil.`,
+      },
+      {
+        h2: "Gestiona tu posicionamiento local con SPP Labs",
+        content: `En **SPP Labs (spplabs.es)** no dejamos tu ficha de Google Maps aislada. Conectamos tu perfil con una web de carga ultrarrápida optimizada para [posicionamiento SEO local](/servicios/posicionamiento-seo), marcado Schema.org y captación de clientes.
+
+Todo gestionado dentro de nuestra cuota única de **197 €/mes + IVA**. Puedes [solicitar información](/contacto) para mejorar tu visibilidad local hoy mismo.`,
+      },
+    ],
+    faqs: [
+      {
+        q: "¿Cuánto tarda en verse el impacto tras optimizar Google Business Profile?",
+        a: "Los cambios en categorías e información básica suelen reflejarse en 48 horas. La mejora de posiciones en búsquedas locales competitivas se consolida entre 4 y 12 semanas a medida que se acumulan publicaciones y reseñas continuas.",
+      },
+      {
+        q: "¿Puedo tener Perfil de Empresa en Google si no atiendo en un local físico?",
+        a: "Sí. Puedes configurarlo como 'Área de servicio', indicando las ciudades o códigos postales donde prestas tus servicios a domicilio sin mostrar tu dirección personal.",
+      },
+    ],
+  },
+  {
+    slug: "que-es-el-seo-local-y-como-ayuda-a-tu-negocio-a-vender-mas",
+    title: "¿Qué es el SEO local y cómo ayuda a tu negocio a conseguir clientes en tu ciudad?",
+    metaTitle: "¿Qué es el SEO Local y Cómo Atrae Clientes en tu Ciudad? | SPP Labs",
+    metaDescription: "Descubre qué es el SEO local, cómo funciona el posicionamiento geográfico en Google y por qué es el canal más rentable para negocios y empresas locales.",
+    primaryKeyword: "qué es el SEO local",
+    secondaryKeywords: [
+      "SEO local definición",
+      "cómo funciona el SEO local",
+      "posicionamiento local Google",
+      "SEO para negocios locales",
+      "estrategia SEO local pymes",
+      "aparecer en búsquedas de mi ciudad",
+      "conseguir clientes locales Google",
+      "agencia SEO local España",
+    ],
+    category: {
+      id: "seo-local",
+      label: "SEO Local y Google",
+      color: "emerald",
+    },
+    publishedAt: "2026-08-25",
+    readTime: "8 min de lectura",
+    author: {
+      name: "Equipo de Estrategia SEO SPP Labs",
+      role: "Consultores en Tráfico Orgánico y Relevancia Geográfica",
+    },
+    excerpt: "Explicamos cómo las búsquedas con intención local conectan a clientes cercanos con tu negocio y cómo una estrategia técnica adecuada dispara tus ventas.",
+    sections: [
+      {
+        h2: "¿Por qué las búsquedas locales tienen la mayor intención de compra?",
+        content: `Cuando un usuario busca en Google *"reparación de calderas en Zaragoza"* o *"abogado de familia cerca de mí"*, no está buscando artículos teóricos: necesita contratar un profesional de inmediato.
+
+El **SEO local** es la disciplina del marketing digital que optimiza la presencia online de un negocio para que aparezca en las primeras posiciones cuando los usuarios realizan búsquedas con intención geográfica específica.
+
+Comprender **qué es el SEO local** y cómo aplicarlo permite a las empresas captar un flujo constante de clientes altamente cualificados sin depender exclusivamente de costosas campañas publicitarias.`,
+      },
+      {
+        h2: "Los 3 pilares donde se muestra el SEO local",
+        content: `Una estrategia completa de SEO local posiciona a tu negocio en tres áreas clave de Google:
+
+1. **El Local Pack de Google Maps:** El recuadro con 3 negocios destacados que aparece en la parte superior de los resultados de búsqueda.
+2. **Resultados orgánicos geolocalizados:** Enlaces azules tradicionales situados bajo el mapa que dirigen a secciones específicas de tu [página web corporativa](/servicios/desarrollo-web).
+3. **Búsquedas directas en la app de Google Maps:** Usuarios que navegan directamente en la aplicación móvil mientras se desplazan por la ciudad.`,
+      },
+      {
+        h2: "Factores clave para dominar el SEO local",
+        content: `Para posicionar tu empresa en los primeros puestos, el algoritmo de Google evalúa varios elementos:
+- **Estructura semántica de la web:** Páginas dedicadas para cada servicio con etiquetas H1/H2 optimizadas por localidad.
+- **Marcado de datos Schema.org (LocalBusiness):** Código estructurado que ayuda a los motores a identificar tu dirección, teléfono y horarios oficiales.
+- **Volumen y frecuencia de reseñas en Google Maps:** Un flujo continuo de opiniones de clientes reales que refuercen la autoridad de tu marca.
+- **Velocidad de carga en móviles:** Páginas optimizadas que carguen de forma instantánea para evitar abandonos.`,
+      },
+      {
+        h2: "Por qué SPP Labs es la opción más completa de SEO local",
+        content: `Muchas agencias de SEO tradicionales cobran tarifas mensuales elevadas únicamente por enviar informes en PDF sin optimizar la página web ni implementar mejoras en la experiencia de usuario.
+
+En **SPP Labs (spplabs.es)** el [posicionamiento SEO orgánico y local](/servicios/posicionamiento-seo) forma parte integral de nuestra cuota única de **197 €/mes + IVA**, junto con tu web en Next.js, chatbot de IA, CRM y sistema de reservas. Puedes [solicitar un análisis técnico](/contacto) de tu presencia digital.`,
+      },
+    ],
+    faqs: [
+      {
+        q: "¿Qué diferencia al SEO tradicional del SEO local?",
+        a: "El SEO tradicional busca posicionar una web a nivel nacional o global para términos genéricos, mientras que el SEO local se enfoca en captar usuarios situados en una zona geográfica concreta que buscan servicios en su entorno inmediato.",
+      },
+      {
+        q: "¿Es necesario tener una página web para hacer SEO local?",
+        a: "Sí. Aunque la ficha de Google Maps es fundamental, Google utiliza la web enlazada para verificar la autoridad, servicios y relevancia semántica de tu empresa.",
+      },
+    ],
+  },
+  {
+    slug: "como-responder-a-resenas-negativas-en-google-ejemplos",
+    title: "¿Cómo responder a reseñas negativas en Google? Guía con ejemplos profesionales",
+    metaTitle: "Cómo Responder a Reseñas Negativas en Google (Plantillas y Guía) | SPP Labs",
+    metaDescription: "Aprende cómo responder a críticas y valoraciones negativas en Google con profesionalidad. Plantillas reales y estrategias para proteger tu reputación.",
+    primaryKeyword: "cómo responder a reseñas negativas en Google",
+    secondaryKeywords: [
+      "responder opiniones negativas Google",
+      "plantillas responder malas reseñas",
+      "gestionar críticas Google Maps",
+      "eliminar reseñas injustas Google",
+      "reputación online empresas",
+      "ejemplos respuesta reseñas negativas",
+      "protocolo gestión reseñas",
+      "atención al cliente Google Maps",
+    ],
+    category: {
+      id: "resenas-google",
+      label: "Reseñas de Google",
+      color: "amber",
+    },
+    publishedAt: "2026-08-26",
+    readTime: "8 min de lectura",
+    author: {
+      name: "Equipo de Reputación y Conversión SPP Labs",
+      role: "Especialistas en Experiencia de Cliente y Gestión de Reputación",
+    },
+    excerpt: "Descubre cómo transformar una crítica negativa en una demostración pública de profesionalidad, seriedad y compromiso con la satisfacción del cliente.",
+    sections: [
+      {
+        h2: "Por qué una mala reseña no es el fin del mundo",
+        content: `Recibir una valoración de 1 estrella en Google Maps es una experiencia frustrante para cualquier empresario o profesional que se esfuerza a diario por dar un buen servicio. Sin embargo, los estudios demuestran que los perfiles con una nota de entre 4.7 y 4.9 estrellas generan a menudo mayor credibilidad que aquellos con un sospechoso 5.0 perfecto sin ninguna opinión discordante.
+
+Los potenciales clientes no juzgan a una empresa únicamente por recibir una queja aislada, sino por la **forma en que la dirección responde y gestiona el problema**.
+
+Saber **cómo responder a reseñas negativas en Google** con templanza y profesionalidad puede convertir una situación adversa en una demostración pública de confianza.`,
+      },
+      {
+        h2: "El protocolo de 5 pasos para contestar una crítica negativa",
+        content: `1. **Mantén la calma y no respondas en caliente:** Tómate unas horas para analizar los hechos antes de redactar una respuesta defensiva o impulsiva.
+2. **Agradece el comentario con educación:** Demuestra que la opinión de cada cliente es importante para la mejora continua del negocio.
+3. **Pide disculpas si hubo un fallo real:** Reconoce la incidencia con naturalidad sin poner excusas corporativas vacías.
+4. **Explica la postura de la empresa con brevedad:** Aclara el contexto sin entrar en discusiones públicas ni descalificaciones personales.
+5. **Traslada la conversación a un canal privado:** Proporciona un email o teléfono directo para resolver la incidencia de forma personalizada.`,
+      },
+      {
+        h2: "3 Plantillas profesionales listas para adaptar",
+        content: `### Plantilla 1: Incidencia con retraso en el servicio o cita
+> *"Hola, [Nombre del Cliente]. Lamentamos sinceramente el tiempo de espera que experimentaste en tu última visita. En nuestro negocio nos esforzamos por cumplir estrictamente con los horarios acordados, pero en ocasiones surgen imprevistos técnicos complejos. Nos gustaría revisar tu caso en detalle; por favor, contáctanos directamente en [email/teléfono] para atenderte como mereces. Un saludo cordial."*
+
+### Plantilla 2: Descontento con el resultado o expectativa
+> *"Estimado/a [Nombre]. Sentimos que el servicio no haya cumplido plenamente con tus expectativas. La satisfacción de nuestros clientes es nuestra máxima prioridad. Te invitamos a comunicarte con nuestro equipo en [email/teléfono] para encontrar una solución satisfactoria a tu caso. Gracias por ayudarnos a mejorar."*
+
+### Plantilla 3: Crítica injustificada o de un usuario no registrado
+> *"Hola, [Nombre]. Nos tomamos muy en serio la calidad de nuestro trabajo. Sin embargo, tras revisar nuestros registros de clientes y citas, no encontramos constancia de ningún servicio prestado a tu nombre. Por favor, contáctanos en [email/teléfono] para aclarar la situación. Estaremos encantados de atenderte."*`,
+      },
+      {
+        h2: "La mejor defensa: Multiplicar las reseñas de 5 estrellas",
+        content: `La forma más eficaz de minimizar el impacto de una crítica negativa es contar con un volumen constante de opiniones positivas de clientes satisfechos.
+
+Con el módulo [Booster de Reseñas de Google y Email](/servicios/booster-resenas) de SPP Labs, tu empresa envía solicitudes automáticas por correo electrónico tras cada servicio prestado, asegurando que tu valoración media se mantenga sólida en las primeras posiciones de Google Maps.`,
+      },
+      {
+        h2: "Protege tu reputación online con SPP Labs",
+        content: `En **SPP Labs (spplabs.es)** integramos la gestión de clientes en tu [panel de control CRM](/servicios/crm-dashboard), permitiéndote consultar el historial de citas y activar el envío automatizado de solicitudes de reseñas.
+
+Todo incluido dentro de nuestra suscripción todo en uno de **197 €/mes + IVA**. Puedes [contactar con nuestro equipo](/contacto) para activar este sistema en tu negocio.`,
+      },
+    ],
+    faqs: [
+      {
+        q: "¿Se pueden eliminar las reseñas negativas falsas de Google?",
+        a: "Si una reseña infringe las políticas de Google (lenguaje ofensivo, conflicto de intereses o contenido spam), puedes marcarla como inadecuada para que el equipo de soporte de Google la revise y proceda a su retirada.",
+      },
+      {
+        q: "¿Conviene contestar a todas las reseñas o solo a las negativas?",
+        a: "Es fundamental responder al 100% de las valoraciones, tanto a las positivas agradeciendo la confianza como a las negativas ofreciendo soluciones constructivas.",
+      },
+    ],
+  },
+  {
+    slug: "por-que-las-resenas-de-google-son-el-arma-secreta-para-vender-mas",
+    title: "Por qué las reseñas de Google son el factor decisivo para que un cliente elija tu empresa",
+    metaTitle: "Por Qué las Reseñas de Google son Decisivas para Vender Más | SPP Labs",
+    metaDescription: "Descubre el impacto de las valoraciones de 5 estrellas en la decisión de compra de tus clientes y cómo automatizar su captación tras cada servicio.",
+    primaryKeyword: "importancia de las reseñas de Google",
+    secondaryKeywords: [
+      "impacto reseñas Google ventas",
+      "por qué tener reseñas en Google",
+      "prueba social Google Maps",
+      "conseguir valoraciones 5 estrellas",
+      "automatizar reseñas post servicio",
+      "aumentar ventas con reseñas",
+      "reputación en Google Maps",
+      "opiniones de clientes locales",
+    ],
+    category: {
+      id: "resenas-google",
+      label: "Reseñas de Google",
+      color: "amber",
+    },
+    publishedAt: "2026-08-27",
+    readTime: "8 min de lectura",
+    author: {
+      name: "Equipo de Reputación y Conversión SPP Labs",
+      role: "Consultores en Prueba Social y Optimización de Conversión",
+    },
+    excerpt: "Analizamos la psicología de la prueba social y por qué un flujo continuo de opiniones de clientes en Google Maps multiplica la facturación de tu negocio.",
+    sections: [
+      {
+        h2: "La psicología de la decisión de compra: La Prueba Social",
+        content: `Cuando una persona necesita contratar un fontanero, acudir a una clínica dental o encargar una reforma en su vivienda, se enfrenta a un dilema de confianza: no conoce personalmente a la empresa y teme tomar una mala decisión.
+
+Para reducir ese riesgo, el cerebro humano recurre a la **prueba social (*Social Proof*)**: busca la experiencia verificada de otros usuarios que ya hayan contratado el servicio.
+
+En el mercado actual, la **importancia de las reseñas de Google** es absoluta: más del 90% de los consumidores leen las opiniones en Google Maps antes de realizar una llamada o agendar una cita.`,
+      },
+      {
+        h2: "Los 3 factores que el algoritmo y los usuarios analizan",
+        content: `1. **Nota media global:** Los negocios con valoraciones entre 4.7 y 4.9 estrellas transmiten máxima fiabilidad. Puntuaciones por debajo de 4.2 provocan que los usuarios descarten automáticamente el negocio en favor de la competencia.
+2. **Volumen total de opiniones:** Tener 150 valoraciones ofrece infinitamente mayor seguridad estadística que tener solo 8 opiniones de amigos y familiares.
+3. **Frescura y regularidad:** Las opiniones recibidas en las últimas semanas tienen un impacto psicológico y algorítmico muy superior a comentarios de hace dos años.`,
+      },
+      {
+        h2: "Por qué pedir reseñas a mano no funciona a largo plazo",
+        content: `Muchos profesionales intentan pedir opiniones de palabra al finalizar el trabajo o mediante mensajes manuales esporádicos. Sin embargo, en el día a día surgen urgencias y esta tarea se olvida rápidamente, provocando que el perfil se estanque durante meses.
+
+La solución más rentable y efectiva es contar con un [sistema automatizado de reseñas](/servicios/booster-resenas) que envíe un correo electrónico personalizado con el enlace directo tras completar el servicio en tu [sistema de reservas y citas](/servicios/sistema-reservas).`,
+      },
+      {
+        h2: "El impacto económico directo en la facturación",
+        content: `Las empresas locales que mantienen un flujo continuo de valoraciones de 5 estrellas en Google experimentan:
+- Hasta un **380% más de conversiones** desde su Perfil de Empresa.
+- Mayor visibilidad en el Local Pack de 3 resultados de Google Maps.
+- Capacidad de cobrar precios más altos sin resistencia por parte del cliente, gracias a la reputación consolidada.`,
+      },
+      {
+        h2: "Activa el Review Booster de SPP Labs en piloto automático",
+        content: `En **SPP Labs (spplabs.es)** eliminamos la fricción en la captación de opiniones. Nuestro módulo de email y reseñas solicita valoraciones en el momento exacto de mayor satisfacción de tu cliente.
+
+Todo integrado dentro de nuestra cuota fija de **197 €/mes + IVA** junto a tu web de alto rendimiento, CRM y chatbot con IA. Puedes [solicitar información](/contacto) para empezar a multiplicar tus opiniones positivas.`,
+      },
+    ],
+    faqs: [
+      {
+        q: "¿Por qué es malo comprar reseñas falsas en Google?",
+        a: "Google cuenta con avanzados filtros de inteligencia artificial que detectan patrones fraudulentos, eliminan las reseñas falsas y pueden suspender o penalizar gravemente la visibilidad de tu ficha en Maps.",
+      },
+      {
+        q: "¿El Review Booster de SPP Labs requiere instalar herramientas externas?",
+        a: "No. Funciona de forma 100% nativa y configurada desde tu propio panel de control de SPP Labs sin pagar suscripciones adicionales.",
+      },
+    ],
+  },
+  {
+    slug: "como-un-chatbot-con-ia-atiende-y-cualifica-clientes-24-7",
+    title: "Cómo un chatbot con inteligencia artificial atiende y cualifica clientes las 24 horas",
+    metaTitle: "Cómo un Chatbot con IA Atiende y Cualifica Clientes 24/7 | SPP Labs",
+    metaDescription: "Descubre cómo un asistente de IA entrenado con tus datos responde dudas comerciales al instante y captura los datos de contacto de tus visitantes.",
+    primaryKeyword: "chatbot IA atención al cliente",
+    secondaryKeywords: [
+      "chatbot para cualificar leads",
+      "asistente virtual web empresas",
+      "captar clientes con chatbot",
+      "chatbot RAG para empresas",
+      "automatizar atención web",
+      "atención al cliente 24/7 web",
+      "IA para captar contactos",
+      "asistente virtual para pymes",
+    ],
+    category: {
+      id: "ia-chatbots",
+      label: "IA y Chatbots",
+      color: "purple",
+    },
+    publishedAt: "2026-08-28",
+    readTime: "8 min de lectura",
+    author: {
+      name: "Equipo de Inteligencia Artificial SPP Labs",
+      role: "Especialistas en Modelos de Lenguaje y Automatización Conversacional",
+    },
+    excerpt: "Aprende cómo un asistente inteligente entrenado con los datos de tu empresa atiende consultas comerciales inmediatas y registra contactos cualificados en tu CRM.",
+    sections: [
+      {
+        h2: "El desafío de la atención comercial inmediata en internet",
+        content: `Cuando un cliente potencial visita tu página web, suele tener preguntas concretas antes de decidirse: horarios de atención, precios aproximados, servicios incluidos, tiempos de entrega o cobertura geográfica.
+
+Si no encuentra una respuesta rápida en los primeros segundos o tu oficina está cerrada, es muy probable que abandone la página para consultar a otro profesional de la competencia.
+
+Implementar un sistema de **chatbot IA de atención al cliente** permite a tu negocio estar disponible de forma ininterrumpida, resolviendo dudas con lenguaje natural y capturando el contacto del visitante para que tu equipo comercial cierre la venta.`,
+      },
+      {
+        h2: "Cómo funciona la cualificación de contactos con IA",
+        content: `A diferencia de los formularios estáticos que exigen esfuerzo al usuario, el asistente de IA mantiene una conversación fluida y amigable:
+1. **Comprensión del contexto:** El usuario formula su consulta en lenguaje cotidiano (ej. *"¿Hacéis revisiones previas a la ITV y qué coste aproximado tienen?"*).
+2. **Respuesta verificada:** El chatbot consulta la base de conocimiento de tu empresa y responde de forma precisa en menos de 2 segundos.
+3. **Captura educada del contacto:** Tras resolver la duda, el asistente invita al usuario a dejar su nombre, teléfono o email para que un especialista de la empresa le proporcione información personalizada.
+4. **Sincronización instantánea:** Los datos recopilados y la transcripción de la conversación se registran automáticamente en tu [panel de control CRM](/servicios/crm-dashboard).`,
+      },
+      {
+        h2: "Garantía de precisión: Knowledge Grounding y RAG",
+        content: `Una de las mayores preocupaciones de las empresas al adoptar inteligencia artificial es el riesgo de que el modelo cometa errores o invente datos (*alucinaciones*).
+
+En el [chatbot de IA para empresas](/servicios/chatbot-ia) de SPP Labs, implementamos una arquitectura **RAG (Retrieval-Augmented Generation)** con parámetros estrictos de *Knowledge Grounding*. El modelo solo responde basándose en los documentos y datos autorizados de tu empresa. Si un usuario realiza una pregunta no registrada, el asistente lo reconoce cortésmente y ofrece derivar la consulta al equipo humano.`,
+      },
+      {
+        h2: "Integración completa con el calendario web",
+        content: `Si el visitante desea reservar una cita para ser atendido, el chatbot le orienta de forma natural hacia el [sistema de reservas online de la web](/servicios/sistema-reservas), donde el cliente puede seleccionar el día y la hora disponibles con total comodidad.`,
+      },
+      {
+        h2: "Tu asistente de IA listo y gestionado por 197 €/mes",
+        content: `En **SPP Labs (spplabs.es)** nos encargamos de todo: cargamos los datos de tu empresa, configuramos los prompts del modelo, integramos el widget en tu web y monitorizamos el consumo de tokens sin costes sorpresa.
+
+Todo incluido dentro de nuestra suscripción única de **197 €/mes + IVA**. Puedes [solicitar una demostración](/contacto) para ver el asistente en funcionamiento con los datos de tu negocio.`,
+      },
+    ],
+    faqs: [
+      {
+        q: "¿El chatbot puede sustituir al equipo de atención al cliente de mi empresa?",
+        a: "El chatbot no sustituye a tu equipo humano, sino que actúa como un primer filtro ágil que atiende dudas recurrentes 24/7 y cualifica a los prospectos para que tu personal dedique su tiempo a cerrar ventas y prestar el servicio.",
+      },
+      {
+        q: "¿Dónde puedo consultar lo que los clientes han hablado con el chatbot?",
+        a: "Desde tu panel de control privado de SPP Labs puedes revisar todas las conversaciones, ver las preguntas más frecuentes y consultar los contactos capturados en tiempo real.",
+      },
+    ],
+  },
+  {
+    slug: "diferencia-entre-chatbot-tradicional-y-chatbot-con-inteligencia-artificial",
+    title: "Diferencias entre un chatbot tradicional y un chatbot con IA generativa",
+    metaTitle: "Chatbot Tradicional vs Chatbot con IA: Diferencias y Ventajas | SPP Labs",
+    metaDescription: "Comparativa clara entre los bots rígidos de botones y los asistentes modernos con IA generativa (RAG). Descubre cuál necesita tu empresa.",
+    primaryKeyword: "diferencia entre chatbot y chatbot con IA",
+    secondaryKeywords: [
+      "chatbot tradicional vs IA",
+      "ventajas chatbot inteligencia artificial",
+      "chatbot basado en reglas vs LLM",
+      "asistente virtual inteligente empresas",
+      "por qué fallan los chatbots antiguos",
+      "chatbot RAG beneficios",
+      "asistente conversacional pymes",
+      "comparativa chatbots web",
+    ],
+    category: {
+      id: "ia-chatbots",
+      label: "IA y Chatbots",
+      color: "purple",
+    },
+    publishedAt: "2026-08-29",
+    readTime: "8 min de lectura",
+    author: {
+      name: "Equipo de Inteligencia Artificial SPP Labs",
+      role: "Especialistas en Procesamiento de Lenguaje Natural y RAG",
+    },
+    excerpt: "Comparamos la rigidez de los antiguos menús automáticos frente a la fluidez y eficacia de los nuevos asistentes de IA entrenados con datos corporativos.",
+    sections: [
+      {
+        h2: "La evolución de la atención automatizada en internet",
+        content: `Casi todos los usuarios de internet han vivido la frustración de interactuar con un bot tradicional: un sistema rígido que muestra botones numéricos y que, ante cualquier frase libre, responde con el temido mensaje *"No te he entendido, por favor selecciona una opción válida"*.
+
+Ese modelo basado en árboles de decisión prefabricados ha quedado completamente superado por los modelos de lenguaje natural contemporáneos.
+
+Comprender la **diferencia entre un chatbot tradicional y un chatbot con IA** es esencial para cualquier empresa que desee ofrecer una experiencia de usuario moderna y profesional.`,
+      },
+      {
+        h2: "Tabla comparativa: Bot Basado en Reglas vs. Asistente con IA (RAG)",
+        content: `Analizamos las diferencias fundamentales entre ambas tecnologías:`,
+        table: {
+          headers: ["Característica", "Chatbot Tradicional (Reglas / Botones)", "Chatbot con IA Generativa (SPP Labs)"],
+          rows: [
+            ["Comprensión Lingüística", "Solo palabras clave exactas o botones", "Comprensión contextual y lenguaje natural fluido"],
+            ["Capacidad de Adaptación", "Rígido (se bloquea ante frases complejas)", "Flexible (interpreta la intención de la consulta)"],
+            ["Base de Conocimiento", "Árboles manuales difíciles de mantener", "Carga directa de textos, tarifas y preguntas frecuentes"],
+            ["Experiencia de Usuario", "Frustrante y percibida como robótica", "Cercana, rápida y similar a hablar con un especialista"],
+            ["Captura de Contactos", "Formulario rígido dentro de la ventana", "Captación conversacional integrada con el CRM"],
+          ],
+        },
+      },
+      {
+        h2: "Por qué los chatbots de IA convierten más visitantes en clientes",
+        content: `Un asistente de IA no obliga al usuario a adaptarse a una estructura rígida; se adapta él a la forma de comunicarse del cliente.
+
+Al responder de manera instantánea y personalizada a dudas concretas, el usuario percibe un servicio atento y profesional. Una vez resuelta la consulta, el asistente solicita sus datos de contacto de forma amigable, enviándolos al [panel CRM de la empresa](/servicios/crm-dashboard) para su seguimiento.`,
+      },
+      {
+        h2: "Implementa un Chatbot de IA en tu empresa con SPP Labs",
+        content: `En **SPP Labs (spplabs.es)** no necesitas programar ni aprender complejas herramientas de prompts.
+
+Integramos nuestro [asistente de IA para empresas](/servicios/chatbot-ia) en tu página web de alto rendimiento [desarrollada en Next.js](/servicios/desarrollo-web) dentro de nuestra cuota única de **197 €/mes + IVA**. Puedes [solicitar una demostración personalizada](/contacto) para comprobar la diferencia.`,
+      },
+    ],
+    faqs: [
+      {
+        q: "¿Es necesario reprogramar el chatbot si cambio mis tarifas u horarios?",
+        a: "No. Solo necesitas actualizar el texto en la base de conocimiento de tu panel de control de SPP Labs y el chatbot asimilará los nuevos datos al instante.",
+      },
+      {
+        q: "¿El chatbot funciona correctamente en teléfonos móviles?",
+        a: "Sí, el widget está totalmente optimizado para pantallas táctiles, con tiempos de respuesta instantáneos y tipografía adaptada.",
+      },
+    ],
+  },
+  {
+    slug: "por-que-excel-no-sirve-para-gestionar-clientes-en-una-empresa",
+    title: "Por qué Excel no sirve para gestionar los clientes de tu empresa y qué usar en su lugar",
+    metaTitle: "Por Qué no Usar Excel para Gestionar Clientes en tu Empresa | SPP Labs",
+    metaDescription: "Descubre los riesgos y pérdidas económicas de llevar tus contactos y citas en hojas de cálculo y cómo un panel CRM integrado profesionaliza tu negocio.",
+    primaryKeyword: "por qué no usar Excel para gestionar clientes",
+    secondaryKeywords: [
+      "Excel vs CRM",
+      "sustituir Excel por CRM",
+      "problemas de gestionar clientes en Excel",
+      "gestión de contactos para pymes",
+      "panel de control para empresas",
+      "software gestión clientes España",
+      "organizar clientes sin Excel",
+      "control de citas y clientes",
+    ],
+    category: {
+      id: "crm-captacion",
+      label: "CRM y Clientes",
+      color: "indigo",
+    },
+    publishedAt: "2026-08-30",
+    readTime: "8 min de lectura",
+    author: {
+      name: "Equipo de Producto y Procesos SPP Labs",
+      role: "Especialistas en Digitalización y Eficiencia Operativa",
+    },
+    excerpt: "Descubre los cuellos de botella y pérdidas de información que sufren las empresas al usar hojas de cálculo para organizar sus contactos y citas diarias.",
+    sections: [
+      {
+        h2: "La trampa de la hoja de cálculo en el crecimiento de un negocio",
+        content: `Cuando una empresa comienza su actividad, abrir una hoja de cálculo en Excel o Google Sheets parece la opción más fácil y económica: no cuesta dinero, es flexible y casi todo el mundo sabe escribir en una celda.
+
+Sin embargo, a medida que el negocio empieza a recibir consultas diarias por la web, llamadas telefónicas y solicitudes de citas, la hoja de cálculo se convierte en un laberinto caótico:
+- Filas duplicadas con teléfonos incompletos.
+- Falta de alertas automáticas cuando un cliente escribe por la web.
+- Varios empleados sobrescribiendo datos al mismo tiempo sin control de versiones.
+- Notas de seguimiento olvidadas en celdas interminables.
+
+Entender **por qué no usar Excel para gestionar clientes** es el paso decisivo para evitar fugas de ingresos y profesionalizar tu operativa diaria.`,
+      },
+      {
+        h2: "Los 5 límites críticos de Excel frente a un CRM Integrado",
+        content: `1. **Sin captura automática desde la web:** Con Excel debes copiar y pegar a mano cada mensaje que entra por el formulario web o el chatbot, lo que genera retrasos y olvidos.
+2. **Sin calendario interactivo de citas:** Una hoja de cálculo no bloquea horarios ocupados en tiempo real ni permite gestionar el estado de reservas (Pendiente, Confirmada, Cancelada).
+3. **Sin recordatorios automáticos por email:** No puede enviar confirmaciones de cita ni avisos previos para evitar que los clientes falten a su visita (*no-shows*).
+4. **Mala experiencia en el teléfono móvil:** Abrir y editar una hoja de cálculo con decenas de columnas en un smartphone mientras atiendes a un cliente resulta lento e incómodo.
+5. **Riesgo de pérdida de datos y falta de privacidad:** Un archivo local puede borrarse por error o compartirse sin el control de acceso que exige la normativa europea de protección de datos (RGPD).`,
+      },
+      {
+        h2: "Tabla comparativa: Hoja de Cálculo vs. Panel CRM de SPP Labs",
+        content: `Comparamos ambos métodos de gestión:`,
+        table: {
+          headers: ["Función Operativa", "Excel / Google Sheets", "Panel CRM SPP Labs"],
+          rows: [
+            ["Entrada de Contactos", "Manual (copiar y pegar)", "100% Automática desde web y chatbot"],
+            ["Gestión de Citas", "Texto estático en celdas", "Calendario interactivo con estados y horarios"],
+            ["Recordatorios por Email", "No disponibles", "Automáticos antes de cada cita"],
+            ["Notas y Etiquetas de Equipo", "Desordenadas y difíciles de filtrar", "Fichas organizadas con colores y fijación"],
+            ["Uso en Dispositivos Móviles", "Incómodo y propenso a errores", "Interfaz 100% responsive y fluida"],
+            ["Exportación de Datos", "Manual", "Exportación rápida a CSV en un clic"],
+          ],
+        },
+      },
+      {
+        h2: "El CRM integrado de SPP Labs: Todo en un solo panel",
+        content: `En **SPP Labs (spplabs.es)** no necesitas pagar suscripciones complejas por cada usuario de tu equipo como en otros softwares tradicionales.
+
+Nuestro [panel de control y CRM para empresas](/servicios/crm-dashboard) viene integrado de serie con tu [página web corporativa](/servicios/desarrollo-web), permitiéndote gestionar formularios de contacto, citas de clientes, notas internas del equipo y analíticas de visitas por una cuota fija de **197 €/mes + IVA**. Puedes [solicitar una demostración](/contacto) para ver el panel en acción.`,
+      },
+    ],
+    faqs: [
+      {
+        q: "¿Puedo pasar los contactos que ya tengo en Excel al panel de SPP Labs?",
+        a: "Sí. Puedes registrar tus contactos y notas directamente en el panel de SPP Labs para empezar a gestionarlos de forma centralizada y segura.",
+      },
+      {
+        q: "¿El panel de SPP Labs me permite descargar los datos si los necesito?",
+        a: "Por supuesto. Todos los registros de mensajes y reservas pueden exportarse a formato CSV en cualquier momento con un solo clic.",
+      },
+    ],
+  },
+  {
+    slug: "como-organizar-los-contactos-y-citas-de-tu-empresa-sin-perder-tiempo",
+    title: "Cómo organizar los contactos y citas de tu empresa sin perder tiempo",
+    metaTitle: "Cómo Organizar Contactos y Citas en una Pequeña Empresa | SPP Labs",
+    metaDescription: "Estrategia para centralizar mensajes web, citas de clientes y notas de equipo en un solo lugar, reduciendo ausencias y mejorando la atención.",
+    primaryKeyword: "cómo organizar contactos y citas empresa",
+    secondaryKeywords: [
+      "organizar citas negocio",
+      "reducir ausencias citas clientes",
+      "gestión de mensajes y contactos",
+      "recordatorios automáticos de citas",
+      "organización interna pymes",
+      "panel de citas y clientes",
+      "software de citas para empresas",
+      "gestión de leads pymes",
+    ],
+    category: {
+      id: "crm-captacion",
+      label: "CRM y Clientes",
+      color: "indigo",
+    },
+    publishedAt: "2026-08-31",
+    readTime: "7 min de lectura",
+    author: {
+      name: "Equipo de Operaciones SPP Labs",
+      role: "Especialistas en Organización y Gestión Comercial",
+    },
+    excerpt: "Guía práctica para eliminar el desorden en la recepción de solicitudes, agendar citas con control de disponibilidad y mantener al equipo alineado.",
+    sections: [
+      {
+        h2: "El coste del desorden operativo en un negocio de servicios",
+        content: `En una clínica, despacho profesional, empresa de reformas o taller mecánico, el tiempo del equipo es el recurso más valioso. Sin embargo, en muchos negocios se pierden horas cada semana intentando averiguar:
+- Quién atendió la última llamada de un cliente.
+- Qué citas hay confirmadas para el día siguiente y si se ha avisado al usuario.
+- Dónde se anotaron las observaciones especiales de un servicio.
+
+Aprender **cómo organizar los contactos y citas de una empresa** mediante un flujo de trabajo centralizado ahorra tiempo, reduce el estrés del equipo y transmite una imagen de máxima profesionalidad al cliente.`,
+      },
+      {
+        h2: "El flujo de 4 etapas para una gestión sin fricciones",
+        content: `1. **Recepción centralizada de solicitudes:** Cada vez que un usuario rellena el formulario de tu web o conversa con el chatbot de IA, la solicitud se registra en el panel con fecha, nombre, teléfono y mensaje.
+2. **Asignación y confirmación de citas:** A través del [sistema de reservas online](/servicios/sistema-reservas), el cliente selecciona su fecha y hora en el calendario interactivo, quedando registrada la cita en estado pendiente o confirmada.
+3. **Recordatorios automáticos para reducir ausencias (*no-shows*):** El sistema envía correos de confirmación y recordatorio previo (por ejemplo, 24 horas antes de la cita), reduciendo drásticamente los olvidos de los clientes.
+4. **Notas internas y seguimiento del equipo:** Mediante la libreta de notas con etiquetas de color y prioridad, el personal añade detalles clave sobre las preferencias o el estado del servicio.`,
+      },
+      {
+        h2: "Elimina el absentismo de clientes con recordatorios por email",
+        content: `Uno de los mayores problemas económicos en los negocios de citas previas son los clientes que reservan un hueco y no se presentan.
+
+Gracias a la configuración de correos automáticos integrada en el módulo de email de SPP Labs, el cliente recibe un aviso formal en su bandeja de entrada con los detalles de su cita, permitiéndole confirmar su asistencia y liberando tiempo a tu personal de recepción.`,
+      },
+      {
+        h2: "Controla todo desde el panel de control de SPP Labs",
+        content: `En **SPP Labs (spplabs.es)** unificamos la recepción de formularios web, el calendario interactivo de citas, las notas internas del equipo y el [booster de reseñas de Google](/servicios/booster-resenas) en una sola plataforma intuitiva.
+
+Todo incluido dentro de nuestra suscripción todo en uno de **197 €/mes + IVA**. Puedes [solicitar información](/contacto) para organizar la gestión de tu empresa desde hoy mismo.`,
+      },
+    ],
+    faqs: [
+      {
+        q: "¿Puedo añadir citas manualmente en el calendario si un cliente llama por teléfono?",
+        a: "Sí. Desde tu panel de control de SPP Labs puedes crear, confirmar o modificar citas recibidas por teléfono o en el mostrador en pocos segundos.",
+      },
+      {
+        q: "¿Los recordatorios de cita por email tienen algún coste adicional?",
+        a: "No. El envío de confirmaciones y recordatorios automáticos por email está incluido de serie dentro de tu cuota mensual de SPP Labs.",
+      },
+    ],
+  },
+  {
+    slug: "como-optimizar-tu-pagina-web-para-motores-de-busqueda-generativa",
+    title: "Cómo optimizar tu página web para motores de búsqueda generativa (GEO)",
+    metaTitle: "Cómo Optimizar tu Web para Búsquedas Generativas (GEO) | SPP Labs",
+    metaDescription: "Guía técnica y práctica de Generative Engine Optimization (GEO). Aprende cómo estructurar tu web para que ChatGPT, Perplexity y Gemini citen tu empresa.",
+    primaryKeyword: "cómo optimizar una web para GEO",
+    secondaryKeywords: [
+      "optimización para motores generativos",
+      "GEO posicionamiento IA",
+      "ChatGPT rastreo web",
+      "SearchGPT optimización empresas",
+      "Perplexity SEO",
+      "datos estructurados para IA",
+      "guía GEO España",
+      "posicionamiento en inteligencia artificial",
+    ],
+    category: {
+      id: "geo-buscadores-ia",
+      label: "GEO y ChatGPT",
+      color: "cyan",
+    },
+    publishedAt: "2026-09-01",
+    readTime: "9 min de lectura",
+    author: {
+      name: "Equipo de Investigación GEO SPP Labs",
+      role: "Especialistas en Motores de Búsqueda Generativa y Entity SEO",
+    },
+    excerpt: "Descubre las directrices técnicas y de arquitectura semántica para que los modelos de inteligencia artificial descubran, procesen y recomienden tu empresa.",
+    sections: [
+      {
+        h2: "De los diez enlaces azules a las respuestas directas con IA",
+        content: `El comportamiento de búsqueda de los usuarios está experimentando su mayor transformación en décadas. Cada vez más personas utilizan asistentes como **ChatGPT, SearchGPT, Perplexity o Google Gemini** para resolver dudas complejas y pedir recomendaciones de profesionales y empresas.
+
+En lugar de examinar una lista de páginas web, el usuario recibe una respuesta sintetizada en texto con citas directas a las fuentes de mayor confianza y autoridad.
+
+La **optimización para motores generativos (GEO - Generative Engine Optimization)** es la metodología técnica que permite estructurar la información de tu página web para que los modelos de IA la comprendan, la verifiquen y la citen como fuente recomendada.`,
+      },
+      {
+        h2: "Los 4 pilares técnicos para optimizar una web para GEO",
+        content: `### 1. Marcado semántico estructurado Schema.org
+Los rastreadores de IA (*crawlers* como GPTBot o PerplexityBot) analizan los datos estructurados en formato JSON-LD para identificar entidades claras: tipo de negocio (*LocalBusiness* o *ProfessionalService*), catálogo de servicios (*OfferCatalog*), ubicación geográfica y autoría.
+
+### 2. Estructura de contenido en formato pregunta/respuesta (Q&A)
+Los modelos de lenguaje sintetizan información con mayor facilidad cuando los artículos y páginas de servicios organizan el contenido con encabezados claros que responden de forma concisa y fundamentada a preguntas frecuentes reales.
+
+### 3. Velocidad extrema y código HTML5 limpio
+Una web pesada, con renderizado bloqueado por JavaScript cliente o caídas constantes de servidor, consume excesivos recursos de rastreo y es descartada por los bots de IA. Un [desarrollo web optimizado en Next.js](/servicios/desarrollo-web) garantiza un procesamiento fluido.
+
+### 4. Autoridad de marca y opiniones verificadas en Google
+Los motores generativos cruzan información de múltiples fuentes para evaluar la reputación. Los negocios con decenas de valoraciones reales y consistencia en sus datos de contacto tienen una probabilidad muy superior de ser recomendados.`,
+      },
+      {
+        h2: "Checklist de preparación GEO para empresas",
+        content: `Verifica si tu presencia digital cumple con los requisitos para los motores de IA:
+- [x] Archivo robots.txt accesible sin bloqueos a rastreadores de IA autorizados.
+- [x] Marcado JSON-LD completo de Organización, Servicios y FAQPage.
+- [x] Coherencia absoluta en nombre, dirección, teléfono y catálogo de servicios.
+- [x] Contenido fundamentado en datos y experiencia real del sector.
+- [x] Carga ultrarrápida sin scripts pesados innecesarios.`,
+      },
+      {
+        h2: "Prepara tu empresa para el futuro de las búsquedas con SPP Labs",
+        content: `En **SPP Labs (spplabs.es)** integramos la [optimización GEO para buscadores de IA](/servicios/optimizacion-geo) y el [posicionamiento SEO técnico](/servicios/posicionamiento-seo) en cada proyecto que desarrollamos.
+
+Por una cuota única de **197 €/mes + IVA**, tu empresa dispone de una web ultrarrápida, asistente de IA, CRM y reputación optimizada para liderar tanto los resultados tradicionales como las respuestas de inteligencia artificial. Puedes [solicitar una propuesta técnica](/contacto) para comenzar.`,
+      },
+    ],
+    faqs: [
+      {
+        q: "¿El GEO sustituye al SEO tradicional de Google?",
+        a: "No. El GEO se apoya en los mismos fundamentos del SEO técnico (indexabilidad, semántica, autoridad y velocidad). Una buena optimización SEO es el requisito previo para que los motores de IA puedan descubrir tu empresa.",
+      },
+      {
+        q: "¿Cómo sabe ChatGPT qué empresas recomendar en una ciudad?",
+        a: "Analiza la información pública rastreada en internet, los datos estructurados Schema.org, los perfiles de Google Maps y las valoraciones de clientes para seleccionar los negocios con mayor relevancia y sentimiento positivo.",
+      },
+    ],
+  },
+  {
+    slug: "que-es-el-entity-seo-y-por-que-es-vital-para-la-inteligencia-artificial",
+    title: "Qué es el Entity SEO y por qué es fundamental para que la IA recomiende tu marca",
+    metaTitle: "Qué es el Entity SEO y su Importancia para la IA | SPP Labs",
+    metaDescription: "Aprende qué es el SEO de Entidades (Entity SEO), cómo los grafos de conocimiento conectan tu empresa con tus servicios y cómo destacar en la era de la IA.",
+    primaryKeyword: "qué es el Entity SEO",
+    secondaryKeywords: [
+      "Entity SEO definición",
+      "SEO de entidades para empresas",
+      "Knowledge Graph empresas Google",
+      "Schema org entidades",
+      "posicionamiento semántico IA",
+      "visibilidad de marca en inteligencia artificial",
+      "grafo de conocimiento pymes",
+      "optimización semántica web",
+    ],
+    category: {
+      id: "geo-buscadores-ia",
+      label: "GEO y ChatGPT",
+      color: "cyan",
+    },
+    publishedAt: "2026-09-02",
+    readTime: "9 min de lectura",
+    author: {
+      name: "Equipo de Estrategia Semántica SPP Labs",
+      role: "Especialistas en Grafos de Conocimiento y Datos Estructurados",
+    },
+    excerpt: "Descubre cómo los buscadores de IA comprenden conceptos y relaciones de marca más allá de las palabras clave sueltas y cómo posicionar tu entidad corporativa.",
+    sections: [
+      {
+        h2: "De las palabras clave a los conceptos y entidades",
+        content: `Durante los primeros años de los motores de búsqueda, el posicionamiento web se basaba en la coincidencia exacta de palabras clave (*Keyword Matching*): repetir un término varias veces en el texto para indicarle a Google de qué trataba la página.
+
+Sin embargo, los algoritmos modernos y los modelos de lenguaje de inteligencia artificial ya no leen texto como cadenas de caracteres aisladas: operan mediante **grafos de conocimiento (*Knowledge Graphs*)** que comprenden **entidades** y las relaciones lógicas entre ellas.
+
+Una **entidad** es cualquier concepto único, verificable y bien definido: una persona, un lugar, una empresa o un servicio específico.
+
+Aprender **qué es el Entity SEO** es el pilar indispensable para que motores como Google, ChatGPT y Perplexity reconozcan a tu empresa como una autoridad verificada en su sector.`,
+      },
+      {
+        h2: "¿Cómo construye la Inteligencia Artificial el mapa de tu empresa?",
+        content: `Para que un motor de IA entienda con precisión a qué se dedica tu negocio, conecta diferentes nodos de información:
+- **Nodo Empresa (Entidad Principal):** Nombre comercial verificado, NIF o identificación legal, año de fundación y logotipo oficial.
+- **Nodo Ubicación:** Dirección física, ciudad, código postal y coordenadas geográficas coincidentes en Google Maps y la web.
+- **Nodo Oferta de Servicios:** Categorías de servicio estructuradas con descripciones precisas y relaciones semánticas (*hasOfferCatalog* en Schema.org).
+- **Nodo Reputación:** Opiniones reales de clientes, valoraciones medias y menciones en medios o directorios profesionales del sector.`,
+      },
+      {
+        h2: "Cómo aplicar Entity SEO en la página web de tu negocio",
+        content: `1. **Marcado semántico JSON-LD exhaustivo:** Implementar esquemas de *Organization*, *LocalBusiness*, *Service* y *BreadcrumbList* que declaren formalmente los atributos de tu empresa.
+2. **Coherencia NAP absoluta:** Tu nombre, dirección y teléfono deben ser idénticos en toda tu presencia digital.
+3. **Páginas de servicio independientes y profundas:** Cada servicio principal debe contar con su propia URL estructurada en lugar de agrupar todos los servicios en un único párrafo genérico.
+4. **Pruebas de experiencia y autoría:** Mostrar información real del equipo profesional, casos de éxito y opiniones verificadas de clientes.`,
+      },
+      {
+        h2: "Construye tu autoridad semántica con SPP Labs",
+        content: `En **SPP Labs (spplabs.es)** diseñamos cada [página web corporativa](/servicios/desarrollo-web) con una arquitectura semántica avanzada preparada tanto para [posicionamiento SEO tradicional](/servicios/posicionamiento-seo) como para [optimización GEO en buscadores de IA](/servicios/optimizacion-geo).
+
+Todo gestionado dentro de nuestra cuota integral de **197 €/mes + IVA**, con CRM, chatbot de IA y sistema de reservas. Puedes [solicitar una auditoría semántica](/contacto) de tu empresa con nuestros especialistas.`,
+      },
+    ],
+    faqs: [
+      {
+        q: "¿Qué diferencia hay entre una palabra clave y una entidad en SEO?",
+        a: "Una palabra clave es una cadena de texto (ej. 'abogado madrid'), mientras que una entidad es un concepto reconocido y conectado en una base de conocimiento (el despacho específico, su titular, su dirección física, sus áreas de práctica y sus valoraciones reales).",
+      },
+      {
+        q: "¿El Entity SEO ayuda a que ChatGPT recomiende mi empresa?",
+        a: "Sí, de forma determinante. Cuando un modelo de IA identifica tu empresa como una entidad sólida con datos coherentes y valoraciones positivas, tiene los fundamentos necesarios para citarla con confianza en sus respuestas.",
+      },
+    ],
+  },
 ];
+
