@@ -200,6 +200,45 @@ export default async function DashboardPage(props) {
     updatedAt: n.updatedAt.toISOString(),
   }));
 
+  // Fetch Google Calendar Connection
+  const rawGCal = await prisma.googleCalendarConnection.findUnique({
+    where: { websiteId: currentWebsite.id },
+    select: {
+      id: true,
+      googleAccountEmail: true,
+      googleCalendarId: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  const googleCalendarConnection = rawGCal
+    ? {
+        id: rawGCal.id,
+        googleAccountEmail: rawGCal.googleAccountEmail,
+        googleCalendarId: rawGCal.googleCalendarId,
+        createdAt: rawGCal.createdAt.toISOString(),
+        updatedAt: rawGCal.updatedAt.toISOString(),
+      }
+    : null;
+
+  // Fetch External Calendar Events imported from Google Calendar
+  const rawExternalEvents = await prisma.externalCalendarEvent.findMany({
+    where: { websiteId: currentWebsite.id },
+    orderBy: { startDateTime: "asc" },
+  });
+
+  const externalCalendarEvents = rawExternalEvents.map((e) => ({
+    id: e.id,
+    googleEventId: e.googleEventId,
+    title: e.title,
+    description: e.description,
+    startDateTime: e.startDateTime.toISOString(),
+    endDateTime: e.endDateTime.toISOString(),
+    isAllDay: e.isAllDay,
+    status: e.status,
+  }));
+
   return (
     <DashboardClient
       session={session}
@@ -213,6 +252,8 @@ export default async function DashboardPage(props) {
       notifications={notifications}
       supportRequests={supportRequests}
       dashboardNotes={dashboardNotes}
+      googleCalendarConnection={googleCalendarConnection}
+      externalCalendarEvents={externalCalendarEvents}
     />
   );
 }

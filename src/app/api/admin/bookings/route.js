@@ -65,6 +65,15 @@ export async function PATCH(request) {
       });
     }).catch(e => console.error("Failed to update monthly booking status metric:", e));
 
+    // Update Google Calendar event asynchronously if connected
+    import("@/lib/googleCalendar").then(({ updateGoogleCalendarEvent }) => {
+      updateGoogleCalendarEvent({
+        websiteId: booking.websiteId,
+        booking: updatedBooking,
+        websiteDisplayName: booking.website?.displayName || "SPP Labs",
+      });
+    }).catch((e) => console.error("Failed to update Google Calendar event on PATCH:", e));
+
     return NextResponse.json({ success: true, data: updatedBooking });
   } catch (error) {
     console.error("PATCH booking status error:", error);
@@ -113,6 +122,15 @@ export async function DELETE(request) {
     await db.booking.delete({
       where: { id },
     });
+
+    if (booking.googleEventId) {
+      import("@/lib/googleCalendar").then(({ deleteGoogleCalendarEvent }) => {
+        deleteGoogleCalendarEvent({
+          websiteId: booking.websiteId,
+          googleEventId: booking.googleEventId,
+        });
+      }).catch((e) => console.error("Failed to delete Google Calendar event on DELETE:", e));
+    }
 
     return NextResponse.json({ success: true, message: "Booking successfully hard deleted" });
   } catch (error) {
@@ -222,6 +240,15 @@ export async function POST(request) {
         status: status || "CONFIRMED",
       });
     }).catch(e => console.error("Failed to increment monthly booking metrics on POST:", e));
+
+    // Sync to Google Calendar asynchronously if connected
+    import("@/lib/googleCalendar").then(({ createGoogleCalendarEvent }) => {
+      createGoogleCalendarEvent({
+        websiteId: website.id,
+        booking: newBooking,
+        websiteDisplayName: website.displayName || "SPP Labs",
+      });
+    }).catch((e) => console.error("Failed to create Google Calendar event on admin POST:", e));
 
     return NextResponse.json({ success: true, data: newBooking });
   } catch (error) {

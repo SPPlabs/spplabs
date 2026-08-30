@@ -46,6 +46,7 @@ model Website {
   scheduledEmails         ScheduledEmail[]
   dashboardNotes          DashboardNote[]
   monthlyMetrics          WebsiteMonthlyMetrics[]
+  externalCalendarEvents  ExternalCalendarEvent[]
 
   @@map("websites")
 }
@@ -99,6 +100,7 @@ model Booking {
   email     String
   message   String
   status    BookingStatus @default(PENDING)
+  googleEventId String?   @map("google_event_id")
   createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz
 
   website   Website       @relation(fields: [websiteId], references: [id], onDelete: Cascade)
@@ -170,12 +172,37 @@ model GoogleCalendarConnection {
   accessToken        String   @map("access_token")
   refreshToken       String   @map("refresh_token")
   tokenExpiresAt     DateTime @map("token_expires_at") @db.Timestamptz
+  syncToken          String?  @map("sync_token")
+  channelId          String?  @map("channel_id")
+  resourceId         String?  @map("resource_id")
+  channelExpiration  DateTime? @map("channel_expiration") @db.Timestamptz
   createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   website            Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
 
   @@map("google_calendar_connections")
+}
+
+model ExternalCalendarEvent {
+  id             String    @id @default(uuid()) @db.Uuid
+  websiteId      String    @map("website_id") @db.Uuid
+  googleEventId  String    @map("google_event_id")
+  title          String
+  description    String?   @db.Text
+  startDateTime  DateTime  @map("start_date_time") @db.Timestamptz
+  endDateTime    DateTime  @map("end_date_time") @db.Timestamptz
+  isAllDay       Boolean   @default(false) @map("is_all_day")
+  status         String    @default("confirmed")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  website        Website   @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@unique([websiteId, googleEventId])
+  @@index([websiteId])
+  @@index([websiteId, startDateTime])
+  @@map("external_calendar_events")
 }
 
 model WebsiteDashboardState {

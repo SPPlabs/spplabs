@@ -309,6 +309,24 @@ export async function POST(request) {
             },
           });
         }
+
+        // D. Create Google Calendar Event if connected
+        try {
+          const gcalConnection = await prisma.googleCalendarConnection.findUnique({
+            where: { websiteId: website.id },
+          });
+
+          if (gcalConnection) {
+            const { createGoogleCalendarEvent } = await import("@/lib/googleCalendar");
+            await createGoogleCalendarEvent({
+              websiteId: website.id,
+              booking,
+              websiteDisplayName: companyName,
+            });
+          }
+        } catch (gcalErr) {
+          console.error("Async Google Calendar event creation error:", gcalErr);
+        }
       } catch (err) {
         console.error("Async booking email & scheduling error:", err);
       }

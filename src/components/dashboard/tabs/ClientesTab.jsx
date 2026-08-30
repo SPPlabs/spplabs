@@ -20,6 +20,8 @@ export default function ClientesTab({
   handleDeleteBooking,
   currentWebsite,
   router,
+  googleCalendarConnection = null,
+  externalCalendarEvents = [],
 }) {
   const [copiedId, setCopiedId] = useState(null);
 
@@ -204,6 +206,8 @@ export default function ClientesTab({
           t={t}
           currentWebsiteDomain={currentWebsite?.domain}
           router={router}
+          googleCalendarConnection={googleCalendarConnection}
+          externalCalendarEvents={externalCalendarEvents}
         />
       </div>
     </div>

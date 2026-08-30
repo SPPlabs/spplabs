@@ -38,6 +38,8 @@ export default function DashboardClient({
   notifications,
   supportRequests,
   dashboardNotes = [],
+  googleCalendarConnection = null,
+  externalCalendarEvents = [],
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -92,6 +94,16 @@ export default function DashboardClient({
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [nowTimestamp] = useState(() => Date.now());
   const mainContainerRef = useRef(null);
+
+  // Sync tab from URL parameters if provided (e.g. ?tab=bookings or ?tab=clientes)
+  useEffect(() => {
+    const tabParam = searchParams?.get("tab");
+    if (tabParam === "clientes" || tabParam === "bookings") {
+      setActiveTab("clientes");
+    } else if (tabParam && ["admin", "overview", "analytics", "notas", "ia", "notificaciones", "informes", "email"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   // Background heartbeat to track user dashboard activity
   useEffect(() => {
@@ -1469,6 +1481,8 @@ export default function DashboardClient({
               handleDeleteBooking={handleDeleteBooking}
               currentWebsite={currentWebsite}
               router={router}
+              googleCalendarConnection={googleCalendarConnection}
+              externalCalendarEvents={externalCalendarEvents}
             />
           )}
 

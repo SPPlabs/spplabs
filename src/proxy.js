@@ -55,10 +55,12 @@ export async function proxy(request) {
 
   // 1. API Domain Enforcements (e.g. api.spplabs.es)
   if (isApiDomain) {
-    // Permit contacts, bookings, analytics POST requests, and the public tracker script
+    // Permit contacts, bookings, analytics POST requests, Google webhook, and the public tracker script
     if (
       path === "/contacts" ||
       path === "/bookings" ||
+      path.startsWith("/api/bookings/") ||
+      path.startsWith("/api/integrations/google-calendar/") ||
       path === "/api/analytics" ||
       path === "/api/chat" ||
       path === "/tracker.js"
