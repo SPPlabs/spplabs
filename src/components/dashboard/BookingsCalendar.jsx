@@ -238,6 +238,48 @@ export default function BookingsCalendar({
     return d.getFullYear() === year && d.getMonth() === month;
   });
 
+  // Calculate upcoming and previous months booking counts and pending notification badges
+  const isPendingBooking = (b) =>
+    b.status === "PENDING" ||
+    b.status === "pending" ||
+    (!b.status && b.status !== "CONFIRMED" && b.status !== "CANCELLED");
+
+  let nextMonthsPendingCount = 0;
+  let nextMonthsTotalCount = 0;
+  let prevMonthsPendingCount = 0;
+  let prevMonthsTotalCount = 0;
+
+  bookings.forEach((b) => {
+    if (b.status === "CANCELLED") return;
+
+    let bYear, bMonth;
+    if (typeof b.date === "string") {
+      const datePart = b.date.split("T")[0];
+      const [y, m] = datePart.split("-").map(Number);
+      bYear = y;
+      bMonth = m - 1;
+    } else if (b.date instanceof Date) {
+      bYear = b.date.getFullYear();
+      bMonth = b.date.getMonth();
+    } else {
+      const d = new Date(b.date);
+      bYear = d.getFullYear();
+      bMonth = d.getMonth();
+    }
+
+    const isFuture = bYear > year || (bYear === year && bMonth > month);
+    const isPast = bYear < year || (bYear === year && bMonth < month);
+    const pending = isPendingBooking(b);
+
+    if (isFuture) {
+      if (pending) nextMonthsPendingCount++;
+      nextMonthsTotalCount++;
+    } else if (isPast) {
+      if (pending) prevMonthsPendingCount++;
+      prevMonthsTotalCount++;
+    }
+  });
+
   const selectedDayBookings = selectedDateStr ? bookingsMap[selectedDateStr] || [] : [];
   const selectedDayExternalEvents = selectedDateStr ? externalEventsMap[selectedDateStr] || [] : [];
 
@@ -478,22 +520,68 @@ export default function BookingsCalendar({
                 </>
               )}
 
-              <div className="flex gap-1 ml-1">
+              <div className="flex gap-1.5 ml-1">
                 <button
                   type="button"
                   onClick={handlePrevMonth}
-                  className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl transition-all cursor-pointer text-sm font-bold"
-                  aria-label="Mes anterior"
+                  className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl transition-all cursor-pointer text-sm font-bold relative"
+                  aria-label={lang === "es" ? "Mes anterior" : "Previous month"}
+                  title={
+                    prevMonthsPendingCount > 0
+                      ? lang === "es"
+                        ? `${prevMonthsPendingCount} cita(s) pendiente(s) en meses anteriores`
+                        : `${prevMonthsPendingCount} pending booking(s) in previous months`
+                      : prevMonthsTotalCount > 0
+                      ? lang === "es"
+                        ? `${prevMonthsTotalCount} cita(s) en meses anteriores`
+                        : `${prevMonthsTotalCount} booking(s) in previous months`
+                      : lang === "es"
+                      ? "Mes anterior"
+                      : "Previous month"
+                  }
                 >
                   &larr;
+                  {prevMonthsPendingCount > 0 ? (
+                    <span className="absolute -top-1.5 -left-1.5 z-10 flex items-center justify-center pointer-events-none">
+                      <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
+                      <span className="relative z-10 flex items-center justify-center min-w-[15px] h-4 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[9px] font-black leading-none shadow-sm border border-white/60">
+                        {prevMonthsPendingCount}
+                      </span>
+                    </span>
+                  ) : prevMonthsTotalCount > 0 ? (
+                    <span className="absolute -top-1 -left-1 z-10 w-2 h-2 rounded-full bg-slate-400 border border-white shadow-2xs" />
+                  ) : null}
                 </button>
                 <button
                   type="button"
                   onClick={handleNextMonth}
-                  className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl transition-all cursor-pointer text-sm font-bold"
-                  aria-label="Mes siguiente"
+                  className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl transition-all cursor-pointer text-sm font-bold relative"
+                  aria-label={lang === "es" ? "Mes siguiente" : "Next month"}
+                  title={
+                    nextMonthsPendingCount > 0
+                      ? lang === "es"
+                        ? `${nextMonthsPendingCount} cita(s) pendiente(s) en meses posteriores`
+                        : `${nextMonthsPendingCount} pending booking(s) in upcoming months`
+                      : nextMonthsTotalCount > 0
+                      ? lang === "es"
+                        ? `${nextMonthsTotalCount} cita(s) en meses posteriores`
+                        : `${nextMonthsTotalCount} booking(s) in upcoming months`
+                      : lang === "es"
+                      ? "Mes siguiente"
+                      : "Next month"
+                  }
                 >
                   &rarr;
+                  {nextMonthsPendingCount > 0 ? (
+                    <span className="absolute -top-1.5 -right-1.5 z-10 flex items-center justify-center pointer-events-none">
+                      <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
+                      <span className="relative z-10 flex items-center justify-center min-w-[15px] h-4 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[9px] font-black leading-none shadow-sm border border-white/60">
+                        {nextMonthsPendingCount}
+                      </span>
+                    </span>
+                  ) : nextMonthsTotalCount > 0 ? (
+                    <span className="absolute -top-1 -right-1 z-10 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white shadow-2xs" />
+                  ) : null}
                 </button>
               </div>
             </div>
