@@ -475,10 +475,19 @@ export async function syncGoogleCalendarEvents(websiteId) {
       const status = item.status; // "confirmed" or "cancelled"
 
       if (status === "cancelled") {
-        // Delete or mark cancelled in database
+        // 1. Delete from external events table
         await prisma.externalCalendarEvent.deleteMany({
           where: { websiteId, googleEventId },
         });
+
+        // 2. If it was linked to a native booking, mark that booking as CANCELLED
+        if (nativeGoogleEventIds.has(googleEventId)) {
+          await prisma.booking.updateMany({
+            where: { websiteId, googleEventId },
+            data: { status: "CANCELLED" },
+          });
+        }
+
         deletedCount++;
         continue;
       }

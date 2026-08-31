@@ -67,6 +67,7 @@ export default function BookingsCalendar({
   // Google Calendar sync & disconnect state
   const [isSyncingGcal, setIsSyncingGcal] = useState(false);
   const [isDisconnectingGcal, setIsDisconnectingGcal] = useState(false);
+  const [deletingGoogleEventId, setDeletingGoogleEventId] = useState(null);
   const [gcalFeedback, setGcalFeedback] = useState(null);
 
   const handleSyncGoogleCalendar = async () => {
@@ -91,17 +92,16 @@ export default function BookingsCalendar({
       } else {
         setGcalFeedback({
           type: "error",
-          message: data.message || (lang === "es" ? "Error al sincronizar" : "Sync error"),
+          message: data.message || (lang === "es" ? "Error al sincronizar" : "Error syncing"),
         });
       }
     } catch {
       setGcalFeedback({
         type: "error",
-        message: lang === "es" ? "Error de conexión" : "Connection error",
+        message: lang === "es" ? "Error de conexión al sincronizar" : "Connection error while syncing",
       });
     } finally {
       setIsSyncingGcal(false);
-      setTimeout(() => setGcalFeedback(null), 5000);
     }
   };
 
@@ -135,6 +135,48 @@ export default function BookingsCalendar({
       alert(lang === "es" ? "Error al desconectar" : "Error disconnecting");
     } finally {
       setIsDisconnectingGcal(false);
+    }
+  };
+
+  const handleDeleteGoogleEvent = async (ext) => {
+    if (
+      !confirm(
+        lang === "es"
+          ? `¿Deseas eliminar "${ext.title || "este evento"}" de Google Calendar y de SPP Labs?`
+          : `Do you want to delete "${ext.title || "this event"}" from Google Calendar and SPP Labs?`
+      )
+    ) {
+      return;
+    }
+
+    setDeletingGoogleEventId(ext.id);
+    try {
+      const res = await fetch("/api/integrations/google-calendar/events", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          googleEventId: ext.googleEventId,
+          targetWebsiteDomain: currentWebsiteDomain,
+        }),
+      });
+
+      if (res.ok) {
+        setGcalFeedback({
+          type: "success",
+          message:
+            lang === "es"
+              ? "Evento eliminado de Google Calendar con éxito."
+              : "Event deleted from Google Calendar successfully.",
+        });
+        if (router) router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.message || (lang === "es" ? "Error al eliminar evento" : "Error deleting event"));
+      }
+    } catch {
+      alert(lang === "es" ? "Error al eliminar evento" : "Error deleting event");
+    } finally {
+      setDeletingGoogleEventId(null);
     }
   };
 
@@ -849,29 +891,52 @@ export default function BookingsCalendar({
                             minute: "2-digit",
                           });
 
+                      const isDeleting = deletingGoogleEventId === ext.id;
+
                       return (
                         <div
                           key={ext.id}
-                          className="bg-indigo-50/50 border border-indigo-200/80 rounded-2xl p-3.5 space-y-1.5 shadow-2xs"
+                          className="bg-indigo-50/50 border border-indigo-200/80 rounded-2xl p-4 space-y-2.5 shadow-2xs transition-all"
                         >
                           <div className="flex justify-between items-start gap-2">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-slate-900 text-xs block">{ext.title}</span>
+                            <div className="flex-1 min-w-0">
+                              <span className="font-bold text-slate-950 text-xs sm:text-sm block truncate">
+                                {ext.title}
+                              </span>
+                              <div className="text-xs text-indigo-900 font-mono font-bold mt-0.5">
+                                {startTime} {endTime ? ` - ${endTime}` : ""}
+                              </div>
                             </div>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 shrink-0">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 shrink-0 flex items-center gap-1">
+                              <GoogleGIcon className="w-3 h-3" />
                               Google
                             </span>
                           </div>
 
-                          <div className="text-xs text-indigo-900 font-mono font-bold">
-                            {startTime} {endTime ? ` - ${endTime}` : ""}
-                          </div>
-
                           {ext.description && (
-                            <p className="text-[11px] text-slate-600 bg-white/70 p-2 rounded-xl border border-indigo-100 leading-relaxed line-clamp-2">
+                            <p className="text-[11px] text-slate-600 bg-white/80 p-2.5 rounded-xl border border-indigo-100/80 leading-relaxed line-clamp-2">
                               {ext.description}
                             </p>
                           )}
+
+                          <div className="flex items-center justify-end pt-2 border-t border-indigo-100/60">
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteGoogleEvent(ext)}
+                              disabled={isDeleting}
+                              className="text-red-650 hover:bg-red-50 hover:border-red-200 font-semibold text-[10px] px-2.5 py-1 rounded-lg border border-red-100 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                              title={lang === "es" ? "Eliminar de Google Calendar" : "Delete from Google Calendar"}
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                              </svg>
+                              <span>
+                                {isDeleting
+                                  ? lang === "es" ? "Eliminando..." : "Deleting..."
+                                  : lang === "es" ? "Eliminar de Google" : "Delete from Google"}
+                              </span>
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
