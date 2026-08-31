@@ -188,26 +188,48 @@ export default function BookingsCalendar({
   const daysArray = Array.from({ length: totalDays }, (_, i) => i + 1);
   const leadingBlanks = Array.from({ length: adjustedFirstDayIndex });
 
+  // Set of native Google Event IDs from SPP Labs bookings to prevent UI duplicates
+  const nativeGoogleEventIds = new Set(
+    bookings.map((b) => b.googleEventId).filter(Boolean)
+  );
+
   // Map SPP Labs Bookings by Date (YYYY-MM-DD)
   const bookingsMap = {};
   bookings.forEach((b) => {
-    const bDate = new Date(b.date);
-    const dateStr = bDate.toISOString().split("T")[0];
-    if (!bookingsMap[dateStr]) {
-      bookingsMap[dateStr] = [];
+    let dateStr = "";
+    if (typeof b.date === "string") {
+      dateStr = b.date.split("T")[0];
+    } else if (b.date instanceof Date) {
+      dateStr = b.date.toISOString().split("T")[0];
     }
-    bookingsMap[dateStr].push(b);
+    if (dateStr) {
+      if (!bookingsMap[dateStr]) {
+        bookingsMap[dateStr] = [];
+      }
+      bookingsMap[dateStr].push(b);
+    }
   });
 
-  // Map External Google Calendar Events by Date (YYYY-MM-DD)
+  // Filter out any external event that corresponds to a native SPP Labs booking
+  const uniqueExternalEvents = externalCalendarEvents.filter(
+    (e) => !nativeGoogleEventIds.has(e.googleEventId)
+  );
+
+  // Map External Google Calendar Events by Date (YYYY-MM-DD in local time)
   const externalEventsMap = {};
-  externalCalendarEvents.forEach((e) => {
+  uniqueExternalEvents.forEach((e) => {
     const eDate = new Date(e.startDateTime);
-    const dateStr = eDate.toISOString().split("T")[0];
-    if (!externalEventsMap[dateStr]) {
-      externalEventsMap[dateStr] = [];
+    if (!isNaN(eDate.getTime())) {
+      const y = eDate.getFullYear();
+      const m = String(eDate.getMonth() + 1).padStart(2, "0");
+      const d = String(eDate.getDate()).padStart(2, "0");
+      const dateStr = `${y}-${m}-${d}`;
+
+      if (!externalEventsMap[dateStr]) {
+        externalEventsMap[dateStr] = [];
+      }
+      externalEventsMap[dateStr].push(e);
     }
-    externalEventsMap[dateStr].push(e);
   });
 
   // Filter bookings belonging to currently viewed month
@@ -403,10 +425,10 @@ export default function BookingsCalendar({
                 <span className="text-xs text-slate-400 font-mono">
                   {currentMonthBookings.length} {lang === "es" ? "citas este mes" : "bookings this month"}
                 </span>
-                {externalCalendarEvents.length > 0 && (
+                {uniqueExternalEvents.length > 0 && (
                   <span className="text-xs text-indigo-600 font-medium flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 inline-block" />
-                    {externalCalendarEvents.length} {lang === "es" ? "eventos de Google" : "Google events"}
+                    {uniqueExternalEvents.length} {lang === "es" ? "eventos de Google" : "Google events"}
                   </span>
                 )}
               </div>

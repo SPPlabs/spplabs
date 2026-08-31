@@ -192,6 +192,36 @@ export async function getValidAccessToken(websiteId) {
 }
 
 /**
+ * Formats a booking's date and time into local RFC3339 datetime strings (without Z)
+ * to ensure Google Calendar applies the target timezone without any UTC offset drift.
+ */
+function getBookingLocalDateTimes(booking, durationMinutes = 45) {
+  let datePart = "";
+  if (typeof booking.date === "string") {
+    datePart = booking.date.split("T")[0];
+  } else if (booking.date instanceof Date) {
+    datePart = booking.date.toISOString().split("T")[0];
+  } else {
+    datePart = new Date().toISOString().split("T")[0];
+  }
+
+  const timePart = (booking.time || "09:00").trim();
+  const [hStr, mStr] = timePart.split(":");
+  const h = parseInt(hStr, 10) || 9;
+  const m = parseInt(mStr, 10) || 0;
+
+  const pad = (n) => String(n).padStart(2, "0");
+  const startIso = `${datePart}T${pad(h)}:${pad(m)}:00`;
+
+  const totalMinutes = h * 60 + m + durationMinutes;
+  const endH = Math.floor(totalMinutes / 60) % 24;
+  const endM = totalMinutes % 60;
+  const endIso = `${datePart}T${pad(endH)}:${pad(endM)}:00`;
+
+  return { startIso, endIso };
+}
+
+/**
  * Creates an event in the tenant's Google Calendar from an SPP Labs booking.
  */
 export async function createGoogleCalendarEvent({ websiteId, booking, websiteDisplayName = "SPP Labs" }) {
@@ -201,16 +231,7 @@ export async function createGoogleCalendarEvent({ websiteId, booking, websiteDis
       return { success: false, reason: "No valid Google Calendar connection" };
     }
 
-    // Parse date and time into ISO string
-    const bookingDate = new Date(booking.date);
-    const [hours, minutes] = (booking.time || "09:00").split(":").map(Number);
-    
-    // Start DateTime
-    const startDateTime = new Date(bookingDate);
-    startDateTime.setHours(hours || 9, minutes || 0, 0, 0);
-
-    // End DateTime (Default 45 minutes appointment)
-    const endDateTime = new Date(startDateTime.getTime() + 45 * 60 * 1000);
+    const { startIso, endIso } = getBookingLocalDateTimes(booking, 45);
 
     const eventPayload = {
       summary: `Cita: ${booking.name} (${websiteDisplayName})`,
@@ -224,12 +245,19 @@ export async function createGoogleCalendarEvent({ websiteId, booking, websiteDis
         `Gestionado automáticamente por SPP Labs`,
       ].join("\n"),
       start: {
-        dateTime: startDateTime.toISOString(),
+        dateTime: startIso,
         timeZone: "Europe/Madrid",
       },
       end: {
-        dateTime: endDateTime.toISOString(),
+        dateTime: endIso,
         timeZone: "Europe/Madrid",
+      },
+      extendedProperties: {
+        private: {
+          source: "spplabs",
+          bookingId: String(booking.id || ""),
+          websiteId: String(websiteId),
+        },
       },
       reminders: {
         useDefault: false,
@@ -286,11 +314,7 @@ export async function updateGoogleCalendarEvent({ websiteId, booking, websiteDis
       return { success: false, reason: "No valid Google Calendar connection" };
     }
 
-    const bookingDate = new Date(booking.date);
-    const [hours, minutes] = (booking.time || "09:00").split(":").map(Number);
-    const startDateTime = new Date(bookingDate);
-    startDateTime.setHours(hours || 9, minutes || 0, 0, 0);
-    const endDateTime = new Date(startDateTime.getTime() + 45 * 60 * 1000);
+    const { startIso, endIso } = getBookingLocalDateTimes(booking, 45);
 
     const isCancelled = booking.status === "CANCELLED";
     const statusPrefix = isCancelled ? "[CANCELADA] " : "";
@@ -307,12 +331,19 @@ export async function updateGoogleCalendarEvent({ websiteId, booking, websiteDis
         `Actualizado por SPP Labs`,
       ].join("\n"),
       start: {
-        dateTime: startDateTime.toISOString(),
+        dateTime: startIso,
         timeZone: "Europe/Madrid",
       },
       end: {
-        dateTime: endDateTime.toISOString(),
+        dateTime: endIso,
         timeZone: "Europe/Madrid",
+      },
+      extendedProperties: {
+        private: {
+          source: "spplabs",
+          bookingId: String(booking.id || ""),
+          websiteId: String(websiteId),
+        },
       },
       colorId: isCancelled ? "11" : "2", // Red if cancelled, green if active
     };
@@ -364,7 +395,7 @@ export async function deleteGoogleCalendarEvent({ websiteId, googleEventId }) {
 
 /**
  * Synchronizes events from Google Calendar to SPP Labs' `ExternalCalendarEvent` table.
- * Supports incremental sync via `syncToken`.
+ * Supports incremental sync via `syncToken` and excludes native SPP Labs bookings.
  */
 export async function syncGoogleCalendarEvents(websiteId) {
   try {
@@ -423,6 +454,18 @@ export async function syncGoogleCalendarEvents(websiteId) {
       return { success: false, error: data.error?.message || "Sync fetch failed" };
     }
 
+    // Fetch all existing booking googleEventIds for this website to prevent duplicate echo
+    const existingBookings = await prisma.booking.findMany({
+      where: {
+        websiteId,
+        googleEventId: { not: null },
+      },
+      select: { googleEventId: true },
+    });
+    const nativeGoogleEventIds = new Set(
+      existingBookings.map((b) => b.googleEventId).filter(Boolean)
+    );
+
     const items = data.items || [];
     let upsertedCount = 0;
     let deletedCount = 0;
@@ -437,6 +480,20 @@ export async function syncGoogleCalendarEvents(websiteId) {
           where: { websiteId, googleEventId },
         });
         deletedCount++;
+        continue;
+      }
+
+      // Check if this event was created by SPP Labs (native booking echo)
+      const isSppLabsOrigin =
+        nativeGoogleEventIds.has(googleEventId) ||
+        item.extendedProperties?.private?.source === "spplabs";
+
+      if (isSppLabsOrigin) {
+        // This is a native SPP Labs booking synced to Google Calendar.
+        // Clean up from external events table so it is NEVER duplicated.
+        await prisma.externalCalendarEvent.deleteMany({
+          where: { websiteId, googleEventId },
+        });
         continue;
       }
 
