@@ -34,6 +34,12 @@ body {
   font-feature-settings: "zero" 0;
 }
 
+/* Smooth touch scrolling with momentum and boundary containment */
+.scroll-touch-contain {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
 /* ==========================================================================
    Interactive 3D Hover Phone Mockup Component
    ========================================================================== */

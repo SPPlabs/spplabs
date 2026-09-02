@@ -943,7 +943,7 @@ export default function EmailTab({
       </div>
 
       {/* OUTBOX & RECENT DELIVERY HISTORY */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+      <div className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
             <h3 className="text-base font-black text-slate-950 flex items-center gap-2">
@@ -995,18 +995,18 @@ export default function EmailTab({
             {lang === "es" ? "No hay registros de correos enviados para este período." : "No email delivery logs recorded for this period."}
           </div>
         ) : (
-          <div className="overflow-x-auto max-h-[460px] overflow-y-auto border border-slate-100 rounded-2xl">
-            <table className="w-full text-left text-xs">
-              <thead className="sticky top-0 bg-white z-10 border-b border-slate-200 shadow-2xs">
-                <tr className="text-slate-400 font-black uppercase text-[9.5px] tracking-wider bg-slate-50/90 backdrop-blur-xs">
-                  <th className="py-3 px-3">{lang === "es" ? "Tipo" : "Type"}</th>
-                  <th className="py-3 px-3">{lang === "es" ? "Destinatario" : "Recipient"}</th>
-                  <th className="py-3 px-3">{lang === "es" ? "Asunto" : "Subject"}</th>
-                  <th className="py-3 px-3">{lang === "es" ? "Fecha / Programado" : "Date / Scheduled"}</th>
-                  <th className="py-3 px-3 text-right">{lang === "es" ? "Estado" : "Status"}</th>
+          <div className="border border-slate-200/90 rounded-2xl max-h-[460px] overflow-auto overscroll-contain scroll-touch-contain relative shadow-2xs">
+            <table className="w-full min-w-[620px] text-left text-xs border-collapse">
+              <thead className="sticky top-0 bg-slate-50 z-10 border-b border-slate-200 shadow-2xs">
+                <tr className="text-slate-500 font-black uppercase text-[9.5px] tracking-wider">
+                  <th className="py-3 px-3.5 whitespace-nowrap">{lang === "es" ? "Tipo" : "Type"}</th>
+                  <th className="py-3 px-3.5 whitespace-nowrap">{lang === "es" ? "Destinatario" : "Recipient"}</th>
+                  <th className="py-3 px-3.5 whitespace-nowrap">{lang === "es" ? "Asunto" : "Subject"}</th>
+                  <th className="py-3 px-3.5 whitespace-nowrap">{lang === "es" ? "Fecha / Programado" : "Date / Scheduled"}</th>
+                  <th className="py-3 px-3.5 text-right whitespace-nowrap">{lang === "es" ? "Estado" : "Status"}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 bg-white">
                 {emailLogs.map((log) => {
                   let badge = "bg-amber-50 text-amber-700 border-amber-200";
                   if (log.status === "SENT") badge = "bg-emerald-50 text-emerald-700 border-emerald-200";
@@ -1033,15 +1033,17 @@ export default function EmailTab({
 
                   return (
                     <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3 px-3 font-bold text-slate-900">
+                      <td className="py-3 px-3.5 font-bold text-slate-900 whitespace-nowrap">
                         <span className="inline-flex items-center gap-1.5">
                           {typeIcon}
                           <span>{typeLabel}</span>
                         </span>
                       </td>
-                      <td className="py-3 px-3 font-sans tabular-nums text-slate-700">{log.recipientEmail}</td>
-                      <td className="py-3 px-3 text-slate-800 truncate max-w-[200px]">{log.subject}</td>
-                      <td className="py-3 px-3 font-sans tabular-nums text-[11px] text-slate-500">
+                      <td className="py-3 px-3.5 font-sans tabular-nums text-slate-700 whitespace-nowrap">{log.recipientEmail}</td>
+                      <td className="py-3 px-3.5 text-slate-800 whitespace-nowrap">
+                        <span className="truncate block max-w-[220px]" title={log.subject}>{log.subject}</span>
+                      </td>
+                      <td className="py-3 px-3.5 font-sans tabular-nums text-[11px] text-slate-500 whitespace-nowrap">
                         {new Date(log.sentAt || log.scheduledFor).toLocaleString("es-ES", {
                           year: "numeric",
                           month: "2-digit",
@@ -1050,7 +1052,7 @@ export default function EmailTab({
                           minute: "2-digit",
                         })}
                       </td>
-                      <td className="py-3 px-3 text-right">
+                      <td className="py-3 px-3.5 text-right whitespace-nowrap">
                         <span className={`px-2.5 py-0.5 rounded-full border text-[10px] font-black ${badge}`}>
                           {log.status}
                         </span>
