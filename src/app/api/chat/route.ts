@@ -383,12 +383,16 @@ export async function POST(request: NextRequest): Promise<Response> {
       };
     });
 
+    // Strict Guard: Reasoning/Thinking is ONLY permissible from authenticated Dashboard test sessions
+    const allowThinking = Boolean(isDashboardSession && isPreviewMode && (body.enable_thinking || body.thinking));
+
     // 10. Streaming LLM generation
     const stream = await generateChatCompletion({
       messages,
       stream: true,
-      max_tokens: 375,
+      max_tokens: allowThinking ? 1500 : 375,
       temperature: 0.2,
+      enableThinking: allowThinking,
     });
 
     // 11. Stream Response construction
@@ -399,11 +403,33 @@ export async function POST(request: NextRequest): Promise<Response> {
         let promptTokens = 0;
         let completionTokens = 0;
         let usageSource: "vllm" | "estimated" = "vllm";
+        let hasOpenedThinkingTag = false;
 
         try {
           for await (const chunk of stream) {
-            const text = chunk.choices[0]?.delta?.content || "";
+            const delta = chunk.choices[0]?.delta as any;
+            const reasoning = delta?.reasoning_content || delta?.reasoning || "";
+            const text = delta?.content || "";
+
+            // Handle dedicated reasoning_content field from vLLM/Qwen/DeepSeek if present
+            if (reasoning) {
+              if (!hasOpenedThinkingTag) {
+                hasOpenedThinkingTag = true;
+                const openTag = "<think>";
+                fullCompletionText += openTag;
+                controller.enqueue(encoder.encode(openTag));
+              }
+              fullCompletionText += reasoning;
+              controller.enqueue(encoder.encode(reasoning));
+            }
+
             if (text) {
+              if (hasOpenedThinkingTag) {
+                hasOpenedThinkingTag = false;
+                const closeTag = "</think>";
+                fullCompletionText += closeTag;
+                controller.enqueue(encoder.encode(closeTag));
+              }
               fullCompletionText += text;
               controller.enqueue(encoder.encode(text));
             }
@@ -414,6 +440,12 @@ export async function POST(request: NextRequest): Promise<Response> {
               completionTokens = chunk.usage.completion_tokens;
               usageSource = "vllm";
             }
+          }
+
+          if (hasOpenedThinkingTag) {
+            const closeTag = "</think>";
+            fullCompletionText += closeTag;
+            controller.enqueue(encoder.encode(closeTag));
           }
         } catch (streamError) {
           logger.error("Error processing completion stream chunks:", streamError);

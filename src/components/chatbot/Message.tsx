@@ -13,7 +13,7 @@ export const Message: React.FC<MessageProps> = ({ message, accentColor }) => {
   // Copy helper for assistant completions
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(message.content);
+      await navigator.clipboard.writeText(answerText || message.content);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -21,41 +21,83 @@ export const Message: React.FC<MessageProps> = ({ message, accentColor }) => {
     }
   };
 
+  // Parse out <think>...</think> if model reasoning was enabled
+  let thoughtText = "";
+  let answerText = message.content;
+  let isThinking = false;
+
+  if (!isUser && message.content && message.content.includes("<think>")) {
+    const thinkStart = message.content.indexOf("<think>");
+    const thinkEnd = message.content.indexOf("</think>");
+
+    if (thinkEnd !== -1) {
+      thoughtText = message.content.substring(thinkStart + 7, thinkEnd).trim();
+      answerText = message.content.substring(thinkEnd + 8).trim();
+      isThinking = false;
+    } else {
+      thoughtText = message.content.substring(thinkStart + 7).trim();
+      answerText = "";
+      isThinking = true;
+    }
+  }
+
   return (
     <div className={`flex w-full mb-4 group ${isUser ? "justify-end" : "justify-start"}`}>
       <div className={`flex flex-col max-w-[85%] ${isUser ? "items-end" : "items-start"}`}>
         
-        {/* Message Bubble Container */}
-        <div className="relative flex items-start">
-          <div
-            className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-              isUser
-                ? "bg-[#e3e3e2] text-zinc-900 rounded-tr-none border border-zinc-300/20 shadow-sm"
-                : "text-zinc-850 px-1 py-1"
-            }`}
-          >
-            {renderMarkdown(message.content)}
+        {/* Thought Accordion (Only present when thinking mode is active) */}
+        {thoughtText && (
+          <div className="w-full mb-2">
+            <details className="group/think rounded-xl border border-violet-200/90 bg-violet-50/60 overflow-hidden text-xs transition-all shadow-2xs" open={isThinking}>
+              <summary className="flex items-center justify-between px-3 py-2 cursor-pointer text-violet-800 font-bold hover:bg-violet-100/50 select-none transition-colors">
+                <span className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${isThinking ? "bg-violet-600 animate-pulse" : "bg-violet-500"}`} />
+                  <span>{isThinking ? "Pensando..." : "Razonamiento de la IA"}</span>
+                </span>
+                <span className="text-[10px] text-violet-600 font-semibold underline ml-2">
+                  {isThinking ? "En progreso" : "Ver detalles"}
+                </span>
+              </summary>
+              <div className="px-3 py-2.5 text-[11px] text-slate-600 border-t border-violet-100 font-mono whitespace-pre-wrap leading-relaxed max-h-[220px] overflow-y-auto bg-white/70">
+                {thoughtText}
+              </div>
+            </details>
           </div>
+        )}
 
-          {/* Copy Button for Assistant messages */}
-          {!isUser && message.content && (
-            <button
-              onClick={handleCopy}
-              className="absolute -right-8 top-1 p-1 bg-white hover:bg-zinc-50 border border-zinc-200 rounded-md text-zinc-400 hover:text-zinc-650 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 shadow-sm cursor-pointer"
-              title="Copy response"
+        {/* Message Bubble Container */}
+        {(answerText || isUser || (!thoughtText && !isThinking)) && (
+          <div className="relative flex items-start">
+            <div
+              className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                isUser
+                  ? "bg-[#e3e3e2] text-zinc-900 rounded-tr-none border border-zinc-300/20 shadow-sm"
+                  : "text-zinc-850 px-1 py-1"
+              }`}
             >
-              {copied ? (
-                <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                </svg>
-              )}
-            </button>
-          )}
-        </div>
+              {renderMarkdown(answerText)}
+            </div>
+
+            {/* Copy Button for Assistant messages */}
+            {!isUser && answerText && (
+              <button
+                onClick={handleCopy}
+                className="absolute -right-8 top-1 p-1 bg-white hover:bg-zinc-50 border border-zinc-200 rounded-md text-zinc-400 hover:text-zinc-650 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 shadow-sm cursor-pointer"
+                title="Copy response"
+              >
+                {copied ? (
+                  <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                  </svg>
+                )}
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Timestamp */}
         <span className="text-[9px] text-zinc-400 mt-1 font-medium select-none px-1">

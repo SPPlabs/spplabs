@@ -18,31 +18,38 @@ function getOpenAIClient(): OpenAI {
   return openAIClientInstance;
 }
 
+export type ChatCompletionCustomParams = {
+  model?: string;
+  enableThinking?: boolean;
+};
+
 /**
  * Overload signature when streaming is explicitly enabled.
  */
 export async function generateChatCompletion(
-  params: Omit<OpenAI.Chat.ChatCompletionCreateParams, "model"> & { model?: string; stream: true }
+  params: Omit<OpenAI.Chat.ChatCompletionCreateParams, "model"> & ChatCompletionCustomParams & { stream: true }
 ): Promise<AsyncIterable<OpenAI.Chat.ChatCompletionChunk>>;
 
 /**
  * Overload signature when streaming is disabled or omitted.
  */
 export async function generateChatCompletion(
-  params: Omit<OpenAI.Chat.ChatCompletionCreateParams, "model"> & { model?: string; stream?: false }
+  params: Omit<OpenAI.Chat.ChatCompletionCreateParams, "model"> & ChatCompletionCustomParams & { stream?: false }
 ): Promise<OpenAI.Chat.ChatCompletion>;
 
 /**
  * Overload signature covering both cases.
  */
 export async function generateChatCompletion(
-  params: Omit<OpenAI.Chat.ChatCompletionCreateParams, "model"> & { model?: string; stream?: boolean }
+  params: Omit<OpenAI.Chat.ChatCompletionCreateParams, "model"> & ChatCompletionCustomParams & { stream?: boolean }
 ): Promise<OpenAI.Chat.ChatCompletion | AsyncIterable<OpenAI.Chat.ChatCompletionChunk>>;
 
 export async function generateChatCompletion(
-  params: Omit<OpenAI.Chat.ChatCompletionCreateParams, "model"> & { model?: string; stream?: boolean }
+  params: Omit<OpenAI.Chat.ChatCompletionCreateParams, "model"> & ChatCompletionCustomParams & { stream?: boolean }
 ): Promise<OpenAI.Chat.ChatCompletion | AsyncIterable<OpenAI.Chat.ChatCompletionChunk>> {
   const client = getOpenAIClient();
+
+  const enableThinking = Boolean(params.enableThinking);
 
   // Cast body to any to enable passing custom properties that vLLM/Qwen expects
   // while satisfying strict TypeScript static type checks.
@@ -50,13 +57,13 @@ export async function generateChatCompletion(
     ...params,
     model: params.model || aiConfig.vllmModel,
     chat_template_kwargs: {
-      enable_thinking: false,
+      enable_thinking: enableThinking,
     },
-    include_reasoning: false,
+    include_reasoning: enableThinking,
   };
 
   try {
-    logger.info(`Sending chat completion request (stream: ${!!params.stream})`);
+    logger.info(`Sending chat completion request (stream: ${!!params.stream}, thinking: ${enableThinking})`);
     return await client.chat.completions.create(body);
   } catch (error) {
     logger.error("Failed to generate chat completion from vLLM:", error);

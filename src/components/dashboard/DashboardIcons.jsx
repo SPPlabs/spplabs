@@ -317,3 +317,11 @@ export function SendIcon({ className = "w-5 h-5", ...props }) {
     </svg>
   );
 }
+
+export function BrainIcon({ className = "w-5 h-5", ...props }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m-4-13.5a3.5 3.5 0 00-3.5 3.5c0 1.2.6 2.3 1.5 2.9A3.5 3.5 0 006 17a3.5 3.5 0 002-3.2M16 6a3.5 3.5 0 013.5 3.5c0 1.2-.6 2.3-1.5 2.9A3.5 3.5 0 0118 17a3.5 3.5 0 01-2-3.2" />
+    </svg>
+  );
+}

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Message } from "@/components/chatbot/Message";
 import { TypingIndicator } from "@/components/chatbot/TypingIndicator";
-import { BotIcon, RefreshIcon, SendIcon } from "@/components/dashboard/DashboardIcons";
+import { BotIcon, RefreshIcon, SendIcon, BrainIcon } from "@/components/dashboard/DashboardIcons";
 
 export default function DashboardChatbot({
   currentWebsite,
@@ -47,6 +47,7 @@ export default function DashboardChatbot({
   });
 
   const [input, setInput] = useState("");
+  const [enableThinking, setEnableThinking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState(null);
@@ -151,6 +152,7 @@ export default function DashboardChatbot({
           website_id: domain,
           message: text,
           preview_mode: true, // Counts tokens, skips visitor transcript logging & monthly chat reports
+          enable_thinking: enableThinking,
         }),
         signal: controller.signal,
       });
@@ -292,7 +294,31 @@ export default function DashboardChatbot({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-center">
+        <div className="flex items-center gap-2 self-start sm:self-center flex-wrap">
+          {/* Thinking Mode Toggle (Internal Dashboard Simulator only) */}
+          <button
+            type="button"
+            onClick={() => setEnableThinking((prev) => !prev)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 border shadow-2xs ${
+              enableThinking
+                ? "bg-violet-50 text-violet-700 border-violet-300 ring-2 ring-violet-200/50"
+                : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900"
+            }`}
+            title={
+              lang === "es"
+                ? "Activar proceso de razonamiento paso a paso de la IA (solo disponible en este probador interno)"
+                : "Enable AI step-by-step reasoning (internal test simulator only)"
+            }
+          >
+            <BrainIcon className={`w-3.5 h-3.5 ${enableThinking ? "text-violet-600 animate-pulse" : "text-slate-500"}`} />
+            <span>{lang === "es" ? "Pensar" : "Thinking"}</span>
+            <span
+              className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                enableThinking ? "bg-violet-600" : "bg-slate-300"
+              }`}
+            />
+          </button>
+
           <button
             type="button"
             onClick={handleClear}
