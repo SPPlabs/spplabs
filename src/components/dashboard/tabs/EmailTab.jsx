@@ -995,10 +995,16 @@ export default function EmailTab({
             {lang === "es" ? "No hay registros de correos enviados para este período." : "No email delivery logs recorded for this period."}
           </div>
         ) : (
-          <div className="border border-slate-200/90 rounded-2xl max-h-[460px] overflow-auto overscroll-contain scroll-touch-contain relative shadow-2xs">
-            <table className="w-full min-w-[620px] text-left text-xs border-collapse">
+          <div className="border border-slate-200/90 rounded-2xl max-h-[460px] overflow-y-auto overflow-x-hidden sm:overflow-x-auto relative shadow-2xs scroll-touch-contain">
+            <table className="w-full text-left text-xs border-collapse">
               <thead className="sticky top-0 bg-slate-50 z-10 border-b border-slate-200 shadow-2xs">
-                <tr className="text-slate-500 font-black uppercase text-[9.5px] tracking-wider">
+                {/* Mobile Header (2 column compact) */}
+                <tr className="sm:hidden text-slate-500 font-black uppercase text-[9.5px] tracking-wider">
+                  <th className="py-3 px-3.5 text-left">{lang === "es" ? "Envío / Destinatario" : "Delivery / Recipient"}</th>
+                  <th className="py-3 px-3.5 text-right">{lang === "es" ? "Estado / Fecha" : "Status / Date"}</th>
+                </tr>
+                {/* Desktop Header (5 columns) */}
+                <tr className="hidden sm:table-row text-slate-500 font-black uppercase text-[9.5px] tracking-wider">
                   <th className="py-3 px-3.5 whitespace-nowrap">{lang === "es" ? "Tipo" : "Type"}</th>
                   <th className="py-3 px-3.5 whitespace-nowrap">{lang === "es" ? "Destinatario" : "Recipient"}</th>
                   <th className="py-3 px-3.5 whitespace-nowrap">{lang === "es" ? "Asunto" : "Subject"}</th>
@@ -1031,28 +1037,57 @@ export default function EmailTab({
                     typeIcon = <PaperAirplaneIcon className="w-3.5 h-3.5 text-slate-500" />;
                   }
 
+                  const formattedDate = new Date(log.sentAt || log.scheduledFor).toLocaleString("es-ES", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+
                   return (
                     <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3 px-3.5 font-bold text-slate-900 whitespace-nowrap">
+                      {/* Mobile Cells (100% width, zero horizontal drift) */}
+                      <td className="sm:hidden py-3 px-3.5 align-top">
+                        <div className="flex items-center gap-1.5 font-bold text-slate-900 text-xs mb-0.5">
+                          {typeIcon}
+                          <span>{typeLabel}</span>
+                        </div>
+                        <span className="font-sans tabular-nums text-slate-700 text-xs block truncate max-w-[190px]">
+                          {log.recipientEmail}
+                        </span>
+                        <span className="text-slate-400 text-[11px] block truncate max-w-[190px]">
+                          {log.subject}
+                        </span>
+                      </td>
+                      <td className="sm:hidden py-3 px-3.5 text-right align-top">
+                        <span className={`inline-block px-2.5 py-0.5 rounded-full border text-[10px] font-black ${badge} mb-1`}>
+                          {log.status}
+                        </span>
+                        <span className="font-sans tabular-nums text-[10px] text-slate-400 block">
+                          {formattedDate}
+                        </span>
+                      </td>
+
+                      {/* Desktop Cells (5 separate columns) */}
+                      <td className="hidden sm:table-cell py-3 px-3.5 font-bold text-slate-900 whitespace-nowrap">
                         <span className="inline-flex items-center gap-1.5">
                           {typeIcon}
                           <span>{typeLabel}</span>
                         </span>
                       </td>
-                      <td className="py-3 px-3.5 font-sans tabular-nums text-slate-700 whitespace-nowrap">{log.recipientEmail}</td>
-                      <td className="py-3 px-3.5 text-slate-800 whitespace-nowrap">
-                        <span className="truncate block max-w-[220px]" title={log.subject}>{log.subject}</span>
+                      <td className="hidden sm:table-cell py-3 px-3.5 font-sans tabular-nums text-slate-700 whitespace-nowrap">
+                        {log.recipientEmail}
                       </td>
-                      <td className="py-3 px-3.5 font-sans tabular-nums text-[11px] text-slate-500 whitespace-nowrap">
-                        {new Date(log.sentAt || log.scheduledFor).toLocaleString("es-ES", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                      <td className="hidden sm:table-cell py-3 px-3.5 text-slate-800 whitespace-nowrap">
+                        <span className="truncate block max-w-[220px]" title={log.subject}>
+                          {log.subject}
+                        </span>
                       </td>
-                      <td className="py-3 px-3.5 text-right whitespace-nowrap">
+                      <td className="hidden sm:table-cell py-3 px-3.5 font-sans tabular-nums text-[11px] text-slate-500 whitespace-nowrap">
+                        {formattedDate}
+                      </td>
+                      <td className="hidden sm:table-cell py-3 px-3.5 text-right whitespace-nowrap">
                         <span className={`px-2.5 py-0.5 rounded-full border text-[10px] font-black ${badge}`}>
                           {log.status}
                         </span>
