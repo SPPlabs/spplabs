@@ -20,6 +20,7 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
     const requestedDomain = searchParams.get("domain")?.trim().toLowerCase();
+    const timeframe = searchParams.get("timeframe")?.trim().toLowerCase() || "all";
 
     let targetDomain = session.domain;
     if (session.role === "ADMIN" && requestedDomain) {
@@ -38,6 +39,17 @@ export async function GET(request) {
     const startOfMonth = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0));
     const endOfMonth = new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999));
 
+    let timeWhere = {};
+    if (timeframe === "day") {
+      timeWhere = { createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } };
+    } else if (timeframe === "week") {
+      timeWhere = { createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } };
+    } else if (timeframe === "month") {
+      timeWhere = { createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } };
+    } else if (timeframe === "year") {
+      timeWhere = { createdAt: { gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) } };
+    }
+
     const [
       logs,
       sentAllTime,
@@ -51,9 +63,12 @@ export async function GET(request) {
       welcomeContactsThisMonth,
     ] = await Promise.all([
       prisma.scheduledEmail.findMany({
-        where: { websiteId: website.id },
+        where: {
+          websiteId: website.id,
+          ...timeWhere,
+        },
         orderBy: { createdAt: "desc" },
-        take: 50,
+        take: timeframe === "all" ? 100 : 300,
       }),
       prisma.scheduledEmail.count({
         where: { websiteId: website.id, status: "SENT" },

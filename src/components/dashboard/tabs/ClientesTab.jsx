@@ -63,7 +63,7 @@ export default function ClientesTab({
           </div>
 
           <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
-            <span className="bg-slate-100 text-slate-700 text-xs px-3 py-1.5 rounded-xl font-bold border border-slate-200 font-mono">
+            <span className="bg-slate-100 text-slate-950 text-xs px-3 py-1.5 rounded-xl font-bold border border-slate-200 font-sans tabular-nums">
               {contactForms.length} {lang === "es" ? "mensajes" : "messages"}
             </span>
 
@@ -119,7 +119,7 @@ export default function ClientesTab({
                         {form.email}
                       </a>
                     </div>
-                    <span className="text-[10px] text-slate-400 font-mono font-semibold shrink-0">
+                    <span className="text-[10px] text-slate-400 font-sans tabular-nums font-semibold shrink-0">
                       {new Date(form.createdAt).toLocaleString(lang === "es" ? "es-ES" : "en-US", {
                         year: "numeric",
                         month: "2-digit",
@@ -134,7 +134,7 @@ export default function ClientesTab({
                   {form.phone && (
                     <div className="text-xs mb-3 flex items-center gap-2 text-slate-600">
                       <span className="text-[10px] font-bold uppercase text-slate-400">{t.clientesPhone}:</span>
-                      <a href={`tel:${form.phone}`} className="font-mono text-slate-800 font-semibold hover:text-blue-600">
+                      <a href={`tel:${form.phone}`} className="font-sans tabular-nums text-slate-800 font-semibold hover:text-blue-600">
                         {form.phone}
                       </a>
                     </div>

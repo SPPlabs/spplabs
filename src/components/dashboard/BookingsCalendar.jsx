@@ -506,7 +506,7 @@ export default function BookingsCalendar({
                 </span>
               </h4>
               <div className="flex items-center gap-3 mt-0.5">
-                <span className="text-xs text-slate-400 font-mono">
+                <span className="text-xs text-slate-400 font-sans tabular-nums">
                   {currentMonthBookings.length} {lang === "es" ? "citas este mes" : "bookings this month"}
                 </span>
                 {uniqueExternalEvents.length > 0 && (
@@ -723,7 +723,7 @@ export default function BookingsCalendar({
                 <h4 className="font-extrabold text-base text-slate-900">
                   {lang === "es" ? "Agenda del día:" : "Day Schedule:"}
                 </h4>
-                <span className="text-brand-blue font-mono font-bold text-xs block mt-0.5">
+                <span className="text-brand-blue font-sans tabular-nums font-bold text-xs block mt-0.5">
                   {selectedDateStr
                     ? new Date(selectedDateStr).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", {
                         dateStyle: "full",
@@ -778,9 +778,9 @@ export default function BookingsCalendar({
                             <div>
                               <span className="font-bold text-slate-950 block">{b.name}</span>
                               <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-xs text-slate-500 font-mono font-bold">{b.time}</span>
+                                <span className="text-xs text-slate-700 font-sans tabular-nums font-bold">{b.time}</span>
                                 {b.phone && (
-                                  <span className="text-[11px] text-slate-400 font-mono">· {b.phone}</span>
+                                  <span className="text-[11px] text-slate-400 font-sans tabular-nums">· {b.phone}</span>
                                 )}
                               </div>
                               {b.email && (

@@ -55,29 +55,26 @@ export default function OverviewTab({
       {/* Top Header Area & KPI Summary */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-2 border-b border-slate-200/80">
         <div>
-          <span className="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider font-mono border border-slate-200 inline-flex items-center gap-1.5">
+          <span className="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider border border-slate-200 inline-flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
             {currentWebsite.domain}
           </span>
           <h2 className="text-3xl font-black mt-3 text-slate-950 tracking-tight">{t.overviewTitle}</h2>
-          <p className="text-slate-500 text-sm mt-1 font-medium">
-            {t.overviewActiveSince} {currentWebsite.registeredAt ? new Date(currentWebsite.registeredAt).toLocaleDateString() : new Date(currentWebsite.createdAt).toLocaleDateString()}
-          </p>
         </div>
 
         {/* 3 Quick KPI Counters */}
         <div className="grid grid-cols-3 gap-3 sm:gap-4 w-full lg:w-auto shrink-0">
           <div className="bg-white border border-slate-200/90 rounded-2xl p-4 text-center shadow-xs flex flex-col justify-center items-center min-w-[110px] sm:min-w-[130px]">
             <span className="text-[10px] sm:text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wider">{t.overviewTotalContacts}</span>
-            <span className="text-2xl sm:text-3xl font-black font-mono text-slate-950">{contactForms.length}</span>
+            <span className="text-2xl sm:text-3xl font-black font-sans tabular-nums text-slate-950">{contactForms.length}</span>
           </div>
           <div className="bg-white border border-slate-200/90 rounded-2xl p-4 text-center shadow-xs flex flex-col justify-center items-center min-w-[110px] sm:min-w-[130px]">
             <span className="text-[10px] sm:text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wider">{t.overviewTotalBookings}</span>
-            <span className="text-2xl sm:text-3xl font-black font-mono text-brand-green">{bookings.length}</span>
+            <span className="text-2xl sm:text-3xl font-black font-sans tabular-nums text-slate-950">{bookings.length}</span>
           </div>
           <div className="bg-white border border-slate-200/90 rounded-2xl p-4 text-center shadow-xs flex flex-col justify-center items-center min-w-[110px] sm:min-w-[130px]">
             <span className="text-[10px] sm:text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wider">{t.overviewTotalConversations}</span>
-            <span className="text-2xl sm:text-3xl font-black font-mono text-indigo-600">{conversationsList.length}</span>
+            <span className="text-2xl sm:text-3xl font-black font-sans tabular-nums text-slate-950">{conversationsList.length}</span>
           </div>
         </div>
       </div>
@@ -190,7 +187,7 @@ export default function OverviewTab({
                     <div className="flex justify-between items-start mb-1">
                       <span className="font-bold text-xs text-slate-900">{form.name}</span>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-slate-400 font-mono">
+                        <span className="text-[10px] text-slate-400 tabular-nums">
                           {new Date(form.createdAt).toLocaleDateString()}
                         </span>
                         <button
@@ -271,7 +268,7 @@ export default function OverviewTab({
                           </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 text-[11px] font-mono text-slate-500 mb-1">
+                      <div className="flex items-center gap-3 text-[11px] tabular-nums text-slate-500 mb-1">
                         <span className="inline-flex items-center gap-1">
                           <CalendarIcon className="w-3.5 h-3.5 text-slate-400" />
                           {new Date(booking.date).toLocaleDateString()}
@@ -329,7 +326,7 @@ export default function OverviewTab({
                         {conv.messageCount} msgs
                       </span>
                     </div>
-                    <span className="text-[10px] text-slate-400 font-mono block mb-1.5">
+                    <span className="text-[10px] text-slate-400 tabular-nums block mb-1.5">
                       {new Date(conv.lastMessageAt).toLocaleString("es-ES", {
                         month: "2-digit",
                         day: "2-digit",

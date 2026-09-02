@@ -106,7 +106,7 @@ export default function AiTab({
                   <span className="w-2 h-2 rounded-full bg-blue-600"></span>
                   {t.iaCurrentMonth} ({currentMonthLabelStr})
                 </span>
-                <span className="text-[11px] font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-lg">
+                <span className="text-[11px] font-sans tabular-nums font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-lg">
                   {currentMonthRecord.totalTokens.toLocaleString()} tokens
                 </span>
               </div>
@@ -114,17 +114,17 @@ export default function AiTab({
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-slate-50 border border-slate-100 p-3 rounded-xl text-center">
                   <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaPromptTokens}</span>
-                  <span className="text-base font-black font-mono text-slate-900 block">{currentMonthRecord.promptTokens.toLocaleString()}</span>
+                  <span className="text-base font-black font-sans tabular-nums text-slate-950 block">{currentMonthRecord.promptTokens.toLocaleString()}</span>
                 </div>
 
                 <div className="bg-slate-50 border border-slate-100 p-3 rounded-xl text-center">
                   <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaCompletionTokens}</span>
-                  <span className="text-base font-black font-mono text-slate-900 block">{currentMonthRecord.completionTokens.toLocaleString()}</span>
+                  <span className="text-base font-black font-sans tabular-nums text-slate-950 block">{currentMonthRecord.completionTokens.toLocaleString()}</span>
                 </div>
 
-                <div className="bg-blue-50/50 border border-blue-100 p-3 rounded-xl text-center">
-                  <span className="text-blue-600 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaTotalTokens}</span>
-                  <span className="text-base font-black font-mono text-blue-950 block">{currentMonthRecord.totalTokens.toLocaleString()}</span>
+                <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl text-center">
+                  <span className="text-slate-500 text-[10px] font-black uppercase tracking-wider block mb-1">{t.iaTotalTokens}</span>
+                  <span className="text-base font-black font-sans tabular-nums text-slate-950 block">{currentMonthRecord.totalTokens.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -155,17 +155,17 @@ export default function AiTab({
                   <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
                     {t.iaAllTimeUsage}
                   </span>
-                  <span className="text-[10px] font-mono bg-white/10 text-slate-200 px-2 py-0.5 rounded-md">
+                  <span className="text-[10px] font-sans tabular-nums bg-white/10 text-slate-200 px-2 py-0.5 rounded-md">
                     {activeMonthsCount} {t.iaActiveMonths.toLowerCase()}
                   </span>
                 </div>
 
                 <div className="mt-2">
-                  <span className="text-3xl font-black font-mono tracking-tight text-white block">
+                  <span className="text-3xl font-black font-sans tabular-nums tracking-tight text-white block">
                     {allTimeTotal.toLocaleString()}
                   </span>
                   <span className="text-[11px] text-slate-400 font-medium block mt-0.5">
-                    {t.iaMonthlyAverage}: <span className="font-mono text-slate-200 font-bold">{monthlyAverage.toLocaleString()}</span> tokens/mes
+                    {t.iaMonthlyAverage}: <span className="font-sans tabular-nums text-white font-bold">{monthlyAverage.toLocaleString()}</span> tokens/mes
                   </span>
                 </div>
               </div>
@@ -173,11 +173,11 @@ export default function AiTab({
               <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-white/10 text-xs">
                 <div>
                   <span className="text-[10px] text-slate-400 block uppercase font-bold">{t.iaPromptTokens}</span>
-                  <span className="font-mono font-bold text-slate-200">{allTimePrompt.toLocaleString()}</span>
+                  <span className="font-sans tabular-nums font-bold text-white">{allTimePrompt.toLocaleString()}</span>
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-400 block uppercase font-bold">{t.iaCompletionTokens}</span>
-                  <span className="font-mono font-bold text-slate-200">{allTimeCompletion.toLocaleString()}</span>
+                  <span className="font-sans tabular-nums font-bold text-white">{allTimeCompletion.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -224,20 +224,20 @@ export default function AiTab({
                           <div className="font-bold border-b border-white/20 pb-1 mb-1 text-slate-200">{monthLabelFull}</div>
                           <div className="flex justify-between gap-2 text-slate-300">
                             <span>{t.iaInputCol}:</span>
-                            <span className="font-mono text-white font-bold">{u.promptTokens.toLocaleString()}</span>
+                            <span className="font-sans tabular-nums text-white font-bold">{u.promptTokens.toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between gap-2 text-slate-300">
                             <span>{t.iaOutputCol}:</span>
-                            <span className="font-mono text-white font-bold">{u.completionTokens.toLocaleString()}</span>
+                            <span className="font-sans tabular-nums text-white font-bold">{u.completionTokens.toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between gap-2 text-blue-300 font-bold border-t border-white/10 pt-1 mt-1">
                             <span>{t.iaTotalCol}:</span>
-                            <span className="font-mono text-white">{u.totalTokens.toLocaleString()}</span>
+                            <span className="font-sans tabular-nums text-white">{u.totalTokens.toLocaleString()}</span>
                           </div>
                         </div>
 
                         {/* Bar Value Header */}
-                        <span className="text-[10px] font-mono font-bold text-slate-500 mb-1 group-hover:text-slate-900 transition-colors">
+                        <span className="text-[10px] font-sans tabular-nums font-bold text-slate-600 mb-1 group-hover:text-slate-950 transition-colors">
                           {u.totalTokens > 999 ? `${(u.totalTokens / 1000).toFixed(1)}k` : u.totalTokens}
                         </span>
 
@@ -306,12 +306,12 @@ export default function AiTab({
                               </span>
                             )}
                           </td>
-                          <td className="px-4 py-3.5 text-right font-mono text-slate-600">{u.promptTokens.toLocaleString()}</td>
-                          <td className="px-4 py-3.5 text-right font-mono text-slate-600">{u.completionTokens.toLocaleString()}</td>
-                          <td className="px-4 py-3.5 text-right font-mono font-black text-slate-900">{u.totalTokens.toLocaleString()}</td>
+                          <td className="px-4 py-3.5 text-right font-sans tabular-nums text-slate-700">{u.promptTokens.toLocaleString()}</td>
+                          <td className="px-4 py-3.5 text-right font-sans tabular-nums text-slate-700">{u.completionTokens.toLocaleString()}</td>
+                          <td className="px-4 py-3.5 text-right font-sans tabular-nums font-black text-slate-950">{u.totalTokens.toLocaleString()}</td>
                           <td className="px-5 py-3.5 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              <span className="font-mono text-[11px] font-bold text-slate-500">{sharePct}%</span>
+                              <span className="font-sans tabular-nums text-[11px] font-bold text-slate-600">{sharePct}%</span>
                               <div className="w-12 bg-slate-100 h-1.5 rounded-full overflow-hidden inline-block">
                                 <div className="bg-blue-600 h-full rounded-full" style={{ width: `${sharePct}%` }}></div>
                               </div>

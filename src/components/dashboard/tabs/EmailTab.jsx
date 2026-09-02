@@ -53,6 +53,7 @@ export default function EmailTab({
   const [emailLogs, setEmailLogs] = useState([]);
   const [emailStats, setEmailStats] = useState(null);
   const [logsLoading, setLogsLoading] = useState(false);
+  const [logsTimeframe, setLogsTimeframe] = useState("all");
 
   // Test Email State
   const [testRecipient, setTestRecipient] = useState("");
@@ -63,11 +64,11 @@ export default function EmailTab({
   const [previewTab, setPreviewTab] = useState("review"); // 'welcome' | 'booking' | 'reminder' | 'review'
 
   // Helper to refresh logs & stats
-  const fetchLogs = async () => {
+  const fetchLogs = async (tf = logsTimeframe) => {
     if (!currentWebsite?.domain) return;
     setLogsLoading(true);
     try {
-      const res = await fetch(`/api/admin/email-logs?domain=${currentWebsite.domain}`);
+      const res = await fetch(`/api/admin/email-logs?domain=${currentWebsite.domain}&timeframe=${tf}`);
       const data = await res.json();
       if (data.success) {
         setEmailLogs(data.data || []);
@@ -80,6 +81,11 @@ export default function EmailTab({
     } finally {
       setLogsLoading(false);
     }
+  };
+
+  const handleTimeframeChange = (tf) => {
+    setLogsTimeframe(tf);
+    fetchLogs(tf);
   };
 
   useEffect(() => {
@@ -288,7 +294,7 @@ export default function EmailTab({
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-4 border-b border-slate-200/80">
         <div>
-          <span className="bg-blue-50 text-blue-700 text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider font-mono border border-blue-200/60 inline-flex items-center gap-1.5">
+          <span className="bg-blue-50 text-blue-700 text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider border border-blue-200/60 inline-flex items-center gap-1.5">
             <MailIcon className="w-3.5 h-3.5" />
             <span>{lang === "es" ? "Automatizaciones de Email & Reseñas Google" : "Email & Google Reviews Automation"}</span>
           </span>
@@ -364,12 +370,6 @@ export default function EmailTab({
                     {lang === "es" ? "Multiplica tus reseñas de 5 estrellas en Google Maps en piloto automático." : "Boost your 5-star Google Maps reviews automatically."}
                   </p>
                 </div>
-              </div>
-
-              <div className="text-right">
-                <span className="text-[10px] font-mono font-black uppercase bg-amber-100 text-amber-900 border border-amber-200 px-2.5 py-1 rounded-full">
-                  {lang === "es" ? "2 Disparadores Disponibles" : "2 Triggers Available"}
-                </span>
               </div>
             </div>
 
@@ -753,9 +753,198 @@ export default function EmailTab({
         </div>
       </div>
 
+      {/* SECTION: EMAIL & GOOGLE REVIEWS ANALYTICS */}
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div>
+            <h3 className="text-xl font-black text-slate-950 flex items-center gap-2">
+              <span className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <MailIcon className="w-4.5 h-4.5" />
+              </span>
+              <span>{lang === "es" ? "Analíticas de Correos & Reseñas de Google" : "Email & Google Reviews Analytics"}</span>
+            </h3>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              {lang === "es"
+                ? "Métricas consolidadas de correos automatizados, tasa de entrega y solicitudes de reseñas de clientes."
+                : "Consolidated metrics for automated emails, delivery rate, and client review requests."}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl font-sans tabular-nums">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>{lang === "es" ? "Tasa de Entrega:" : "Delivery Rate:"} {emailStats?.deliveryRate || "100.0"}%</span>
+            </span>
+          </div>
+        </div>
+
+        {/* 4 Main KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* KPI 1: Sent This Month */}
+          <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-5 shadow-2xs relative overflow-hidden group hover:border-slate-300 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                {lang === "es" ? "Enviados Este Mes" : "Sent This Month"}
+              </span>
+              <span className="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                <PaperAirplaneIcon className="w-3.5 h-3.5" />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white font-sans tabular-nums tracking-tight">
+                {(emailStats?.sentThisMonth ?? 0).toLocaleString()}
+              </span>
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                {lang === "es" ? "Mes en curso" : "Current month"}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium mt-1.5">
+              {lang === "es" ? "Confirmaciones, avisos y reseñas" : "Confirmations, alerts & reviews"}
+            </p>
+          </div>
+
+          {/* KPI 2: All-Time Sent */}
+          <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-5 shadow-2xs relative overflow-hidden group hover:border-slate-300 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                {lang === "es" ? "Total Histórico" : "All-Time Sent"}
+              </span>
+              <span className="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <CheckIcon className="w-3.5 h-3.5" />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white font-sans tabular-nums tracking-tight">
+                {(emailStats?.sentAllTime ?? 0).toLocaleString()}
+              </span>
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                {emailStats?.deliveryRate || "100.0"}% {lang === "es" ? "éxito" : "success"}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium mt-1.5">
+              {lang === "es" ? "Correos totales entregados" : "Total delivered emails"}
+            </p>
+          </div>
+
+          {/* KPI 3: Google Review Booster */}
+          <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-5 shadow-2xs relative overflow-hidden group hover:border-slate-300 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                {lang === "es" ? "Booster Reseñas Google" : "Google Review Booster"}
+              </span>
+              <span className="w-7 h-7 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center">
+                <StarIcon className="w-3.5 h-3.5" filled={true} />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white font-sans tabular-nums tracking-tight">
+                {(emailStats?.reviewRequestsThisMonth ?? 0).toLocaleString()}
+              </span>
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                {(emailStats?.reviewRequestsAllTime ?? 0)} {lang === "es" ? "total" : "total"}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium mt-1.5">
+              {lang === "es" ? "Solicitudes de 5 estrellas enviadas" : "5-star requests sent to clients"}
+            </p>
+          </div>
+
+          {/* KPI 4: Pending / Scheduled */}
+          <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-5 shadow-2xs relative overflow-hidden group hover:border-slate-300 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                {lang === "es" ? "En Cola / Programados" : "Scheduled in Queue"}
+              </span>
+              <span className="w-7 h-7 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <ClockIcon className="w-3.5 h-3.5" />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white font-sans tabular-nums tracking-tight">
+                {(emailStats?.pendingCount ?? 0).toLocaleString()}
+              </span>
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                {lang === "es" ? "En espera" : "Pending"}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium mt-1.5">
+              {lang === "es" ? "Listos para su hora programada" : "Ready for their scheduled trigger"}
+            </p>
+          </div>
+        </div>
+
+        {/* Breakdown by Email Type Cards */}
+        <div className="pt-2">
+          <span className="text-xs font-black uppercase tracking-wider text-slate-400 block mb-3">
+            {lang === "es" ? "Desglose de Envíos este Mes por Tipo:" : "Monthly Deliveries by Type:"}
+          </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="bg-amber-50/60 border border-amber-200/70 rounded-2xl p-3.5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="w-7 h-7 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                  <StarIcon className="w-3.5 h-3.5" filled={true} />
+                </span>
+                <div>
+                  <span className="text-xs font-extrabold text-slate-900 block">Google Review</span>
+                  <span className="text-[10px] text-slate-500 font-medium">{lang === "es" ? "Solicitudes enviadas" : "Requests sent"}</span>
+                </div>
+              </div>
+              <span className="text-base font-black text-slate-950 dark:text-white font-sans tabular-nums">
+                {emailStats?.reviewRequestsThisMonth ?? 0}
+              </span>
+            </div>
+
+            <div className="bg-emerald-50/60 border border-emerald-200/70 rounded-2xl p-3.5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                  <CalendarIcon className="w-3.5 h-3.5" />
+                </span>
+                <div>
+                  <span className="text-xs font-extrabold text-slate-900 block">{lang === "es" ? "Confirmación Cita" : "Booking Confirm"}</span>
+                  <span className="text-[10px] text-slate-500 font-medium">{lang === "es" ? "Citas recibidas" : "Bookings received"}</span>
+                </div>
+              </div>
+              <span className="text-base font-black text-slate-950 dark:text-white font-sans tabular-nums">
+                {emailStats?.bookingConfirmsThisMonth ?? 0}
+              </span>
+            </div>
+
+            <div className="bg-indigo-50/60 border border-indigo-200/70 rounded-2xl p-3.5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="w-7 h-7 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                  <ClockIcon className="w-3.5 h-3.5" />
+                </span>
+                <div>
+                  <span className="text-xs font-extrabold text-slate-900 block">{lang === "es" ? "Recordatorio Cita" : "Anti No-Show"}</span>
+                  <span className="text-[10px] text-slate-500 font-medium">{lang === "es" ? "Avisos previos" : "Prior alerts"}</span>
+                </div>
+              </div>
+              <span className="text-base font-black text-slate-950 dark:text-white font-sans tabular-nums">
+                {emailStats?.bookingRemindersThisMonth ?? 0}
+              </span>
+            </div>
+
+            <div className="bg-blue-50/60 border border-blue-200/70 rounded-2xl p-3.5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="w-7 h-7 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                  <HandWaveIcon className="w-3.5 h-3.5" />
+                </span>
+                <div>
+                  <span className="text-xs font-extrabold text-slate-900 block">{lang === "es" ? "Bienvenida Contacto" : "Welcome Contact"}</span>
+                  <span className="text-[10px] text-slate-500 font-medium">{lang === "es" ? "Formularios web" : "Web inquiries"}</span>
+                </div>
+              </div>
+              <span className="text-base font-black text-slate-950 dark:text-white font-sans tabular-nums">
+                {emailStats?.welcomeContactsThisMonth ?? 0}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* OUTBOX & RECENT DELIVERY HISTORY */}
       <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
             <h3 className="text-base font-black text-slate-950 flex items-center gap-2">
               <InboxIcon className="w-5 h-5 text-slate-800" />
@@ -766,25 +955,55 @@ export default function EmailTab({
             </p>
           </div>
 
-          <span className="text-[11px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200 px-3 py-1 rounded-xl">
-            {emailLogs.length} {lang === "es" ? "registros" : "logs"}
-          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Timeframe Filter Buttons */}
+            <div className="inline-flex items-center bg-slate-100 p-1 rounded-xl gap-1 border border-slate-200">
+              {[
+                { id: "day", label: lang === "es" ? "Día" : "Day" },
+                { id: "week", label: lang === "es" ? "Semana" : "Week" },
+                { id: "month", label: lang === "es" ? "Mes" : "Month" },
+                { id: "year", label: lang === "es" ? "Año" : "Year" },
+                { id: "all", label: lang === "es" ? "Todo" : "All" },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleTimeframeChange(item.id)}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    logsTimeframe === item.id
+                      ? "bg-white text-slate-950 shadow-xs"
+                      : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            <span className="text-[11px] font-sans tabular-nums font-bold bg-slate-100 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-xl">
+              {emailLogs.length} {lang === "es" ? "registros" : "logs"}
+            </span>
+          </div>
         </div>
 
-        {emailLogs.length === 0 ? (
+        {logsLoading ? (
+          <div className="flex items-center justify-center py-16 text-slate-400 text-xs">
+            <span className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin mr-2"></span>
+            {lang === "es" ? "Cargando registros..." : "Loading delivery logs..."}
+          </div>
+        ) : emailLogs.length === 0 ? (
           <div className="text-center py-12 text-slate-400 italic text-xs">
-            {lang === "es" ? "No hay registros de correos enviados todavía." : "No email delivery logs recorded yet."}
+            {lang === "es" ? "No hay registros de correos enviados para este período." : "No email delivery logs recorded for this period."}
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[460px] overflow-y-auto border border-slate-100 rounded-2xl">
             <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-200 text-slate-400 font-black uppercase text-[9.5px] tracking-wider">
-                  <th className="pb-3">{lang === "es" ? "Tipo" : "Type"}</th>
-                  <th className="pb-3">{lang === "es" ? "Destinatario" : "Recipient"}</th>
-                  <th className="pb-3">{lang === "es" ? "Asunto" : "Subject"}</th>
-                  <th className="pb-3">{lang === "es" ? "Fecha / Programado" : "Date / Scheduled"}</th>
-                  <th className="pb-3 text-right">{lang === "es" ? "Estado" : "Status"}</th>
+              <thead className="sticky top-0 bg-white z-10 border-b border-slate-200 shadow-2xs">
+                <tr className="text-slate-400 font-black uppercase text-[9.5px] tracking-wider bg-slate-50/90 backdrop-blur-xs">
+                  <th className="py-3 px-3">{lang === "es" ? "Tipo" : "Type"}</th>
+                  <th className="py-3 px-3">{lang === "es" ? "Destinatario" : "Recipient"}</th>
+                  <th className="py-3 px-3">{lang === "es" ? "Asunto" : "Subject"}</th>
+                  <th className="py-3 px-3">{lang === "es" ? "Fecha / Programado" : "Date / Scheduled"}</th>
+                  <th className="py-3 px-3 text-right">{lang === "es" ? "Estado" : "Status"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -814,15 +1033,15 @@ export default function EmailTab({
 
                   return (
                     <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3 font-bold text-slate-900">
+                      <td className="py-3 px-3 font-bold text-slate-900">
                         <span className="inline-flex items-center gap-1.5">
                           {typeIcon}
                           <span>{typeLabel}</span>
                         </span>
                       </td>
-                      <td className="py-3 font-mono text-slate-600">{log.recipientEmail}</td>
-                      <td className="py-3 text-slate-800 truncate max-w-[200px]">{log.subject}</td>
-                      <td className="py-3 font-mono text-[11px] text-slate-500">
+                      <td className="py-3 px-3 font-sans tabular-nums text-slate-700">{log.recipientEmail}</td>
+                      <td className="py-3 px-3 text-slate-800 truncate max-w-[200px]">{log.subject}</td>
+                      <td className="py-3 px-3 font-sans tabular-nums text-[11px] text-slate-500">
                         {new Date(log.sentAt || log.scheduledFor).toLocaleString("es-ES", {
                           year: "numeric",
                           month: "2-digit",
@@ -831,7 +1050,7 @@ export default function EmailTab({
                           minute: "2-digit",
                         })}
                       </td>
-                      <td className="py-3 text-right">
+                      <td className="py-3 px-3 text-right">
                         <span className={`px-2.5 py-0.5 rounded-full border text-[10px] font-black ${badge}`}>
                           {log.status}
                         </span>
@@ -843,195 +1062,6 @@ export default function EmailTab({
             </table>
           </div>
         )}
-      </div>
-
-      {/* SECTION: EMAIL & GOOGLE REVIEWS ANALYTICS */}
-      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-fade-in">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-          <div>
-            <h3 className="text-xl font-black text-slate-950 flex items-center gap-2">
-              <span className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                <MailIcon className="w-4.5 h-4.5" />
-              </span>
-              <span>{lang === "es" ? "Analíticas de Correos & Reseñas de Google" : "Email & Google Reviews Analytics"}</span>
-            </h3>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">
-              {lang === "es"
-                ? "Métricas consolidadas de correos automatizados, tasa de entrega y solicitudes de reseñas de clientes."
-                : "Consolidated metrics for automated emails, delivery rate, and client review requests."}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl font-mono">
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-              <span>{lang === "es" ? "Tasa de Entrega:" : "Delivery Rate:"} {emailStats?.deliveryRate || "100.0"}%</span>
-            </span>
-          </div>
-        </div>
-
-        {/* 4 Main KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* KPI 1: Sent This Month */}
-          <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-5 shadow-2xs relative overflow-hidden group hover:border-slate-300 transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
-                {lang === "es" ? "Enviados Este Mes" : "Sent This Month"}
-              </span>
-              <span className="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                <PaperAirplaneIcon className="w-3.5 h-3.5" />
-              </span>
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                {(emailStats?.sentThisMonth ?? 0).toLocaleString()}
-              </span>
-              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                {lang === "es" ? "Mes en curso" : "Current month"}
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium mt-1.5">
-              {lang === "es" ? "Confirmaciones, avisos y reseñas" : "Confirmations, alerts & reviews"}
-            </p>
-          </div>
-
-          {/* KPI 2: All-Time Sent */}
-          <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-5 shadow-2xs relative overflow-hidden group hover:border-slate-300 transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
-                {lang === "es" ? "Total Histórico" : "All-Time Sent"}
-              </span>
-              <span className="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <CheckIcon className="w-3.5 h-3.5" />
-              </span>
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                {(emailStats?.sentAllTime ?? 0).toLocaleString()}
-              </span>
-              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                {emailStats?.deliveryRate || "100.0"}% {lang === "es" ? "éxito" : "success"}
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium mt-1.5">
-              {lang === "es" ? "Correos totales entregados" : "Total delivered emails"}
-            </p>
-          </div>
-
-          {/* KPI 3: Google Review Booster */}
-          <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-5 shadow-2xs relative overflow-hidden group hover:border-slate-300 transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
-                {lang === "es" ? "Booster Reseñas Google" : "Google Review Booster"}
-              </span>
-              <span className="w-7 h-7 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center">
-                <StarIcon className="w-3.5 h-3.5" filled={true} />
-              </span>
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                {(emailStats?.reviewRequestsThisMonth ?? 0).toLocaleString()}
-              </span>
-              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                {(emailStats?.reviewRequestsAllTime ?? 0)} {lang === "es" ? "total" : "total"}
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium mt-1.5">
-              {lang === "es" ? "Solicitudes de 5 estrellas enviadas" : "5-star requests sent to clients"}
-            </p>
-          </div>
-
-          {/* KPI 4: Pending / Scheduled */}
-          <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-5 shadow-2xs relative overflow-hidden group hover:border-slate-300 transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
-                {lang === "es" ? "En Cola / Programados" : "Scheduled in Queue"}
-              </span>
-              <span className="w-7 h-7 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                <ClockIcon className="w-3.5 h-3.5" />
-              </span>
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                {(emailStats?.pendingCount ?? 0).toLocaleString()}
-              </span>
-              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                {lang === "es" ? "En espera" : "Pending"}
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium mt-1.5">
-              {lang === "es" ? "Listos para su hora programada" : "Ready for their scheduled trigger"}
-            </p>
-          </div>
-        </div>
-
-        {/* Breakdown by Email Type Cards */}
-        <div className="pt-2">
-          <span className="text-xs font-black uppercase tracking-wider text-slate-400 block mb-3">
-            {lang === "es" ? "Desglose de Envíos este Mes por Tipo:" : "Monthly Deliveries by Type:"}
-          </span>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="bg-amber-50/60 border border-amber-200/70 rounded-2xl p-3.5 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
-                  <StarIcon className="w-3.5 h-3.5" filled={true} />
-                </span>
-                <div>
-                  <span className="text-xs font-extrabold text-slate-900 block">Google Review</span>
-                  <span className="text-[10px] text-slate-500 font-medium">{lang === "es" ? "Solicitudes enviadas" : "Requests sent"}</span>
-                </div>
-              </div>
-              <span className="text-base font-black text-amber-800 font-mono">
-                {emailStats?.reviewRequestsThisMonth ?? 0}
-              </span>
-            </div>
-
-            <div className="bg-emerald-50/60 border border-emerald-200/70 rounded-2xl p-3.5 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                  <CalendarIcon className="w-3.5 h-3.5" />
-                </span>
-                <div>
-                  <span className="text-xs font-extrabold text-slate-900 block">{lang === "es" ? "Confirmación Cita" : "Booking Confirm"}</span>
-                  <span className="text-[10px] text-slate-500 font-medium">{lang === "es" ? "Citas recibidas" : "Bookings received"}</span>
-                </div>
-              </div>
-              <span className="text-base font-black text-emerald-800 font-mono">
-                {emailStats?.bookingConfirmsThisMonth ?? 0}
-              </span>
-            </div>
-
-            <div className="bg-indigo-50/60 border border-indigo-200/70 rounded-2xl p-3.5 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-                  <ClockIcon className="w-3.5 h-3.5" />
-                </span>
-                <div>
-                  <span className="text-xs font-extrabold text-slate-900 block">{lang === "es" ? "Recordatorio Cita" : "Anti No-Show"}</span>
-                  <span className="text-[10px] text-slate-500 font-medium">{lang === "es" ? "Avisos previos" : "Prior alerts"}</span>
-                </div>
-              </div>
-              <span className="text-base font-black text-indigo-800 font-mono">
-                {emailStats?.bookingRemindersThisMonth ?? 0}
-              </span>
-            </div>
-
-            <div className="bg-blue-50/60 border border-blue-200/70 rounded-2xl p-3.5 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-                  <HandWaveIcon className="w-3.5 h-3.5" />
-                </span>
-                <div>
-                  <span className="text-xs font-extrabold text-slate-900 block">{lang === "es" ? "Bienvenida Contacto" : "Welcome Contact"}</span>
-                  <span className="text-[10px] text-slate-500 font-medium">{lang === "es" ? "Formularios web" : "Web inquiries"}</span>
-                </div>
-              </div>
-              <span className="text-base font-black text-blue-800 font-mono">
-                {emailStats?.welcomeContactsThisMonth ?? 0}
-              </span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

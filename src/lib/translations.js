@@ -60,7 +60,7 @@ export const translations = {
     exitImpersonating: "Salir de Impersonación",
     
     // Resumen Tab
-    overviewTitle: "Resumen y Telemetría del Sitio",
+    overviewTitle: "resumen y telemetría",
     overviewActiveDomain: "Dominio Activo:",
     overviewActiveSince: "Registrado desde:",
     overviewBriefTitle: "Resumen General",
@@ -251,7 +251,7 @@ export const translations = {
     exitImpersonating: "Exit Impersonation",
     
     // Resumen Tab
-    overviewTitle: "Site Overview & Telemetry",
+    overviewTitle: "overview & telemetry",
     overviewActiveDomain: "Active Domain:",
     overviewActiveSince: "Registered since:",
     overviewBriefTitle: "General Summary",

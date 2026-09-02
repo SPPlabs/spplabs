@@ -26,6 +26,14 @@ body {
   font-family: var(--font-geist-sans), sans-serif;
 }
 
+/* Ensure tabular alignment and normal unslashed zero across dashboard metric numbers */
+.tabular-nums,
+[data-number] {
+  font-family: var(--font-geist-sans), sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "zero" 0;
+}
+
 /* ==========================================================================
    Interactive 3D Hover Phone Mockup Component
    ========================================================================== */

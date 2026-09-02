@@ -585,7 +585,7 @@ export default function NotasTab({
                         </div>
                       )}
                       {note.email && (
-                        <div className="flex items-center gap-1.5 text-slate-500 font-mono">
+                        <div className="flex items-center gap-1.5 text-slate-500 font-sans tabular-nums">
                           <MailIcon className="w-3.5 h-3.5 text-slate-400" />
                           <a
                             href={`mailto:${note.email}`}
@@ -597,7 +597,7 @@ export default function NotasTab({
                         </div>
                       )}
                       {note.phone && (
-                        <div className="flex items-center gap-1.5 text-slate-500 font-mono">
+                        <div className="flex items-center gap-1.5 text-slate-500 font-sans tabular-nums">
                           <PhoneIcon className="w-3.5 h-3.5 text-slate-400" />
                           <a
                             href={`tel:${note.phone}`}
@@ -620,7 +620,7 @@ export default function NotasTab({
                 </div>
 
                 {/* Footer: Timestamp */}
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-sans tabular-nums">
                   <span>
                     {new Date(note.updatedAt || note.createdAt).toLocaleString(isEs ? "es-ES" : "en-US", {
                       year: "numeric",
@@ -951,7 +951,7 @@ export default function NotasTab({
                     </div>
                   )}
                   {viewingNote.email && (
-                    <div className="flex items-center gap-2 text-slate-600 font-mono">
+                    <div className="flex items-center gap-2 text-slate-600 font-sans tabular-nums">
                       <MailIcon className="w-4 h-4 text-slate-400" />
                       <a href={`mailto:${viewingNote.email}`} className="text-brand-blue hover:underline">
                         {viewingNote.email}
@@ -959,7 +959,7 @@ export default function NotasTab({
                     </div>
                   )}
                   {viewingNote.phone && (
-                    <div className="flex items-center gap-2 text-slate-600 font-mono">
+                    <div className="flex items-center gap-2 text-slate-600 font-sans tabular-nums">
                       <PhoneIcon className="w-4 h-4 text-slate-400" />
                       <a href={`tel:${viewingNote.phone}`} className="text-brand-blue hover:underline">
                         {viewingNote.phone}
@@ -984,7 +984,7 @@ export default function NotasTab({
               </div>
 
               {/* Timestamps */}
-              <div className="text-[10px] text-slate-400 font-mono pt-2 border-t border-slate-100 flex justify-between">
+              <div className="text-[10px] text-slate-400 font-sans tabular-nums pt-2 border-t border-slate-100 flex justify-between">
                 <span>
                   {isEs ? "Creado: " : "Created: "}
                   {new Date(viewingNote.createdAt).toLocaleString(isEs ? "es-ES" : "en-US", {

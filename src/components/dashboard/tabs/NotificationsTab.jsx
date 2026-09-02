@@ -109,7 +109,7 @@ export default function NotificationsTab({
             </h3>
             <p className="text-xs text-slate-500 font-medium mt-0.5">{t.notifSubtitle}</p>
           </div>
-          <span className="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-full font-bold border border-slate-200 font-mono self-start sm:self-auto">
+          <span className="bg-slate-100 text-slate-950 text-xs px-3 py-1 rounded-full font-bold border border-slate-200 font-sans tabular-nums self-start sm:self-auto">
             {announcementsList.length} {lang === "es" ? "publicados" : "published"}
           </span>
         </div>
@@ -138,7 +138,7 @@ export default function NotificationsTab({
                         )
                       )}
                     </div>
-                    <span className="text-[10px] text-slate-400 font-mono font-semibold shrink-0">
+                    <span className="text-[10px] text-slate-400 font-sans tabular-nums font-semibold shrink-0">
                       {new Date(ann.createdAt).toLocaleDateString()}
                     </span>
                   </div>
@@ -183,7 +183,7 @@ export default function NotificationsTab({
                   {lang === "es" ? "Mensajes directos y solicitudes de soporte enviados por los clientes" : "Direct petitions and support requests sent by clients"}
                 </p>
               </div>
-              <span className="bg-slate-100 text-slate-800 text-xs px-3 py-1 rounded-full font-bold border border-slate-200 font-mono self-start sm:self-auto">
+              <span className="bg-slate-100 text-slate-950 text-xs px-3 py-1 rounded-full font-bold border border-slate-200 font-sans tabular-nums self-start sm:self-auto">
                 {petitionsList.length} {lang === "es" ? "peticiones" : "petitions"}
               </span>
             </div>
@@ -207,7 +207,7 @@ export default function NotificationsTab({
                             <span className="text-[10px] font-mono font-semibold text-blue-600 block">{pet.domain}</span>
                           </div>
                         </div>
-                        <span className="text-[10px] text-slate-400 font-mono font-bold shrink-0">
+                        <span className="text-[10px] text-slate-400 font-sans tabular-nums font-bold shrink-0">
                           {new Date(pet.createdAt).toLocaleString("es-ES", {
                             year: "numeric",
                             month: "2-digit",
@@ -283,11 +283,11 @@ export default function NotificationsTab({
                     <div key={pet.id} className="bg-slate-50 border border-slate-200/80 rounded-xl p-4 text-xs">
                       <div className="flex justify-between items-center mb-2">
                         <span className="font-bold text-slate-800">{pet.title || "Petición a SPP Labs"}</span>
-                        <span className="text-[10px] text-slate-400 font-mono">
+                        <span className="text-[10px] text-slate-400 font-sans tabular-nums">
                           {t.notifDate}: {new Date(pet.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className="text-slate-600 leading-relaxed italic mb-3 pl-2.5 border-l-2 border-slate-300">"{pet.message}"</p>
+                      <p className="text-slate-600 leading-relaxed italic mb-3 pl-2.5 border-l-2 border-slate-300">&ldquo;{pet.message}&rdquo;</p>
                       <div className="flex justify-end pt-2 border-t border-slate-200/40">
                         <button
                           onClick={() => handleDeletePetition(pet.id)}

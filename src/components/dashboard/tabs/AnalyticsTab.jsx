@@ -16,24 +16,23 @@ function DonutChart({ data }) {
     "#3b82f6", // Blue
   ];
 
-  let accumulatedPercent = 0;
-
-  const slices = data.map((item, index) => {
+  const slices = data.reduce((acc, item, index) => {
     const count = Number(item.count || 0);
     const percent = total > 0 ? (count / total) * 100 : 0;
     const color = colors[index % colors.length];
-    const offset = 100 - accumulatedPercent;
-    accumulatedPercent += percent;
+    const offset = 100 - acc.accumulated;
+    acc.accumulated += percent;
 
-    return {
+    acc.list.push({
       name: item.name || item.device_type || item.browser || item.os || item.page_url || "Otro",
       count,
       percent: percent.toFixed(1),
       color,
       strokeDasharray: `${percent} ${100 - percent}`,
       strokeDashoffset: offset,
-    };
-  });
+    });
+    return acc;
+  }, { list: [], accumulated: 0 }).list;
 
   return (
     <div className="flex flex-col items-center justify-center p-4">
@@ -57,7 +56,7 @@ function DonutChart({ data }) {
         </svg>
         <div className="absolute flex flex-col items-center justify-center">
           <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total</span>
-          <span className="text-base font-black font-mono text-slate-900">{total}</span>
+          <span className="text-base font-black font-sans tabular-nums text-slate-950">{total}</span>
         </div>
       </div>
 
@@ -68,7 +67,7 @@ function DonutChart({ data }) {
               <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: slice.color }}></span>
               <span className="truncate max-w-[120px]" title={slice.name}>{slice.name}</span>
             </div>
-            <span className="font-mono text-slate-900 shrink-0">{slice.count} ({slice.percent}%)</span>
+            <span className="font-sans tabular-nums font-bold text-slate-950 shrink-0">{slice.count} ({slice.percent}%)</span>
           </div>
         ))}
       </div>
@@ -140,21 +139,20 @@ function ReferralFunnel({ data, lang }) {
   const sortedData = consolidatedData.sort((a, b) => b.count - a.count).slice(0, 5);
   const colors = ["#8b5cf6", "#06b6d4", "#f59e0b", "#f43f5e", "#10b981"];
 
-  let currentFunnelY = 80;
   const funnelHeight = 40;
 
-  const lanes = sortedData.map((item, idx) => {
+  const lanes = sortedData.reduce((acc, item, idx) => {
     const fraction = total > 0 ? item.count / total : 0;
     const laneWidth = Math.max(fraction * funnelHeight, 2);
     const color = colors[idx % colors.length];
 
     const sourceY = 20 + idx * 35;
-    const destY = currentFunnelY + laneWidth / 2;
-    currentFunnelY += laneWidth;
+    const destY = acc.currentY + laneWidth / 2;
+    acc.currentY += laneWidth;
 
     const pathD = `M 20 ${sourceY} C 100 ${sourceY}, 100 ${destY}, 180 ${destY}`;
 
-    return {
+    acc.lanes.push({
       name: item.referrer,
       count: item.count,
       percent: total > 0 ? ((item.count / total) * 100).toFixed(1) : 0,
@@ -162,8 +160,9 @@ function ReferralFunnel({ data, lang }) {
       laneWidth,
       color,
       sourceY,
-    };
-  });
+    });
+    return acc;
+  }, { lanes: [], currentY: 80 }).lanes;
 
   return (
     <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row gap-6 items-center w-full">
@@ -206,7 +205,7 @@ function ReferralFunnel({ data, lang }) {
                 <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: lane.color }}></span>
                 <span className="text-slate-800 font-medium truncate max-w-[150px]" title={lane.name}>{lane.name}</span>
               </div>
-              <span className="font-mono text-slate-900">{lane.count} ({lane.percent}%)</span>
+              <span className="font-sans tabular-nums font-bold text-slate-950">{lane.count} ({lane.percent}%)</span>
             </div>
             <div className="h-2 bg-slate-100 border border-slate-200/50 rounded-full overflow-hidden">
               <div className="h-full rounded-full transition-all duration-500" style={{ width: `${lane.percent}%`, backgroundColor: lane.color }}></div>
@@ -243,7 +242,7 @@ export default function AnalyticsTab({
       {/* Header stats & Timeframe Controls */}
       <div className="bg-white border border-slate-200/90 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm w-full">
         <div className="relative z-10">
-          <span className="bg-slate-100 text-slate-800 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider font-mono border border-slate-200 inline-flex items-center gap-1.5">
+          <span className="bg-slate-100 text-slate-800 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider border border-slate-200 inline-flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
             {currentWebsite.domain}
           </span>
@@ -331,7 +330,7 @@ export default function AnalyticsTab({
                 <span className="text-[11px] font-extrabold text-purple-600 uppercase tracking-wider">{t.analyticsTotalHits}</span>
                 {renderInfoTooltip("totalHits", lang === "es" ? "Suma total de páginas cargadas y solicitudes registradas en la web." : "Total number of pageviews and requests logged on the site.", "shift-right-mobile")}
               </div>
-              <span className="text-3xl font-black font-mono text-slate-950 tracking-tight">{analyticsData.overview.visitors}</span>
+              <span className="text-3xl font-black font-sans tabular-nums text-slate-950 tracking-tight">{analyticsData.overview.visitors}</span>
               <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.visitors_growth?.startsWith("↓") ? "text-rose-600" : "text-emerald-600"}`}>
                 {analyticsData.overview.visitors_growth} {analyticsData.overview.period_label || "vs anterior"}
               </span>
@@ -344,7 +343,7 @@ export default function AnalyticsTab({
                 <span className="text-[11px] font-extrabold text-sky-600 uppercase tracking-wider">{t.analyticsUniques}</span>
                 {renderInfoTooltip("uniques", lang === "es" ? "Número de usuarios o dispositivos distintos que han accedido a la web." : "Number of distinct users or individual devices visiting the site.", "shift-left-mobile")}
               </div>
-              <span className="text-3xl font-black font-mono text-sky-600 tracking-tight">{analyticsData.overview.unique_visitors}</span>
+              <span className="text-3xl font-black font-sans tabular-nums text-slate-950 tracking-tight">{analyticsData.overview.unique_visitors}</span>
               <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.unique_growth?.startsWith("↓") ? "text-rose-600" : "text-sky-600"}`}>
                 {analyticsData.overview.unique_growth} {analyticsData.overview.period_label || "vs anterior"}
               </span>
@@ -357,7 +356,7 @@ export default function AnalyticsTab({
                 <span className="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">{t.analyticsSessions}</span>
                 {renderInfoTooltip("sessions", lang === "es" ? "Grupos de interacción continua realizadas por un visitante sin interrupciones." : "Continuous periods of user activity on the site without long breaks.", "shift-right-mobile")}
               </div>
-              <span className="text-3xl font-black font-mono text-emerald-600 tracking-tight">{analyticsData.overview.sessions}</span>
+              <span className="text-3xl font-black font-sans tabular-nums text-slate-950 tracking-tight">{analyticsData.overview.sessions}</span>
               <span className={`text-[10px] font-bold block mt-1 ${analyticsData.overview.sessions_growth?.startsWith("↓") ? "text-rose-600" : "text-emerald-600"}`}>
                 {analyticsData.overview.sessions_growth} {analyticsData.overview.period_label || "vs anterior"}
               </span>
@@ -370,7 +369,7 @@ export default function AnalyticsTab({
                 <span className="text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">{t.analyticsDuration}</span>
                 {renderInfoTooltip("duration", lang === "es" ? "Tiempo medio estimado que pasa cada visitante dentro del sitio web." : "Average time a visitor spends navigating pages during a session.", "shift-left-mobile")}
               </div>
-              <span className="text-3xl font-black font-mono text-slate-900 tracking-tight">{analyticsData.overview.avg_duration}s</span>
+              <span className="text-3xl font-black font-sans tabular-nums text-slate-950 tracking-tight">{analyticsData.overview.avg_duration}s</span>
               <span className="text-[10px] text-slate-500 font-bold block mt-1">Promedio por sesión</span>
             </div>
 
@@ -381,7 +380,7 @@ export default function AnalyticsTab({
                 <span className="text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider">{t.analyticsBounce}</span>
                 {renderInfoTooltip("bounce", lang === "es" ? "Porcentaje de visitas donde el usuario salió tras ver solo una página." : "Percentage of visits where the user left after viewing only one page.", "shift-left")}
               </div>
-              <span className="text-3xl font-black font-mono text-indigo-600 tracking-tight">{analyticsData.overview.bounce_rate}%</span>
+              <span className="text-3xl font-black font-sans tabular-nums text-slate-950 tracking-tight">{analyticsData.overview.bounce_rate}%</span>
             </div>
           </div>
 
@@ -538,7 +537,7 @@ export default function AnalyticsTab({
                           </text>
 
                           <line x1={chartLeft} y1={chartBottom} x2={chartRight} y2={chartBottom} stroke="#cbd5e1" strokeWidth="1.5" />
-                          <text x={chartLeft - 8} y={chartBottom + 4} fill="#64748b" textAnchor="end" className="text-[10px] font-mono font-bold">
+                          <text x={chartLeft - 8} y={chartBottom + 4} fill="#64748b" textAnchor="end" className="text-[10px] font-sans font-bold tabular-nums">
                             0
                           </text>
 
@@ -594,7 +593,7 @@ export default function AnalyticsTab({
                                   isPointActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                                 }`}>
                                   <rect x={tooltipX} y={tooltipY} width="90" height="22" rx="6" fill="#0f172a" />
-                                  <text x={tooltipX + 45} y={tooltipY + 14} fill="#ffffff" fontSize="9" fontWeight="900" textAnchor="middle" className="font-mono">
+                                  <text x={tooltipX + 45} y={tooltipY + 14} fill="#ffffff" fontSize="9" fontWeight="900" textAnchor="middle" className="font-sans tabular-nums">
                                     {countVal} {countVal === 1 ? (lang === "es" ? "visitante" : "visitor") : (lang === "es" ? "visitantes" : "visitors")}
                                   </text>
                                 </g>
@@ -721,7 +720,7 @@ export default function AnalyticsTab({
                         <span className="text-xs text-slate-500 font-bold uppercase tracking-wide">{label}</span>
                         {renderInfoTooltip(`conv_${conv.event_type}`, desc, "center")}
                       </div>
-                      <span className={`text-2xl font-black font-mono ${color}`}>{conv.count}</span>
+                      <span className="text-2xl font-black font-sans tabular-nums text-slate-950">{conv.count}</span>
                     </div>
                   );
                 })}
