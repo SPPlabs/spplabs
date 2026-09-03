@@ -31,6 +31,7 @@ export function getOrganizationSchema() {
     "@id": `${BASE_URL}/#organization`,
     name: "SPP Labs",
     alternateName: "SPP Labs Soluciones Tecnológicas",
+    slogan: "Diseño web, SEO, IA y Automatización para Empresas en España",
     url: BASE_URL,
     logo: {
       "@type": "ImageObject",
@@ -39,7 +40,7 @@ export function getOrganizationSchema() {
     },
     image: `${BASE_URL}/logo.webp`,
     description:
-      "Desarrollo web a medida, sistemas CRM, asistentes inteligentes con IA y optimización SEO/GEO para empresas.",
+      "Agencia tecnológica especializada en diseño web premium, posicionamiento SEO, asistentes inteligentes con IA y automatización de procesos para empresas en España.",
     email: "info@spplabs.es",
     priceRange: "€€",
     address: {
@@ -50,6 +51,18 @@ export function getOrganizationSchema() {
       "@type": "Country",
       name: "España",
     },
+    knowsAbout: [
+      "Diseño web",
+      "Desarrollo web a medida",
+      "Posicionamiento SEO",
+      "Optimización GEO (Generative Engine Optimization)",
+      "Inteligencia Artificial",
+      "Chatbots de IA 24/7",
+      "Automatización de procesos empresariales",
+      "Sistemas CRM",
+      "Sistemas de reservas y citas online",
+      "Booster de reseñas en Google Maps y automatización por email",
+    ],
     sameAs: [
       "https://github.com",
     ],
@@ -62,6 +75,8 @@ export function getOrganizationSchema() {
           itemOffered: {
             "@type": "Service",
             name: "Desarrollo Web Premium",
+            serviceType: "Diseño y desarrollo web",
+            description: "Páginas web interactivas y aplicaciones de alto rendimiento desarrolladas con Next.js, velocidad ultra-rápida y soporte transaccional.",
             url: `${BASE_URL}/servicios/desarrollo-web`,
           },
         },
@@ -70,6 +85,8 @@ export function getOrganizationSchema() {
           itemOffered: {
             "@type": "Service",
             name: "Sistemas CRM y Panel de Control",
+            serviceType: "Automatización y CRM",
+            description: "Plataforma centralizada para gestión de clientes, seguimiento de leads, telemetría y analíticas de tráfico en tiempo real.",
             url: `${BASE_URL}/servicios/crm-dashboard`,
           },
         },
@@ -78,6 +95,8 @@ export function getOrganizationSchema() {
           itemOffered: {
             "@type": "Service",
             name: "Chatbot de IA 24/7",
+            serviceType: "Inteligencia Artificial",
+            description: "Asistentes conversacionales inteligentes con arquitectura RAG local entrenados con datos de empresa para captar clientes 24/7.",
             url: `${BASE_URL}/servicios/chatbot-ia`,
           },
         },
@@ -86,6 +105,8 @@ export function getOrganizationSchema() {
           itemOffered: {
             "@type": "Service",
             name: "Optimización GEO (Buscadores de IA)",
+            serviceType: "SEO y GEO",
+            description: "Estructuración de datos y autoridad semántica para ser recomendado por buscadores de IA como ChatGPT, Perplexity y Gemini.",
             url: `${BASE_URL}/servicios/optimizacion-geo`,
           },
         },
@@ -94,6 +115,8 @@ export function getOrganizationSchema() {
           itemOffered: {
             "@type": "Service",
             name: "Posicionamiento SEO Orgánico",
+            serviceType: "Posicionamiento SEO",
+            description: "Estrategias de indexación y optimización técnica para dominar los resultados de búsqueda orgánica en Google.",
             url: `${BASE_URL}/servicios/posicionamiento-seo`,
           },
         },
@@ -102,6 +125,8 @@ export function getOrganizationSchema() {
           itemOffered: {
             "@type": "Service",
             name: "Sistema de Reservas y Citas",
+            serviceType: "Automatización de citas",
+            description: "Agenda y reservas de citas online sincronizadas en tiempo real con Google Calendar y confirmación automática por email.",
             url: `${BASE_URL}/servicios/sistema-reservas`,
           },
         },
@@ -110,6 +135,8 @@ export function getOrganizationSchema() {
           itemOffered: {
             "@type": "Service",
             name: "Booster de Reseñas de Google & Email",
+            serviceType: "Reputación y Email Marketing",
+            description: "Automatización de reseñas de 5 estrellas en Google Maps y envío de recordatorios de citas para eliminar ausencias.",
             url: `${BASE_URL}/servicios/booster-resenas`,
           },
         },

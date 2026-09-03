@@ -9,73 +9,6 @@ import { useLanguage } from "@/context/LanguageContext";
 export default function InicioSection() {
   const { lang } = useLanguage();
 
-  // Simulated metrics for the interactive dashboard mockup
-  const metrics = {
-    throughput: {
-      title: lang === "es" ? "Rendimiento de Red" : "Network Throughput",
-      value: "1,248.4 Mb/s",
-      change: lang === "es" ? "+14.2% desde la última hora" : "+14.2% from last hour",
-      isPositive: true,
-      color: "blue",
-      svgPath: (
-        <svg viewBox="0 0 500 150" className="w-full h-40 text-brand-blue" fill="none" stroke="currentColor" strokeWidth="3">
-          <defs>
-            <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#2563eb" stopOpacity="0.2" />
-              <stop offset="100%" stopColor="#2563eb" stopOpacity="0.0" />
-            </linearGradient>
-          </defs>
-          <path d="M0,100 L50,110 L100,85 L150,90 L200,60 L250,75 L300,45 L350,55 L400,30 L450,42 L500,20" />
-          <path d="M0,100 L50,110 L100,85 L150,90 L200,60 L250,75 L300,45 L350,55 L400,30 L450,42 L500,20 L500,150 L0,150 Z" fill="url(#blueGrad)" stroke="none" />
-          <circle cx="500" cy="20" r="6" fill="#2563eb" className="animate-ping" />
-          <circle cx="500" cy="20" r="4" fill="#2563eb" />
-        </svg>
-      )
-    },
-    cpu: {
-      title: lang === "es" ? "Uso de CPU" : "CPU Utilization",
-      value: "42.8%",
-      change: lang === "es" ? "-5.3% desde la última hora" : "-5.3% from last hour",
-      isPositive: true,
-      color: "green",
-      svgPath: (
-        <svg viewBox="0 0 500 150" className="w-full h-40 text-brand-green" fill="none" stroke="currentColor" strokeWidth="3">
-          <defs>
-            <linearGradient id="greenGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-            </linearGradient>
-          </defs>
-          <path d="M0,130 L50,120 L100,125 L150,80 L200,95 L250,70 L300,50 L350,85 L400,60 L450,48 L500,40" />
-          <path d="M0,130 L50,120 L100,125 L150,80 L200,95 L250,70 L300,50 L350,85 L400,60 L450,48 L500,40 L500,150 L0,150 Z" fill="url(#greenGrad)" stroke="none" />
-          <circle cx="500" cy="40" r="6" fill="#10b981" className="animate-ping" />
-          <circle cx="500" cy="40" r="4" fill="#10b981" />
-        </svg>
-      )
-    },
-    latency: {
-      title: lang === "es" ? "Tiempo de Respuesta API" : "API Response Time",
-      value: "14ms",
-      change: lang === "es" ? "+0.4% desde la última hora" : "+0.4% from last hour",
-      isPositive: false,
-      color: "black",
-      svgPath: (
-        <svg viewBox="0 0 500 150" className="w-full h-40 text-black" fill="none" stroke="currentColor" strokeWidth="3">
-          <defs>
-            <linearGradient id="blackGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#000000" stopOpacity="0.1" />
-              <stop offset="100%" stopColor="#000000" stopOpacity="0.0" />
-            </linearGradient>
-          </defs>
-          <path d="M0,45 L50,42 L100,40 L150,43 L200,41 L250,38 L300,40 L350,42 L400,39 L450,41 L500,40" />
-          <path d="M0,45 L50,42 L100,40 L150,43 L200,41 L250,38 L300,40 L350,42 L400,39 L450,41 L500,40 L500,150 L0,150 Z" fill="url(#blackGrad)" stroke="none" />
-          <circle cx="500" cy="40" r="6" fill="#000000" className="animate-ping" />
-          <circle cx="500" cy="40" r="4" fill="#000000" />
-        </svg>
-      )
-    }
-  };
-
   return (
     <>
       {/* Hero Section */}
@@ -96,21 +29,19 @@ export default function InicioSection() {
                 <span className="text-yellow-400 font-extrabold">RESEÑAS</span>
               </div>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-zinc-950 leading-[1.08] mb-8 lowercase font-sans">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-zinc-950 leading-[1.12] mb-8 font-sans">
                 {lang === "es" ? (
                   <>
-                    convierte <br className="hidden sm:inline" />
-                    visitas en{" "}
+                    Diseño web, SEO, IA y Automatización para{" "}
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue to-brand-green">
-                      clientes
+                      Empresas en España
                     </span>
                   </>
                 ) : (
                   <>
-                    convert <br className="hidden sm:inline" />
-                    visits into{" "}
+                    Web Design, SEO, AI & Automation for{" "}
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue to-brand-green">
-                      clients
+                      Businesses in Spain
                     </span>
                   </>
                 )}
