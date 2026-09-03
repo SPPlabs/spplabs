@@ -12,7 +12,7 @@ export default function InicioSection() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-10 pb-20 md:py-32 border-b border-zinc-100">
+      <section className="relative overflow-hidden pt-10 pb-20 md:pt-20 md:pb-32 border-b border-zinc-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
             {/* Hero Copy */}
