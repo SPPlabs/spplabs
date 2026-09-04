@@ -696,9 +696,6 @@ export default function EmailTab({
                 <EyeIcon className="w-4 h-4 text-slate-700" />
                 <span>{lang === "es" ? "Previsualizador en Vivo" : "Live Email Preview"}</span>
               </h4>
-              <span className="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-bold">
-                HTML Responsive
-              </span>
             </div>
 
             {/* Template Switcher Buttons */}
