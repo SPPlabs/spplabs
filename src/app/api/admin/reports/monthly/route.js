@@ -647,7 +647,7 @@ function generatePositiveInsights({
     insights.push({
       id: "automation_win",
       category: "Disponibilidad 24/7",
-      badge: "🚀 Captación Continua",
+      badge: "Captación Continua",
       title: "Atención y Captación Automática Fuera de Horario",
       description: `Durante ${monthName} de ${year}, la automatización del sitio atendió ${totalAutomated} interacciones y solicitudes fuera del horario comercial habitual.`,
       action: "La presencia digital activa permitió convertir consultas nocturnas y de fin de semana sin requerir atención manual constante.",
@@ -656,7 +656,7 @@ function generatePositiveInsights({
     insights.push({
       id: "reach_win",
       category: "Presencia Digital",
-      badge: "📈 Cobertura Activa",
+      badge: "Cobertura Activa",
       title: "Consolidación del Alcance del Sitio Web",
       description: `El sitio web mantuvo una cobertura continua en ${monthName}, alcanzando ${uniqueVisitors || totalVisitors || 1} visitantes únicos durante el mes.`,
       action: "Se recomienda continuar promocionando los servicios clave en la página de inicio para acelerar la captación.",
@@ -669,7 +669,7 @@ function generatePositiveInsights({
     insights.push({
       id: "leads_win",
       category: "Generación de Contactos",
-      badge: "🎯 Alto Interés",
+      badge: "Alto Interés",
       title: `${totalLeads} Oportunidades de Negocio Generadas`,
       description: `Se captaron ${contactFormsCount} formularios de contacto directos y ${totalBookings} solicitudes de cita (${confirmedBookings} confirmadas) en ${monthName}.`,
       action: `La tasa de conversión del sitio alcanzó el ${leadConversionRate}% respecto a los visitantes únicos.`,
@@ -678,7 +678,7 @@ function generatePositiveInsights({
     insights.push({
       id: "traffic_interest",
       category: "Atención del Cliente",
-      badge: "💡 Interés Creciente",
+      badge: "Interés Creciente",
       title: "Interés Sostenido en las Secciones Principales",
       description: `Los usuarios consultaron con mayor frecuencia la sección '${topPages[0]?.page_url || "/"}', registrando ${topPages[0]?.count || totalVisitors} visualizaciones.`,
       action: "Añadir un botón directo de llamada a la acción en esta página aumentará la tasa de respuesta.",
@@ -695,7 +695,7 @@ function generatePositiveInsights({
     insights.push({
       id: "mobile_win",
       category: "Experiencia Móvil",
-      badge: "📱 Dominio Smartphone",
+      badge: "Dominio Smartphone",
       title: `Excelente Adaptación para Dispositivos Móviles (${mobilePct}%)`,
       description: `El ${mobilePct}% de tus clientes interactuó desde teléfonos móviles de forma fluida durante el mes.`,
       action: "La optimización móvil garantiza una experiencia ágil para los usuarios en cualquier lugar.",
@@ -704,7 +704,7 @@ function generatePositiveInsights({
     insights.push({
       id: "source_win",
       category: "Canales de Tráfico",
-      badge: "🌐 Canal Principal",
+      badge: "Canal Principal",
       title: `Liderazgo de Captación desde ${topSource}`,
       description: `${topSource} se posicionó como la principal fuente de atracción de usuarios hacia tu negocio este mes.`,
       action: "Mantener la presencia en este canal reforzará la llegada de nuevos clientes de forma constante.",

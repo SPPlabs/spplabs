@@ -13,7 +13,42 @@ import {
   SparklesIcon,
   LightbulbIcon,
   MailIcon,
+  ChartBarIcon,
+  LockClosedIcon,
+  RocketIcon,
+  TrendingUpIcon,
+  TargetIcon,
+  DevicePhoneMobileIcon,
+  GlobeAltIcon,
 } from "@/components/dashboard/DashboardIcons";
+
+function getInsightBadgeIcon(item) {
+  const text = `${item.badge || ""} ${item.category || ""} ${item.id || ""}`.toLowerCase();
+  if (text.includes("captación") || text.includes("disponibilidad") || text.includes("continua") || text.includes("rocket") || item.id === "automation_win") {
+    return <RocketIcon className="w-3.5 h-3.5 text-indigo-300 shrink-0" />;
+  }
+  if (text.includes("cobertura") || text.includes("alcance") || text.includes("presencia") || text.includes("trending") || item.id === "reach_win") {
+    return <TrendingUpIcon className="w-3.5 h-3.5 text-indigo-300 shrink-0" />;
+  }
+  if (text.includes("leads") || text.includes("interés") || text.includes("oportunidades") || text.includes("target") || item.id === "leads_win") {
+    return <TargetIcon className="w-3.5 h-3.5 text-indigo-300 shrink-0" />;
+  }
+  if (text.includes("móvil") || text.includes("smartphone") || text.includes("dispositivos") || item.id === "mobile_win") {
+    return <DevicePhoneMobileIcon className="w-3.5 h-3.5 text-indigo-300 shrink-0" />;
+  }
+  if (text.includes("canal") || text.includes("tráfico") || text.includes("fuente") || item.id === "source_win") {
+    return <GlobeAltIcon className="w-3.5 h-3.5 text-indigo-300 shrink-0" />;
+  }
+  if (text.includes("atención") || text.includes("idea") || item.id === "traffic_interest") {
+    return <LightbulbIcon className="w-3.5 h-3.5 text-indigo-300 shrink-0" />;
+  }
+  return <SparklesIcon className="w-3.5 h-3.5 text-indigo-300 shrink-0" />;
+}
+
+function cleanBadgeText(badge, category) {
+  const raw = badge || category || "Logro Destacado";
+  return raw.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|\p{Extended_Pictographic}/gu, "").trim();
+}
 
 export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }) {
   const now = new Date();
@@ -315,7 +350,8 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
 
           <div className="max-w-2xl mx-auto space-y-2">
             <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-900 text-xs font-extrabold px-3 py-1 rounded-full">
-              🔒 Informe Mensual En Curso
+              <LockClosedIcon className="w-3.5 h-3.5 text-amber-800 shrink-0" />
+              <span>Informe Mensual En Curso</span>
             </span>
             <h3 className="text-2xl font-black text-slate-900">
               El informe de {data.monthName} {data.year} aún no ha finalizado
@@ -355,7 +391,10 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
             <div className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-3xl p-6 shadow-md space-y-4 animate-fade-in no-print">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-base font-black">📊 Comparativa Mes a Mes</span>
+                  <span className="w-7 h-7 rounded-xl bg-white/10 flex items-center justify-center text-indigo-300 shrink-0">
+                    <ChartBarIcon className="w-4 h-4" />
+                  </span>
+                  <span className="text-base font-black">Comparativa Mes a Mes</span>
                   <span className="text-xs bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 px-2.5 py-0.5 rounded-full font-extrabold">
                     {data.monthName} {data.year} vs {data.comparison.prev_month_name} {data.comparison.prev_year}
                   </span>
@@ -579,8 +618,9 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
                   >
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-indigo-200 px-2.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30">
-                          {item.badge || item.category}
+                        <span className="text-[10px] font-black uppercase tracking-wider text-indigo-200 px-2.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 inline-flex items-center gap-1.5">
+                          {getInsightBadgeIcon(item)}
+                          <span>{cleanBadgeText(item.badge, item.category)}</span>
                         </span>
                       </div>
                       <h4 className="text-sm font-extrabold text-white mb-2 leading-snug">{item.title}</h4>
