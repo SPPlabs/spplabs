@@ -196,7 +196,26 @@ export default function TerminosYCondicionesPage() {
           {/* Section 6 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              6. Registro de usuarios
+              6. Acceso y administración de los sistemas
+            </h2>
+            <p className="text-sm text-zinc-700 leading-relaxed">
+              Para proporcionar los servicios contratados, SPP Labs podrá disponer de acceso administrativo o técnico a los sistemas, aplicaciones, paneles, CRM, bases de datos y demás infraestructura tecnológica gestionada por SPP Labs en nombre del cliente.
+            </p>
+            <p className="text-sm text-zinc-700 leading-relaxed">
+              Este acceso podrá utilizarse para tareas de configuración, mantenimiento, soporte técnico, resolución de incidencias, seguridad, monitorización, actualización y mejora de los servicios.
+            </p>
+            <p className="text-sm text-zinc-700 leading-relaxed">
+              El acceso se limitará a lo necesario para la prestación de los servicios y se realizará de conformidad con la normativa aplicable en materia de protección de datos.
+            </p>
+            <p className="text-sm text-zinc-700 leading-relaxed">
+              El cliente reconoce que determinados servicios requieren que SPP Labs mantenga acceso técnico o administrativo a la infraestructura necesaria para garantizar su funcionamiento.
+            </p>
+          </section>
+
+          {/* Section 7 */}
+          <section className="space-y-3">
+            <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
+              7. Registro de usuarios
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               Algunos servicios podrán requerir la creación de una cuenta.
@@ -214,10 +233,10 @@ export default function TerminosYCondicionesPage() {
             </p>
           </section>
 
-          {/* Section 7 */}
+          {/* Section 8 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              7. Contratación, precios y pagos
+              8. Contratación, precios y pagos
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               Los precios serán los publicados o los expresamente aceptados mediante presupuesto.
@@ -240,10 +259,10 @@ export default function TerminosYCondicionesPage() {
             </ul>
           </section>
 
-          {/* Section 8 */}
+          {/* Section 9 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              8. Renovaciones y cancelaciones
+              9. Renovaciones y cancelaciones
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               Las suscripciones se mantendrán activas mientras continúen siendo abonadas.
@@ -256,10 +275,10 @@ export default function TerminosYCondicionesPage() {
             </p>
           </section>
 
-          {/* Section 9 */}
+          {/* Section 10 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              9. Disponibilidad del servicio
+              10. Disponibilidad del servicio
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               SPP Labs realizará esfuerzos razonables para mantener la disponibilidad de sus servicios.
@@ -286,23 +305,35 @@ export default function TerminosYCondicionesPage() {
             </p>
           </section>
 
-          {/* Section 10 */}
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              10. Mantenimiento
-            </h2>
-            <p className="text-sm text-zinc-700 leading-relaxed">
-              SPP Labs podrá realizar tareas de mantenimiento preventivo o correctivo cuando resulte necesario.
-            </p>
-            <p className="text-sm text-zinc-700 leading-relaxed">
-              Siempre que sea razonablemente posible, los mantenimientos programados que puedan afectar significativamente a la disponibilidad del servicio serán comunicados con antelación.
-            </p>
-          </section>
-
           {/* Section 11 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              11. Propiedad intelectual
+              11. Mantenimiento, soporte y modificaciones
+            </h2>
+            <p className="text-sm text-zinc-700 leading-relaxed">
+              SPP Labs realizará las tareas de mantenimiento técnico necesarias para mantener los servicios contratados en funcionamiento.
+            </p>
+            <p className="text-sm text-zinc-700 leading-relaxed">
+              Salvo que el contrato o plan contratado establezca condiciones diferentes, el servicio incluye una (1) solicitud de modificación de la página web por cada periodo de dos (2) meses.
+            </p>
+            <p className="text-sm text-zinc-700 leading-relaxed">
+              Las solicitudes deberán referirse a modificaciones razonables sobre la web existente, incluyendo, entre otras, cambios de textos, imágenes, información comercial, horarios, datos de contacto, precios o elementos equivalentes.
+            </p>
+            <p className="text-sm text-zinc-700 leading-relaxed">
+              Las modificaciones que requieran desarrollo de nuevas funcionalidades, cambios sustanciales en la estructura, integraciones con servicios externos, rediseños, migraciones u otros trabajos de carácter extraordinario podrán quedar fuera del mantenimiento incluido y ser objeto de presupuesto independiente.
+            </p>
+            <p className="text-sm text-zinc-700 leading-relaxed">
+              Las solicitudes no utilizadas no serán acumulables entre periodos.
+            </p>
+            <p className="text-sm text-zinc-700 leading-relaxed">
+              SPP Labs determinará razonablemente si una solicitud se encuentra dentro del mantenimiento incluido atendiendo a su complejidad y alcance.
+            </p>
+          </section>
+
+          {/* Section 12 */}
+          <section className="space-y-3">
+            <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
+              12. Propiedad intelectual
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               Todos los contenidos del sitio web, incluyendo, entre otros:
@@ -327,10 +358,10 @@ export default function TerminosYCondicionesPage() {
             </p>
           </section>
 
-          {/* Section 12 */}
+          {/* Section 13 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              12. Propiedad del contenido del cliente
+              13. Propiedad del contenido del cliente
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               El cliente conservará en todo momento la titularidad sobre los contenidos, documentos, imágenes, bases de datos y demás información que facilite para la prestación de los servicios.
@@ -340,10 +371,10 @@ export default function TerminosYCondicionesPage() {
             </p>
           </section>
 
-          {/* Section 13 */}
+          {/* Section 14 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              13. Servicios basados en Inteligencia Artificial
+              14. Servicios basados en Inteligencia Artificial
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               Algunos servicios podrán incorporar modelos de Inteligencia Artificial.
@@ -361,10 +392,10 @@ export default function TerminosYCondicionesPage() {
             </p>
           </section>
 
-          {/* Section 14 */}
+          {/* Section 15 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              14. Servicios de terceros
+              15. Servicios de terceros
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               Los servicios podrán integrarse con plataformas, APIs o proveedores externos.
@@ -380,10 +411,10 @@ export default function TerminosYCondicionesPage() {
             </ul>
           </section>
 
-          {/* Section 15 */}
+          {/* Section 16 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              15. Obligaciones del cliente
+              16. Obligaciones del cliente
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               El cliente se compromete a:
@@ -397,10 +428,10 @@ export default function TerminosYCondicionesPage() {
             </ul>
           </section>
 
-          {/* Section 16 */}
+          {/* Section 17 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              16. Limitación de responsabilidad
+              17. Limitación de responsabilidad
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               SPP Labs responderá únicamente en los supuestos previstos por la legislación aplicable.
@@ -424,10 +455,10 @@ export default function TerminosYCondicionesPage() {
             </p>
           </section>
 
-          {/* Section 17 */}
+          {/* Section 18 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              17. Suspensión o terminación del servicio
+              18. Suspensión o terminación del servicio
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               SPP Labs podrá suspender temporalmente o cancelar definitivamente el acceso a los servicios cuando el usuario:
@@ -441,10 +472,10 @@ export default function TerminosYCondicionesPage() {
             </ul>
           </section>
 
-          {/* Section 18 */}
+          {/* Section 19 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              18. Cese de la actividad
+              19. Cese de la actividad
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               SPP Labs se reserva el derecho a cesar total o parcialmente la prestación de sus servicios o finalizar su actividad empresarial.
@@ -457,10 +488,10 @@ export default function TerminosYCondicionesPage() {
             </p>
           </section>
 
-          {/* Section 19 */}
+          {/* Section 20 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              19. Protección de datos
+              20. Protección de datos
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               El tratamiento de los datos personales se realizará conforme a la{" "}
@@ -471,10 +502,10 @@ export default function TerminosYCondicionesPage() {
             </p>
           </section>
 
-          {/* Section 20 */}
+          {/* Section 21 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              20. Cookies
+              21. Cookies
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               El uso de cookies se regula mediante la correspondiente{" "}
@@ -484,10 +515,10 @@ export default function TerminosYCondicionesPage() {
             </p>
           </section>
 
-          {/* Section 21 */}
+          {/* Section 22 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              21. Enlaces a sitios externos
+              22. Enlaces a sitios externos
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               El sitio web podrá contener enlaces hacia páginas de terceros.
@@ -497,10 +528,10 @@ export default function TerminosYCondicionesPage() {
             </p>
           </section>
 
-          {/* Section 22 */}
+          {/* Section 23 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              22. Modificaciones de los términos
+              23. Modificaciones de los términos
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               SPP Labs podrá modificar los presentes Términos y Condiciones cuando resulte necesario para adaptarlos a cambios legales, técnicos o comerciales.
@@ -510,30 +541,30 @@ export default function TerminosYCondicionesPage() {
             </p>
           </section>
 
-          {/* Section 23 */}
+          {/* Section 24 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              23. Fuerza mayor
+              24. Fuerza mayor
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               SPP Labs no será responsable del incumplimiento de sus obligaciones cuando éste derive de circunstancias imprevisibles o inevitables, incluyendo, entre otras, desastres naturales, conflictos armados, pandemias, fallos generalizados de telecomunicaciones, cortes de suministro eléctrico, ataques informáticos de gran escala o decisiones de autoridades competentes.
             </p>
           </section>
 
-          {/* Section 24 */}
+          {/* Section 25 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              24. Nulidad parcial
+              25. Nulidad parcial
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               Si alguna de las disposiciones de estos Términos fuera declarada nula o inaplicable por una autoridad competente, dicha circunstancia no afectará a la validez del resto de las disposiciones, que permanecerán plenamente vigentes.
             </p>
           </section>
 
-          {/* Section 25 */}
+          {/* Section 26 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              25. Legislación aplicable y jurisdicción
+              26. Legislación aplicable y jurisdicción
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               Los presentes Términos y Condiciones se regirán e interpretarán de conformidad con la legislación española.
@@ -543,10 +574,10 @@ export default function TerminosYCondicionesPage() {
             </p>
           </section>
 
-          {/* Section 26 */}
+          {/* Section 27 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-black border-b border-zinc-100 pb-2">
-              26. Contacto
+              27. Contacto
             </h2>
             <p className="text-sm text-zinc-700 leading-relaxed">
               Para cualquier consulta relacionada con los presentes Términos y Condiciones o con los servicios ofrecidos por SPP Labs, los usuarios podrán ponerse en contacto a través del siguiente correo electrónico:
