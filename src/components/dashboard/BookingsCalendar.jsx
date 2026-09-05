@@ -21,6 +21,7 @@ import {
   exportBookingsToCsv,
   exportBookingIcsFile,
   exportCalendarIcsFile,
+  formatWhatsAppUrl,
 } from "@/lib/exportUtils";
 
 function getInitials(name) {
@@ -884,7 +885,7 @@ export default function BookingsCalendar({
                                     </a>
                                   </div>
                                   <a
-                                    href={`https://wa.me/${b.phone.replace(/[^0-9]/g, "")}`}
+                                    href={formatWhatsAppUrl(b.phone)}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-[10px] font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 shadow-2xs"

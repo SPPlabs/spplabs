@@ -18,6 +18,7 @@ import {
   copyTextToClipboard,
   formatContactToText,
   formatBookingToText,
+  formatWhatsAppUrl,
 } from "@/lib/exportUtils";
 
 function getInitials(name) {
@@ -255,7 +256,7 @@ export default function OverviewTab({
                             <span>{form.phone}</span>
                           </a>
                           <a
-                            href={`https://wa.me/${form.phone.replace(/[^0-9]/g, "")}`}
+                            href={formatWhatsAppUrl(form.phone)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors cursor-pointer"
@@ -398,7 +399,7 @@ export default function OverviewTab({
                                 <span>{booking.phone}</span>
                               </a>
                               <a
-                                href={`https://wa.me/${booking.phone.replace(/[^0-9]/g, "")}`}
+                                href={formatWhatsAppUrl(booking.phone)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors cursor-pointer"

@@ -28,6 +28,7 @@ import {
   exportContactsToCsv,
   formatBookingToText,
   exportBookingIcsFile,
+  formatWhatsAppUrl,
 } from "@/lib/exportUtils";
 
 // Helper to get initials from a person's name
@@ -339,7 +340,7 @@ export default function ClientesTab({
 
                       {form.phone && (
                         <a
-                          href={`https://wa.me/${form.phone.replace(/[^0-9]/g, "")}`}
+                          href={formatWhatsAppUrl(form.phone)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10.5px] font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 shadow-2xs"
@@ -707,7 +708,7 @@ export default function ClientesTab({
 
                             {b.phone && (
                               <a
-                                href={`https://wa.me/${b.phone.replace(/[^0-9]/g, "")}`}
+                                href={formatWhatsAppUrl(b.phone)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10.5px] font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 shadow-2xs"

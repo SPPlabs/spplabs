@@ -273,3 +273,39 @@ export function exportCalendarIcsFile(bookings = [], companyName = "SPP Labs", f
   const safeDomain = (companyName || "spplabs").replace(/[^a-zA-Z0-9_-]/g, "_");
   downloadBlob(ics, `${filenamePrefix}_${safeDomain}_${dateStr}.ics`, "text/calendar;charset=utf-8");
 }
+
+/**
+ * Format a phone number into a safe, robust WhatsApp direct-chat URL.
+ * Automatically adds the country prefix (default Spain +34) if omitted,
+ * strips leading '00', and uses api.whatsapp.com to prevent WhatsApp from
+ * mistaking numbers for non-existent usernames (@username).
+ */
+export function formatWhatsAppUrl(phone, defaultCountryCode = "34") {
+  if (!phone) return "#";
+
+  const trimmed = String(phone).trim();
+  const hasPlus = trimmed.startsWith("+");
+
+  // Strip non-digits
+  let cleaned = trimmed.replace(/[^0-9]/g, "");
+  if (!cleaned) return "#";
+
+  // Remove leading international dialing '00' (e.g. 0034 -> 34)
+  if (cleaned.startsWith("00")) {
+    cleaned = cleaned.replace(/^00+/, "");
+  }
+
+  // If not explicitly entered with '+' or starting with country code:
+  if (!hasPlus) {
+    const startsWithDefault = cleaned.startsWith(defaultCountryCode);
+    if (!startsWithDefault) {
+      // Spanish mobile/landlines (typically 9 digits starting with 6, 7, 8, 9, or up to 10 digits)
+      if (/^[6789]/.test(cleaned) && cleaned.length <= 10) {
+        cleaned = `${defaultCountryCode}${cleaned}`;
+      }
+    }
+  }
+
+  return `https://api.whatsapp.com/send?phone=${cleaned}`;
+}
+
