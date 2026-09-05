@@ -110,43 +110,36 @@ export async function POST(request) {
     const isContactReviewEnabled = Boolean(enableContactReviewRequest);
     const contactDelay = contactReviewDelayHours !== undefined ? Number(contactReviewDelayHours) : 24;
 
+    const baseData = {
+      senderName: senderName?.trim() || website.displayName,
+      replyToEmail: replyToEmail?.trim() || null,
+      googleReviewUrl: googleReviewUrl?.trim() || null,
+      enableWelcomeEmail: Boolean(enableWelcomeEmail),
+      enableBookingConfirm: Boolean(enableBookingConfirm),
+      enableBookingReminder: Boolean(enableBookingReminder),
+      reminderHoursBefore: reminderHoursBefore !== undefined ? Number(reminderHoursBefore) : 24,
+      enableReviewRequest: isBookingReviewEnabled,
+      reviewDelayHours: bookingDelay,
+      enableBookingReviewRequest: isBookingReviewEnabled,
+      bookingReviewDelayHours: bookingDelay,
+      enableContactReviewRequest: isContactReviewEnabled,
+      contactReviewDelayHours: contactDelay,
+      brandColor: brandColor?.trim() || "#0284c7",
+    };
+
+    const updateData = { ...baseData };
+    if (customLogoUrl !== undefined) {
+      updateData.customLogoUrl = customLogoUrl && customLogoUrl.trim() ? customLogoUrl.trim() : null;
+    }
+
     const updatedConfig = await prisma.websiteEmailConfig.upsert({
       where: { websiteId: website.id },
       create: {
         websiteId: website.id,
-        senderName: senderName?.trim() || website.displayName,
-        replyToEmail: replyToEmail?.trim() || null,
-        googleReviewUrl: googleReviewUrl?.trim() || null,
-        enableWelcomeEmail: Boolean(enableWelcomeEmail),
-        enableBookingConfirm: Boolean(enableBookingConfirm),
-        enableBookingReminder: Boolean(enableBookingReminder),
-        reminderHoursBefore: reminderHoursBefore !== undefined ? Number(reminderHoursBefore) : 24,
-        enableReviewRequest: isBookingReviewEnabled,
-        reviewDelayHours: bookingDelay,
-        enableBookingReviewRequest: isBookingReviewEnabled,
-        bookingReviewDelayHours: bookingDelay,
-        enableContactReviewRequest: isContactReviewEnabled,
-        contactReviewDelayHours: contactDelay,
-        brandColor: brandColor?.trim() || "#0284c7",
-        customLogoUrl: customLogoUrl?.trim() || null,
+        ...baseData,
+        customLogoUrl: customLogoUrl && customLogoUrl.trim() ? customLogoUrl.trim() : null,
       },
-      update: {
-        senderName: senderName?.trim() || website.displayName,
-        replyToEmail: replyToEmail?.trim() || null,
-        googleReviewUrl: googleReviewUrl?.trim() || null,
-        enableWelcomeEmail: Boolean(enableWelcomeEmail),
-        enableBookingConfirm: Boolean(enableBookingConfirm),
-        enableBookingReminder: Boolean(enableBookingReminder),
-        reminderHoursBefore: reminderHoursBefore !== undefined ? Number(reminderHoursBefore) : 24,
-        enableReviewRequest: isBookingReviewEnabled,
-        reviewDelayHours: bookingDelay,
-        enableBookingReviewRequest: isBookingReviewEnabled,
-        bookingReviewDelayHours: bookingDelay,
-        enableContactReviewRequest: isContactReviewEnabled,
-        contactReviewDelayHours: contactDelay,
-        brandColor: brandColor?.trim() || "#0284c7",
-        customLogoUrl: customLogoUrl?.trim() || null,
-      },
+      update: updateData,
     });
 
     return NextResponse.json({

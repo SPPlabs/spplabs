@@ -24,6 +24,7 @@ import {
 
 export default function EmailTab({
   currentWebsite,
+  currentLogoUrl,
   t,
   lang,
 }) {
@@ -48,6 +49,7 @@ export default function EmailTab({
   const [contactReviewDelayHours, setContactReviewDelayHours] = useState(24);
   
   const [brandColor, setBrandColor] = useState("#0284c7");
+  const [customLogoUrl, setCustomLogoUrl] = useState("");
 
   // Email Logs & Stats State
   const [emailLogs, setEmailLogs] = useState([]);
@@ -128,6 +130,7 @@ export default function EmailTab({
           setContactReviewDelayHours(c.contactReviewDelayHours || 24);
 
           setBrandColor(c.brandColor || "#0284c7");
+          setCustomLogoUrl(c.customLogoUrl || "");
         }
 
         if (logsData.success) {
@@ -181,6 +184,7 @@ export default function EmailTab({
           enableContactReviewRequest,
           contactReviewDelayHours: Number(contactReviewDelayHours),
           brandColor,
+          ...(currentLogoUrl || customLogoUrl ? { customLogoUrl: currentLogoUrl || customLogoUrl } : {}),
         }),
       });
 
@@ -241,7 +245,7 @@ export default function EmailTab({
   const getPreviewHtml = () => {
     const compName = senderName || currentWebsite?.displayName || "Empresa Demo";
     const dom = currentWebsite?.domain || "spplabs.es";
-    const logo = currentWebsite?.logoUrl || null;
+    const logo = currentLogoUrl || customLogoUrl || currentWebsite?.logoUrl || null;
 
     if (previewTab === "welcome") {
       return generateWelcomeContactHtml({

@@ -181,6 +181,7 @@ export async function POST(request) {
 
           const companyName = website.displayName || "Atención al Cliente";
           const brandColor = emailConfig?.brandColor || "#0284c7";
+          const customLogoUrl = emailConfig?.customLogoUrl || website.logoUrl || null;
 
           const html = generateWelcomeContactHtml({
             recipientName: name.trim(),
@@ -188,6 +189,7 @@ export async function POST(request) {
             clientDomain: website.domain,
             brandColor,
             messageSnippet: message.trim().slice(0, 200),
+            customLogoUrl,
           });
 
           const sendRes = await sendEmail({
@@ -218,6 +220,7 @@ export async function POST(request) {
         // B. Schedule or Send Google Review Booster for Contact Form
         if (emailConfig && emailConfig.enableContactReviewRequest) {
           const companyName = website.displayName || "Atención al Cliente";
+          const customLogoUrl = emailConfig?.customLogoUrl || website.logoUrl || null;
           const delayHours = emailConfig.contactReviewDelayHours !== undefined ? emailConfig.contactReviewDelayHours : 24;
 
           if (delayHours === 0) {
@@ -232,6 +235,7 @@ export async function POST(request) {
               clientDomain: website.domain,
               googleReviewUrl: emailConfig.googleReviewUrl || `https://${website.domain}`,
               brandColor,
+              customLogoUrl,
             });
 
             const sendRes = await sendEmail({

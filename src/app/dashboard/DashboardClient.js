@@ -1560,6 +1560,7 @@ export default function DashboardClient({
           {activeTab === "email" && (
             <EmailTab
               currentWebsite={currentWebsite}
+              currentLogoUrl={currentLogoUrl}
               t={t}
               lang={lang}
             />

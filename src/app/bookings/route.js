@@ -221,6 +221,7 @@ export async function POST(request) {
         const brandColor = emailConfig?.brandColor || "#0284c7";
         const dateStr = parsedDate.toLocaleDateString("es-ES", { dateStyle: "long" });
         const timeStr = time.trim();
+        const customLogoUrl = emailConfig?.customLogoUrl || website.logoUrl || null;
 
         const { sendEmail } = await import("@/lib/email");
         const { generateBookingConfirmationHtml } = await import("@/lib/emailTemplates");
@@ -234,6 +235,7 @@ export async function POST(request) {
             dateStr,
             timeStr,
             brandColor,
+            customLogoUrl,
           });
 
           const sendRes = await sendEmail({

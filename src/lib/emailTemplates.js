@@ -34,11 +34,25 @@ function getSvgCheck(strokeColor = "#166534", size = 15) {
 
 function renderHeader(companyName, clientDomain, brandColor = "#0284c7", customLogoUrl = null) {
   let logoImgHtml = "";
-  if (customLogoUrl && customLogoUrl.trim()) {
-    const rawUrl = customLogoUrl.trim();
+  let rawUrl = customLogoUrl && typeof customLogoUrl === "string" ? customLogoUrl.trim() : null;
+
+  // Default fallback for SPP Labs if no custom logo is uploaded
+  if (!rawUrl && (!clientDomain || clientDomain === "spplabs.es" || clientDomain === "www.spplabs.es")) {
+    rawUrl = "/logo.webp";
+  }
+
+  if (rawUrl) {
+    // Prefer PNG sibling over WebP for broad email client compatibility (e.g. desktop Outlook)
+    if (rawUrl.includes("-logo.webp")) {
+      rawUrl = rawUrl.replace("-logo.webp", "-logo.png");
+    }
+
+    const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://spplabs.es";
+    const cleanBaseUrl = appBaseUrl.endsWith("/") ? appBaseUrl.slice(0, -1) : appBaseUrl;
+
     const absoluteLogoUrl = rawUrl.startsWith("http://") || rawUrl.startsWith("https://")
       ? rawUrl
-      : `https://${clientDomain || "spplabs.es"}${rawUrl.startsWith("/") ? "" : "/"}${rawUrl}`;
+      : `${cleanBaseUrl}${rawUrl.startsWith("/") ? "" : "/"}${rawUrl}`;
 
     logoImgHtml = `
       <img src="${absoluteLogoUrl}" alt="${companyName || "Logo"}" style="max-height: 42px; max-width: 140px; width: auto; height: auto; object-fit: contain; display: block; margin-bottom: 8px; border-radius: 8px;" />
