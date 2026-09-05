@@ -427,7 +427,7 @@ export default function DashboardClient({
             viewBox="0 0 24 24"
           >
             <circle cx="12" cy="12" r="10" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 17.5h.01" />
           </svg>
         </button>
 
@@ -1517,6 +1517,8 @@ export default function DashboardClient({
               handleUpdateChatbotKnowledge={handleUpdateChatbotKnowledge}
               iaSaved={iaSaved}
               iaSaving={iaSaving}
+              activeTooltipId={activeTooltipId}
+              renderInfoTooltip={renderInfoTooltip}
             />
           )}
 
