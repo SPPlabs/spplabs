@@ -8,6 +8,9 @@ import {
   BotIcon,
   ClockIcon,
   UserIcon,
+  PhoneIcon,
+  WhatsAppIcon,
+  ChatBubbleIcon,
   ClipboardIcon,
   ClipboardCheckIcon,
 } from "@/components/dashboard/DashboardIcons";
@@ -16,6 +19,13 @@ import {
   formatContactToText,
   formatBookingToText,
 } from "@/lib/exportUtils";
+
+function getInitials(name) {
+  if (!name) return "U";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 export default function OverviewTab({
   currentWebsite,
@@ -181,19 +191,36 @@ export default function OverviewTab({
                 {t.clientesNoForms}
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="space-y-3">
                 {contactForms.slice(0, 3).map((form) => (
-                  <div key={form.id} className="py-3.5 first:pt-0 last:pb-0 group">
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="font-bold text-xs text-slate-900">{form.name}</span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-slate-400 tabular-nums">
-                          {new Date(form.createdAt).toLocaleDateString()}
-                        </span>
+                  <div
+                    key={form.id}
+                    className="p-3.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200/80 rounded-2xl transition-all space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                          {getInitials(form.name)}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="font-extrabold text-xs text-slate-900 block truncate">
+                            {form.name}
+                          </span>
+                          <span className="text-[10px] text-slate-400 tabular-nums flex items-center gap-1">
+                            <ClockIcon className="w-3 h-3 text-slate-400" />
+                            {new Date(form.createdAt).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", {
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
                         <button
                           type="button"
                           onClick={() => handleCopyContact(form)}
-                          className="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-700 rounded transition-colors cursor-pointer"
+                          className="p-1 hover:bg-white border border-transparent hover:border-slate-200 text-slate-400 hover:text-slate-700 rounded-lg transition-colors cursor-pointer"
                           title={lang === "es" ? "Copiar datos del contacto" : "Copy contact details"}
                         >
                           {copiedId === form.id ? (
@@ -204,10 +231,48 @@ export default function OverviewTab({
                         </button>
                       </div>
                     </div>
-                    <span className="text-blue-600 block text-[11px] font-semibold truncate mb-1.5">{form.email}</span>
-                    <p className="text-slate-600 text-xs line-clamp-2 pl-2.5 border-l-2 border-slate-200">
-                      {form.message}
-                    </p>
+
+                    {/* Contact Pills */}
+                    <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                      {form.email && (
+                        <a
+                          href={`mailto:${form.email}`}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-slate-200/80 rounded-lg font-bold text-blue-600 hover:text-blue-800 transition-colors truncate max-w-[180px]"
+                          title={form.email}
+                        >
+                          <MailIcon className="w-3 h-3 text-blue-500 shrink-0" />
+                          <span className="truncate">{form.email}</span>
+                        </a>
+                      )}
+                      {form.phone && (
+                        <div className="inline-flex items-center gap-1">
+                          <a
+                            href={`tel:${form.phone}`}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-slate-200/80 rounded-lg font-mono font-bold text-slate-700 hover:text-emerald-600 transition-colors"
+                            title={form.phone}
+                          >
+                            <PhoneIcon className="w-3 h-3 text-emerald-600 shrink-0" />
+                            <span>{form.phone}</span>
+                          </a>
+                          <a
+                            href={`https://wa.me/${form.phone.replace(/[^0-9]/g, "")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors cursor-pointer"
+                            title="WhatsApp"
+                          >
+                            <WhatsAppIcon className="w-3 h-3" />
+                          </a>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Message Preview */}
+                    {form.message && (
+                      <p className="text-slate-600 text-xs line-clamp-2 italic bg-white/80 p-2 rounded-xl border border-slate-200/60 leading-relaxed">
+                        {`"${form.message}"`}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -238,26 +303,66 @@ export default function OverviewTab({
                 {t.clientesNoBookings}
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="space-y-3">
                 {bookings.slice(0, 3).map((booking) => {
-                  let badgeColor = "bg-amber-50 border-amber-200 text-amber-700";
-                  if (booking.status === "CONFIRMED") {
-                    badgeColor = "bg-emerald-50 border-emerald-200 text-emerald-700";
-                  } else if (booking.status === "CANCELLED") {
-                    badgeColor = "bg-rose-50 border-rose-200 text-rose-700";
-                  }
+                  const isConfirmed = booking.status === "CONFIRMED";
+                  const isCancelled = booking.status === "CANCELLED";
+
                   return (
-                    <div key={booking.id} className="py-3.5 first:pt-0 last:pb-0 group">
-                      <div className="flex justify-between items-start mb-1.5">
-                        <span className="font-bold text-xs text-slate-900">{booking.name}</span>
-                        <div className="flex items-center gap-1.5">
-                          <span className={`font-bold text-[9px] px-2 py-0.5 rounded-md border ${badgeColor}`}>
-                            {booking.status === "CONFIRMED" ? t.clientesAccept : booking.status === "CANCELLED" ? t.clientesReject : "PENDIENTE"}
+                    <div
+                      key={booking.id}
+                      className="p-3.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200/80 rounded-2xl transition-all space-y-2.5"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div
+                            className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs text-white shrink-0 shadow-2xs ${
+                              isConfirmed
+                                ? "bg-gradient-to-br from-emerald-500 to-teal-700"
+                                : isCancelled
+                                ? "bg-gradient-to-br from-rose-500 to-red-700"
+                                : "bg-gradient-to-br from-amber-500 to-orange-600"
+                            }`}
+                          >
+                            {getInitials(booking.name)}
+                          </div>
+                          <div className="min-w-0">
+                            <span className="font-extrabold text-xs text-slate-900 block truncate">
+                              {booking.name}
+                            </span>
+                            <div className="flex items-center gap-1.5 text-[10px] tabular-nums font-sans mt-0.5">
+                              <span className="inline-flex items-center gap-1 font-bold text-slate-700 bg-white px-1.5 py-0.5 rounded border border-slate-200/60">
+                                <ClockIcon className="w-2.5 h-2.5 text-slate-400" />
+                                {booking.time}
+                              </span>
+                              <span className="text-slate-400">·</span>
+                              <span className="text-slate-500 font-medium">
+                                {new Date(booking.date).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span
+                            className={`font-black text-[9px] uppercase px-2 py-0.5 rounded-full border ${
+                              isConfirmed
+                                ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                : isCancelled
+                                ? "bg-rose-50 border-rose-200 text-rose-700"
+                                : "bg-amber-50 border-amber-200 text-amber-700"
+                            }`}
+                          >
+                            {isConfirmed ? (lang === "es" ? "Confirmada" : "Confirmed") : isCancelled ? (lang === "es" ? "Cancelada" : "Cancelled") : (lang === "es" ? "Pendiente" : "Pending")}
                           </span>
+
                           <button
                             type="button"
                             onClick={() => handleCopyBooking(booking)}
-                            className="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-700 rounded transition-colors cursor-pointer"
+                            className="p-1 hover:bg-white border border-transparent hover:border-slate-200 text-slate-400 hover:text-slate-700 rounded-lg transition-colors cursor-pointer"
                             title={lang === "es" ? "Copiar detalles de la cita" : "Copy booking details"}
                           >
                             {copiedId === booking.id ? (
@@ -268,18 +373,46 @@ export default function OverviewTab({
                           </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 text-[11px] tabular-nums text-slate-500 mb-1">
-                        <span className="inline-flex items-center gap-1">
-                          <CalendarIcon className="w-3.5 h-3.5 text-slate-400" />
-                          {new Date(booking.date).toLocaleDateString()}
-                        </span>
-                        <span className="inline-flex items-center gap-1">
-                          <ClockIcon className="w-3.5 h-3.5 text-slate-400" />
-                          {booking.time}
-                        </span>
-                      </div>
+
+                      {/* Contact and Phone/WhatsApp if available */}
+                      {(booking.email || booking.phone) && (
+                        <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                          {booking.email && (
+                            <a
+                              href={`mailto:${booking.email}`}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-slate-200/80 rounded-lg font-bold text-blue-600 hover:text-blue-800 transition-colors truncate max-w-[170px]"
+                              title={booking.email}
+                            >
+                              <MailIcon className="w-3 h-3 text-blue-500 shrink-0" />
+                              <span className="truncate">{booking.email}</span>
+                            </a>
+                          )}
+                          {booking.phone && (
+                            <div className="inline-flex items-center gap-1">
+                              <a
+                                href={`tel:${booking.phone}`}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-slate-200/80 rounded-lg font-mono font-bold text-slate-700 hover:text-emerald-600 transition-colors"
+                                title={booking.phone}
+                              >
+                                <PhoneIcon className="w-3 h-3 text-emerald-600 shrink-0" />
+                                <span>{booking.phone}</span>
+                              </a>
+                              <a
+                                href={`https://wa.me/${booking.phone.replace(/[^0-9]/g, "")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors cursor-pointer"
+                                title="WhatsApp"
+                              >
+                                <WhatsAppIcon className="w-3 h-3" />
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       {booking.message && (
-                        <p className="text-slate-500 text-xs line-clamp-1 italic pl-2.5 border-l-2 border-slate-200">
+                        <p className="text-slate-600 text-xs line-clamp-1 italic bg-white/80 p-2 rounded-xl border border-slate-200/60 leading-relaxed">
                           {`"${booking.message}"`}
                         </p>
                       )}
@@ -314,28 +447,40 @@ export default function OverviewTab({
                 {t.overviewNoConversations}
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="space-y-3">
                 {conversationsList.slice(0, 3).map((conv) => (
-                  <div key={conv.id} className="py-3.5 first:pt-0 last:pb-0">
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="font-bold text-xs text-slate-900 truncate max-w-[160px] inline-flex items-center gap-1.5">
-                        <UserIcon className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className="truncate">{conv.visitorName || conv.visitorId}</span>
-                      </span>
-                      <span className="text-[9px] bg-indigo-50 border border-indigo-200/60 text-indigo-700 font-bold px-2 py-0.5 rounded-md">
+                  <div
+                    key={conv.id}
+                    className="p-3.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200/80 rounded-2xl transition-all space-y-2"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                          <BotIcon className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="font-extrabold text-xs text-slate-900 block truncate">
+                            {conv.visitorName || conv.visitorId}
+                          </span>
+                          <span className="text-[10px] text-slate-400 tabular-nums flex items-center gap-1">
+                            <ClockIcon className="w-3 h-3 text-slate-400" />
+                            {new Date(conv.lastMessageAt).toLocaleString(lang === "es" ? "es-ES" : "en-US", {
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                      </div>
+
+                      <span className="text-[9.5px] bg-indigo-50 border border-indigo-200/60 text-indigo-700 font-bold px-2 py-0.5 rounded-full shrink-0">
                         {conv.messageCount} msgs
                       </span>
                     </div>
-                    <span className="text-[10px] text-slate-400 tabular-nums block mb-1.5">
-                      {new Date(conv.lastMessageAt).toLocaleString("es-ES", {
-                        month: "2-digit",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
+
                     {conv.firstMessageSnippet && (
-                      <p className="text-slate-600 text-xs line-clamp-2 pl-2.5 border-l-2 border-slate-200 italic">
+                      <p className="text-slate-600 text-xs line-clamp-2 italic bg-white/80 p-2 rounded-xl border border-slate-200/60 leading-relaxed">
                         {`"${conv.firstMessageSnippet}"`}
                       </p>
                     )}

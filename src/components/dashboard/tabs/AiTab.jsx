@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { UserIcon, ChatBubbleIcon, CloseIcon } from "@/components/dashboard/DashboardIcons";
 import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 
@@ -22,6 +24,22 @@ export default function AiTab({
   iaSaved,
   iaSaving,
 }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (selectedConversation) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedConversation]);
+
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonthNum = now.getMonth() + 1;
@@ -386,7 +404,7 @@ export default function AiTab({
                       onClick={() => setSelectedConversation(conv)}
                       className="px-3.5 py-1.5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-2xs transition-all cursor-pointer"
                     >
-                      Ver Transcript
+                      {lang === "es" ? "Ver conversación" : "View conversation"}
                     </button>
                     <button
                       type="button"
@@ -405,22 +423,22 @@ export default function AiTab({
           )}
         </div>
 
-        {/* Conversation Transcript Modal */}
-        {selectedConversation && (
+        {/* Conversation Modal mounted to body via portal */}
+        {selectedConversation && mounted && createPortal(
           <div 
-            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 animate-fade-in"
+            className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-[100] flex items-center justify-center p-3 sm:p-4 animate-fade-in"
             onClick={(e) => { if (e.target === e.currentTarget) setSelectedConversation(null); }}
           >
-            <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-scale-up flex flex-col max-h-[90vh] sm:max-h-[85vh]">
+            <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-scale-up flex flex-col max-h-[88dvh] sm:max-h-[85vh]">
               {/* Sticky Header */}
               <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
                 <div className="min-w-0 pr-2">
                   <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
                     <ChatBubbleIcon className="w-4.5 h-4.5 text-blue-600" />
-                    <span>Transcripción de la Conversación</span>
+                    <span>{lang === "es" ? "Conversación con el Asistente" : "Chatbot Conversation"}</span>
                   </h3>
                   <p className="text-xs text-slate-500 font-mono mt-0.5 truncate">
-                    Visitante: {selectedConversation.visitorName || selectedConversation.visitorId} • {new Date(selectedConversation.startedAt).toLocaleString("es-ES", {
+                    {lang === "es" ? "Visitante" : "Visitor"}: {selectedConversation.visitorName || selectedConversation.visitorId} • {new Date(selectedConversation.startedAt).toLocaleString(lang === "es" ? "es-ES" : "en-US", {
                       year: "numeric",
                       month: "2-digit",
                       day: "2-digit",
@@ -440,7 +458,7 @@ export default function AiTab({
               </div>
 
               {/* Scrollable Messages Body */}
-              <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 bg-slate-100/50">
+              <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 bg-slate-100/50 overscroll-contain">
                 {selectedConversation.messages?.map((msg, idx) => (
                   <div
                     key={msg.id || idx}
@@ -448,10 +466,10 @@ export default function AiTab({
                   >
                     <div className="flex items-center gap-1.5 mb-1 px-1">
                       <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">
-                        {msg.sender === "VISITOR" ? `Visitante` : "Asistente IA SPP"}
+                        {msg.sender === "VISITOR" ? (lang === "es" ? "Visitante" : "Visitor") : "Asistente IA SPP"}
                       </span>
-                      <span className="text-[9px] text-slate-300">
-                        {new Date(msg.createdAt).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
+                      <span className="text-[9px] text-slate-400 font-sans tabular-nums">
+                        {new Date(msg.createdAt).toLocaleTimeString(lang === "es" ? "es-ES" : "en-US", { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     </div>
                     <div
@@ -474,11 +492,12 @@ export default function AiTab({
                   onClick={() => setSelectedConversation(null)}
                   className="px-5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
                 >
-                  Cerrar Transcripción
+                  {lang === "es" ? "Cerrar conversación" : "Close conversation"}
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
         {/* Chatbot RAG Editor Form */}

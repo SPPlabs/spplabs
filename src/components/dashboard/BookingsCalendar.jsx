@@ -6,6 +6,13 @@ import {
   ClipboardCheckIcon,
   DownloadIcon,
   CalendarDaysIcon,
+  CalendarIcon,
+  ClockIcon,
+  MailIcon,
+  PhoneIcon,
+  WhatsAppIcon,
+  ChatBubbleIcon,
+  TrashIcon,
 } from "@/components/dashboard/DashboardIcons";
 import {
   copyTextToClipboard,
@@ -15,6 +22,13 @@ import {
   exportBookingIcsFile,
   exportCalendarIcsFile,
 } from "@/lib/exportUtils";
+
+function getInitials(name) {
+  if (!name) return "U";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 // Clean Google G Icon
 function GoogleGIcon({ className = "w-4 h-4" }) {
@@ -754,10 +768,10 @@ export default function BookingsCalendar({
                   : "Click any day in the calendar to view its schedule."}
               </p>
             ) : (
-              <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1">
+              <div className="space-y-4 max-h-[520px] overflow-y-auto pr-1">
                 {/* 1. SPP Labs Web Bookings */}
                 {selectedDayBookings.length > 0 && (
-                  <div className="space-y-3">
+                  <div className="space-y-3.5">
                     <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-500" />
                       {lang === "es" ? "Citas de la Web (SPP Labs)" : "Website Bookings (SPP Labs)"} (
@@ -765,45 +779,143 @@ export default function BookingsCalendar({
                     </span>
 
                     {selectedDayBookings.map((b) => {
-                      let statusBadge = "bg-amber-50 border-amber-200 text-amber-700";
-                      if (b.status === "CONFIRMED") statusBadge = "bg-emerald-50 border-emerald-200 text-emerald-700";
-                      if (b.status === "CANCELLED") statusBadge = "bg-rose-50 border-rose-200 text-rose-700";
+                      const isConfirmed = b.status === "CONFIRMED";
+                      const isCancelled = b.status === "CANCELLED";
 
                       return (
                         <div
                           key={b.id}
-                          className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 shadow-2xs"
+                          className="bg-white border border-slate-200/90 hover:border-emerald-300/80 rounded-2xl p-4 space-y-3.5 shadow-2xs hover:shadow-xs transition-all"
                         >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <span className="font-bold text-slate-950 block">{b.name}</span>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-xs text-slate-700 font-sans tabular-nums font-bold">{b.time}</span>
-                                {b.phone && (
-                                  <span className="text-[11px] text-slate-400 font-sans tabular-nums">· {b.phone}</span>
-                                )}
+                          {/* Header: Avatar, Name, Time, and Status Pill */}
+                          <div className="flex items-start justify-between gap-2.5">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div
+                                className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs text-white shrink-0 shadow-2xs ring-2 ${
+                                  isConfirmed
+                                    ? "bg-gradient-to-br from-emerald-500 to-teal-700 ring-emerald-100"
+                                    : isCancelled
+                                    ? "bg-gradient-to-br from-rose-500 to-red-700 ring-rose-100"
+                                    : "bg-gradient-to-br from-amber-500 to-orange-600 ring-amber-100"
+                                }`}
+                              >
+                                {getInitials(b.name)}
                               </div>
-                              {b.email && (
-                                <span className="text-[11px] text-blue-600 block truncate max-w-[200px]">
-                                  {b.email}
+                              <div className="min-w-0">
+                                <span className="font-extrabold text-sm text-slate-950 block truncate">
+                                  {b.name}
                                 </span>
-                              )}
+                                <div className="flex items-center gap-1.5 text-[11px] font-sans tabular-nums mt-0.5">
+                                  <span className="inline-flex items-center gap-1 font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md">
+                                    <ClockIcon className="w-3 h-3 text-slate-500" />
+                                    {b.time}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusBadge}`}>
-                              {b.status}
+
+                            {/* Status Badge */}
+                            <span
+                              className={`text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0 inline-flex items-center gap-1 ${
+                                isConfirmed
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                  : isCancelled
+                                  ? "bg-rose-50 text-rose-700 border-rose-200"
+                                  : "bg-amber-50 text-amber-800 border-amber-200"
+                              }`}
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  isConfirmed
+                                    ? "bg-emerald-500"
+                                    : isCancelled
+                                    ? "bg-rose-500"
+                                    : "bg-amber-500 animate-ping"
+                                }`}
+                              />
+                              {isConfirmed
+                                ? (lang === "es" ? "Confirmada" : "Confirmed")
+                                : isCancelled
+                                ? (lang === "es" ? "Cancelada" : "Cancelled")
+                                : (lang === "es" ? "Pendiente" : "Pending")}
                             </span>
                           </div>
 
-                          <p className="text-xs text-slate-600 bg-white p-2.5 border border-slate-200/80 rounded-xl italic leading-relaxed">
-                            {`"${b.message || "Sin comentarios."}"`}
-                          </p>
+                          {/* Contact Info Pills */}
+                          {(b.email || b.phone) && (
+                            <div className="space-y-1.5">
+                              {b.email && (
+                                <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-2 flex items-center justify-between gap-2">
+                                  <div className="min-w-0 flex items-center gap-2">
+                                    <div className="w-6 h-6 rounded-lg bg-blue-100/70 text-blue-700 flex items-center justify-center shrink-0">
+                                      <MailIcon className="w-3.5 h-3.5" />
+                                    </div>
+                                    <a
+                                      href={`mailto:${b.email}`}
+                                      className="text-xs font-bold text-slate-800 hover:text-blue-600 truncate transition-colors"
+                                      title={b.email}
+                                    >
+                                      {b.email}
+                                    </a>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => copyTextToClipboard(b.email)}
+                                    className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-md transition-colors cursor-pointer shrink-0"
+                                    title={lang === "es" ? "Copiar email" : "Copy email"}
+                                  >
+                                    <ClipboardIcon className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              )}
 
-                          <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-200/50">
+                              {b.phone && (
+                                <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-2 flex items-center justify-between gap-2">
+                                  <div className="min-w-0 flex items-center gap-2">
+                                    <div className="w-6 h-6 rounded-lg bg-emerald-100/70 text-emerald-700 flex items-center justify-center shrink-0">
+                                      <PhoneIcon className="w-3.5 h-3.5" />
+                                    </div>
+                                    <a
+                                      href={`tel:${b.phone}`}
+                                      className="text-xs font-mono font-bold text-slate-800 hover:text-emerald-600 truncate transition-colors"
+                                      title={b.phone}
+                                    >
+                                      {b.phone}
+                                    </a>
+                                  </div>
+                                  <a
+                                    href={`https://wa.me/${b.phone.replace(/[^0-9]/g, "")}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-[10px] font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 shadow-2xs"
+                                    title="WhatsApp"
+                                  >
+                                    <WhatsAppIcon className="w-3 h-3" />
+                                    <span>WhatsApp</span>
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Client Message / Reason */}
+                          <div className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-2.5 space-y-1">
+                            <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                              <ChatBubbleIcon className="w-3 h-3 text-slate-500" />
+                              <span>{lang === "es" ? "Nota del cliente:" : "Client note:"}</span>
+                            </span>
+                            <p className="text-xs text-slate-700 italic leading-relaxed whitespace-pre-wrap">
+                              {`"${b.message || (lang === "es" ? "Sin notas adicionales." : "No notes provided.")}"`}
+                            </p>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-100">
                             <div className="flex items-center gap-1.5">
                               <button
                                 type="button"
                                 onClick={() => handleCopySingleBooking(b)}
-                                className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                                className="px-2.5 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
                                 title={lang === "es" ? "Copiar cita" : "Copy"}
                               >
                                 {copiedId === b.id ? (
@@ -815,7 +927,7 @@ export default function BookingsCalendar({
                                   </>
                                 ) : (
                                   <>
-                                    <ClipboardIcon className="w-3.5 h-3.5 text-slate-500" />
+                                    <ClipboardIcon className="w-3.5 h-3.5 text-slate-400" />
                                     <span>{lang === "es" ? "Copiar" : "Copy"}</span>
                                   </>
                                 )}
@@ -824,10 +936,10 @@ export default function BookingsCalendar({
                               <button
                                 type="button"
                                 onClick={() => handleExportSingleBookingIcs(b)}
-                                className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                                className="px-2.5 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
                                 title={lang === "es" ? "Descargar .ics" : "Download .ics"}
                               >
-                                <DownloadIcon className="w-3.5 h-3.5 text-slate-500" />
+                                <DownloadIcon className="w-3.5 h-3.5 text-slate-400" />
                                 <span>.ics</span>
                               </button>
                             </div>
@@ -838,14 +950,14 @@ export default function BookingsCalendar({
                                   <button
                                     type="button"
                                     onClick={() => onAccept(b.id, "CONFIRMED")}
-                                    className="bg-brand-green hover:bg-brand-green-dark text-white font-bold text-[10px] px-2.5 py-1 rounded-lg cursor-pointer transition-all"
+                                    className="bg-brand-green hover:bg-brand-green-dark text-white font-bold text-[10.5px] px-2.5 py-1 rounded-lg cursor-pointer transition-all shadow-2xs"
                                   >
                                     {t.clientesAccept || "Aceptar"}
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => onReject(b.id, "CANCELLED")}
-                                    className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg cursor-pointer transition-all"
+                                    className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10.5px] px-2.5 py-1 rounded-lg cursor-pointer transition-all shadow-2xs"
                                   >
                                     {t.clientesReject || "Rechazar"}
                                   </button>
@@ -854,10 +966,11 @@ export default function BookingsCalendar({
                               <button
                                 type="button"
                                 onClick={() => onDelete(b.id)}
-                                className="text-red-650 hover:bg-red-50 font-semibold text-[10px] px-2 py-1 rounded-lg border border-red-100 transition-all cursor-pointer"
+                                className="text-red-650 hover:bg-red-50 font-semibold text-[10.5px] px-2 py-1 rounded-lg border border-red-100 transition-all cursor-pointer flex items-center gap-1"
                                 title={t.clientesDelete || "Eliminar"}
                               >
-                                {t.clientesDelete || "Eliminar"}
+                                <TrashIcon className="w-3 h-3" />
+                                <span>{t.clientesDelete || "Eliminar"}</span>
                               </button>
                             </div>
                           </div>
