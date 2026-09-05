@@ -378,7 +378,13 @@ export default function DashboardClient({
     };
   }, []);
 
-  const renderInfoTooltip = (id, text, align = "center") => {
+  const renderInfoTooltip = (
+    id,
+    text,
+    align = "center",
+    position = "top",
+    widthClass = "w-48 sm:w-56"
+  ) => {
     const isOpen = activeTooltipId === id;
     
     let containerPos = "left-1/2 -translate-x-1/2";
@@ -400,6 +406,12 @@ export default function DashboardClient({
       containerPos = "right-0 sm:left-1/2 left-auto sm:left-auto translate-x-0 sm:-translate-x-1/2";
       arrowPos = "right-3 sm:left-1/2 left-auto sm:left-auto translate-x-0 sm:-translate-x-1/2";
     }
+
+    const isBottom = position === "bottom";
+    const posClass = isBottom ? "top-full mt-2" : "bottom-full mb-2";
+    const arrowClass = isBottom
+      ? "bottom-full -mb-1 border-4 border-transparent border-b-slate-950"
+      : "top-full -mt-1 border-4 border-transparent border-t-slate-950";
 
     return (
       <div 
@@ -432,13 +444,16 @@ export default function DashboardClient({
         </button>
 
         {/* Tooltip Card - Elevated to highest z-index layer (z-50) */}
-        <div className={`transition-all duration-200 absolute bottom-full mb-2 w-48 sm:w-56 max-w-[calc(100vw-3rem)] bg-slate-950 text-white text-[10.5px] font-medium p-3 rounded-2xl shadow-2xl z-50 leading-relaxed text-center border border-slate-700/80 ${containerPos} ${
-          isOpen 
-            ? "opacity-100 visible pointer-events-auto scale-100" 
-            : "opacity-0 invisible pointer-events-none scale-95"
-        }`}>
+        <div 
+          role="tooltip"
+          className={`transition-all duration-200 absolute ${posClass} ${widthClass} max-w-[calc(100vw-2rem)] bg-slate-950 text-white text-[11px] font-normal p-3.5 rounded-2xl shadow-2xl z-50 leading-relaxed border border-slate-700/80 ${containerPos} ${
+            isOpen 
+              ? "opacity-100 visible pointer-events-auto scale-100" 
+              : "opacity-0 invisible pointer-events-none scale-95"
+          }`}
+        >
           {text}
-          <div className={`absolute top-full -mt-1 border-4 border-transparent border-t-slate-950 ${arrowPos}`}></div>
+          <div className={`absolute ${arrowClass} ${arrowPos}`}></div>
         </div>
       </div>
     );
