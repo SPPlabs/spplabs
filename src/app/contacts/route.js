@@ -221,7 +221,7 @@ export async function POST(request) {
         if (emailConfig && emailConfig.enableContactReviewRequest) {
           const companyName = website.displayName || "Atención al Cliente";
           const customLogoUrl = emailConfig?.customLogoUrl || website.logoUrl || null;
-          const delayHours = emailConfig.contactReviewDelayHours !== undefined ? emailConfig.contactReviewDelayHours : 24;
+          const delayHours = emailConfig.contactReviewDelayHours ?? 24;
 
           if (delayHours === 0) {
             // Immediate dispatch

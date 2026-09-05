@@ -117,17 +117,27 @@ export default function EmailTab({
           setSenderName(c.senderName || currentWebsite?.displayName || "");
           setReplyToEmail(c.replyToEmail || "");
           setGoogleReviewUrl(c.googleReviewUrl || "");
-          setEnableWelcomeEmail(c.enableWelcomeEmail !== undefined ? c.enableWelcomeEmail : true);
-          setEnableBookingConfirm(c.enableBookingConfirm !== undefined ? c.enableBookingConfirm : true);
-          setEnableBookingReminder(c.enableBookingReminder !== undefined ? c.enableBookingReminder : true);
-          setReminderHoursBefore(c.reminderHoursBefore || 24);
+          setEnableWelcomeEmail(c.enableWelcomeEmail !== undefined && c.enableWelcomeEmail !== null ? Boolean(c.enableWelcomeEmail) : true);
+          setEnableBookingConfirm(c.enableBookingConfirm !== undefined && c.enableBookingConfirm !== null ? Boolean(c.enableBookingConfirm) : true);
+          setEnableBookingReminder(c.enableBookingReminder !== undefined && c.enableBookingReminder !== null ? Boolean(c.enableBookingReminder) : true);
+          setReminderHoursBefore(c.reminderHoursBefore !== undefined && c.reminderHoursBefore !== null ? Number(c.reminderHoursBefore) : 24);
 
-          const isBookingReview = c.enableBookingReviewRequest !== undefined ? c.enableBookingReviewRequest : (c.enableReviewRequest !== undefined ? c.enableReviewRequest : true);
+          const isBookingReview = (c.enableBookingReviewRequest !== undefined && c.enableBookingReviewRequest !== null)
+            ? Boolean(c.enableBookingReviewRequest)
+            : ((c.enableReviewRequest !== undefined && c.enableReviewRequest !== null)
+                ? Boolean(c.enableReviewRequest)
+                : true);
           setEnableBookingReviewRequest(isBookingReview);
-          setBookingReviewDelayHours(c.bookingReviewDelayHours || c.reviewDelayHours || 2);
 
-          setEnableContactReviewRequest(Boolean(c.enableContactReviewRequest));
-          setContactReviewDelayHours(c.contactReviewDelayHours || 24);
+          const bookingDelay = (c.bookingReviewDelayHours !== undefined && c.bookingReviewDelayHours !== null)
+            ? Number(c.bookingReviewDelayHours)
+            : ((c.reviewDelayHours !== undefined && c.reviewDelayHours !== null)
+                ? Number(c.reviewDelayHours)
+                : 2);
+          setBookingReviewDelayHours(bookingDelay);
+
+          setEnableContactReviewRequest(c.enableContactReviewRequest !== undefined && c.enableContactReviewRequest !== null ? Boolean(c.enableContactReviewRequest) : false);
+          setContactReviewDelayHours(c.contactReviewDelayHours !== undefined && c.contactReviewDelayHours !== null ? Number(c.contactReviewDelayHours) : 24);
 
           setBrandColor(c.brandColor || "#0284c7");
           setCustomLogoUrl(c.customLogoUrl || "");
@@ -191,6 +201,19 @@ export default function EmailTab({
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.message || "Error al guardar configuración");
+      }
+
+      if (data.data) {
+        const c = data.data;
+        if (c.bookingReviewDelayHours !== undefined && c.bookingReviewDelayHours !== null) {
+          setBookingReviewDelayHours(Number(c.bookingReviewDelayHours));
+        }
+        if (c.contactReviewDelayHours !== undefined && c.contactReviewDelayHours !== null) {
+          setContactReviewDelayHours(Number(c.contactReviewDelayHours));
+        }
+        if (c.reminderHoursBefore !== undefined && c.reminderHoursBefore !== null) {
+          setReminderHoursBefore(Number(c.reminderHoursBefore));
+        }
       }
 
       setSaveSuccess(true);

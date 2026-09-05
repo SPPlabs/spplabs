@@ -269,7 +269,7 @@ export async function POST(request) {
           const appointmentDateTime = new Date(parsedDate);
           appointmentDateTime.setHours(hours || 9, minutes || 0, 0, 0);
 
-          const reminderHoursBefore = emailConfig?.reminderHoursBefore || 24;
+          const reminderHoursBefore = emailConfig?.reminderHoursBefore ?? 24;
           const reminderScheduledDate = new Date(appointmentDateTime.getTime() - reminderHoursBefore * 60 * 60 * 1000);
 
           if (reminderScheduledDate > new Date()) {
@@ -289,13 +289,13 @@ export async function POST(request) {
         }
 
         // C. Schedule Google Review Booster for Booking (e.g. 2h after appointment)
-        const isBookingReviewEnabled = emailConfig ? (emailConfig.enableBookingReviewRequest !== undefined ? emailConfig.enableBookingReviewRequest : emailConfig.enableReviewRequest) : true;
+        const isBookingReviewEnabled = emailConfig ? (emailConfig.enableBookingReviewRequest ?? emailConfig.enableReviewRequest ?? true) : true;
         if (isBookingReviewEnabled) {
           const [hours, minutes] = (time.trim() || "09:00").split(":").map(Number);
           const appointmentDateTime = new Date(parsedDate);
           appointmentDateTime.setHours(hours || 9, minutes || 0, 0, 0);
 
-          const reviewDelayHours = emailConfig?.bookingReviewDelayHours || emailConfig?.reviewDelayHours || 2;
+          const reviewDelayHours = emailConfig?.bookingReviewDelayHours ?? emailConfig?.reviewDelayHours ?? 2;
           const reviewScheduledDate = new Date(appointmentDateTime.getTime() + reviewDelayHours * 60 * 60 * 1000);
 
           await prisma.scheduledEmail.create({

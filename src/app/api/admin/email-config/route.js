@@ -33,25 +33,49 @@ export async function GET(request) {
       return NextResponse.json({ error: "NotFound", message: "Website not found" }, { status: 404 });
     }
 
+    const cfg = website.emailConfig;
+    const defaultData = {
+      senderName: website.displayName || "Atención al Cliente",
+      replyToEmail: "",
+      googleReviewUrl: "",
+      enableWelcomeEmail: true,
+      enableBookingConfirm: true,
+      enableBookingReminder: true,
+      reminderHoursBefore: 24,
+      enableReviewRequest: true,
+      reviewDelayHours: 2,
+      enableBookingReviewRequest: true,
+      bookingReviewDelayHours: 2,
+      enableContactReviewRequest: false,
+      contactReviewDelayHours: 24,
+      brandColor: "#0284c7",
+      customLogoUrl: "",
+    };
+
+    const responseData = cfg
+      ? {
+          ...cfg,
+          senderName: cfg.senderName || website.displayName || "Atención al Cliente",
+          replyToEmail: cfg.replyToEmail || "",
+          googleReviewUrl: cfg.googleReviewUrl || "",
+          enableWelcomeEmail: cfg.enableWelcomeEmail ?? true,
+          enableBookingConfirm: cfg.enableBookingConfirm ?? true,
+          enableBookingReminder: cfg.enableBookingReminder ?? true,
+          reminderHoursBefore: cfg.reminderHoursBefore ?? 24,
+          enableReviewRequest: cfg.enableBookingReviewRequest ?? cfg.enableReviewRequest ?? true,
+          reviewDelayHours: cfg.bookingReviewDelayHours ?? cfg.reviewDelayHours ?? 2,
+          enableBookingReviewRequest: cfg.enableBookingReviewRequest ?? cfg.enableReviewRequest ?? true,
+          bookingReviewDelayHours: cfg.bookingReviewDelayHours ?? cfg.reviewDelayHours ?? 2,
+          enableContactReviewRequest: cfg.enableContactReviewRequest ?? false,
+          contactReviewDelayHours: cfg.contactReviewDelayHours ?? 24,
+          brandColor: cfg.brandColor || "#0284c7",
+          customLogoUrl: cfg.customLogoUrl || "",
+        }
+      : defaultData;
+
     return NextResponse.json({
       success: true,
-      data: website.emailConfig || {
-        senderName: website.displayName || "Atención al Cliente",
-        replyToEmail: "",
-        googleReviewUrl: "",
-        enableWelcomeEmail: true,
-        enableBookingConfirm: true,
-        enableBookingReminder: true,
-        reminderHoursBefore: 24,
-        enableReviewRequest: true,
-        reviewDelayHours: 2,
-        enableBookingReviewRequest: true,
-        bookingReviewDelayHours: 2,
-        enableContactReviewRequest: false,
-        contactReviewDelayHours: 24,
-        brandColor: "#0284c7",
-        customLogoUrl: "",
-      },
+      data: responseData,
     });
   } catch (error) {
     console.error("GET email-config error:", error);
@@ -105,19 +129,38 @@ export async function POST(request) {
       return NextResponse.json({ error: "NotFound", message: "Website not found" }, { status: 404 });
     }
 
-    const isBookingReviewEnabled = enableBookingReviewRequest !== undefined ? Boolean(enableBookingReviewRequest) : (enableReviewRequest !== undefined ? Boolean(enableReviewRequest) : true);
-    const bookingDelay = bookingReviewDelayHours !== undefined ? Number(bookingReviewDelayHours) : (reviewDelayHours !== undefined ? Number(reviewDelayHours) : 2);
-    const isContactReviewEnabled = Boolean(enableContactReviewRequest);
-    const contactDelay = contactReviewDelayHours !== undefined ? Number(contactReviewDelayHours) : 24;
+    const isBookingReviewEnabled = (enableBookingReviewRequest !== undefined && enableBookingReviewRequest !== null)
+      ? Boolean(enableBookingReviewRequest)
+      : ((enableReviewRequest !== undefined && enableReviewRequest !== null)
+          ? Boolean(enableReviewRequest)
+          : true);
+
+    const bookingDelay = (bookingReviewDelayHours !== undefined && bookingReviewDelayHours !== null && !isNaN(Number(bookingReviewDelayHours)))
+      ? Number(bookingReviewDelayHours)
+      : ((reviewDelayHours !== undefined && reviewDelayHours !== null && !isNaN(Number(reviewDelayHours)))
+          ? Number(reviewDelayHours)
+          : 2);
+
+    const isContactReviewEnabled = (enableContactReviewRequest !== undefined && enableContactReviewRequest !== null)
+      ? Boolean(enableContactReviewRequest)
+      : false;
+
+    const contactDelay = (contactReviewDelayHours !== undefined && contactReviewDelayHours !== null && !isNaN(Number(contactReviewDelayHours)))
+      ? Number(contactReviewDelayHours)
+      : 24;
+
+    const reminderHours = (reminderHoursBefore !== undefined && reminderHoursBefore !== null && !isNaN(Number(reminderHoursBefore)))
+      ? Number(reminderHoursBefore)
+      : 24;
 
     const baseData = {
       senderName: senderName?.trim() || website.displayName,
       replyToEmail: replyToEmail?.trim() || null,
       googleReviewUrl: googleReviewUrl?.trim() || null,
-      enableWelcomeEmail: Boolean(enableWelcomeEmail),
-      enableBookingConfirm: Boolean(enableBookingConfirm),
-      enableBookingReminder: Boolean(enableBookingReminder),
-      reminderHoursBefore: reminderHoursBefore !== undefined ? Number(reminderHoursBefore) : 24,
+      enableWelcomeEmail: enableWelcomeEmail !== undefined && enableWelcomeEmail !== null ? Boolean(enableWelcomeEmail) : true,
+      enableBookingConfirm: enableBookingConfirm !== undefined && enableBookingConfirm !== null ? Boolean(enableBookingConfirm) : true,
+      enableBookingReminder: enableBookingReminder !== undefined && enableBookingReminder !== null ? Boolean(enableBookingReminder) : true,
+      reminderHoursBefore: reminderHours,
       enableReviewRequest: isBookingReviewEnabled,
       reviewDelayHours: bookingDelay,
       enableBookingReviewRequest: isBookingReviewEnabled,
