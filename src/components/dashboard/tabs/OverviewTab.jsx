@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   CalendarIcon,
   MailIcon,
@@ -33,15 +33,29 @@ export default function OverviewTab({
   t,
   lang,
   contactForms,
-  bookings,
+  bookings = [],
   conversationsList,
   announcementsList,
   setActiveTab,
+  googleCalendarConnection = null,
+  externalCalendarEvents = [],
 }) {
   const [copiedId, setCopiedId] = useState(null);
-  const pendingBookingsCount = bookings.filter((b) => b.status === "PENDING").length;
+  const pendingBookingsCount = (bookings || []).filter((b) => b.status === "PENDING").length;
   const recentContactsCount = contactForms.length;
   const announcementsCount = announcementsList.length;
+
+  const googleBookingsCount = useMemo(() => {
+    if (!googleCalendarConnection || !externalCalendarEvents?.length) return 0;
+    const nativeGoogleEventIds = new Set(
+      (bookings || []).map((b) => b.googleEventId).filter(Boolean)
+    );
+    return externalCalendarEvents.filter(
+      (e) => !nativeGoogleEventIds.has(e.googleEventId) && e.status !== "cancelled"
+    ).length;
+  }, [googleCalendarConnection, externalCalendarEvents, bookings]);
+
+  const totalBookingsCount = (bookings?.length || 0) + googleBookingsCount;
 
   const handleCopyContact = async (form) => {
     const text = formatContactToText(form, lang);
@@ -81,7 +95,7 @@ export default function OverviewTab({
           </div>
           <div className="bg-white border border-slate-200/90 rounded-2xl p-4 text-center shadow-xs flex flex-col justify-center items-center min-w-[110px] sm:min-w-[130px]">
             <span className="text-[10px] sm:text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wider">{t.overviewTotalBookings}</span>
-            <span className="text-2xl sm:text-3xl font-black font-sans tabular-nums text-slate-950">{bookings.length}</span>
+            <span className="text-2xl sm:text-3xl font-black font-sans tabular-nums text-slate-950">{totalBookingsCount}</span>
           </div>
           <div className="bg-white border border-slate-200/90 rounded-2xl p-4 text-center shadow-xs flex flex-col justify-center items-center min-w-[110px] sm:min-w-[130px]">
             <span className="text-[10px] sm:text-xs text-slate-500 font-bold block mb-1 uppercase tracking-wider">{t.overviewTotalConversations}</span>

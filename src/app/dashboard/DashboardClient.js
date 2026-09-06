@@ -1481,6 +1481,8 @@ export default function DashboardClient({
               conversationsList={conversationsList}
               announcementsList={announcementsList}
               setActiveTab={setActiveTab}
+              googleCalendarConnection={googleCalendarConnection}
+              externalCalendarEvents={externalCalendarEvents}
             />
           )}
 
