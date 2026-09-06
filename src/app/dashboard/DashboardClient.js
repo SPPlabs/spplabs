@@ -1571,7 +1571,12 @@ export default function DashboardClient({
           {/* TAB: INFORMES MENSUALES */}
           {activeTab === "informes" && (
             <div className="space-y-8 animate-fade-in w-full">
-              <MonthlyReportsView currentWebsiteDomain={currentWebsite?.domain || ""} lang={lang} />
+              <MonthlyReportsView
+                currentWebsite={currentWebsite}
+                currentWebsiteDomain={currentWebsite?.domain || ""}
+                currentLogoUrl={currentLogoUrl}
+                lang={lang}
+              />
             </div>
           )}
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import MonthlyReportPdfTemplate from "@/components/dashboard/MonthlyReportPdfTemplate";
 import {
   TableIcon,
   DownloadIcon,
@@ -50,7 +51,12 @@ function cleanBadgeText(badge, category) {
   return raw.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|\p{Extended_Pictographic}/gu, "").trim();
 }
 
-export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }) {
+export default function MonthlyReportsView({
+  currentWebsite,
+  currentWebsiteDomain,
+  currentLogoUrl,
+  lang = "es",
+}) {
   const now = new Date();
   const currentCalYear = now.getFullYear();
   const currentCalMonth = now.getMonth() + 1; // 1-12
@@ -62,6 +68,7 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
   const [selectedYear, setSelectedYear] = useState(defaultYear);
   const [selectedMonth, setSelectedMonth] = useState(defaultMonth);
   const [enableCompare, setEnableCompare] = useState(false);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -82,13 +89,58 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
     { num: 12, name: "Diciembre" },
   ];
 
-  const yearsList = [2026, 2025, 2024];
+  // Requirements: Remove 2024 and 2025, add 2027 and 2028
+  const yearsList = [2026, 2027, 2028];
 
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const fetchReport = useCallback(() => {
     setRefreshTrigger((prev) => prev + 1);
   }, []);
+
+  // Determine website registration / first active period
+  const websiteCreatedDate = currentWebsite?.createdAt ? new Date(currentWebsite.createdAt) : null;
+  const firstActiveYear = data?.firstActiveYear || (websiteCreatedDate ? websiteCreatedDate.getFullYear() : 2026);
+  const firstActiveMonth = data?.firstActiveMonth || (websiteCreatedDate ? websiteCreatedDate.getMonth() + 1 : 1);
+
+  // Helper: check if a month is before user registration / first analytics
+  const isMonthBeforeRegistration = useCallback((year, monthNum) => {
+    if (year < firstActiveYear) return true;
+    if (year === firstActiveYear && monthNum < firstActiveMonth) return true;
+    return false;
+  }, [firstActiveYear, firstActiveMonth]);
+
+  // Helper: check if a month is in progress or future
+  const isMonthInProgress = (year, monthNum) => {
+    return year === currentCalYear && monthNum === currentCalMonth;
+  };
+
+  const isMonthFuture = (year, monthNum) => {
+    return year > currentCalYear || (year === currentCalYear && monthNum > currentCalMonth);
+  };
+
+  // Safe year change handler ensuring valid month selection
+  const handleYearChange = (newYear) => {
+    setSelectedYear(newYear);
+    const isCurrentMonthInvalid =
+      isMonthBeforeRegistration(newYear, selectedMonth) ||
+      isMonthInProgress(newYear, selectedMonth) ||
+      isMonthFuture(newYear, selectedMonth);
+
+    if (isCurrentMonthInvalid) {
+      const validMonths = monthsList.filter(
+        (m) =>
+          !isMonthBeforeRegistration(newYear, m.num) &&
+          !isMonthInProgress(newYear, m.num) &&
+          !isMonthFuture(newYear, m.num)
+      );
+      if (validMonths.length > 0) {
+        setSelectedMonth(validMonths[validMonths.length - 1].num);
+      } else {
+        setSelectedMonth(1);
+      }
+    }
+  };
 
   useEffect(() => {
     let isCancelled = false;
@@ -127,8 +179,66 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
     };
   }, [currentWebsiteDomain, selectedYear, selectedMonth, enableCompare, refreshTrigger]);
 
-  const handlePrintPdf = () => {
-    window.print();
+  // Direct PDF generation and download without redirecting to browser print dialog
+  const handleDownloadPdf = async () => {
+    if (!data || data.isInProgress || data.isBeforeActive || generatingPdf) return;
+    setGeneratingPdf(true);
+
+    try {
+      const { default: jsPDF } = await import("jspdf");
+      const { default: html2canvas } = await import("html2canvas");
+
+      const page1 = document.getElementById("report-pdf-page-1");
+      const page2 = document.getElementById("report-pdf-page-2");
+
+      if (!page1) {
+        throw new Error("Página del informe no encontrada.");
+      }
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+        compress: true,
+      });
+
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+
+      // Render Page 1
+      const canvas1 = await html2canvas(page1, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+      const img1 = canvas1.toDataURL("image/jpeg", 0.95);
+      pdf.addImage(img1, "JPEG", 0, 0, pdfWidth, pdfHeight, undefined, "FAST");
+
+      // Render Page 2 if present
+      if (page2) {
+        pdf.addPage();
+        const canvas2 = await html2canvas(page2, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: "#ffffff",
+          logging: false,
+        });
+        const img2 = canvas2.toDataURL("image/jpeg", 0.95);
+        pdf.addImage(img2, "JPEG", 0, 0, pdfWidth, pdfHeight, undefined, "FAST");
+      }
+
+      const safeDomain = (currentWebsiteDomain || data?.domain || "informe").replace(/[^a-zA-Z0-9_-]/g, "_");
+      pdf.save(`Informe_Mensual_${safeDomain}_${selectedYear}_${selectedMonth}.pdf`);
+    } catch (err) {
+      console.error("Error generating PDF:", err);
+      // Fallback
+      window.print();
+    } finally {
+      setGeneratingPdf(false);
+    }
   };
 
   const handleExportCsv = () => {
@@ -161,14 +271,6 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
     document.body.removeChild(link);
   };
 
-  // Helper to check if a month is in progress or future
-  const isMonthInProgress = (year, monthNum) => {
-    return year === currentCalYear && monthNum === currentCalMonth;
-  };
-
-  const isMonthFuture = (year, monthNum) => {
-    return year > currentCalYear || (year === currentCalYear && monthNum > currentCalMonth);
-  };
 
   // Helper for rendering delta badges
   const renderComparisonDelta = (growthStr, prevValue, prevMonthName) => {
@@ -209,13 +311,12 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
           .no-print {
             display: none !important;
           }
-          .print-full-width {
+          #monthly-report-pdf-capture-wrapper {
+            position: static !important;
+            left: 0 !important;
+            top: 0 !important;
             width: 100% !important;
-            max-width: none !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            box-shadow: none !important;
-            border: none !important;
+            pointer-events: auto !important;
           }
         }
       `}</style>
@@ -255,11 +356,19 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
               className="appearance-none bg-slate-50 border border-slate-200 text-slate-900 font-extrabold text-xs rounded-2xl px-4 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-slate-900/10 cursor-pointer shadow-2xs"
             >
               {monthsList.map((m) => {
+                const isBefore = isMonthBeforeRegistration(selectedYear, m.num);
                 const inProg = isMonthInProgress(selectedYear, m.num);
                 const isFut = isMonthFuture(selectedYear, m.num);
+                const isDisabled = isBefore || inProg || isFut;
+
+                let tag = "";
+                if (isBefore) tag = " — (Sin actividad previa)";
+                else if (inProg) tag = " — (Mes actual en curso)";
+                else if (isFut) tag = " — (Futuro)";
+
                 return (
-                  <option key={m.num} value={m.num}>
-                    {m.name} {inProg ? "— (Mes actual en curso)" : isFut ? "— (Futuro)" : ""}
+                  <option key={m.num} value={m.num} disabled={isDisabled}>
+                    {m.name}{tag}
                   </option>
                 );
               })}
@@ -271,7 +380,7 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
           <div className="relative">
             <select
               value={selectedYear}
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              onChange={(e) => handleYearChange(Number(e.target.value))}
               className="appearance-none bg-slate-50 border border-slate-200 text-slate-900 font-extrabold text-xs rounded-2xl px-4 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-slate-900/10 cursor-pointer shadow-2xs"
             >
               {yearsList.map((y) => (
@@ -300,7 +409,7 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
           {/* Action Buttons */}
           <button
             onClick={handleExportCsv}
-            disabled={loading || !data || data.isInProgress}
+            disabled={loading || !data || data.isInProgress || data.isBeforeActive}
             className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center gap-2 shadow-2xs disabled:opacity-40"
           >
             <TableIcon className="w-4 h-4 text-slate-700" />
@@ -308,12 +417,22 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
           </button>
 
           <button
-            onClick={handlePrintPdf}
-            disabled={loading || !data || data.isInProgress}
+            onClick={handleDownloadPdf}
+            disabled={loading || !data || data.isInProgress || data.isBeforeActive || generatingPdf}
             className="px-4 py-2.5 bg-slate-900 hover:bg-black text-white text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center gap-2 shadow-xs disabled:opacity-40"
+            title="Descargar informe completo en formato PDF"
           >
-            <DownloadIcon className="w-4 h-4 text-white" />
-            <span>Descargar PDF</span>
+            {generatingPdf ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Generando PDF...</span>
+              </>
+            ) : (
+              <>
+                <DownloadIcon className="w-4 h-4 text-white" />
+                <span>Descargar PDF</span>
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -338,6 +457,40 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
           >
             Reintentar
           </button>
+        </div>
+      )}
+
+      {/* State: Month Before Registration Notice */}
+      {!loading && !error && data && data.isBeforeActive && (
+        <div className="bg-white border border-slate-200 rounded-3xl p-8 sm:p-12 text-center shadow-xs space-y-6">
+          <div className="w-16 h-16 rounded-3xl bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center mx-auto shadow-2xs">
+            <ClockIcon className="w-8 h-8" />
+          </div>
+
+          <div className="max-w-2xl mx-auto space-y-2">
+            <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 text-xs font-extrabold px-3 py-1 rounded-full">
+              <LockClosedIcon className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+              <span>Periodo Sin Actividad Registrada</span>
+            </span>
+            <h3 className="text-2xl font-black text-slate-900">
+              No hay analítica disponible para {data.monthName} {data.year}
+            </h3>
+            <p className="text-sm text-slate-600 font-medium leading-relaxed">
+              El registro de actividad de este sitio web comenzó en <strong>{monthsList.find((m) => m.num === firstActiveMonth)?.name || ""} {firstActiveYear}</strong>. Los meses previos no registran visitas ni actividad porque el servicio aún no estaba activo.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <button
+              onClick={() => {
+                setSelectedYear(defaultYear);
+                setSelectedMonth(defaultMonth);
+              }}
+              className="w-full sm:w-auto px-6 py-3 bg-slate-900 hover:bg-black text-white text-xs font-extrabold rounded-2xl transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center gap-2"
+            >
+              <span>Ver último informe cerrado ({lastClosedMonthName} {defaultYear})</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -376,7 +529,7 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
       )}
 
       {/* Main Report Content (Closed Months Only) */}
-      {!loading && !error && data && !data.isInProgress && (
+      {!loading && !error && data && !data.isInProgress && !data.isBeforeActive && (
         <div className="space-y-8 print-full-width">
           {/* Printable Report Title Banner */}
           <div className="hidden print:block mb-8 pb-4 border-b border-slate-200">
@@ -756,6 +909,30 @@ export default function MonthlyReportsView({ currentWebsiteDomain, lang = "es" }
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Off-screen Container for High-Quality PDF Capture & Print */}
+      {data && !data.isInProgress && !data.isBeforeActive && (
+        <div
+          id="monthly-report-pdf-capture-wrapper"
+          style={{
+            position: "fixed",
+            left: "-9999px",
+            top: 0,
+            width: "794px",
+            opacity: 1,
+            zIndex: -50,
+            pointerEvents: "none",
+          }}
+          aria-hidden="true"
+        >
+          <MonthlyReportPdfTemplate
+            data={data}
+            currentWebsite={currentWebsite}
+            currentLogoUrl={currentLogoUrl}
+            lang={lang}
+          />
         </div>
       )}
     </div>

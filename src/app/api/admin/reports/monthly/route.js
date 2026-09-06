@@ -46,6 +46,45 @@ export async function GET(request) {
     const targetMonth = parseInt(url.searchParams.get("month") || String(currentCalMonth === 1 ? 12 : currentCalMonth - 1), 10);
     const enableCompare = url.searchParams.get("compare") === "true";
 
+    // Determine website registration / first active period
+    let initialDate = website.createdAt ? new Date(website.createdAt) : new Date();
+    try {
+      const minAnalytics = await clickhouseQuery(
+        `SELECT min(event_time) as min_time FROM analytics_events WHERE website_id = {website_id: String} AND event_time > '2020-01-01 00:00:00'`,
+        { website_id: targetDomain }
+      );
+      if (minAnalytics?.[0]?.min_time) {
+        const firstAnalyticsDate = new Date(minAnalytics[0].min_time);
+        if (!isNaN(firstAnalyticsDate.getTime()) && firstAnalyticsDate < initialDate) {
+          initialDate = firstAnalyticsDate;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not query ClickHouse min event_time:", e.message);
+    }
+
+    const firstActiveYear = initialDate.getFullYear();
+    const firstActiveMonth = initialDate.getMonth() + 1;
+
+    // Rule: Months prior to registration/first active activity cannot be viewed
+    const isBeforeActive = targetYear < firstActiveYear || (targetYear === firstActiveYear && targetMonth < firstActiveMonth);
+    if (isBeforeActive) {
+      return NextResponse.json({
+        success: true,
+        isBeforeActive: true,
+        domain: targetDomain,
+        displayName: website.displayName,
+        logoUrl: website.logoUrl || null,
+        year: targetYear,
+        month: targetMonth,
+        monthName: getMonthNameEs(targetMonth),
+        firstActiveYear,
+        firstActiveMonth,
+        firstActiveMonthName: getMonthNameEs(firstActiveMonth),
+        message: `El periodo seleccionado (${getMonthNameEs(targetMonth)} ${targetYear}) es anterior al registro o inicio de actividad del sitio web (${getMonthNameEs(firstActiveMonth)} ${firstActiveYear}).`,
+      });
+    }
+
     // Rule: Current in-progress month cannot be viewed as a finalized monthly report
     const isCurrentMonth = targetYear === currentCalYear && targetMonth === currentCalMonth;
     const isFutureMonth = targetYear > currentCalYear || (targetYear === currentCalYear && targetMonth > currentCalMonth);
@@ -60,12 +99,15 @@ export async function GET(request) {
         isFutureMonth,
         domain: targetDomain,
         displayName: website.displayName,
+        logoUrl: website.logoUrl || null,
         year: targetYear,
         month: targetMonth,
         monthName: getMonthNameEs(targetMonth),
         currentMonth: currentCalMonth,
         currentMonthName: getMonthNameEs(currentCalMonth),
         currentYear: currentCalYear,
+        firstActiveYear,
+        firstActiveMonth,
         availableAt: `1 de ${getMonthNameEs(nextMonthNum)} de ${nextYearNum}`,
         message: isCurrentMonth
           ? `El informe de ${getMonthNameEs(targetMonth)} ${targetYear} está en curso. Los informes consolidados se cierran y publican automáticamente al finalizar el mes natural.`
@@ -562,9 +604,13 @@ Genera 3 o 4 logros y recomendaciones clave orientadas a DESTACAR LOS BUENOS RES
       data: {
         domain: targetDomain,
         displayName: website.displayName,
+        logoUrl: website.logoUrl || null,
         year: targetYear,
         month: targetMonth,
         monthName: getMonthNameEs(targetMonth),
+        firstActiveYear,
+        firstActiveMonth,
+        firstActiveDate: initialDate.toISOString(),
         overview: {
           visitors: totalVisitors,
           unique_visitors: uniqueVisitors,
