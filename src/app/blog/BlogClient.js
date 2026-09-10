@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
-import { blogCategories, blogArticles } from "@/lib/blogData";
+import { blogCategories, blogArticles, getLocalizedArticle } from "@/lib/blogData";
 
 export default function BlogClient() {
   const { lang } = useLanguage();
@@ -12,8 +12,12 @@ export default function BlogClient() {
   const [selectedCategory, setSelectedCategory] = useState("todos");
   const [searchQuery, setSearchQuery] = useState("");
 
+  const localizedArticles = useMemo(() => {
+    return blogArticles.map((a) => getLocalizedArticle(a, lang));
+  }, [lang]);
+
   const filteredArticles = useMemo(() => {
-    return blogArticles.filter((article) => {
+    return localizedArticles.filter((article) => {
       // Category match
       if (selectedCategory !== "todos" && article.category.id !== selectedCategory) {
         return false;
@@ -23,14 +27,14 @@ export default function BlogClient() {
         const q = searchQuery.toLowerCase();
         const inTitle = article.title.toLowerCase().includes(q);
         const inExcerpt = article.excerpt.toLowerCase().includes(q);
-        const inKw = article.primaryKeyword.toLowerCase().includes(q) || article.secondaryKeywords.some(k => k.toLowerCase().includes(q));
+        const inKw = article.primaryKeyword?.toLowerCase().includes(q) || article.secondaryKeywords?.some(k => k.toLowerCase().includes(q));
         if (!inTitle && !inExcerpt && !inKw) return false;
       }
       return true;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [localizedArticles, selectedCategory, searchQuery]);
 
-  const featuredArticle = blogArticles[0];
+  const featuredArticle = localizedArticles[0];
 
   return (
     <div className="bg-slate-50 min-h-screen py-12 md:py-20">
@@ -85,7 +89,7 @@ export default function BlogClient() {
                         : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60"
                     }`}
                   >
-                    {cat.label}
+                    {isEs ? cat.label : (cat.labelEn || cat.label)}
                   </button>
                 );
               })}

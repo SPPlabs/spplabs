@@ -1,15 +1,42 @@
 // src/lib/blogData.js
 // Artículos del Blog de SPP Labs optimizados para SEO y conversión de clientes (España)
 
+import { blogArticlesEn } from "./blogDataEn.js";
+
 export const blogCategories = [
-  { id: "todos", label: "Todos los artículos", count: 24 },
-  { id: "paginas-web", label: "Páginas Web", count: 4, iconName: "GlobeAltIcon", color: "blue" },
-  { id: "seo-local", label: "SEO Local y Google", count: 4, iconName: "MapPinIcon", color: "emerald" },
-  { id: "resenas-google", label: "Reseñas de Google", count: 4, iconName: "StarIcon", color: "amber" },
-  { id: "ia-chatbots", label: "IA y Chatbots", count: 4, iconName: "BotIcon", color: "purple" },
-  { id: "crm-captacion", label: "CRM y Clientes", count: 4, iconName: "UsersIcon", color: "indigo" },
-  { id: "geo-buscadores-ia", label: "GEO y ChatGPT", count: 4, iconName: "SparklesIcon", color: "cyan" },
+  { id: "todos", label: "Todos los artículos", labelEn: "All Articles", count: 24 },
+  { id: "paginas-web", label: "Páginas Web", labelEn: "Web Development", count: 4, iconName: "GlobeAltIcon", color: "blue" },
+  { id: "seo-local", label: "SEO Local y Google", labelEn: "Local SEO & Google", count: 4, iconName: "MapPinIcon", color: "emerald" },
+  { id: "resenas-google", label: "Reseñas de Google", labelEn: "Google Reviews", count: 4, iconName: "StarIcon", color: "amber" },
+  { id: "ia-chatbots", label: "IA y Chatbots", labelEn: "AI & Chatbots", count: 4, iconName: "BotIcon", color: "purple" },
+  { id: "crm-captacion", label: "CRM y Clientes", labelEn: "CRM & Lead Capture", count: 4, iconName: "UsersIcon", color: "indigo" },
+  { id: "geo-buscadores-ia", label: "GEO y ChatGPT", labelEn: "GEO & ChatGPT", count: 4, iconName: "SparklesIcon", color: "cyan" },
 ];
+
+export function getLocalizedArticle(article, lang) {
+  if (!article) return article;
+  if (lang === "en" && blogArticlesEn && blogArticlesEn[article.slug]) {
+    const en = blogArticlesEn[article.slug];
+    const cat = blogCategories.find((c) => c.id === article.category?.id);
+    return {
+      ...article,
+      title: en.title || article.title,
+      excerpt: en.excerpt || article.excerpt,
+      readTime: en.readTime || article.readTime?.replace("de lectura", "read") || "5 min read",
+      author: {
+        ...article.author,
+        role: en.authorRole || "Specialists in Web Development, SEO & Digital Automation",
+      },
+      category: {
+        ...article.category,
+        label: cat?.labelEn || article.category?.label,
+      },
+      sections: en.sections || article.sections,
+      faqs: en.faqs || article.faqs,
+    };
+  }
+  return article;
+}
 
 export const blogArticles = [
   {
