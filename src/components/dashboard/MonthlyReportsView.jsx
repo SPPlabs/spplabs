@@ -21,6 +21,7 @@ import {
   TargetIcon,
   DevicePhoneMobileIcon,
   GlobeAltIcon,
+  CheckIcon,
 } from "@/components/dashboard/DashboardIcons";
 
 function getInsightBadgeIcon(item) {
@@ -69,6 +70,24 @@ export default function MonthlyReportsView({
   const [selectedMonth, setSelectedMonth] = useState(defaultMonth);
   const [enableCompare, setEnableCompare] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
+
+  // Dropdown states for custom SPP Labs selectors
+  const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
+  const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
+  const [isExportDropdownOpen, setIsExportDropdownOpen] = useState(false);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (!e.target.closest("[data-report-dropdown]")) {
+        setIsMonthDropdownOpen(false);
+        setIsYearDropdownOpen(false);
+        setIsExportDropdownOpen(false);
+      }
+    };
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, []);
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -348,48 +367,152 @@ export default function MonthlyReportsView({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {/* Month Dropdown */}
-          <div className="relative">
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="appearance-none bg-slate-50 border border-slate-200 text-slate-900 font-extrabold text-xs rounded-2xl px-4 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-slate-900/10 cursor-pointer shadow-2xs"
+          {/* Custom SPP Labs Month Dropdown */}
+          <div className="relative" data-report-dropdown>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMonthDropdownOpen(!isMonthDropdownOpen);
+                setIsYearDropdownOpen(false);
+                setIsExportDropdownOpen(false);
+              }}
+              className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-extrabold text-xs rounded-2xl px-4 py-2.5 shadow-2xs flex items-center gap-2 cursor-pointer transition-all"
+              title="Seleccionar mes del informe"
             >
-              {monthsList.map((m) => {
-                const isBefore = isMonthBeforeRegistration(selectedYear, m.num);
-                const inProg = isMonthInProgress(selectedYear, m.num);
-                const isFut = isMonthFuture(selectedYear, m.num);
-                const isDisabled = isBefore || inProg || isFut;
+              <CalendarIcon className="w-3.5 h-3.5 text-slate-500" />
+              <span>{monthsList.find((m) => m.num === selectedMonth)?.name || "Mes"}</span>
+              <svg
+                className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${
+                  isMonthDropdownOpen ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </button>
 
-                let tag = "";
-                if (isBefore) tag = " — (Sin actividad previa)";
-                else if (inProg) tag = " — (Mes actual en curso)";
-                else if (isFut) tag = " — (Futuro)";
+            {isMonthDropdownOpen && (
+              <div className="absolute left-0 top-full mt-1.5 w-64 max-h-80 overflow-y-auto bg-white border border-slate-200/90 rounded-2xl shadow-xl p-1.5 z-40 animate-fade-in space-y-0.5">
+                <div className="px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 mb-1">
+                  Meses {selectedYear}
+                </div>
+                {monthsList.map((m) => {
+                  const isBefore = isMonthBeforeRegistration(selectedYear, m.num);
+                  const inProg = isMonthInProgress(selectedYear, m.num);
+                  const isFut = isMonthFuture(selectedYear, m.num);
+                  const isDisabled = isBefore || inProg || isFut;
+                  const isSelected = selectedMonth === m.num;
 
-                return (
-                  <option key={m.num} value={m.num} disabled={isDisabled}>
-                    {m.name}{tag}
-                  </option>
-                );
-              })}
-            </select>
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none">▼</span>
+                  let badgeLabel = "";
+                  let badgeClass = "";
+                  if (inProg) {
+                    badgeLabel = "En curso";
+                    badgeClass = "bg-blue-50 text-blue-600 border border-blue-200/60";
+                  } else if (isBefore) {
+                    badgeLabel = "Sin datos";
+                    badgeClass = "bg-slate-100 text-slate-400";
+                  } else if (isFut) {
+                    badgeLabel = "Futuro";
+                    badgeClass = "bg-slate-100 text-slate-400";
+                  }
+
+                  return (
+                    <button
+                      key={m.num}
+                      type="button"
+                      disabled={isDisabled}
+                      onClick={() => {
+                        setSelectedMonth(m.num);
+                        setIsMonthDropdownOpen(false);
+                      }}
+                      className={`w-full px-3 py-2 text-left rounded-xl text-xs font-bold transition-all flex items-center justify-between gap-2 ${
+                        isDisabled
+                          ? "opacity-45 cursor-not-allowed bg-slate-50/40 text-slate-400"
+                          : isSelected
+                          ? "bg-slate-900 text-white shadow-xs"
+                          : "hover:bg-slate-100 text-slate-700 cursor-pointer"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {isSelected && !isDisabled ? (
+                          <CheckIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        ) : (
+                          <span className="w-3.5 h-3.5 shrink-0" />
+                        )}
+                        <span>{m.name}</span>
+                      </div>
+
+                      {badgeLabel && (
+                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md shrink-0 ${badgeClass}`}>
+                          {badgeLabel}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {/* Year Dropdown */}
-          <div className="relative">
-            <select
-              value={selectedYear}
-              onChange={(e) => handleYearChange(Number(e.target.value))}
-              className="appearance-none bg-slate-50 border border-slate-200 text-slate-900 font-extrabold text-xs rounded-2xl px-4 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-slate-900/10 cursor-pointer shadow-2xs"
+          {/* Custom SPP Labs Year Dropdown */}
+          <div className="relative" data-report-dropdown>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsYearDropdownOpen(!isYearDropdownOpen);
+                setIsMonthDropdownOpen(false);
+                setIsExportDropdownOpen(false);
+              }}
+              className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-extrabold text-xs rounded-2xl px-3.5 py-2.5 shadow-2xs flex items-center gap-2 cursor-pointer transition-all"
+              title="Seleccionar año del informe"
             >
-              {yearsList.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none">▼</span>
+              <span>{selectedYear}</span>
+              <svg
+                className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${
+                  isYearDropdownOpen ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </button>
+
+            {isYearDropdownOpen && (
+              <div className="absolute left-0 top-full mt-1.5 w-36 bg-white border border-slate-200/90 rounded-2xl shadow-xl p-1.5 z-40 animate-fade-in space-y-0.5">
+                <div className="px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 mb-1">
+                  Año
+                </div>
+                {yearsList.map((y) => {
+                  const isSelected = selectedYear === y;
+                  return (
+                    <button
+                      key={y}
+                      type="button"
+                      onClick={() => {
+                        handleYearChange(y);
+                        setIsYearDropdownOpen(false);
+                      }}
+                      className={`w-full px-3 py-2 text-left rounded-xl text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
+                        isSelected
+                          ? "bg-slate-900 text-white shadow-xs"
+                          : "hover:bg-slate-100 text-slate-700"
+                      }`}
+                    >
+                      <span>{y}</span>
+                      {isSelected && <CheckIcon className="w-3.5 h-3.5 text-emerald-400" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Compare Toggle */}
@@ -406,34 +529,84 @@ export default function MonthlyReportsView({
             <span>Comparar con mes anterior</span>
           </button>
 
-          {/* Action Buttons */}
-          <button
-            onClick={handleExportCsv}
-            disabled={loading || !data || data.isInProgress || data.isBeforeActive}
-            className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center gap-2 shadow-2xs disabled:opacity-40"
-          >
-            <TableIcon className="w-4 h-4 text-slate-700" />
-            <span>Exportar CSV</span>
-          </button>
+          {/* Custom SPP Labs Export Dropdown (CSV & PDF combined) */}
+          <div className="relative" data-report-dropdown>
+            <button
+              type="button"
+              disabled={loading || !data || data.isInProgress || data.isBeforeActive}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExportDropdownOpen(!isExportDropdownOpen);
+                setIsMonthDropdownOpen(false);
+                setIsYearDropdownOpen(false);
+              }}
+              className="px-4 py-2.5 bg-slate-900 hover:bg-black text-white text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center gap-2 shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+              title="Opciones de exportación del informe"
+            >
+              {generatingPdf ? (
+                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <DownloadIcon className="w-3.5 h-3.5 text-white" />
+              )}
+              <span>{generatingPdf ? "Generando..." : "Exportar"}</span>
+              <svg
+                className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${
+                  isExportDropdownOpen ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </button>
 
-          <button
-            onClick={handleDownloadPdf}
-            disabled={loading || !data || data.isInProgress || data.isBeforeActive || generatingPdf}
-            className="px-4 py-2.5 bg-slate-900 hover:bg-black text-white text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center gap-2 shadow-xs disabled:opacity-40"
-            title="Descargar informe completo en formato PDF"
-          >
-            {generatingPdf ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Generando PDF...</span>
-              </>
-            ) : (
-              <>
-                <DownloadIcon className="w-4 h-4 text-white" />
-                <span>Descargar PDF</span>
-              </>
+            {isExportDropdownOpen && (
+              <div className="absolute right-0 top-full mt-1.5 w-60 bg-white border border-slate-200/90 rounded-2xl shadow-xl p-1.5 z-40 animate-fade-in space-y-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleExportCsv();
+                    setIsExportDropdownOpen(false);
+                  }}
+                  className="w-full px-3 py-2.5 text-left rounded-xl transition-all hover:bg-slate-50 flex items-start gap-2.5 cursor-pointer group"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 group-hover:bg-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5 transition-colors">
+                    <TableIcon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 block">Exportar CSV</span>
+                    <span className="text-[10.5px] text-slate-400 block font-medium">Hoja de cálculo Excel / CSV</span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={generatingPdf}
+                  onClick={() => {
+                    handleDownloadPdf();
+                    setIsExportDropdownOpen(false);
+                  }}
+                  className="w-full px-3 py-2.5 text-left rounded-xl transition-all hover:bg-blue-50/60 flex items-start gap-2.5 cursor-pointer group border-t border-slate-100 disabled:opacity-50"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 group-hover:bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 mt-0.5 transition-colors">
+                    {generatingPdf ? (
+                      <div className="w-3.5 h-3.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <DownloadIcon className="w-4 h-4" />
+                    )}
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-blue-900 block">
+                      {generatingPdf ? "Generando informe..." : "Descargar PDF"}
+                    </span>
+                    <span className="text-[10.5px] text-slate-400 block font-medium">Documento PDF oficial SPP Labs</span>
+                  </div>
+                </button>
+              </div>
             )}
-          </button>
+          </div>
         </div>
       </div>
 

@@ -25,6 +25,7 @@ import {
   CheckIcon,
   CloseIcon,
 } from "@/components/dashboard/DashboardIcons";
+import ConfirmModal from "@/components/dashboard/ConfirmModal";
 
 export default function DashboardClient({
   session,
@@ -49,6 +50,57 @@ export default function DashboardClient({
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [theme, setTheme] = useState("light");
+  const [copiedKey, setCopiedKey] = useState(null);
+
+  // Custom SPP Labs Confirm Modal state
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    confirmText: "",
+    cancelText: "",
+    confirmButtonClass: "bg-rose-600 hover:bg-rose-700 text-white",
+    requireInputMatch: null,
+    inputLabel: null,
+    onConfirm: null,
+    isProcessing: false,
+  });
+
+  const openConfirmModal = ({
+    title,
+    description,
+    confirmText = lang === "es" ? "Eliminar" : "Delete",
+    cancelText = lang === "es" ? "Cancelar" : "Cancel",
+    confirmButtonClass = "bg-rose-600 hover:bg-rose-700 text-white",
+    requireInputMatch = null,
+    inputLabel = null,
+    onConfirm,
+  }) => {
+    setConfirmModal({
+      isOpen: true,
+      title,
+      description,
+      confirmText,
+      cancelText,
+      confirmButtonClass,
+      requireInputMatch,
+      inputLabel,
+      onConfirm: async () => {
+        setConfirmModal((prev) => ({ ...prev, isProcessing: true }));
+        try {
+          if (onConfirm) await onConfirm();
+        } finally {
+          setConfirmModal((prev) => ({ ...prev, isOpen: false, isProcessing: false }));
+        }
+      },
+      isProcessing: false,
+    });
+  };
+
+  const closeConfirmModal = () => {
+    if (confirmModal.isProcessing) return;
+    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+  };
 
   useEffect(() => {
     const savedLang = localStorage.getItem("spp_lang");
@@ -272,32 +324,46 @@ export default function DashboardClient({
     }
   };
 
-  const handleDeleteLogo = async () => {
-    if (!confirm(lang === "es" ? "¿Seguro que deseas eliminar el logo de la empresa?" : "Are you sure you want to remove the business logo?")) return;
-
-    setIsUploadingLogo(true);
-    setLogoMessage({ text: "", type: "" });
-
-    try {
-      const res = await fetch(`/api/admin/upload-logo?domain=${encodeURIComponent(currentWebsite.domain)}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
-        setCurrentLogoUrl(null);
-        setLogoMessage({
-          text: lang === "es" ? "Logo eliminado correctamente" : "Logo removed successfully",
-          type: "success",
-        });
-        setTimeout(() => setLogoMessage({ text: "", type: "" }), 4000);
-      } else {
-        const data = await res.json();
-        setLogoMessage({
-          text: data.message || "Error al eliminar el logo",
-          type: "error",
-        });
-      }
-    } catch (err) {
+  const handleDeleteLogo = () => {
+    openConfirmModal({
+      title: lang === "es" ? "¿Eliminar logotipo de la empresa?" : "Remove company logo?",
+      description: lang === "es"
+        ? "¿Estás seguro de que deseas eliminar el logotipo actual? Se restablecerá al identificador predeterminado de SPP Labs."
+        : "Are you sure you want to remove the current logo? It will reset to the default SPP Labs identifier.",
+      confirmText: lang === "es" ? "Eliminar logotipo" : "Remove logo",
+      onConfirm: async () => {
+        setIsUploadingLogo(true);
+        setLogoMessage({ text: "", type: "" });
+        try {
+          const res = await fetch(`/api/admin/upload-logo?domain=${encodeURIComponent(currentWebsite.domain)}`, {
+            method: "DELETE",
+          });
+          if (res.ok) {
+            setCurrentLogoUrl(null);
+            setLogoMessage({
+              text: lang === "es" ? "Logo eliminado correctamente" : "Logo removed successfully",
+              type: "success",
+            });
+            setTimeout(() => setLogoMessage({ text: "", type: "" }), 4000);
+          } else {
+            const data = await res.json();
+            setLogoMessage({
+              text: data.message || "Error al eliminar el logo",
+              type: "error",
+            });
+          }
+        } catch (err) {
+          console.error("Delete logo error:", err);
+          setLogoMessage({
+            text: lang === "es" ? "Error al eliminar el logo" : "Error removing logo",
+            type: "error",
+          });
+        } finally {
+          setIsUploadingLogo(false);
+        }
+      },
+    });
+  };
       console.error("Logo delete error:", err);
       setLogoMessage({
         text: lang === "es" ? "Error de conexión" : "Connection error",
@@ -523,17 +589,25 @@ export default function DashboardClient({
     }
   };
 
-  const handleDeleteConversation = async (convId) => {
-    if (!confirm("¿Está seguro de que desea eliminar este registro de conversación?")) return;
-    try {
-      const res = await fetch(`/api/admin/conversations?id=${convId}`, { method: "DELETE" });
-      if (res.ok) {
-        setConversationsList(prev => prev.filter(c => c.id !== convId));
-        if (selectedConversation?.id === convId) setSelectedConversation(null);
-      }
-    } catch (err) {
-      console.error("Delete conversation error:", err);
-    }
+  const handleDeleteConversation = (convId) => {
+    openConfirmModal({
+      title: lang === "es" ? "¿Eliminar conversación de IA?" : "Delete AI conversation?",
+      description: lang === "es"
+        ? "Esta acción no se puede deshacer. Se eliminará permanentemente el registro del diálogo del visitante con el chatbot."
+        : "This action cannot be undone. The visitor's conversation history with the chatbot will be permanently deleted.",
+      confirmText: lang === "es" ? "Eliminar conversación" : "Delete conversation",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/admin/conversations?id=${convId}`, { method: "DELETE" });
+          if (res.ok) {
+            setConversationsList(prev => prev.filter(c => c.id !== convId));
+            if (selectedConversation?.id === convId) setSelectedConversation(null);
+          }
+        } catch (err) {
+          console.error("Delete conversation error:", err);
+        }
+      },
+    });
   };
 
   // Re-sync all domain-specific local states whenever currentWebsite or domain changes (e.g. impersonation)
@@ -560,62 +634,94 @@ export default function DashboardClient({
   }, [activeTab, analyticsTimeframe]);
 
   // Handle Update Booking Status
-  const handleUpdateBookingStatus = async (bookingId, status) => {
-    if (!confirm(`¿Está seguro de que desea cambiar el estado de esta cita a ${status === "CONFIRMED" ? "Confirmada" : "Cancelada"}?`)) return;
-    try {
-      const res = await fetch("/api/admin/bookings", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId, status }),
-      });
-      if (res.ok) {
-        router.refresh();
-      } else {
-        const data = await res.json();
-        alert(data.message || "Error al actualizar estado");
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Error al actualizar estado");
-    }
+  const handleUpdateBookingStatus = (bookingId, status) => {
+    const isConfirming = status === "CONFIRMED";
+    openConfirmModal({
+      title: isConfirming
+        ? (lang === "es" ? "¿Confirmar cita?" : "Confirm booking?")
+        : (lang === "es" ? "¿Cancelar cita?" : "Cancel booking?"),
+      description: isConfirming
+        ? (lang === "es" ? "¿Deseas marcar esta cita como confirmada?" : "Do you want to mark this booking as confirmed?")
+        : (lang === "es" ? "¿Deseas marcar esta cita como cancelada?" : "Do you want to mark this booking as cancelled?"),
+      confirmText: isConfirming
+        ? (lang === "es" ? "Confirmar cita" : "Confirm booking")
+        : (lang === "es" ? "Cancelar cita" : "Cancel booking"),
+      confirmButtonClass: isConfirming
+        ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+        : "bg-amber-600 hover:bg-amber-700 text-white",
+      onConfirm: async () => {
+        try {
+          const res = await fetch("/api/admin/bookings", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ bookingId, status }),
+          });
+          if (res.ok) {
+            router.refresh();
+          } else {
+            const data = await res.json();
+            alert(data.message || "Error al actualizar estado");
+          }
+        } catch (e) {
+          console.error(e);
+          alert("Error al actualizar estado");
+        }
+      },
+    });
   };
 
   // Handle Delete Booking
-  const handleDeleteBooking = async (id) => {
-    if (!confirm("¿Está seguro de que desea eliminar permanentemente esta cita de reserva?")) return;
-    try {
-      const res = await fetch(`/api/admin/bookings?id=${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        router.refresh();
-      } else {
-        const data = await res.json();
-        alert(data.message || "Error al eliminar reserva");
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Error al eliminar reserva");
-    }
+  const handleDeleteBooking = (id) => {
+    openConfirmModal({
+      title: lang === "es" ? "¿Eliminar cita de reserva?" : "Delete booking appointment?",
+      description: lang === "es"
+        ? "Esta acción no se puede deshacer. La cita se cancelará y eliminará permanentemente del calendario y listados."
+        : "This action cannot be undone. The booking will be permanently removed from the calendar and records.",
+      confirmText: lang === "es" ? "Eliminar cita" : "Delete booking",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/admin/bookings?id=${id}`, {
+            method: "DELETE",
+          });
+          if (res.ok) {
+            router.refresh();
+          } else {
+            const data = await res.json();
+            alert(data.message || "Error al eliminar reserva");
+          }
+        } catch (e) {
+          console.error(e);
+          alert("Error al eliminar reserva");
+        }
+      },
+    });
   };
 
   // Handle Delete Contact
-  const handleDeleteContact = async (id) => {
-    if (!confirm("¿Está seguro de que desea eliminar permanentemente este mensaje de contacto?")) return;
-    try {
-      const res = await fetch(`/api/admin/contacts?id=${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        router.refresh();
-      } else {
-        const data = await res.json();
-        alert(data.message || "Error al eliminar contacto");
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Error al eliminar contacto");
-    }
+  const handleDeleteContact = (id) => {
+    openConfirmModal({
+      title: lang === "es" ? "¿Eliminar mensaje de contacto?" : "Delete contact inquiry?",
+      description: lang === "es"
+        ? "Esta acción no se puede deshacer. La consulta del cliente se eliminará definitivamente del panel."
+        : "This action cannot be undone. The customer inquiry will be permanently deleted from the dashboard.",
+      confirmText: lang === "es" ? "Eliminar mensaje" : "Delete message",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/admin/contacts?id=${id}`, {
+            method: "DELETE",
+          });
+          if (res.ok) {
+            router.refresh();
+          } else {
+            const data = await res.json();
+            alert(data.message || "Error al eliminar contacto");
+          }
+        } catch (e) {
+          console.error(e);
+          alert("Error al eliminar contacto");
+        }
+      },
+    });
   };
 
   // Handle Logout
@@ -785,62 +891,90 @@ export default function DashboardClient({
   };
 
   // Handle deleting announcement / notification
-  const handleDeleteAnnouncement = async (id) => {
-    if (!confirm(lang === "es" ? "¿Está seguro de que desea eliminar esta notificación?" : "Are you sure you want to delete this notification?")) return;
-    try {
-      const res = await fetch(`/api/admin/notifications?id=${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        setAnnouncementsList(prev => prev.filter(item => item.id !== id));
-        router.refresh();
-      } else {
-        const data = await res.json();
-        alert(data.message || "Error al eliminar notificación");
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Error al eliminar notificación");
-    }
+  const handleDeleteAnnouncement = (id) => {
+    openConfirmModal({
+      title: lang === "es" ? "¿Eliminar notificación?" : "Delete announcement?",
+      description: lang === "es"
+        ? "¿Estás seguro de que deseas eliminar este comunicado? Ya no se mostrará a los usuarios ni en el tablón."
+        : "Are you sure you want to delete this announcement? It will no longer be visible to users.",
+      confirmText: lang === "es" ? "Eliminar comunicado" : "Delete announcement",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/admin/notifications?id=${id}`, {
+            method: "DELETE",
+          });
+          if (res.ok) {
+            setAnnouncementsList(prev => prev.filter(item => item.id !== id));
+            router.refresh();
+          } else {
+            const data = await res.json();
+            alert(data.message || "Error al eliminar notificación");
+          }
+        } catch (e) {
+          console.error(e);
+          alert("Error al eliminar notificación");
+        }
+      },
+    });
   };
 
   // Handle deleting petition
-  const handleDeletePetition = async (id) => {
-    if (!confirm(lang === "es" ? "¿Está seguro de eliminar esta petición?" : "Are you sure you want to delete this petition?")) return;
-    try {
-      const res = await fetch(`/api/admin/petitions?id=${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        setPetitionsList(prev => prev.filter(item => item.id !== id));
-        router.refresh();
-      } else {
-        const data = await res.json();
-        alert(data.message || "Error al eliminar petición");
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Error al eliminar petición");
-    }
+  const handleDeletePetition = (id) => {
+    openConfirmModal({
+      title: lang === "es" ? "¿Eliminar petición de soporte?" : "Delete support petition?",
+      description: lang === "es"
+        ? "¿Estás seguro de que deseas eliminar este registro de petición a SPP Labs?"
+        : "Are you sure you want to delete this support request record?",
+      confirmText: lang === "es" ? "Eliminar petición" : "Delete petition",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/admin/petitions?id=${id}`, {
+            method: "DELETE",
+          });
+          if (res.ok) {
+            setPetitionsList(prev => prev.filter(item => item.id !== id));
+            router.refresh();
+          } else {
+            const data = await res.json();
+            alert(data.message || "Error al eliminar petición");
+          }
+        } catch (e) {
+          console.error(e);
+          alert("Error al eliminar petición");
+        }
+      },
+    });
   };
 
-  // Handle administrative user account deletion
-  const handleDeleteUser = async (userId) => {
-    if (!confirm(t.usersDeleteConfirm)) return;
-    try {
-      const res = await fetch(`/api/admin/users?id=${userId}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        router.refresh();
-      } else {
-        const data = await res.json();
-        alert(data.message || data.error || "Failed to delete client account");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete client account");
-    }
+  // Handle administrative user account deletion with strict verification
+  const handleDeleteUser = (userId) => {
+    const webTarget = allWebsites.find((w) => w.id === userId);
+    const targetLabel = webTarget ? `${webTarget.displayName} (${webTarget.domain})` : "";
+
+    openConfirmModal({
+      title: lang === "es" ? "¿Eliminar usuario / cliente definitivamente?" : "Permanently delete user account?",
+      description: lang === "es"
+        ? `ADVERTENCIA CRÍTICA: Se eliminará permanentemente la cuenta de ${targetLabel || "este cliente"}, incluyendo su dominio, credenciales, citas, contactos y todos sus datos asociados.\n\nPara confirmar esta acción irreversible, escribe ELIMINAR a continuación:`
+        : `CRITICAL WARNING: The account for ${targetLabel || "this client"} will be permanently erased, including domain, credentials, bookings, contacts, and all associated records.\n\nTo confirm this irreversible action, type ELIMINAR below:`,
+      confirmText: lang === "es" ? "Eliminar cliente definitivamente" : "Delete client permanently",
+      requireInputMatch: "ELIMINAR",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/admin/users?id=${userId}`, {
+            method: "DELETE",
+          });
+          if (res.ok) {
+            router.refresh();
+          } else {
+            const data = await res.json();
+            alert(data.message || data.error || "Failed to delete client account");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Failed to delete client account");
+        }
+      },
+    });
   };
 
   return (
@@ -1513,6 +1647,7 @@ export default function DashboardClient({
               googleCalendarConnection={googleCalendarConnection}
               externalCalendarEvents={externalCalendarEvents}
               handleExportToNotes={handleExportToNotes}
+              openConfirmModal={openConfirmModal}
             />
           )}
 
@@ -1835,6 +1970,9 @@ export default function DashboardClient({
           </div>
         </div>
       )}
+
+      {/* SPP LABS CUSTOM CONFIRMATION MODAL */}
+      <ConfirmModal {...confirmModal} onClose={closeConfirmModal} lang={lang} />
     </div>
   );
 }

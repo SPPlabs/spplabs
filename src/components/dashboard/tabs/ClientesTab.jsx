@@ -59,6 +59,7 @@ export default function ClientesTab({
   googleCalendarConnection = null,
   externalCalendarEvents = [],
   handleExportToNotes = null,
+  openConfirmModal = null,
 }) {
   const [copiedId, setCopiedId] = useState(null);
   const [contactSearch, setContactSearch] = useState("");
@@ -148,17 +149,7 @@ export default function ClientesTab({
     }
   };
 
-  const handleDeleteGoogleEvent = async (ext) => {
-    if (
-      !confirm(
-        lang === "es"
-          ? `¿Deseas eliminar "${ext.title || "este evento"}" de Google Calendar y de SPP Labs?`
-          : `Do you want to delete "${ext.title || "this event"}" from Google Calendar and SPP Labs?`
-      )
-    ) {
-      return;
-    }
-
+  const executeDeleteGoogleEvent = async (ext) => {
     setDeletingGoogleEventId(ext.id);
     try {
       const res = await fetch("/api/integrations/google-calendar/events", {
@@ -180,6 +171,23 @@ export default function ClientesTab({
       alert(lang === "es" ? "Error al eliminar evento" : "Error deleting event");
     } finally {
       setDeletingGoogleEventId(null);
+    }
+  };
+
+  const handleDeleteGoogleEvent = (ext) => {
+    if (openConfirmModal) {
+      openConfirmModal({
+        title: lang === "es" ? "¿Eliminar evento de Google Calendar?" : "Delete Google Calendar event?",
+        description: lang === "es"
+          ? `¿Deseas eliminar "${ext.title || "este evento"}" de Google Calendar y desvincularlo de SPP Labs? Esta acción no se puede deshacer.`
+          : `Do you want to delete "${ext.title || "this event"}" from Google Calendar and SPP Labs? This action cannot be undone.`,
+        confirmText: lang === "es" ? "Eliminar evento" : "Delete event",
+        onConfirm: async () => {
+          await executeDeleteGoogleEvent(ext);
+        },
+      });
+    } else {
+      executeDeleteGoogleEvent(ext);
     }
   };
 
@@ -824,6 +832,7 @@ export default function ClientesTab({
             googleCalendarConnection={googleCalendarConnection}
             externalCalendarEvents={externalCalendarEvents}
             onExportToNotes={handleExportToNotes}
+            openConfirmModal={openConfirmModal}
           />
         )}
 

@@ -48,6 +48,7 @@ export default function BookingsCalendar({
   currentWebsiteDomain,
   router,
   onExportToNotes = null,
+  openConfirmModal = null,
 }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState("");
@@ -120,17 +121,7 @@ export default function BookingsCalendar({
     }
   };
 
-  const handleDisconnectGoogleCalendar = async () => {
-    if (
-      !confirm(
-        lang === "es"
-          ? "¿Estás seguro de que deseas desconectar Google Calendar? Las citas de SPP Labs se conservarán."
-          : "Are you sure you want to disconnect Google Calendar? Your SPP Labs bookings will be preserved."
-      )
-    ) {
-      return;
-    }
-
+  const executeDisconnectGoogleCalendar = async () => {
     setIsDisconnectingGcal(true);
     try {
       const res = await fetch("/api/integrations/google-calendar/disconnect", {
@@ -153,17 +144,25 @@ export default function BookingsCalendar({
     }
   };
 
-  const handleDeleteGoogleEvent = async (ext) => {
-    if (
-      !confirm(
-        lang === "es"
-          ? `¿Deseas eliminar "${ext.title || "este evento"}" de Google Calendar y de SPP Labs?`
-          : `Do you want to delete "${ext.title || "this event"}" from Google Calendar and SPP Labs?`
-      )
-    ) {
-      return;
+  const handleDisconnectGoogleCalendar = () => {
+    if (openConfirmModal) {
+      openConfirmModal({
+        title: lang === "es" ? "¿Desconectar Google Calendar?" : "Disconnect Google Calendar?",
+        description: lang === "es"
+          ? "¿Estás seguro de que deseas desconectar Google Calendar? Las citas de SPP Labs se conservarán y ya no se mostrarán los eventos sincronizados."
+          : "Are you sure you want to disconnect Google Calendar? Your SPP Labs bookings will be preserved and synced events will no longer be displayed.",
+        confirmText: lang === "es" ? "Desconectar cuenta" : "Disconnect account",
+        confirmButtonClass: "bg-amber-600 hover:bg-amber-700 text-white",
+        onConfirm: async () => {
+          await executeDisconnectGoogleCalendar();
+        },
+      });
+    } else {
+      executeDisconnectGoogleCalendar();
     }
+  };
 
+  const executeDeleteGoogleEvent = async (ext) => {
     setDeletingGoogleEventId(ext.id);
     try {
       const res = await fetch("/api/integrations/google-calendar/events", {
@@ -192,6 +191,23 @@ export default function BookingsCalendar({
       alert(lang === "es" ? "Error al eliminar evento" : "Error deleting event");
     } finally {
       setDeletingGoogleEventId(null);
+    }
+  };
+
+  const handleDeleteGoogleEvent = (ext) => {
+    if (openConfirmModal) {
+      openConfirmModal({
+        title: lang === "es" ? "¿Eliminar evento de Google Calendar?" : "Delete Google Calendar event?",
+        description: lang === "es"
+          ? `¿Deseas eliminar "${ext.title || "este evento"}" de Google Calendar y desvincularlo de SPP Labs? Esta acción no se puede deshacer.`
+          : `Do you want to delete "${ext.title || "this event"}" from Google Calendar and SPP Labs? This action cannot be undone.`,
+        confirmText: lang === "es" ? "Eliminar evento" : "Delete event",
+        onConfirm: async () => {
+          await executeDeleteGoogleEvent(ext);
+        },
+      });
+    } else {
+      executeDeleteGoogleEvent(ext);
     }
   };
 
