@@ -155,14 +155,29 @@ export const InlineChatbot: React.FC = () => {
 
         {/* Disclaimer */}
         <span className="text-[10px] text-black font-semibold text-center mt-3 select-none leading-normal">
-          Al hablar con esta IA estás aceptando nuestra{" "}
-          <Link href="/politica-de-privacidad" className="underline hover:text-zinc-700">
-            política de privacidad
-          </Link>{" "}
-          y nuestros{" "}
-          <Link href="/terminos-y-condiciones" className="underline hover:text-zinc-700">
-            términos y condiciones
-          </Link>
+          {lang === "es" ? (
+            <>
+              Al hablar con esta IA estás aceptando nuestra{" "}
+              <Link href="/politica-de-privacidad" className="underline hover:text-zinc-700">
+                política de privacidad
+              </Link>{" "}
+              y nuestros{" "}
+              <Link href="/terminos-y-condiciones" className="underline hover:text-zinc-700">
+                términos y condiciones
+              </Link>
+            </>
+          ) : (
+            <>
+              By chatting with this AI you accept our{" "}
+              <Link href="/politica-de-privacidad" className="underline hover:text-zinc-700">
+                privacy policy
+              </Link>{" "}
+              and our{" "}
+              <Link href="/terminos-y-condiciones" className="underline hover:text-zinc-700">
+                terms and conditions
+              </Link>
+            </>
+          )}
         </span>
       </div>
     </div>

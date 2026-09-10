@@ -50,7 +50,7 @@ export default function NotificationsTab({
                 required
                 value={announcementTitle}
                 onChange={(e) => setAnnouncementTitle(e.target.value)}
-                placeholder="Ej: Mantenimiento programado de base de datos"
+                placeholder={lang === "es" ? "Ej: Mantenimiento programado de base de datos" : "E.g.: Scheduled database maintenance"}
                 className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-4 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
               />
             </div>
@@ -61,7 +61,7 @@ export default function NotificationsTab({
                 required
                 value={announcementMsg}
                 onChange={(e) => setAnnouncementMsg(e.target.value)}
-                placeholder="Escriba aquí los detalles del comunicado..."
+                placeholder={lang === "es" ? "Escriba aquí los detalles del comunicado..." : "Write announcement details here..."}
                 className="w-full h-28 bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs resize-none focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
               />
             </div>
@@ -73,7 +73,7 @@ export default function NotificationsTab({
                 onChange={(e) => setAnnouncementTargetId(e.target.value)}
                 className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-4 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
               >
-                <option value="">-- Todos los usuarios (Global) --</option>
+                <option value="">{lang === "es" ? "-- Todos los usuarios (Global) --" : "-- All users (Global) --"}</option>
                 {allWebsites.filter(w => w.domain !== "spplabs.es").map(w => (
                   <option key={w.id} value={w.id}>{w.displayName} ({w.domain})</option>
                 ))}
@@ -91,7 +91,7 @@ export default function NotificationsTab({
               disabled={announcementSending}
               className="h-11 px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer"
             >
-              {announcementSending ? "Publicando..." : t.adminNotifButton}
+              {announcementSending ? (lang === "es" ? "Publicando..." : "Publishing...") : t.adminNotifButton}
             </button>
           </form>
         </div>
@@ -129,7 +129,7 @@ export default function NotificationsTab({
                       {session.domain === "spplabs.es" && !isImpersonating && (
                         ann.websiteId ? (
                           <span className="bg-blue-50 text-blue-700 text-[10px] px-2.5 py-0.5 rounded-md font-bold border border-blue-200/60">
-                            {lang === "es" ? "Para: " : "To: "}{ann.targetDisplayName || ann.targetDomain || "Cliente"}
+                            {lang === "es" ? "Para: " : "To: "}{ann.targetDisplayName || ann.targetDomain || (lang === "es" ? "Cliente" : "Client")}
                           </span>
                         ) : (
                           <span className="bg-emerald-50 text-emerald-700 text-[10px] px-2.5 py-0.5 rounded-md font-bold border border-emerald-200/60">
@@ -139,7 +139,7 @@ export default function NotificationsTab({
                       )}
                     </div>
                     <span className="text-[10px] text-slate-400 font-sans tabular-nums font-semibold shrink-0">
-                      {new Date(ann.createdAt).toLocaleDateString()}
+                      {new Date(ann.createdAt).toLocaleDateString(lang === "es" ? "es-ES" : "en-US")}
                     </span>
                   </div>
                   <div className="bg-slate-50/80 border-l-3 border-purple-500 rounded-r-xl p-3.5 text-xs text-slate-700 leading-relaxed font-sans mb-3">
@@ -208,7 +208,7 @@ export default function NotificationsTab({
                           </div>
                         </div>
                         <span className="text-[10px] text-slate-400 font-sans tabular-nums font-bold shrink-0">
-                          {new Date(pet.createdAt).toLocaleString("es-ES", {
+                          {new Date(pet.createdAt).toLocaleString(lang === "es" ? "es-ES" : "en-US", {
                             year: "numeric",
                             month: "2-digit",
                             day: "2-digit",
@@ -282,9 +282,9 @@ export default function NotificationsTab({
                   {petitionsList.map((pet) => (
                     <div key={pet.id} className="bg-slate-50 border border-slate-200/80 rounded-xl p-4 text-xs">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="font-bold text-slate-800">{pet.title || "Petición a SPP Labs"}</span>
+                        <span className="font-bold text-slate-800">{pet.title || (lang === "es" ? "Petición a SPP Labs" : "Petition to SPP Labs")}</span>
                         <span className="text-[10px] text-slate-400 font-sans tabular-nums">
-                          {t.notifDate}: {new Date(pet.createdAt).toLocaleDateString()}
+                          {t.notifDate}: {new Date(pet.createdAt).toLocaleDateString(lang === "es" ? "es-ES" : "en-US")}
                         </span>
                       </div>
                       <p className="text-slate-600 leading-relaxed italic mb-3 pl-2.5 border-l-2 border-slate-300">&ldquo;{pet.message}&rdquo;</p>

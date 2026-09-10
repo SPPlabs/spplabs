@@ -946,9 +946,9 @@ export default function DashboardClient({
       title: lang === "es" ? "¿Eliminar usuario / cliente definitivamente?" : "Permanently delete user account?",
       description: lang === "es"
         ? `ADVERTENCIA CRÍTICA: Se eliminará permanentemente la cuenta de ${targetLabel || "este cliente"}, incluyendo su dominio, credenciales, citas, contactos y todos sus datos asociados.\n\nPara confirmar esta acción irreversible, escribe ELIMINAR a continuación:`
-        : `CRITICAL WARNING: The account for ${targetLabel || "this client"} will be permanently erased, including domain, credentials, bookings, contacts, and all associated records.\n\nTo confirm this irreversible action, type ELIMINAR below:`,
+        : `CRITICAL WARNING: The account for ${targetLabel || "this client"} will be permanently erased, including domain, credentials, bookings, contacts, and all associated records.\n\nTo confirm this irreversible action, type ${lang === "es" ? "ELIMINAR" : "DELETE"} below:`,
       confirmText: lang === "es" ? "Eliminar cliente definitivamente" : "Delete client permanently",
-      requireInputMatch: "ELIMINAR",
+      requireInputMatch: lang === "es" ? "ELIMINAR" : "DELETE",
       onConfirm: async () => {
         try {
           const res = await fetch(`/api/admin/users?id=${userId}`, {
@@ -1174,12 +1174,12 @@ export default function DashboardClient({
                 className={`w-full flex items-center transition-all cursor-pointer rounded-xl font-black text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200/80 ${
                   sidebarOpen ? "gap-3 px-4 py-3 text-left" : "justify-center p-3 relative"
                 } mt-3 shadow-xs active:scale-95`}
-                title="vuelve a spplabs.es"
+                title={lang === "es" ? "vuelve a spplabs.es" : "back to spplabs.es"}
               >
                 <svg className="w-5 h-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 016 6v3" />
                 </svg>
-                {sidebarOpen && <span className="truncate">vuelve a spplabs.es</span>}
+                {sidebarOpen && <span className="truncate">{lang === "es" ? "vuelve a spplabs.es" : "back to spplabs.es"}</span>}
               </button>
             )}
           </nav>
@@ -1502,7 +1502,7 @@ export default function DashboardClient({
                       <svg className="w-5 h-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 016 6v3" />
                       </svg>
-                      <span>vuelve a spplabs.es</span>
+                      <span>{lang === "es" ? "vuelve a spplabs.es" : "back to spplabs.es"}</span>
                     </button>
                   )}
                 </nav>

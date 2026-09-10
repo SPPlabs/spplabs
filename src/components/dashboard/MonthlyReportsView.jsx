@@ -47,8 +47,8 @@ function getInsightBadgeIcon(item) {
   return <SparklesIcon className="w-3.5 h-3.5 text-indigo-300 shrink-0" />;
 }
 
-function cleanBadgeText(badge, category) {
-  const raw = badge || category || "Logro Destacado";
+function cleanBadgeText(badge, category, isEs = true) {
+  const raw = badge || category || (isEs ? "Logro Destacado" : "Key Achievement");
   return raw.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|\p{Extended_Pictographic}/gu, "").trim();
 }
 
@@ -58,6 +58,7 @@ export default function MonthlyReportsView({
   currentLogoUrl,
   lang = "es",
 }) {
+  const isEs = lang === "es";
   const now = new Date();
   const currentCalYear = now.getFullYear();
   const currentCalMonth = now.getMonth() + 1; // 1-12
@@ -94,19 +95,25 @@ export default function MonthlyReportsView({
   const [error, setError] = useState("");
 
   const monthsList = [
-    { num: 1, name: "Enero" },
-    { num: 2, name: "Febrero" },
-    { num: 3, name: "Marzo" },
-    { num: 4, name: "Abril" },
-    { num: 5, name: "Mayo" },
-    { num: 6, name: "Junio" },
-    { num: 7, name: "Julio" },
-    { num: 8, name: "Agosto" },
-    { num: 9, name: "Septiembre" },
-    { num: 10, name: "Octubre" },
-    { num: 11, name: "Noviembre" },
-    { num: 12, name: "Diciembre" },
+    { num: 1, nameEs: "Enero", nameEn: "January" },
+    { num: 2, nameEs: "Febrero", nameEn: "February" },
+    { num: 3, nameEs: "Marzo", nameEn: "March" },
+    { num: 4, nameEs: "Abril", nameEn: "April" },
+    { num: 5, nameEs: "Mayo", nameEn: "May" },
+    { num: 6, nameEs: "Junio", nameEn: "June" },
+    { num: 7, nameEs: "Julio", nameEn: "July" },
+    { num: 8, nameEs: "Agosto", nameEn: "August" },
+    { num: 9, nameEs: "Septiembre", nameEn: "September" },
+    { num: 10, nameEs: "Octubre", nameEn: "October" },
+    { num: 11, nameEs: "Noviembre", nameEn: "November" },
+    { num: 12, nameEs: "Diciembre", nameEn: "December" },
   ];
+
+  const getMonthName = (mNum) => {
+    const item = monthsList.find((m) => m.num === mNum);
+    if (!item) return "";
+    return isEs ? item.nameEs : item.nameEn;
+  };
 
   // Requirements: Remove 2024 and 2025, add 2027 and 2028
   const yearsList = [2026, 2027, 2028];
@@ -263,21 +270,21 @@ export default function MonthlyReportsView({
   const handleExportCsv = () => {
     if (!data || data.isInProgress) return;
     const rows = [
-      ["Concepto", "Valor"],
-      ["Dominio", data?.domain || ""],
-      ["Periodo", `${data?.monthName || ""} ${data?.year || ""}`],
-      ["Visitas Totales", data?.overview?.visitors || 0],
-      ["Visitantes Únicos", data?.overview?.unique_visitors || 0],
-      ["Sesiones Totales", data?.overview?.sessions || 0],
-      ["Tasa de Rebote (%)", `${data?.overview?.bounce_rate || 0}%`],
-      ["Duración Media (seg)", data?.overview?.avg_duration || 0],
-      ["Formularios Recibidos", data?.crm?.contact_forms || 0],
-      ["Citas Solicitadas", data?.crm?.total_bookings || 0],
-      ["Citas Confirmadas", data?.crm?.confirmed_bookings || 0],
-      ["Citas Fuera de Horario (24/7)", data?.crm?.off_hours_bookings || 0],
-      ["Chats Asistente IA", data?.crm?.chat_conversations || 0],
-      ["Correos Automáticos Enviados", data?.crm?.emails_sent || 0],
-      ["Solicitudes Reseñas Google", data?.crm?.review_requests_sent || 0],
+      [isEs ? "Concepto" : "Metric", isEs ? "Valor" : "Value"],
+      [isEs ? "Dominio" : "Domain", data?.domain || ""],
+      [isEs ? "Periodo" : "Period", `${displayMonthName || data?.monthName || ""} ${data?.year || ""}`],
+      [isEs ? "Visitas Totales" : "Total Visits", data?.overview?.visitors || 0],
+      [isEs ? "Visitantes Únicos" : "Unique Visitors", data?.overview?.unique_visitors || 0],
+      [isEs ? "Sesiones Totales" : "Total Sessions", data?.overview?.sessions || 0],
+      [isEs ? "Tasa de Rebote (%)" : "Bounce Rate (%)", `${data?.overview?.bounce_rate || 0}%`],
+      [isEs ? "Duración Media (seg)" : "Avg Duration (sec)", data?.overview?.avg_duration || 0],
+      [isEs ? "Formularios Recibidos" : "Contact Forms Received", data?.crm?.contact_forms || 0],
+      [isEs ? "Citas Solicitadas" : "Bookings Requested", data?.crm?.total_bookings || 0],
+      [isEs ? "Citas Confirmadas" : "Confirmed Bookings", data?.crm?.confirmed_bookings || 0],
+      [isEs ? "Citas Fuera de Horario (24/7)" : "Off-Hours Bookings (24/7)", data?.crm?.off_hours_bookings || 0],
+      [isEs ? "Chats Asistente IA" : "AI Assistant Chats", data?.crm?.chat_conversations || 0],
+      [isEs ? "Correos Automáticos Enviados" : "Automated Emails Sent", data?.crm?.emails_sent || 0],
+      [isEs ? "Solicitudes Reseñas Google" : "Google Review Requests", data?.crm?.review_requests_sent || 0],
     ];
 
     let csvContent = "data:text/csv;charset=utf-8," + rows.map((e) => e.join(",")).join("\n");
@@ -289,7 +296,6 @@ export default function MonthlyReportsView({
     link.click();
     document.body.removeChild(link);
   };
-
 
   // Helper for rendering delta badges
   const renderComparisonDelta = (growthStr, prevValue, prevMonthName) => {
@@ -306,7 +312,7 @@ export default function MonthlyReportsView({
             ? "bg-rose-50 text-rose-700 border-rose-200"
             : "bg-slate-100 text-slate-700 border-slate-200"
         }`}
-        title={`Mes anterior (${prevMonthName}): ${prevValue}`}
+        title={isEs ? `Mes anterior (${prevMonthName}): ${prevValue}` : `Previous month (${prevMonthName}): ${prevValue}`}
       >
         <span>{isPositive ? "▲" : isNegative ? "▼" : "•"}</span>
         <span>{growthStr}</span>
@@ -315,8 +321,9 @@ export default function MonthlyReportsView({
     );
   };
 
-  const currentCalMonthName = monthsList.find((m) => m.num === currentCalMonth)?.name || "";
-  const lastClosedMonthName = monthsList.find((m) => m.num === defaultMonth)?.name || "";
+  const currentCalMonthName = getMonthName(currentCalMonth);
+  const lastClosedMonthName = getMonthName(defaultMonth);
+  const displayMonthName = getMonthName(selectedMonth);
 
   return (
     <div className="space-y-8 w-full max-w-7xl mx-auto print:p-0 print:m-0 print:max-w-none animate-fade-in">
@@ -348,7 +355,7 @@ export default function MonthlyReportsView({
               <span className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                 <TableIcon className="w-4.5 h-4.5" />
               </span>
-              <span>Informes Mensuales</span>
+              <span>{isEs ? "Informes Mensuales" : "Monthly Reports"}</span>
             </h2>
 
             {/* Prominent Current Month Indicator */}
@@ -357,12 +364,14 @@ export default function MonthlyReportsView({
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
               </span>
-              <span>Mes actual: {currentCalMonthName} {currentCalYear} (En curso)</span>
+              <span>{isEs ? `Mes actual: ${currentCalMonthName} ${currentCalYear} (En curso)` : `Current month: ${currentCalMonthName} ${currentCalYear} (In progress)`}</span>
             </span>
           </div>
 
           <p className="text-xs font-semibold text-slate-500 mt-2">
-            Resumen mensual consolidado. Los informes cerrados se publican el día 1 del mes siguiente.
+            {isEs
+              ? "Resumen mensual consolidado. Los informes cerrados se publican el día 1 del mes siguiente."
+              : "Consolidated monthly summary. Closed reports are published on the 1st of the following month."}
           </p>
         </div>
 
@@ -378,10 +387,10 @@ export default function MonthlyReportsView({
                 setIsExportDropdownOpen(false);
               }}
               className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-extrabold text-xs rounded-2xl px-4 py-2.5 shadow-2xs flex items-center gap-2 cursor-pointer transition-all"
-              title="Seleccionar mes del informe"
+              title={isEs ? "Seleccionar mes del informe" : "Select report month"}
             >
               <CalendarIcon className="w-3.5 h-3.5 text-slate-500" />
-              <span>{monthsList.find((m) => m.num === selectedMonth)?.name || "Mes"}</span>
+              <span>{getMonthName(selectedMonth) || (isEs ? "Mes" : "Month")}</span>
               <svg
                 className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${
                   isMonthDropdownOpen ? "rotate-180" : ""
@@ -398,7 +407,7 @@ export default function MonthlyReportsView({
             {isMonthDropdownOpen && (
               <div className="absolute left-0 top-full mt-1.5 w-64 max-h-80 overflow-y-auto bg-white border border-slate-200/90 rounded-2xl shadow-xl p-1.5 z-40 animate-fade-in space-y-0.5">
                 <div className="px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 mb-1">
-                  Meses {selectedYear}
+                  {isEs ? `Meses ${selectedYear}` : `Months ${selectedYear}`}
                 </div>
                 {monthsList.map((m) => {
                   const isBefore = isMonthBeforeRegistration(selectedYear, m.num);
@@ -410,13 +419,13 @@ export default function MonthlyReportsView({
                   let badgeLabel = "";
                   let badgeClass = "";
                   if (inProg) {
-                    badgeLabel = "En curso";
+                    badgeLabel = isEs ? "En curso" : "In progress";
                     badgeClass = "bg-blue-50 text-blue-600 border border-blue-200/60";
                   } else if (isBefore) {
-                    badgeLabel = "Sin datos";
+                    badgeLabel = isEs ? "Sin datos" : "No data";
                     badgeClass = "bg-slate-100 text-slate-400";
                   } else if (isFut) {
-                    badgeLabel = "Futuro";
+                    badgeLabel = isEs ? "Futuro" : "Future";
                     badgeClass = "bg-slate-100 text-slate-400";
                   }
 
@@ -443,7 +452,7 @@ export default function MonthlyReportsView({
                         ) : (
                           <span className="w-3.5 h-3.5 shrink-0" />
                         )}
-                        <span>{m.name}</span>
+                        <span>{isEs ? m.nameEs : m.nameEn}</span>
                       </div>
 
                       {badgeLabel && (
@@ -469,7 +478,7 @@ export default function MonthlyReportsView({
                 setIsExportDropdownOpen(false);
               }}
               className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-extrabold text-xs rounded-2xl px-3.5 py-2.5 shadow-2xs flex items-center gap-2 cursor-pointer transition-all"
-              title="Seleccionar año del informe"
+              title={isEs ? "Seleccionar año del informe" : "Select report year"}
             >
               <span>{selectedYear}</span>
               <svg
@@ -488,7 +497,7 @@ export default function MonthlyReportsView({
             {isYearDropdownOpen && (
               <div className="absolute left-0 top-full mt-1.5 w-36 bg-white border border-slate-200/90 rounded-2xl shadow-xl p-1.5 z-40 animate-fade-in space-y-0.5">
                 <div className="px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 mb-1">
-                  Año
+                  {isEs ? "Año" : "Year"}
                 </div>
                 {yearsList.map((y) => {
                   const isSelected = selectedYear === y;
@@ -526,7 +535,7 @@ export default function MonthlyReportsView({
             }`}
           >
             <span className={`w-2 h-2 rounded-full ${enableCompare ? "bg-emerald-400 animate-pulse" : "bg-slate-300"}`}></span>
-            <span>Comparar con mes anterior</span>
+            <span>{isEs ? "Comparar con mes anterior" : "Compare with previous month"}</span>
           </button>
 
           {/* Custom SPP Labs Export Dropdown (CSV & PDF combined) */}
@@ -541,14 +550,14 @@ export default function MonthlyReportsView({
                 setIsYearDropdownOpen(false);
               }}
               className="px-4 py-2.5 bg-slate-900 hover:bg-black text-white text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center gap-2 shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
-              title="Opciones de exportación del informe"
+              title={isEs ? "Opciones de exportación del informe" : "Report export options"}
             >
               {generatingPdf ? (
                 <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
                 <DownloadIcon className="w-3.5 h-3.5 text-white" />
               )}
-              <span>{generatingPdf ? "Generando..." : "Exportar"}</span>
+              <span>{generatingPdf ? (isEs ? "Generando..." : "Generating...") : (isEs ? "Exportar" : "Export")}</span>
               <svg
                 className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${
                   isExportDropdownOpen ? "rotate-180" : ""
@@ -576,8 +585,8 @@ export default function MonthlyReportsView({
                     <TableIcon className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-slate-900 block">Exportar CSV</span>
-                    <span className="text-[10.5px] text-slate-400 block font-medium">Hoja de cálculo Excel / CSV</span>
+                    <span className="text-xs font-bold text-slate-900 block">{isEs ? "Exportar CSV" : "Export CSV"}</span>
+                    <span className="text-[10.5px] text-slate-400 block font-medium">{isEs ? "Hoja de cálculo Excel / CSV" : "Excel / CSV spreadsheet"}</span>
                   </div>
                 </button>
 
@@ -599,9 +608,9 @@ export default function MonthlyReportsView({
                   </div>
                   <div>
                     <span className="text-xs font-bold text-blue-900 block">
-                      {generatingPdf ? "Generando informe..." : "Descargar PDF"}
+                      {generatingPdf ? (isEs ? "Generando informe..." : "Generating report...") : (isEs ? "Descargar PDF" : "Download PDF")}
                     </span>
-                    <span className="text-[10.5px] text-slate-400 block font-medium">Documento PDF oficial SPP Labs</span>
+                    <span className="text-[10.5px] text-slate-400 block font-medium">{isEs ? "Documento PDF oficial SPP Labs" : "Official SPP Labs PDF document"}</span>
                   </div>
                 </button>
               </div>
@@ -614,8 +623,8 @@ export default function MonthlyReportsView({
       {loading && (
         <div className="bg-white border border-slate-200/90 rounded-3xl p-16 text-center shadow-xs">
           <div className="w-10 h-10 border-4 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-sm font-extrabold text-slate-800">Cargando informe mensual...</p>
-          <p className="text-xs text-slate-400 mt-1 font-medium">Consolidando analítica OLAP y métricas de clientes</p>
+          <p className="text-sm font-extrabold text-slate-800">{isEs ? "Cargando informe mensual..." : "Loading monthly report..."}</p>
+          <p className="text-xs text-slate-400 mt-1 font-medium">{isEs ? "Consolidando analítica OLAP y métricas de clientes" : "Consolidating OLAP analytics and client metrics"}</p>
         </div>
       )}
 
@@ -628,7 +637,7 @@ export default function MonthlyReportsView({
             onClick={fetchReport}
             className="mt-4 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold rounded-xl transition-all cursor-pointer shadow-xs"
           >
-            Reintentar
+            {isEs ? "Reintentar" : "Retry"}
           </button>
         </div>
       )}
@@ -643,13 +652,17 @@ export default function MonthlyReportsView({
           <div className="max-w-2xl mx-auto space-y-2">
             <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 text-xs font-extrabold px-3 py-1 rounded-full">
               <LockClosedIcon className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-              <span>Periodo Sin Actividad Registrada</span>
+              <span>{isEs ? "Periodo Sin Actividad Registrada" : "Period Without Recorded Activity"}</span>
             </span>
             <h3 className="text-2xl font-black text-slate-900">
-              No hay analítica disponible para {data.monthName} {data.year}
+              {isEs ? `No hay analítica disponible para ${displayMonthName} ${data.year}` : `No analytics available for ${displayMonthName} ${data.year}`}
             </h3>
             <p className="text-sm text-slate-600 font-medium leading-relaxed">
-              El registro de actividad de este sitio web comenzó en <strong>{monthsList.find((m) => m.num === firstActiveMonth)?.name || ""} {firstActiveYear}</strong>. Los meses previos no registran visitas ni actividad porque el servicio aún no estaba activo.
+              {isEs ? (
+                <>El registro de actividad de este sitio web comenzó en <strong>{getMonthName(firstActiveMonth)} {firstActiveYear}</strong>. Los meses previos no registran visitas ni actividad porque el servicio aún no estaba activo.</>
+              ) : (
+                <>Activity tracking for this website began in <strong>{getMonthName(firstActiveMonth)} {firstActiveYear}</strong>. Previous months show no visits or activity because the service was not yet active.</>
+              )}
             </p>
           </div>
 
@@ -661,7 +674,7 @@ export default function MonthlyReportsView({
               }}
               className="w-full sm:w-auto px-6 py-3 bg-slate-900 hover:bg-black text-white text-xs font-extrabold rounded-2xl transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center gap-2"
             >
-              <span>Ver último informe cerrado ({lastClosedMonthName} {defaultYear})</span>
+              <span>{isEs ? `Ver último informe cerrado (${lastClosedMonthName} ${defaultYear})` : `View latest closed report (${lastClosedMonthName} ${defaultYear})`}</span>
             </button>
           </div>
         </div>
@@ -677,13 +690,17 @@ export default function MonthlyReportsView({
           <div className="max-w-2xl mx-auto space-y-2">
             <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-900 text-xs font-extrabold px-3 py-1 rounded-full">
               <LockClosedIcon className="w-3.5 h-3.5 text-amber-800 shrink-0" />
-              <span>Informe Mensual En Curso</span>
+              <span>{isEs ? "Informe Mensual En Curso" : "Monthly Report In Progress"}</span>
             </span>
             <h3 className="text-2xl font-black text-slate-900">
-              El informe de {data.monthName} {data.year} aún no ha finalizado
+              {isEs ? `El informe de ${displayMonthName} ${data.year} aún no ha finalizado` : `The report for ${displayMonthName} ${data.year} has not finished yet`}
             </h3>
             <p className="text-sm text-slate-600 font-medium leading-relaxed">
-              Los informes mensuales de SPP Labs representan ciclos consolidados cerrados. El informe completo y definitivo de <strong>{data.monthName} {data.year}</strong> se publicará automáticamente el <strong>{data.availableAt}</strong>.
+              {isEs ? (
+                <>Los informes mensuales de SPP Labs representan ciclos consolidados cerrados. El informe completo y definitivo de <strong>{displayMonthName} {data.year}</strong> se publicará automáticamente el <strong>{data.availableAt}</strong>.</>
+              ) : (
+                <>SPP Labs monthly reports represent consolidated closed cycles. The complete and finalized report for <strong>{displayMonthName} {data.year}</strong> will be published automatically on <strong>{data.availableAt}</strong>.</>
+              )}
             </p>
           </div>
 
@@ -695,7 +712,7 @@ export default function MonthlyReportsView({
               }}
               className="w-full sm:w-auto px-6 py-3 bg-slate-900 hover:bg-black text-white text-xs font-extrabold rounded-2xl transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center gap-2"
             >
-              <span>Ver último informe cerrado ({lastClosedMonthName} {defaultYear})</span>
+              <span>{isEs ? `Ver último informe cerrado (${lastClosedMonthName} ${defaultYear})` : `View latest closed report (${lastClosedMonthName} ${defaultYear})`}</span>
             </button>
           </div>
         </div>
@@ -706,9 +723,9 @@ export default function MonthlyReportsView({
         <div className="space-y-8 print-full-width">
           {/* Printable Report Title Banner */}
           <div className="hidden print:block mb-8 pb-4 border-b border-slate-200">
-            <h1 className="text-2xl font-black text-slate-900">Informe Mensual Consolidado</h1>
+            <h1 className="text-2xl font-black text-slate-900">{isEs ? "Informe Mensual Consolidado" : "Consolidated Monthly Report"}</h1>
             <p className="text-sm font-bold text-slate-600 mt-1">
-              Sitio Web: <span className="text-slate-900">{data.displayName} ({data.domain})</span> | Periodo: <span className="text-slate-900">{data.monthName} {data.year}</span>
+              {isEs ? "Sitio Web:" : "Website:"} <span className="text-slate-900">{data.displayName} ({data.domain})</span> | {isEs ? "Periodo:" : "Period:"} <span className="text-slate-900">{displayMonthName} {data.year}</span>
             </p>
           </div>
 
@@ -720,87 +737,87 @@ export default function MonthlyReportsView({
                   <span className="w-7 h-7 rounded-xl bg-white/10 flex items-center justify-center text-indigo-300 shrink-0">
                     <ChartBarIcon className="w-4 h-4" />
                   </span>
-                  <span className="text-base font-black">Comparativa Mes a Mes</span>
+                  <span className="text-base font-black">{isEs ? "Comparativa Mes a Mes" : "Month-over-Month Comparison"}</span>
                   <span className="text-xs bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 px-2.5 py-0.5 rounded-full font-extrabold">
-                    {data.monthName} {data.year} vs {data.comparison.prev_month_name} {data.comparison.prev_year}
+                    {displayMonthName} {data.year} vs {getMonthName(selectedMonth === 1 ? 12 : selectedMonth - 1) || data.comparison.prev_month_name} {data.comparison.prev_year}
                   </span>
                 </div>
                 <span className="text-xs text-slate-400 font-medium">
-                  Crecimiento respecto a los 30 días previos
+                  {isEs ? "Crecimiento respecto a los 30 días previos" : "Growth compared to previous 30 days"}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 {/* Metric 1 */}
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5">
-                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Visitantes Únicos</span>
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">{isEs ? "Visitantes Únicos" : "Unique Visitors"}</span>
                   <div className="flex items-baseline gap-2 mt-1">
                     <span className="text-lg font-black text-white">{data.overview.unique_visitors.toLocaleString()}</span>
                     <span className={`text-xs font-black ${data.comparison.unique_growth.startsWith("+") ? "text-emerald-400" : "text-rose-400"}`}>
                       {data.comparison.unique_growth}
                     </span>
                   </div>
-                  <span className="block text-[10px] text-slate-400 mt-0.5">Ant: {data.comparison.prev_unique}</span>
+                  <span className="block text-[10px] text-slate-400 mt-0.5">{isEs ? "Ant:" : "Prev:"} {data.comparison.prev_unique}</span>
                 </div>
 
                 {/* Metric 2 */}
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5">
-                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Visitas</span>
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">{isEs ? "Total Visitas" : "Total Visits"}</span>
                   <div className="flex items-baseline gap-2 mt-1">
                     <span className="text-lg font-black text-white">{data.overview.visitors.toLocaleString()}</span>
                     <span className={`text-xs font-black ${data.comparison.visitors_growth.startsWith("+") ? "text-emerald-400" : "text-rose-400"}`}>
                       {data.comparison.visitors_growth}
                     </span>
                   </div>
-                  <span className="block text-[10px] text-slate-400 mt-0.5">Ant: {data.comparison.prev_visitors}</span>
+                  <span className="block text-[10px] text-slate-400 mt-0.5">{isEs ? "Ant:" : "Prev:"} {data.comparison.prev_visitors}</span>
                 </div>
 
                 {/* Metric 3 */}
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5">
-                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Leads & Formularios</span>
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">{isEs ? "Leads & Formularios" : "Leads & Forms"}</span>
                   <div className="flex items-baseline gap-2 mt-1">
                     <span className="text-lg font-black text-white">{data.overview.total_leads}</span>
                     <span className={`text-xs font-black ${data.comparison.leads_growth.startsWith("+") ? "text-emerald-400" : "text-rose-400"}`}>
                       {data.comparison.leads_growth}
                     </span>
                   </div>
-                  <span className="block text-[10px] text-slate-400 mt-0.5">Ant: {data.comparison.prev_leads}</span>
+                  <span className="block text-[10px] text-slate-400 mt-0.5">{isEs ? "Ant:" : "Prev:"} {data.comparison.prev_leads}</span>
                 </div>
 
                 {/* Metric 4 */}
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5">
-                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Citas Confirmadas</span>
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">{isEs ? "Citas Confirmadas" : "Confirmed Bookings"}</span>
                   <div className="flex items-baseline gap-2 mt-1">
                     <span className="text-lg font-black text-white">{data.crm.confirmed_bookings}</span>
                     <span className={`text-xs font-black ${data.comparison.bookings_growth.startsWith("+") ? "text-emerald-400" : "text-rose-400"}`}>
                       {data.comparison.bookings_growth}
                     </span>
                   </div>
-                  <span className="block text-[10px] text-slate-400 mt-0.5">Ant: {data.comparison.prev_bookings}</span>
+                  <span className="block text-[10px] text-slate-400 mt-0.5">{isEs ? "Ant:" : "Prev:"} {data.comparison.prev_bookings}</span>
                 </div>
 
                 {/* Metric 5 */}
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5">
-                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Sesiones Totales</span>
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">{isEs ? "Sesiones Totales" : "Total Sessions"}</span>
                   <div className="flex items-baseline gap-2 mt-1">
                     <span className="text-lg font-black text-white">{data.overview.sessions.toLocaleString()}</span>
                     <span className={`text-xs font-black ${data.comparison.sessions_growth.startsWith("+") ? "text-emerald-400" : "text-rose-400"}`}>
                       {data.comparison.sessions_growth}
                     </span>
                   </div>
-                  <span className="block text-[10px] text-slate-400 mt-0.5">Ant: {data.comparison.prev_sessions}</span>
+                  <span className="block text-[10px] text-slate-400 mt-0.5">{isEs ? "Ant:" : "Prev:"} {data.comparison.prev_sessions}</span>
                 </div>
 
                 {/* Metric 6 */}
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5">
-                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Emails Enviados</span>
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">{isEs ? "Emails Enviados" : "Emails Sent"}</span>
                   <div className="flex items-baseline gap-2 mt-1">
                     <span className="text-lg font-black text-white">{data.crm.emails_sent || 0}</span>
                     <span className={`text-xs font-black ${(data.comparison.emails_growth || "+0%").startsWith("+") ? "text-emerald-400" : "text-rose-400"}`}>
                       {data.comparison.emails_growth || "0%"}
                     </span>
                   </div>
-                  <span className="block text-[10px] text-slate-400 mt-0.5">Ant: {data.comparison.prev_emails || 0}</span>
+                  <span className="block text-[10px] text-slate-400 mt-0.5">{isEs ? "Ant:" : "Prev:"} {data.comparison.prev_emails || 0}</span>
                 </div>
               </div>
             </div>
@@ -811,7 +828,7 @@ export default function MonthlyReportsView({
             {/* Card 1: Unique Visitors */}
             <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-slate-400 uppercase tracking-wider">Visitantes Únicos</span>
+                <span className="text-xs font-black text-slate-400 uppercase tracking-wider">{isEs ? "Visitantes Únicos" : "Unique Visitors"}</span>
                 <span className="w-8 h-8 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
                   <UsersIcon className="w-4.5 h-4.5" />
                 </span>
@@ -821,14 +838,14 @@ export default function MonthlyReportsView({
                 {renderComparisonDelta(data.comparison?.unique_growth, data.comparison?.prev_unique, data.comparison?.prev_month_name)}
               </div>
               <p className="text-[11px] font-extrabold text-slate-500 mt-2">
-                Total de visitas: {data.overview.visitors.toLocaleString()}
+                {isEs ? `Total de visitas: ${data.overview.visitors.toLocaleString()}` : `Total visits: ${data.overview.visitors.toLocaleString()}`}
               </p>
             </div>
 
             {/* Card 2: Contact Leads */}
             <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-slate-400 uppercase tracking-wider">Leads & Contactos</span>
+                <span className="text-xs font-black text-slate-400 uppercase tracking-wider">{isEs ? "Leads & Contactos" : "Leads & Inquiries"}</span>
                 <span className="w-8 h-8 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                   <InboxIcon className="w-4.5 h-4.5" />
                 </span>
@@ -844,14 +861,14 @@ export default function MonthlyReportsView({
                 )}
               </div>
               <p className="text-[11px] font-extrabold text-slate-500 mt-2">
-                {data.crm.contact_forms} formularios + {data.crm.total_bookings} citas
+                {isEs ? `${data.crm.contact_forms} formularios + ${data.crm.total_bookings} citas` : `${data.crm.contact_forms} forms + ${data.crm.total_bookings} bookings`}
               </p>
             </div>
 
             {/* Card 3: Confirmed Bookings */}
             <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-slate-400 uppercase tracking-wider">Citas Confirmadas</span>
+                <span className="text-xs font-black text-slate-400 uppercase tracking-wider">{isEs ? "Citas Confirmadas" : "Confirmed Bookings"}</span>
                 <span className="w-8 h-8 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
                   <CalendarIcon className="w-4.5 h-4.5" />
                 </span>
@@ -863,19 +880,19 @@ export default function MonthlyReportsView({
                 ) : data.crm.off_hours_bookings > 0 ? (
                   <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 inline-flex items-center gap-1">
                     <ClockIcon className="w-3 h-3 text-purple-600" />
-                    <span>{data.crm.off_hours_bookings} fuera horario</span>
+                    <span>{data.crm.off_hours_bookings} {isEs ? "fuera horario" : "after hours"}</span>
                   </span>
                 ) : null}
               </div>
               <p className="text-[11px] font-extrabold text-slate-500 mt-2">
-                Pendientes: {data.crm.pending_bookings}
+                {isEs ? `Pendientes: ${data.crm.pending_bookings}` : `Pending: ${data.crm.pending_bookings}`}
               </p>
             </div>
 
             {/* Card 4: AI Chatbot Interactivity */}
             <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-slate-400 uppercase tracking-wider">Asistencia Virtual IA</span>
+                <span className="text-xs font-black text-slate-400 uppercase tracking-wider">{isEs ? "Asistencia Virtual IA" : "AI Virtual Assistant"}</span>
                 <span className="w-8 h-8 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
                   <BotIcon className="w-4.5 h-4.5" />
                 </span>
@@ -891,14 +908,14 @@ export default function MonthlyReportsView({
                 )}
               </div>
               <p className="text-[11px] font-extrabold text-slate-500 mt-2">
-                Atención continua a visitantes
+                {isEs ? "Atención continua a visitantes" : "24/7 continuous visitor support"}
               </p>
             </div>
 
             {/* Card 5: Automated Emails & Google Reviews */}
             <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-slate-400 uppercase tracking-wider">Emails & Reseñas</span>
+                <span className="text-xs font-black text-slate-400 uppercase tracking-wider">{isEs ? "Emails & Reseñas" : "Emails & Reviews"}</span>
                 <span className="w-8 h-8 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
                   <MailIcon className="w-4.5 h-4.5" />
                 </span>
@@ -909,12 +926,12 @@ export default function MonthlyReportsView({
                   renderComparisonDelta(data.comparison.emails_growth, data.comparison.prev_emails, data.comparison.prev_month_name)
                 ) : (
                   <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                    {data.crm.review_requests_sent || 0} reseñas
+                    {data.crm.review_requests_sent || 0} {isEs ? "reseñas" : "reviews"}
                   </span>
                 )}
               </div>
               <p className="text-[11px] font-extrabold text-slate-500 mt-2">
-                {data.crm.review_requests_sent || 0} solicitudes Google Booster
+                {data.crm.review_requests_sent || 0} {isEs ? "solicitudes Google Booster" : "Google Booster requests"}
               </p>
             </div>
           </div>
@@ -924,10 +941,12 @@ export default function MonthlyReportsView({
             <div className="flex items-center justify-between mb-6">
               <div>
                 <span className="text-xs font-extrabold uppercase tracking-widest text-indigo-300">
-                  Diagnóstico y Logros Destacados
+                  {isEs ? "Diagnóstico y Logros Destacados" : "Diagnostic & Key Achievements"}
                 </span>
                 <h3 className="text-lg font-black text-white mt-0.5">
-                  AI Insights & Resumen de Progreso ({data.monthName} {data.year})
+                  {isEs
+                    ? `AI Insights & Resumen de Progreso (${displayMonthName} ${data.year})`
+                    : `AI Insights & Progress Summary (${displayMonthName} ${data.year})`}
                 </h3>
               </div>
               <span className="w-9 h-9 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-indigo-300">
@@ -946,7 +965,7 @@ export default function MonthlyReportsView({
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-[10px] font-black uppercase tracking-wider text-indigo-200 px-2.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 inline-flex items-center gap-1.5">
                           {getInsightBadgeIcon(item)}
-                          <span>{cleanBadgeText(item.badge, item.category)}</span>
+                          <span>{cleanBadgeText(item.badge, item.category, isEs)}</span>
                         </span>
                       </div>
                       <h4 className="text-sm font-extrabold text-white mb-2 leading-snug">{item.title}</h4>
@@ -969,11 +988,13 @@ export default function MonthlyReportsView({
             <div className="lg:col-span-8 bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900">Evolución Diaria del Tráfico</h3>
-                  <p className="text-xs font-semibold text-slate-400">Visitas acumuladas por día en {data.monthName}</p>
+                  <h3 className="text-base font-extrabold text-slate-900">{isEs ? "Evolución Diaria del Tráfico" : "Daily Traffic Trend"}</h3>
+                  <p className="text-xs font-semibold text-slate-400">
+                    {isEs ? `Visitas acumuladas por día en ${displayMonthName}` : `Daily cumulative visits in ${displayMonthName}`}
+                  </p>
                 </div>
                 <span className="text-xs font-black px-3 py-1 bg-slate-100 text-slate-700 rounded-xl">
-                  {data.overview.visitors.toLocaleString()} Visitas
+                  {data.overview.visitors.toLocaleString()} {isEs ? "Visitas" : "Visits"}
                 </span>
               </div>
 
@@ -990,7 +1011,7 @@ export default function MonthlyReportsView({
                           <div key={i} className="flex-1 flex flex-col items-center gap-2 group relative">
                             {/* Hover Tooltip */}
                             <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[10px] font-black py-1 px-2.5 rounded-xl whitespace-nowrap z-20 pointer-events-none shadow-md">
-                              Día {dayNum}: {d.count} visitas
+                              {isEs ? `Día ${dayNum}: ${d.count} visitas` : `Day ${dayNum}: ${d.count} visits`}
                             </div>
                             {/* Bar Visual */}
                             <div className="w-full flex items-end justify-center h-40">
@@ -1008,7 +1029,7 @@ export default function MonthlyReportsView({
                 </div>
               ) : (
                 <div className="h-48 flex items-center justify-center text-xs font-bold text-slate-400">
-                  Sin datos suficientes para el gráfico diario.
+                  {isEs ? "Sin datos suficientes para el gráfico diario." : "Not enough data for daily trend chart."}
                 </div>
               )}
             </div>
@@ -1016,8 +1037,10 @@ export default function MonthlyReportsView({
             {/* Peak Hours Distribution Bar Chart */}
             <div className="lg:col-span-4 bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs">
               <div className="mb-6">
-                <h3 className="text-base font-extrabold text-slate-900">Franjas Horarias</h3>
-                <p className="text-xs font-semibold text-slate-400">Distribución de actividad por hora del día</p>
+                <h3 className="text-base font-extrabold text-slate-900">{isEs ? "Franjas Horarias" : "Time Slots"}</h3>
+                <p className="text-xs font-semibold text-slate-400">
+                  {isEs ? "Distribución de actividad por hora del día" : "Activity distribution by hour of day"}
+                </p>
               </div>
 
               <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
@@ -1029,7 +1052,7 @@ export default function MonthlyReportsView({
                       <div key={i} className="space-y-1">
                         <div className="flex justify-between text-[11px] font-extrabold text-slate-600">
                           <span>{h.hour}</span>
-                          <span>{h.count} visitas</span>
+                          <span>{h.count} {isEs ? "visitas" : "visits"}</span>
                         </div>
                         <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                           <div style={{ width: `${widthPct}%` }} className="bg-indigo-600 h-full rounded-full"></div>
@@ -1046,38 +1069,38 @@ export default function MonthlyReportsView({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Top Pages */}
             <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs">
-              <h3 className="text-base font-extrabold text-slate-900 mb-4">Páginas Más Visitadas</h3>
+              <h3 className="text-base font-extrabold text-slate-900 mb-4">{isEs ? "Páginas Más Visitadas" : "Most Visited Pages"}</h3>
               <div className="divide-y divide-slate-100">
                 {data.topPages && data.topPages.length > 0 ? (
                   data.topPages.map((p, idx) => (
                     <div key={idx} className="py-3 flex items-center justify-between text-xs">
                       <span className="font-extrabold text-slate-800 truncate max-w-[280px]">{p.page_url}</span>
                       <span className="font-black px-2.5 py-1 bg-slate-100 text-slate-700 rounded-xl">
-                        {p.count} vistas
+                        {p.count} {isEs ? "vistas" : "views"}
                       </span>
                     </div>
                   ))
                 ) : (
-                  <p className="text-xs text-slate-400 py-4">No hay datos de páginas vistas.</p>
+                  <p className="text-xs text-slate-400 py-4">{isEs ? "No hay datos de páginas vistas." : "No page view data available."}</p>
                 )}
               </div>
             </div>
 
             {/* Traffic Referrers */}
             <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs">
-              <h3 className="text-base font-extrabold text-slate-900 mb-4">Fuentes de Tráfico (Origen)</h3>
+              <h3 className="text-base font-extrabold text-slate-900 mb-4">{isEs ? "Fuentes de Tráfico (Origen)" : "Traffic Sources (Referrers)"}</h3>
               <div className="divide-y divide-slate-100">
                 {data.referrers && data.referrers.length > 0 ? (
                   data.referrers.map((r, idx) => (
                     <div key={idx} className="py-3 flex items-center justify-between text-xs">
                       <span className="font-extrabold text-slate-800 truncate max-w-[280px]">{r.referrer}</span>
                       <span className="font-black px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-xl">
-                        {r.count} visitas
+                        {r.count} {isEs ? "visitas" : "visits"}
                       </span>
                     </div>
                   ))
                 ) : (
-                  <p className="text-xs text-slate-400 py-4">No hay datos de orígenes.</p>
+                  <p className="text-xs text-slate-400 py-4">{isEs ? "No hay datos de orígenes." : "No referral data available."}</p>
                 )}
               </div>
             </div>

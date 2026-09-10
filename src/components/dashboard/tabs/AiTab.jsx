@@ -409,9 +409,11 @@ export default function AiTab({
                 <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.596.596 0 01-.744-.555c0-.125.034-.249.098-.35a6.046 6.046 0 00.865-2.222A8.134 8.134 0 013 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
                 </svg>
-                Historial de Conversaciones de Visitantes
+                {lang === "es" ? "Historial de Conversaciones de Visitantes" : "Visitor Conversations History"}
               </h4>
-              <p className="text-[11px] text-slate-500 font-medium mt-0.5">Registro de chats atendidos por la IA para {currentWebsite.domain}</p>
+              <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                {lang === "es" ? `Registro de chats atendidos por la IA para ${currentWebsite.domain}` : `Log of chats handled by AI for ${currentWebsite.domain}`}
+              </p>
             </div>
             <span className="text-[10px] font-mono font-bold text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
               {conversationsList.length} chats
@@ -420,12 +422,16 @@ export default function AiTab({
 
           {conversationsLoading ? (
             <div className="py-8 text-center text-xs text-slate-400 font-medium animate-pulse">
-              Cargando conversaciones...
+              {lang === "es" ? "Cargando conversaciones..." : "Loading conversations..."}
             </div>
           ) : conversationsList.length === 0 ? (
             <div className="bg-white border border-slate-200/80 rounded-xl p-8 text-center">
-              <p className="text-xs text-slate-400 italic font-medium">No se han registrado conversaciones de visitantes aún.</p>
-              <p className="text-[11px] text-slate-400 mt-1">Los diálogos entre visitantes y el chatbot de IA se guardarán automáticamente aquí.</p>
+              <p className="text-xs text-slate-400 italic font-medium">
+                {lang === "es" ? "No se han registrado conversaciones de visitantes aún." : "No visitor conversations recorded yet."}
+              </p>
+              <p className="text-[11px] text-slate-400 mt-1">
+                {lang === "es" ? "Los diálogos entre visitantes y el chatbot de IA se guardarán automáticamente aquí." : "Visitor chats with the AI assistant will automatically be saved here."}
+              </p>
             </div>
           ) : (
             <div className="bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-2xs divide-y divide-slate-100">
@@ -441,7 +447,7 @@ export default function AiTab({
                         {conv.messageCount} msgs
                       </span>
                       <span className="text-[10px] text-slate-400 font-mono sm:ml-auto">
-                        {new Date(conv.lastMessageAt).toLocaleString("es-ES", {
+                        {new Date(conv.lastMessageAt).toLocaleString(lang === "es" ? "es-ES" : "en-US", {
                           year: "numeric",
                           month: "2-digit",
                           day: "2-digit",
@@ -466,7 +472,7 @@ export default function AiTab({
                       type="button"
                       onClick={() => handleDeleteConversation(conv.id)}
                       className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
-                      title="Eliminar conversación"
+                      title={lang === "es" ? "Eliminar conversación" : "Delete conversation"}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -570,7 +576,7 @@ export default function AiTab({
                     ? "text-amber-700 bg-amber-50 border-amber-300 font-extrabold"
                     : "text-slate-400 bg-white border-slate-200"
                 }`}>
-                  {chatbotContent.length.toLocaleString()} / 40,000 caracteres
+                  {chatbotContent.length.toLocaleString()} / 40,000 {lang === "es" ? "caracteres" : "characters"}
                 </span>
 
                 {!isEditingKnowledge ? (

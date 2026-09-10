@@ -11,12 +11,12 @@ export default function Header({ activePage }) {
   const t = translations[lang] || translations.es;
 
   const navItems = [
-    { id: "inicio", href: "/", labelEs: "Inicio", labelEn: "Inicio" },
-    { id: "servicios", href: "/servicios", labelEs: "Servicios", labelEn: "Servicios" },
-    { id: "tecnologia", href: "/tecnologia", labelEs: "Tecnología", labelEn: "Tecnología" },
-    { id: "nosotros", href: "/nosotros", labelEs: "Nosotros", labelEn: "Nosotros" },
+    { id: "inicio", href: "/", labelEs: "Inicio", labelEn: "Home" },
+    { id: "servicios", href: "/servicios", labelEs: "Servicios", labelEn: "Services" },
+    { id: "tecnologia", href: "/tecnologia", labelEs: "Tecnología", labelEn: "Technology" },
+    { id: "nosotros", href: "/nosotros", labelEs: "Nosotros", labelEn: "About Us" },
     { id: "blog", href: "/blog", labelEs: "Blog", labelEn: "Blog" },
-    { id: "contacto", href: "/contacto", labelEs: "Contacto", labelEn: "Contacto" }
+    { id: "contacto", href: "/contacto", labelEs: "Contacto", labelEn: "Contact" }
   ];
 
   return (

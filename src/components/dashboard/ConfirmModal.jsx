@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 
 export default function ConfirmModal({
   isOpen = false,
-  title = "¿Estás seguro?",
-  description = "Esta acción no se puede deshacer.",
-  confirmText = "Eliminar",
-  cancelText = "Cancelar",
+  title,
+  description,
+  confirmText,
+  cancelText,
   confirmButtonClass = "bg-rose-600 hover:bg-rose-700 text-white",
   requireInputMatch = null,
   inputLabel = null,
@@ -17,6 +17,11 @@ export default function ConfirmModal({
   lang = "es",
 }) {
   const [inputValue, setInputValue] = useState("");
+
+  const resolvedTitle = title || (lang === "es" ? "¿Estás seguro?" : "Are you sure?");
+  const resolvedDesc = description || (lang === "es" ? "Esta acción no se puede deshacer." : "This action cannot be undone.");
+  const resolvedConfirm = confirmText || (lang === "es" ? "Eliminar" : "Delete");
+  const resolvedCancel = (cancelText && cancelText !== "Cancelar") ? cancelText : (lang === "es" ? "Cancelar" : "Cancel");
 
   // Reset input value whenever modal opens or closes
   useEffect(() => {
@@ -75,12 +80,12 @@ export default function ConfirmModal({
 
         {/* Title */}
         <h3 className="font-extrabold text-slate-950 text-base sm:text-lg mb-2 tracking-tight">
-          {title}
+          {resolvedTitle}
         </h3>
 
         {/* Description */}
         <p className="text-xs sm:text-[13px] text-slate-500 mb-6 leading-relaxed font-sans whitespace-pre-wrap">
-          {description}
+          {resolvedDesc}
         </p>
 
         {/* Strict Verification Input (if required) */}
@@ -125,7 +130,7 @@ export default function ConfirmModal({
             disabled={isProcessing}
             className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50"
           >
-            {cancelText}
+            {resolvedCancel}
           </button>
           <button
             type="button"
@@ -139,7 +144,7 @@ export default function ConfirmModal({
                 <span>{lang === "es" ? "Procesando..." : "Processing..."}</span>
               </>
             ) : (
-              <span>{confirmText}</span>
+              <span>{resolvedConfirm}</span>
             )}
           </button>
         </div>

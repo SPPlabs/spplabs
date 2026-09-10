@@ -286,7 +286,7 @@ export default function EmailTab({
         recipientName: "Carlos Rodríguez",
         companyName: compName,
         clientDomain: dom,
-        dateStr: "18 de agosto de 2026",
+        dateStr: lang === "es" ? "18 de agosto de 2026" : "August 18, 2026",
         timeStr: "11:30",
         brandColor,
         customLogoUrl: logo,
@@ -298,7 +298,7 @@ export default function EmailTab({
         recipientName: "Carlos Rodríguez",
         companyName: compName,
         clientDomain: dom,
-        dateStr: "Mañana, 18 de agosto de 2026",
+        dateStr: lang === "es" ? "Mañana, 18 de agosto de 2026" : "Tomorrow, August 18, 2026",
         timeStr: "11:30",
         brandColor,
         customLogoUrl: logo,
@@ -1048,20 +1048,20 @@ export default function EmailTab({
                     typeLabel = "Google Review";
                     typeIcon = <StarIcon className="w-3.5 h-3.5 text-amber-500" filled={true} />;
                   } else if (log.emailType === "BOOKING_REMINDER") {
-                    typeLabel = "Recordatorio";
+                    typeLabel = lang === "es" ? "Recordatorio" : "Reminder";
                     typeIcon = <ClockIcon className="w-3.5 h-3.5 text-indigo-500" />;
                   } else if (log.emailType === "BOOKING_CONFIRMATION") {
-                    typeLabel = "Cita Confirmada";
+                    typeLabel = lang === "es" ? "Cita Confirmada" : "Booking Confirmed";
                     typeIcon = <CalendarIcon className="w-3.5 h-3.5 text-emerald-500" />;
                   } else if (log.emailType === "WELCOME_CONTACT") {
-                    typeLabel = "Bienvenida";
+                    typeLabel = lang === "es" ? "Bienvenida" : "Welcome";
                     typeIcon = <HandWaveIcon className="w-3.5 h-3.5 text-blue-500" />;
                   } else if (log.emailType === "TEST_EMAIL") {
-                    typeLabel = "Prueba";
+                    typeLabel = lang === "es" ? "Prueba" : "Test";
                     typeIcon = <PaperAirplaneIcon className="w-3.5 h-3.5 text-slate-500" />;
                   }
 
-                  const formattedDate = new Date(log.sentAt || log.scheduledFor).toLocaleString("es-ES", {
+                  const formattedDate = new Date(log.sentAt || log.scheduledFor).toLocaleString(lang === "es" ? "es-ES" : "en-US", {
                     year: "numeric",
                     month: "2-digit",
                     day: "2-digit",

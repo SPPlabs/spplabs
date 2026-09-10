@@ -11,14 +11,23 @@ export default function MonthlyReportPdfTemplate({
 }) {
   if (!data || data.isInProgress || data.isBeforeActive) return null;
 
+  const isEs = lang === "es";
+
+  const monthNamesEn = {
+    "Enero": "January", "Febrero": "February", "Marzo": "March", "Abril": "April",
+    "Mayo": "May", "Junio": "June", "Julio": "July", "Agosto": "August",
+    "Septiembre": "September", "Octubre": "October", "Noviembre": "November", "Diciembre": "December"
+  };
+  const rawMonth = data.monthName || "";
+  const monthName = isEs ? rawMonth : (monthNamesEn[rawMonth] || rawMonth);
+
   const displayName = currentWebsite?.displayName || data.displayName || data.domain || "Cliente";
   const domain = currentWebsite?.domain || data.domain || "";
   const logoUrl = currentLogoUrl || currentWebsite?.logoUrl || data.logoUrl || null;
-  const monthName = data.monthName || "";
   const year = data.year || new Date().getFullYear();
 
   // Date formatting for header
-  const reportDateStr = new Date().toLocaleDateString(lang === "es" ? "es-ES" : "en-US", {
+  const reportDateStr = new Date().toLocaleDateString(isEs ? "es-ES" : "en-US", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -120,7 +129,7 @@ export default function MonthlyReportPdfTemplate({
                     textTransform: "uppercase",
                   }}
                 >
-                  Informe Ejecutivo Consolidado
+                  {isEs ? "Informe Ejecutivo Consolidado" : "Consolidated Executive Report"}
                 </span>
               </div>
             </div>
@@ -213,7 +222,7 @@ export default function MonthlyReportPdfTemplate({
                   display: "block",
                 }}
               >
-                Periodo Analizado
+                {isEs ? "Periodo Analizado" : "Analyzed Period"}
               </span>
               <h1
                 style={{
@@ -236,7 +245,7 @@ export default function MonthlyReportPdfTemplate({
                   display: "block",
                 }}
               >
-                Emisión Oficial: {reportDateStr}
+                {isEs ? `Emisión Oficial: ${reportDateStr}` : `Official Issue: ${reportDateStr}`}
               </span>
               <span
                 style={{
@@ -251,7 +260,7 @@ export default function MonthlyReportPdfTemplate({
                   marginTop: "3px",
                 }}
               >
-                ✓ Ciclo Cerrado y Verificado
+                {isEs ? "✓ Ciclo Cerrado y Verificado" : "✓ Closed & Verified Cycle"}
               </span>
             </div>
           </div>
@@ -276,7 +285,7 @@ export default function MonthlyReportPdfTemplate({
                 margin: 0,
               }}
             >
-              1. Cuadro de Mando Ejecutivo (KPIs Consolidados)
+              {isEs ? "1. Cuadro de Mando Ejecutivo (KPIs Consolidados)" : "1. Executive Scorecard (Consolidated KPIs)"}
             </h2>
           </div>
 
@@ -299,7 +308,7 @@ export default function MonthlyReportPdfTemplate({
               }}
             >
               <span style={{ fontSize: "9.5px", fontWeight: "800", color: "#64748b", textTransform: "uppercase" }}>
-                Visitantes Únicos
+                {isEs ? "Visitantes Únicos" : "Unique Visitors"}
               </span>
               <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginTop: "3px" }}>
                 <span style={{ fontSize: "20px", fontWeight: "900", color: "#0f172a" }}>
@@ -318,7 +327,7 @@ export default function MonthlyReportPdfTemplate({
                 )}
               </div>
               <span style={{ fontSize: "9px", color: "#64748b", display: "block", marginTop: "2px" }}>
-                Total visitas: {(overview.visitors || 0).toLocaleString()}
+                {isEs ? `Total visitas: ${(overview.visitors || 0).toLocaleString()}` : `Total visits: ${(overview.visitors || 0).toLocaleString()}`}
               </span>
             </div>
 
@@ -332,7 +341,7 @@ export default function MonthlyReportPdfTemplate({
               }}
             >
               <span style={{ fontSize: "9.5px", fontWeight: "800", color: "#64748b", textTransform: "uppercase" }}>
-                Oportunidades (Leads)
+                {isEs ? "Oportunidades (Leads)" : "Opportunities (Leads)"}
               </span>
               <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginTop: "3px" }}>
                 <span style={{ fontSize: "20px", fontWeight: "900", color: "#0f172a" }}>
@@ -352,7 +361,7 @@ export default function MonthlyReportPdfTemplate({
                 </span>
               </div>
               <span style={{ fontSize: "9px", color: "#64748b", display: "block", marginTop: "2px" }}>
-                {crm.contact_forms || 0} forms · {crm.total_bookings || 0} citas
+                {crm.contact_forms || 0} forms · {crm.total_bookings || 0} {isEs ? "citas" : "bookings"}
               </span>
             </div>
 
@@ -366,7 +375,7 @@ export default function MonthlyReportPdfTemplate({
               }}
             >
               <span style={{ fontSize: "9.5px", fontWeight: "800", color: "#64748b", textTransform: "uppercase" }}>
-                Citas Confirmadas
+                {isEs ? "Citas Confirmadas" : "Confirmed Bookings"}
               </span>
               <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginTop: "3px" }}>
                 <span style={{ fontSize: "20px", fontWeight: "900", color: "#0f172a" }}>
@@ -383,12 +392,12 @@ export default function MonthlyReportPdfTemplate({
                       borderRadius: "4px",
                     }}
                   >
-                    {crm.off_hours_bookings} en 24/7
+                    {crm.off_hours_bookings} {isEs ? "en 24/7" : "in 24/7"}
                   </span>
                 )}
               </div>
               <span style={{ fontSize: "9px", color: "#64748b", display: "block", marginTop: "2px" }}>
-                Pendientes: {crm.pending_bookings || 0}
+                {isEs ? "Pendientes:" : "Pending:"} {crm.pending_bookings || 0}
               </span>
             </div>
 
@@ -402,7 +411,7 @@ export default function MonthlyReportPdfTemplate({
               }}
             >
               <span style={{ fontSize: "9.5px", fontWeight: "800", color: "#64748b", textTransform: "uppercase" }}>
-                Asistencia Virtual IA
+                {isEs ? "Asistencia Virtual IA" : "AI Virtual Assistant"}
               </span>
               <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginTop: "3px" }}>
                 <span style={{ fontSize: "20px", fontWeight: "900", color: "#0f172a" }}>
@@ -427,7 +436,7 @@ export default function MonthlyReportPdfTemplate({
               }}
             >
               <span style={{ fontSize: "9.5px", fontWeight: "800", color: "#64748b", textTransform: "uppercase" }}>
-                Sesiones Totales
+                {isEs ? "Sesiones Totales" : "Total Sessions"}
               </span>
               <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginTop: "3px" }}>
                 <span style={{ fontSize: "20px", fontWeight: "900", color: "#0f172a" }}>
@@ -435,7 +444,7 @@ export default function MonthlyReportPdfTemplate({
                 </span>
               </div>
               <span style={{ fontSize: "9px", color: "#64748b", display: "block", marginTop: "2px" }}>
-                Duración media: {Math.round((overview.avg_duration || 0) / 60)} min
+                {isEs ? "Duración media:" : "Avg duration:"} {Math.round((overview.avg_duration || 0) / 60)} min
               </span>
             </div>
 
@@ -449,7 +458,7 @@ export default function MonthlyReportPdfTemplate({
               }}
             >
               <span style={{ fontSize: "9.5px", fontWeight: "800", color: "#64748b", textTransform: "uppercase" }}>
-                Tasa de Rebote
+                {isEs ? "Tasa de Rebote" : "Bounce Rate"}
               </span>
               <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginTop: "3px" }}>
                 <span style={{ fontSize: "20px", fontWeight: "900", color: "#0f172a" }}>
@@ -457,7 +466,7 @@ export default function MonthlyReportPdfTemplate({
                 </span>
               </div>
               <span style={{ fontSize: "9px", color: "#64748b", display: "block", marginTop: "2px" }}>
-                {(100 - (overview.bounce_rate || 0)).toFixed(1)}% retención
+                {(100 - (overview.bounce_rate || 0)).toFixed(1)}% {isEs ? "retención" : "retention"}
               </span>
             </div>
 
@@ -471,7 +480,7 @@ export default function MonthlyReportPdfTemplate({
               }}
             >
               <span style={{ fontSize: "9.5px", fontWeight: "800", color: "#64748b", textTransform: "uppercase" }}>
-                Emails Automatizados
+                {isEs ? "Emails Automatizados" : "Automated Emails"}
               </span>
               <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginTop: "3px" }}>
                 <span style={{ fontSize: "20px", fontWeight: "900", color: "#0f172a" }}>
@@ -479,7 +488,7 @@ export default function MonthlyReportPdfTemplate({
                 </span>
               </div>
               <span style={{ fontSize: "9px", color: "#64748b", display: "block", marginTop: "2px" }}>
-                Confirmaciones y avisos
+                {isEs ? "Confirmaciones y avisos" : "Confirmations & alerts"}
               </span>
             </div>
 
@@ -493,7 +502,7 @@ export default function MonthlyReportPdfTemplate({
               }}
             >
               <span style={{ fontSize: "9.5px", fontWeight: "800", color: "#64748b", textTransform: "uppercase" }}>
-                Reseñas Google Booster
+                {isEs ? "Reseñas Google Booster" : "Google Booster Reviews"}
               </span>
               <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginTop: "3px" }}>
                 <span style={{ fontSize: "20px", fontWeight: "900", color: "#0f172a" }}>
@@ -501,7 +510,7 @@ export default function MonthlyReportPdfTemplate({
                 </span>
               </div>
               <span style={{ fontSize: "9px", color: "#64748b", display: "block", marginTop: "2px" }}>
-                Solicitudes de reputación
+                {isEs ? "Solicitudes de reputación" : "Reputation requests"}
               </span>
             </div>
           </div>
@@ -526,7 +535,7 @@ export default function MonthlyReportPdfTemplate({
                 margin: 0,
               }}
             >
-              2. Diagnóstico Estratégico y Retorno de Inversión (AI Insights)
+              {isEs ? "2. Diagnóstico Estratégico y Retorno de Inversión (AI Insights)" : "2. Strategic Diagnosis & ROI (AI Insights)"}
             </h2>
           </div>
 
@@ -556,10 +565,10 @@ export default function MonthlyReportPdfTemplate({
                       borderRadius: "4px",
                     }}
                   >
-                    {item.badge || item.category || "Logro Destacado"}
+                    {item.badge || item.category || (isEs ? "Logro Destacado" : "Key Achievement")}
                   </span>
                   <span style={{ fontSize: "9px", fontWeight: "700", color: "#64748b" }}>
-                    Impacto Digital
+                    {isEs ? "Impacto Digital" : "Digital Impact"}
                   </span>
                 </div>
                 <h3
@@ -594,7 +603,7 @@ export default function MonthlyReportPdfTemplate({
                     display: "inline-block",
                   }}
                 >
-                  💡 Recomendación: {item.action}
+                  💡 {isEs ? "Recomendación:" : "Recommendation:"} {item.action}
                 </div>
               </div>
             ))}
@@ -614,9 +623,9 @@ export default function MonthlyReportPdfTemplate({
             fontWeight: "700",
           }}
         >
-          <span>SPP Labs · Tecnología y Crecimiento Digital · Confidencial</span>
+          <span>{isEs ? "SPP Labs · Tecnología y Crecimiento Digital · Confidencial" : "SPP Labs · Technology & Digital Growth · Confidential"}</span>
           <span>{domain} — {monthName} {year}</span>
-          <span>Página 1 de 2</span>
+          <span>{isEs ? "Página 1 de 2" : "Page 1 of 2"}</span>
         </div>
       </div>
 
@@ -657,7 +666,7 @@ export default function MonthlyReportPdfTemplate({
               </span>
               <span style={{ color: "#cbd5e1" }}>|</span>
               <span style={{ fontSize: "11px", fontWeight: "700", color: "#64748b" }}>
-                Desglose Operativo y Analítica Detallada
+                {isEs ? "Desglose Operativo y Analítica Detallada" : "Operational Breakdown & Detailed Analytics"}
               </span>
             </div>
 
@@ -671,7 +680,7 @@ export default function MonthlyReportPdfTemplate({
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
               <div style={{ width: "3px", height: "14px", backgroundColor: "#0284c7", borderRadius: "2px" }}></div>
               <h2 style={{ fontSize: "12px", fontWeight: "900", textTransform: "uppercase", letterSpacing: "0.06em", color: "#1e293b", margin: 0 }}>
-                3. Evolución Diaria y Franjas Horarias de Tráfico
+                {isEs ? "3. Evolución Diaria y Franjas Horarias de Tráfico" : "3. Daily Traffic Trend & Time Slots"}
               </h2>
             </div>
 
@@ -686,8 +695,10 @@ export default function MonthlyReportPdfTemplate({
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "10px", fontWeight: "700", color: "#64748b" }}>
-                <span>Visitas por día del mes ({monthName})</span>
-                <span style={{ color: "#0f172a", fontWeight: "800" }}>Pico máximo: {maxDailyCount} visitas/día</span>
+                <span>{isEs ? `Visitas por día del mes (${monthName})` : `Visits per day of the month (${monthName})`}</span>
+                <span style={{ color: "#0f172a", fontWeight: "800" }}>
+                  {isEs ? `Pico máximo: ${maxDailyCount} visitas/día` : `Peak: ${maxDailyCount} visits/day`}
+                </span>
               </div>
 
               {dailyTrend.length > 0 ? (
@@ -723,7 +734,7 @@ export default function MonthlyReportPdfTemplate({
                             backgroundColor: "#2563eb",
                             borderRadius: "2px 2px 0 0",
                           }}
-                          title={`Día ${dayNum}: ${d.count} visitas`}
+                          title={isEs ? `Día ${dayNum}: ${d.count} visitas` : `Day ${dayNum}: ${d.count} visits`}
                         ></div>
                       </div>
                     );
@@ -731,14 +742,14 @@ export default function MonthlyReportPdfTemplate({
                 </div>
               ) : (
                 <div style={{ fontSize: "10px", color: "#94a3b8", textAlign: "center", padding: "12px 0" }}>
-                  Sin datos suficientes de evolución diaria
+                  {isEs ? "Sin datos suficientes de evolución diaria" : "Not enough daily trend data"}
                 </div>
               )}
 
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "8.5px", color: "#94a3b8", fontWeight: "700", marginTop: "4px" }}>
-                <span>Día 1</span>
-                <span>Día 15</span>
-                <span>Día {dailyTrend.length || 30}</span>
+                <span>{isEs ? "Día 1" : "Day 1"}</span>
+                <span>{isEs ? "Día 15" : "Day 15"}</span>
+                <span>{isEs ? `Día ${dailyTrend.length || 30}` : `Day ${dailyTrend.length || 30}`}</span>
               </div>
             </div>
 
@@ -751,10 +762,10 @@ export default function MonthlyReportPdfTemplate({
               }}
             >
               {[
-                { label: "Madrugada (00h-06h)", hours: [0, 1, 2, 3, 4, 5] },
-                { label: "Mañana (06h-12h)", hours: [6, 7, 8, 9, 10, 11] },
-                { label: "Tarde (12h-18h)", hours: [12, 13, 14, 15, 16, 17] },
-                { label: "Noche (18h-24h)", hours: [18, 19, 20, 21, 22, 23] },
+                { label: isEs ? "Madrugada (00h-06h)" : "Early Morning (00h-06h)", hours: [0, 1, 2, 3, 4, 5] },
+                { label: isEs ? "Mañana (06h-12h)" : "Morning (06h-12h)", hours: [6, 7, 8, 9, 10, 11] },
+                { label: isEs ? "Tarde (12h-18h)" : "Afternoon (12h-18h)", hours: [12, 13, 14, 15, 16, 17] },
+                { label: isEs ? "Noche (18h-24h)" : "Night (18h-24h)", hours: [18, 19, 20, 21, 22, 23] },
               ].map((bracket, idx) => {
                 const count = hourlyDist
                   .filter((h) => bracket.hours.includes(parseInt(h.hour, 10)))
@@ -810,7 +821,7 @@ export default function MonthlyReportPdfTemplate({
               <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
                 <div style={{ width: "3px", height: "12px", backgroundColor: "#2563eb", borderRadius: "2px" }}></div>
                 <h3 style={{ fontSize: "11px", fontWeight: "900", textTransform: "uppercase", letterSpacing: "0.04em", color: "#0f172a", margin: 0 }}>
-                  Páginas Más Visitadas
+                  {isEs ? "Páginas Más Visitadas" : "Most Visited Pages"}
                 </h3>
               </div>
 
@@ -841,7 +852,7 @@ export default function MonthlyReportPdfTemplate({
                     );
                   })
                 ) : (
-                  <span style={{ fontSize: "10px", color: "#94a3b8" }}>Sin datos de páginas vistas</span>
+                  <span style={{ fontSize: "10px", color: "#94a3b8" }}>{isEs ? "Sin datos de páginas vistas" : "No page view data"}</span>
                 )}
               </div>
             </div>
@@ -858,7 +869,7 @@ export default function MonthlyReportPdfTemplate({
               <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
                 <div style={{ width: "3px", height: "12px", backgroundColor: "#16a34a", borderRadius: "2px" }}></div>
                 <h3 style={{ fontSize: "11px", fontWeight: "900", textTransform: "uppercase", letterSpacing: "0.04em", color: "#0f172a", margin: 0 }}>
-                  Fuentes de Captación (Origen)
+                  {isEs ? "Fuentes de Captación (Origen)" : "Acquisition Sources (Referrers)"}
                 </h3>
               </div>
 
@@ -880,12 +891,12 @@ export default function MonthlyReportPdfTemplate({
                         {idx + 1}. {r.referrer}
                       </span>
                       <span style={{ fontWeight: "800", color: "#16a34a", whiteSpace: "nowrap" }}>
-                        {r.count} visitas
+                        {r.count} {isEs ? "visitas" : "visits"}
                       </span>
                     </div>
                   ))
                 ) : (
-                  <span style={{ fontSize: "10px", color: "#94a3b8" }}>Sin datos de fuentes de tráfico</span>
+                  <span style={{ fontSize: "10px", color: "#94a3b8" }}>{isEs ? "Sin datos de fuentes de tráfico" : "No traffic source data"}</span>
                 )}
               </div>
             </div>
@@ -910,7 +921,7 @@ export default function MonthlyReportPdfTemplate({
               }}
             >
               <h4 style={{ fontSize: "10.5px", fontWeight: "900", textTransform: "uppercase", color: "#0f172a", margin: "0 0 8px 0" }}>
-                Dispositivos y Navegadores
+                {isEs ? "Dispositivos y Navegadores" : "Devices & Browsers"}
               </h4>
               <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
                 {devices.map((d, i) => {
@@ -928,7 +939,7 @@ export default function MonthlyReportPdfTemplate({
                       }}
                     >
                       <span style={{ fontSize: "8.5px", fontWeight: "800", color: "#64748b", textTransform: "uppercase", display: "block" }}>
-                        {d.device || "Otro"}
+                        {d.device || (isEs ? "Otro" : "Other")}
                       </span>
                       <span style={{ fontSize: "12px", fontWeight: "900", color: "#0f172a" }}>
                         {pct}%
@@ -940,7 +951,7 @@ export default function MonthlyReportPdfTemplate({
 
               {browsers.length > 0 && (
                 <div style={{ fontSize: "9.5px", color: "#64748b", fontWeight: "600" }}>
-                  Navegadores líderes: {browsers.map((b) => `${b.browser} (${b.count})`).join(" · ")}
+                  {isEs ? "Navegadores líderes: " : "Leading browsers: "}{browsers.map((b) => `${b.browser} (${b.count})`).join(" · ")}
                 </div>
               )}
             </div>
@@ -955,20 +966,20 @@ export default function MonthlyReportPdfTemplate({
               }}
             >
               <h4 style={{ fontSize: "10.5px", fontWeight: "900", textTransform: "uppercase", color: "#0f172a", margin: "0 0 8px 0" }}>
-                Distribución Geográfica
+                {isEs ? "Distribución Geográfica" : "Geographic Distribution"}
               </h4>
               <div style={{ fontSize: "10px", color: "#334155", lineHeight: "1.6" }}>
                 <div>
-                  <strong style={{ color: "#0f172a" }}>Principales Ciudades (España): </strong>
+                  <strong style={{ color: "#0f172a" }}>{isEs ? "Principales Ciudades (España): " : "Top Cities (Spain): "}</strong>
                   {spainCities.length > 0
                     ? spainCities.map((c) => `${c.city} (${c.count})`).join(", ")
-                    : "Datos en consolidación"}
+                    : (isEs ? "Datos en consolidación" : "Data consolidating")}
                 </div>
                 <div style={{ marginTop: "4px" }}>
-                  <strong style={{ color: "#0f172a" }}>Países de Procedencia: </strong>
+                  <strong style={{ color: "#0f172a" }}>{isEs ? "Países de Procedencia: " : "Countries of Origin: "}</strong>
                   {countries.length > 0
                     ? countries.map((c) => `${c.country} (${c.count})`).join(", ")
-                    : "España y directos"}
+                    : (isEs ? "España y directos" : "Spain and direct")}
                 </div>
               </div>
             </div>
@@ -995,13 +1006,15 @@ export default function MonthlyReportPdfTemplate({
                     display: "block",
                   }}
                 >
-                  Garantía y Propiedad del Dato
+                  {isEs ? "Garantía y Propiedad del Dato" : "Data Guarantee & Ownership"}
                 </span>
                 <span style={{ fontSize: "11.5px", fontWeight: "900", color: "#ffffff", display: "block", marginTop: "2px" }}>
-                  Infraestructura Cloud de Alto Rendimiento · SPP Labs
+                  {isEs ? "Infraestructura Cloud de Alto Rendimiento · SPP Labs" : "High-Performance Cloud Infrastructure · SPP Labs"}
                 </span>
                 <p style={{ fontSize: "9.5px", color: "#94a3b8", margin: "3px 0 0 0", lineHeight: "1.3" }}>
-                  Todas las métricas y registros de clientes recogidos en este informe son propiedad exclusiva de {displayName}.
+                  {isEs
+                    ? `Todas las métricas y registros de clientes recogidos en este informe son propiedad exclusiva de ${displayName}.`
+                    : `All metrics and client records collected in this report are the exclusive property of ${displayName}.`}
                 </p>
               </div>
 
@@ -1017,7 +1030,7 @@ export default function MonthlyReportPdfTemplate({
                     borderRadius: "6px",
                   }}
                 >
-                  ✓ Verificado
+                  {isEs ? "✓ Verificado" : "✓ Verified"}
                 </span>
               </div>
             </div>
@@ -1037,9 +1050,9 @@ export default function MonthlyReportPdfTemplate({
             fontWeight: "700",
           }}
         >
-          <span>SPP Labs · Tecnología y Crecimiento Digital · Confidencial</span>
+          <span>{isEs ? "SPP Labs · Tecnología y Crecimiento Digital · Confidencial" : "SPP Labs · Technology & Digital Growth · Confidential"}</span>
           <span>{domain} — {monthName} {year}</span>
-          <span>Página 2 de 2</span>
+          <span>{isEs ? "Página 2 de 2" : "Page 2 of 2"}</span>
         </div>
       </div>
     </div>

@@ -154,10 +154,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           
           <div className="w-full flex flex-col gap-2 mb-2">
             <button
-              onClick={() => handleSelectQuestion("qué servicios ofrecéis?")}
+              onClick={() => handleSelectQuestion(lang === "es" ? "qué servicios ofrecéis?" : "what services do you offer?")}
               className="bg-white text-black text-xs text-left px-5 py-3.5 rounded-2xl hover:bg-zinc-100 transition-all font-bold border border-zinc-300 shadow-xs cursor-pointer flex items-center justify-between"
             >
-              <span>qué servicios ofrecéis?</span>
+              <span>{lang === "es" ? "qué servicios ofrecéis?" : "what services do you offer?"}</span>
               <svg className="w-4 h-4 text-black shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
               </svg>
@@ -228,14 +228,29 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
         {/* Disclaimer */}
         <span className="text-[10px] text-black font-semibold text-center mt-1 select-none leading-normal">
-          Al hablar con esta IA estás aceptando nuestra{" "}
-          <Link href="/politica-de-privacidad" className="underline hover:text-zinc-700">
-            política de privacidad
-          </Link>{" "}
-          y nuestros{" "}
-          <Link href="/terminos-y-condiciones" className="underline hover:text-zinc-700">
-            términos y condiciones
-          </Link>
+          {lang === "es" ? (
+            <>
+              Al hablar con esta IA estás aceptando nuestra{" "}
+              <Link href="/politica-de-privacidad" className="underline hover:text-zinc-700">
+                política de privacidad
+              </Link>{" "}
+              y nuestros{" "}
+              <Link href="/terminos-y-condiciones" className="underline hover:text-zinc-700">
+                términos y condiciones
+              </Link>
+            </>
+          ) : (
+            <>
+              By chatting with this AI you accept our{" "}
+              <Link href="/politica-de-privacidad" className="underline hover:text-zinc-700">
+                privacy policy
+              </Link>{" "}
+              and our{" "}
+              <Link href="/terminos-y-condiciones" className="underline hover:text-zinc-700">
+                terms and conditions
+              </Link>
+            </>
+          )}
         </span>
       </div>
     </div>

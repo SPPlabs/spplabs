@@ -238,7 +238,7 @@ export const translations = {
     menuAnaliticas: "Analytics",
     menuClientes: "Clients",
     menuNotas: "Notes & Team",
-    menuIA: "IA",
+    menuIA: "AI",
     menuNotificaciones: "Notifications & Requests",
     menuInformes: "Monthly Reports",
     menuEmail: "Email & Reviews",

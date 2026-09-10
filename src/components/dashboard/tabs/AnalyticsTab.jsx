@@ -76,9 +76,9 @@ function DonutChart({ data }) {
   );
 }
 
-function formatReferrerName(ref) {
+function formatReferrerName(ref, lang = "es") {
   if (!ref || ref === "Direct / None" || ref === "Direct" || ref === "Directo / Ninguno" || ref === "" || ref === "null" || ref === "undefined") {
-    return "Directo";
+    return lang === "es" ? "Directo" : "Direct";
   }
 
   const str = String(ref).trim();
@@ -100,7 +100,7 @@ function formatReferrerName(ref) {
   if (lower.includes("duckduckgo")) return "DuckDuckGo";
   if (lower.includes("whatsapp")) return "WhatsApp";
   if (lower.includes("telegram") || lower.includes("t.me")) return "Telegram";
-  if (lower.includes("internal ai engine") || lower.includes("ai engine")) return "Motor IA";
+  if (lower.includes("internal ai engine") || lower.includes("ai engine")) return lang === "es" ? "Motor IA" : "AI Engine";
   if (lower.includes("spplabs") || lower.includes("spp labs")) return "SPP Labs";
 
   if (str.startsWith("http://") || str.startsWith("https://") || str.startsWith("android-app://")) {
@@ -126,11 +126,11 @@ function formatReferrerName(ref) {
 }
 
 function ReferralFunnel({ data, lang }) {
-  if (!data || data.length === 0) return <p className="text-xs text-slate-450 py-6 text-center">No hay datos</p>;
+  if (!data || data.length === 0) return <p className="text-xs text-slate-450 py-6 text-center">{lang === "es" ? "No hay datos" : "No data"}</p>;
 
   const grouped = {};
   data.forEach(item => {
-    const cleanName = formatReferrerName(item.referrer);
+    const cleanName = formatReferrerName(item.referrer, lang);
     const count = Number(item.count || 0);
     grouped[cleanName] = (grouped[cleanName] || 0) + count;
   });
@@ -170,7 +170,7 @@ function ReferralFunnel({ data, lang }) {
       <div className="w-full md:w-1/2 h-52 relative">
         <svg viewBox="0 0 240 200" className="w-full h-full overflow-visible">
           <path d="M 180 75 L 210 75 L 225 100 L 225 120 L 210 145 L 180 145 Z" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="1" />
-          <text x="200" y="113" fill="#64748b" textAnchor="middle" className="text-[7px] font-black tracking-widest font-mono">EMBUDO</text>
+          <text x="200" y="113" fill="#64748b" textAnchor="middle" className="text-[7px] font-black tracking-widest font-mono">{lang === "es" ? "EMBUDO" : "FUNNEL"}</text>
           
           {lanes.map((lane, idx) => (
             <g key={idx} className="group">
@@ -393,7 +393,7 @@ export default function AnalyticsTab({
                 {renderInfoTooltip("duration", lang === "es" ? "Tiempo medio estimado que pasa cada visitante dentro del sitio web." : "Average time a visitor spends navigating pages during a session.", "shift-left-mobile")}
               </div>
               <span className="text-3xl font-black font-sans tabular-nums text-slate-950 tracking-tight">{analyticsData.overview.avg_duration}s</span>
-              <span className="text-[10px] text-slate-500 font-bold block mt-1">Promedio por sesión</span>
+              <span className="text-[10px] text-slate-500 font-bold block mt-1">{lang === "es" ? "Promedio por sesión" : "Avg per session"}</span>
             </div>
 
             <div className={`bg-white border-t-4 border-t-indigo-600 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm glass-card-hover flex flex-col justify-center items-center transition-all relative ${

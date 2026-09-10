@@ -102,7 +102,7 @@ export default function AdminTab({
       return (
         <span className="inline-flex items-center gap-1.5 text-xs text-slate-400 font-medium">
           <span className="w-2 h-2 rounded-full bg-slate-300"></span>
-          <span>Pendiente</span>
+          <span>{t.usersWebPending || (lang === "es" ? "Pendiente" : "Pending")}</span>
         </span>
       );
     }
@@ -114,7 +114,7 @@ export default function AdminTab({
           title={`HTTP ${health.statusCode} • Latencia: ${health.latencyMs}ms`}
         >
           <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>{t.usersWebOnline || "Operativo"}</span>
+          <span>{t.usersWebOnline || (lang === "es" ? "Operativo" : "Operational")}</span>
           <span className="text-[10px] text-emerald-600 font-mono font-normal">
             ({health.latencyMs}ms)
           </span>
@@ -126,10 +126,10 @@ export default function AdminTab({
     return (
       <span
         className="inline-flex items-center gap-1.5 text-xs font-bold text-red-700 bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full cursor-help"
-        title={`Error: ${health.error || "Inaccesible"}`}
+        title={`Error: ${health.error || (lang === "es" ? "Inaccesible" : "Unreachable")}`}
       >
         <span className="w-2 h-2 rounded-full bg-red-500"></span>
-        <span>{t.usersWebOffline || "Caído"}</span>
+        <span>{t.usersWebOffline || (lang === "es" ? "Caído" : "Down")}</span>
         {health.error && (
           <span className="text-[10px] text-red-600 font-mono font-normal truncate max-w-[90px]">
             ({health.error})
@@ -148,7 +148,7 @@ export default function AdminTab({
             <span className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
               <BoltIcon className="w-4.5 h-4.5" />
             </span>
-            <span>Provisionar Sitio Cliente</span>
+            <span>{lang === "es" ? "Provisionar Sitio Cliente" : "Provision Client Website"}</span>
           </h3>
           <p className="text-xs text-slate-500 font-medium mt-0.5">{t.usersSubtitle}</p>
         </div>
@@ -197,7 +197,7 @@ export default function AdminTab({
               {createLoading ? (
                 <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
               ) : (
-                "Generar Credenciales"
+                lang === "es" ? "Generar Credenciales" : "Generate Credentials"
               )}
             </button>
           </div>
@@ -210,11 +210,14 @@ export default function AdminTab({
               <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              ¡Cliente provisionado exitosamente!
+              {lang === "es" ? "¡Cliente provisionado exitosamente!" : "Client provisioned successfully!"}
             </div>
 
             <p className="text-xs text-slate-500 mb-4 leading-relaxed font-medium">
-              <span className="font-bold text-red-500">ADVERTENCIA:</span> Copie la clave API ahora. Está encriptada usando Argon2id y no se volverá a mostrar.
+              <span className="font-bold text-red-500">{lang === "es" ? "ADVERTENCIA:" : "WARNING:"}</span>{" "}
+              {lang === "es"
+                ? "Copie la clave API ahora. Está encriptada usando Argon2id y no se volverá a mostrar."
+                : "Copy the API key now. It is encrypted using Argon2id and will not be displayed again."}
             </p>
 
             <div className="space-y-4">
@@ -228,13 +231,13 @@ export default function AdminTab({
                     onClick={() => navigator.clipboard.writeText(createdCredentials.signupToken)}
                     className="bg-white hover:bg-slate-100 border border-slate-200 text-xs px-3.5 py-2 rounded-xl font-bold transition-all active:scale-95 cursor-pointer shadow-2xs"
                   >
-                    Copiar
+                    {lang === "es" ? "Copiar" : "Copy"}
                   </button>
                 </div>
               </div>
 
               <div>
-                <span className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Clave API</span>
+                <span className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">{lang === "es" ? "Clave API" : "API Key"}</span>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 bg-white border border-slate-200 px-3 py-2 rounded-xl text-xs font-mono text-emerald-700 font-bold select-all">
                     {createdCredentials.rawApiKey}
@@ -243,7 +246,7 @@ export default function AdminTab({
                     onClick={() => navigator.clipboard.writeText(createdCredentials.rawApiKey)}
                     className="bg-white hover:bg-slate-100 border border-slate-200 text-xs px-3.5 py-2 rounded-xl font-bold transition-all active:scale-95 cursor-pointer shadow-2xs"
                   >
-                    Copiar
+                    {lang === "es" ? "Copiar" : "Copy"}
                   </button>
                 </div>
               </div>

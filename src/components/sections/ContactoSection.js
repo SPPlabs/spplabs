@@ -439,7 +439,7 @@ export default function ContactoSection() {
 
               <form onSubmit={handleContactSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Name</label>
+                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">{lang === "es" ? "Nombre" : "Name"}</label>
                   <input
                     type="text"
                     required

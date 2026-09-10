@@ -18,7 +18,7 @@ export default function InicioSection() {
             {/* Hero Copy */}
             <div className="lg:col-span-6 flex flex-col items-start text-left">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-zinc-200 text-xs font-bold bg-white mb-6 shadow-sm">
-                <span className="text-brand-blue">IA</span>
+                <span className="text-brand-blue">{lang === "es" ? "IA" : "AI"}</span>
                 <span className="text-zinc-350">•</span>
                 <span className="text-cyan-500">WEB</span>
                 <span className="text-zinc-350">•</span>
@@ -26,7 +26,7 @@ export default function InicioSection() {
                 <span className="text-zinc-350">•</span>
                 <span className="text-brand-green">CRM</span>
                 <span className="text-zinc-350">•</span>
-                <span className="text-yellow-400 font-extrabold">RESEÑAS</span>
+                <span className="text-yellow-400 font-extrabold">{lang === "es" ? "RESEÑAS" : "REVIEWS"}</span>
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-zinc-950 leading-[1.12] mb-8 font-sans">
@@ -75,7 +75,7 @@ export default function InicioSection() {
                         }
                       }}
                     >
-                      Prueba Gratis
+                      {lang === "es" ? "Prueba Gratis" : "Free Trial"}
                     </button>
                   </div>
                 </div>
@@ -87,7 +87,7 @@ export default function InicioSection() {
                   <svg className="w-4 h-4 sm:w-5 sm:h-5 text-brand-green shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
-                  <span>Chatbot IA</span>
+                  <span>{lang === "es" ? "Chatbot IA" : "AI Chatbot"}</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 sm:gap-2.5 text-xs font-bold tracking-wide shrink-0">
@@ -108,7 +108,7 @@ export default function InicioSection() {
                   <svg className="w-4 h-4 sm:w-5 sm:h-5 text-brand-blue-dark shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span>Reservas</span>
+                  <span>{lang === "es" ? "Reservas" : "Bookings"}</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 sm:gap-2.5 text-xs font-bold tracking-wide shrink-0">
@@ -130,7 +130,7 @@ export default function InicioSection() {
                   >
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                   </svg>
-                  <span>Reseñas</span>
+                  <span>{lang === "es" ? "Reseñas" : "Reviews"}</span>
                 </div>
               </div>
             </div>
@@ -393,7 +393,7 @@ export default function InicioSection() {
                           : "Automate 5-star Google Maps review requests and smart email booking reminders on autopilot."}
                       </p>
                     </div>
-                    <span className="text-amber-400 text-[9px] uppercase font-bold tracking-wider">06 // Reseñas & Email</span>
+                    <span className="text-amber-400 text-[9px] uppercase font-bold tracking-wider">{lang === "es" ? "06 // Reseñas & Email" : "06 // Reviews & Email"}</span>
                   </div>
                 </div>
               </div>
@@ -411,7 +411,7 @@ export default function InicioSection() {
             <div className="lg:col-span-5 flex flex-col items-start text-left">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-zinc-200 bg-white shadow-xs mb-6">
                 <span className="text-xs font-black uppercase tracking-wider text-brand-blue">DASHBOARD</span>
-                <span className="text-xs font-black uppercase tracking-wider text-brand-green">TODO EN UNO</span>
+                <span className="text-xs font-black uppercase tracking-wider text-brand-green">{lang === "es" ? "TODO EN UNO" : "ALL IN ONE"}</span>
               </div>
 
               <h2 className="text-3xl sm:text-5xl font-black text-zinc-950 tracking-tight leading-[1.12] mb-8 font-sans">
@@ -480,7 +480,7 @@ export default function InicioSection() {
                       <div className="px-3 py-2 rounded-xl text-xs font-bold text-zinc-600 flex items-center justify-between gap-2 relative">
                         <div className="flex items-center gap-2.5">
                           <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                          <span>Resumen</span>
+                          <span>{lang === "es" ? "Resumen" : "Overview"}</span>
                         </div>
                         <span className="relative flex items-center justify-center shrink-0">
                           <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
@@ -493,7 +493,7 @@ export default function InicioSection() {
                       <div className="px-3 py-2 rounded-xl text-xs font-bold bg-zinc-950 text-white flex items-center justify-between gap-2 shadow-sm relative">
                         <div className="flex items-center gap-2.5">
                           <svg className="w-4 h-4 text-brand-green" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                          <span>Analíticas</span>
+                          <span>{lang === "es" ? "Analíticas" : "Analytics"}</span>
                         </div>
                         <span className="relative flex items-center justify-center shrink-0">
                           <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
@@ -504,7 +504,7 @@ export default function InicioSection() {
                       <div className="px-3 py-2 rounded-xl text-xs font-bold text-zinc-600 flex items-center justify-between gap-2 relative">
                         <div className="flex items-center gap-2.5">
                           <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                          <span>Clientes</span>
+                          <span>{lang === "es" ? "Clientes" : "Clients"}</span>
                         </div>
                         <span className="relative flex items-center justify-center shrink-0">
                           <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
@@ -526,7 +526,7 @@ export default function InicioSection() {
                       <div className="px-3 py-2 rounded-xl text-xs font-bold text-zinc-600 flex items-center justify-between gap-2 relative">
                         <div className="flex items-center gap-2.5">
                           <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                          <span>IA</span>
+                          <span>{lang === "es" ? "IA" : "AI"}</span>
                         </div>
                         <span className="relative flex items-center justify-center shrink-0">
                           <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
@@ -539,7 +539,7 @@ export default function InicioSection() {
                       <div className="px-3 py-2 rounded-xl text-xs font-bold text-zinc-600 flex items-center justify-between gap-2 relative">
                         <div className="flex items-center gap-2.5">
                           <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                          <span className="truncate">Notificaciones...</span>
+                          <span className="truncate">{lang === "es" ? "Notificaciones..." : "Notifications..."}</span>
                         </div>
                         <span className="relative flex items-center justify-center shrink-0">
                           <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
@@ -552,14 +552,14 @@ export default function InicioSection() {
                       <div className="px-3 py-2 rounded-xl text-xs font-bold text-zinc-600 flex items-center justify-between gap-2 relative">
                         <div className="flex items-center gap-2.5">
                           <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                          <span>Informes</span>
+                          <span>{lang === "es" ? "Informes" : "Reports"}</span>
                         </div>
                       </div>
 
                       <div className="px-3 py-2 rounded-xl text-xs font-bold text-zinc-600 flex items-center justify-between gap-2 relative">
                         <div className="flex items-center gap-2.5">
                           <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
-                          <span>Email y Reseñas</span>
+                          <span>{lang === "es" ? "Email y Reseñas" : "Email & Reviews"}</span>
                         </div>
                         <span className="relative flex items-center justify-center shrink-0">
                           <span className="relative z-10 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-amber-500 text-white text-[8.5px] font-black leading-none shadow-[0_0_8px_rgba(245,158,11,0.9)] border border-white/40">
@@ -575,14 +575,14 @@ export default function InicioSection() {
                   <div className="mt-8 space-y-2 pt-4 border-t border-zinc-200">
                     <div className="p-2.5 bg-white border border-zinc-200 rounded-xl flex items-center justify-between">
                       <div>
-                        <span className="text-[11px] font-bold text-black block">Tu Empresa</span>
+                        <span className="text-[11px] font-bold text-black block">{lang === "es" ? "Tu Empresa" : "Your Company"}</span>
                         <span className="text-[9px] text-zinc-400 block font-mono">tuempresa.es</span>
                       </div>
                       <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
                     </div>
                     <div className="w-full py-1.5 bg-white border border-zinc-200 rounded-xl text-[10px] font-bold text-zinc-600 text-center flex items-center justify-center gap-1">
                       <svg className="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                      <span>Cerrar Sesión</span>
+                      <span>{lang === "es" ? "Cerrar Sesión" : "Sign Out"}</span>
                     </div>
                   </div>
                 </div>
@@ -592,20 +592,20 @@ export default function InicioSection() {
                   <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-zinc-150">
                     <div>
                       <span className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase bg-zinc-100 px-2 py-0.5 rounded">TUEMPRESA.ES</span>
-                      <h3 className="text-base font-black text-black mt-1">Analíticas de Tráfico</h3>
-                      <p className="text-[11px] text-zinc-500 font-medium">Métricas de visitas e interacción ingeridas en tiempo real</p>
+                      <h3 className="text-base font-black text-black mt-1">{lang === "es" ? "Analíticas de Tráfico" : "Traffic Analytics"}</h3>
+                      <p className="text-[11px] text-zinc-500 font-medium">{lang === "es" ? "Métricas de visitas e interacción ingeridas en tiempo real" : "Real-time visitor and interaction metrics"}</p>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <div className="flex bg-zinc-100 p-1 rounded-xl text-[10px] font-bold">
-                        <span className="px-2 py-1 text-zinc-600">Día</span>
-                        <span className="px-2 py-1 bg-black text-white rounded-lg shadow-xs">Semana</span>
-                        <span className="px-2 py-1 text-zinc-600">Mes</span>
-                        <span className="px-2 py-1 text-zinc-600">Año</span>
+                        <span className="px-2 py-1 text-zinc-600">{lang === "es" ? "Día" : "Day"}</span>
+                        <span className="px-2 py-1 bg-black text-white rounded-lg shadow-xs">{lang === "es" ? "Semana" : "Week"}</span>
+                        <span className="px-2 py-1 text-zinc-600">{lang === "es" ? "Mes" : "Month"}</span>
+                        <span className="px-2 py-1 text-zinc-600">{lang === "es" ? "Año" : "Year"}</span>
                       </div>
                       <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2.5 py-1 rounded-xl text-[10px] font-bold">
                         <span className="w-2 h-2 rounded-full bg-brand-green animate-ping"></span>
-                        <span>2 activos</span>
+                        <span>{lang === "es" ? "2 activos" : "2 active"}</span>
                       </div>
                     </div>
                   </div>
@@ -613,33 +613,33 @@ export default function InicioSection() {
                   {/* 5 Metric Cards */}
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                     <div className="bg-zinc-50 border-t-2 border-purple-500 border-x border-b border-zinc-200 p-3 rounded-xl text-center">
-                      <span className="text-[8px] font-bold uppercase text-purple-600 tracking-wider block">Total Impresiones</span>
+                      <span className="text-[8px] font-bold uppercase text-purple-600 tracking-wider block">{lang === "es" ? "Total Impresiones" : "Total Impressions"}</span>
                       <span className="text-lg font-black text-black my-0.5 block">934</span>
-                      <span className="text-[8px] font-bold text-emerald-600 block">↑ +100% vs semana</span>
+                      <span className="text-[8px] font-bold text-emerald-600 block">{lang === "es" ? "↑ +100% vs semana" : "↑ +100% vs week"}</span>
                     </div>
 
                     <div className="bg-zinc-50 border-t-2 border-brand-cyan border-x border-b border-zinc-200 p-3 rounded-xl text-center">
-                      <span className="text-[8px] font-bold uppercase text-cyan-600 tracking-wider block">Visitantes Únicos</span>
+                      <span className="text-[8px] font-bold uppercase text-cyan-600 tracking-wider block">{lang === "es" ? "Visitantes Únicos" : "Unique Visitors"}</span>
                       <span className="text-lg font-black text-black my-0.5 block">30</span>
-                      <span className="text-[8px] font-bold text-emerald-600 block">↑ +100% vs semana</span>
+                      <span className="text-[8px] font-bold text-emerald-600 block">{lang === "es" ? "↑ +100% vs semana" : "↑ +100% vs week"}</span>
                     </div>
 
                     <div className="bg-zinc-50 border-t-2 border-brand-green border-x border-b border-zinc-200 p-3 rounded-xl text-center">
-                      <span className="text-[8px] font-bold uppercase text-brand-green tracking-wider block">Sesiones</span>
+                      <span className="text-[8px] font-bold uppercase text-brand-green tracking-wider block">{lang === "es" ? "Sesiones" : "Sessions"}</span>
                       <span className="text-lg font-black text-black my-0.5 block">53</span>
-                      <span className="text-[8px] font-bold text-emerald-600 block">↑ +100% vs semana</span>
+                      <span className="text-[8px] font-bold text-emerald-600 block">{lang === "es" ? "↑ +100% vs semana" : "↑ +100% vs week"}</span>
                     </div>
 
                     <div className="bg-zinc-50 border-t-2 border-amber-500 border-x border-b border-zinc-200 p-3 rounded-xl text-center">
-                      <span className="text-[8px] font-bold uppercase text-amber-600 tracking-wider block">Duración Promedio</span>
+                      <span className="text-[8px] font-bold uppercase text-amber-600 tracking-wider block">{lang === "es" ? "Duración Promedio" : "Average Duration"}</span>
                       <span className="text-lg font-black text-black my-0.5 block">72s</span>
-                      <span className="text-[8px] font-bold text-zinc-400 block">Promedio por sesión</span>
+                      <span className="text-[8px] font-bold text-zinc-400 block">{lang === "es" ? "Promedio por sesión" : "Avg per session"}</span>
                     </div>
 
                     <div className="bg-zinc-50 border-t-2 border-blue-500 border-x border-b border-zinc-200 p-3 rounded-xl text-center col-span-2 sm:col-span-1">
-                      <span className="text-[8px] font-bold uppercase text-blue-600 tracking-wider block">Tasa Rebote</span>
+                      <span className="text-[8px] font-bold uppercase text-blue-600 tracking-wider block">{lang === "es" ? "Tasa Rebote" : "Bounce Rate"}</span>
                       <span className="text-lg font-black text-black my-0.5 block">28%</span>
-                      <span className="text-[8px] font-bold text-emerald-600 block">Excelente</span>
+                      <span className="text-[8px] font-bold text-emerald-600 block">{lang === "es" ? "Excelente" : "Excellent"}</span>
                     </div>
                   </div>
 
@@ -651,11 +651,11 @@ export default function InicioSection() {
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 005.814-5.519l2.74-1.22" /></svg>
                         </div>
                         <div>
-                          <span className="text-[10px] font-extrabold text-black uppercase tracking-wider block">Volumen de Tráfico (Últimos 7 días)</span>
-                          <span className="text-[9px] text-zinc-400 block">Histórico de visitas e interacción</span>
+                          <span className="text-[10px] font-extrabold text-black uppercase tracking-wider block">{lang === "es" ? "Volumen de Tráfico (Últimos 7 días)" : "Traffic Volume (Last 7 days)"}</span>
+                          <span className="text-[9px] text-zinc-400 block">{lang === "es" ? "Histórico de visitas e interacción" : "Visitor history and interaction"}</span>
                         </div>
                       </div>
-                      <span className="text-[9px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded">Semana</span>
+                      <span className="text-[9px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded">{lang === "es" ? "Semana" : "Week"}</span>
                     </div>
 
                     <div className="relative w-full h-32 pt-2">
@@ -678,7 +678,7 @@ export default function InicioSection() {
 
                   {/* Traffic Sources Progress Rows */}
                   <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-xs space-y-2.5">
-                    <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-wider block">Orígenes de Tráfico</span>
+                    <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-wider block">{lang === "es" ? "Orígenes de Tráfico" : "Traffic Sources"}</span>
                     
                     <div className="space-y-2 text-[11px] font-semibold">
                       <div>

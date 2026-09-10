@@ -60,7 +60,7 @@ export default function ServiciosSection() {
       description: isEs
         ? "Un asistente inteligente entrenado exclusivamente con los datos y catálogos de su empresa para resolver dudas comerciales y captar clientes las 24 horas del día."
         : "Deploy intelligent AI chat agents trained on your business data to resolve inquiries instantly and convert prospects 24 hours a day.",
-      tags: ["RAG AI", "Captación Leads", "Respuestas 24/7"],
+      tags: isEs ? ["RAG AI", "Captación Leads", "Respuestas 24/7"] : ["RAG AI", "Lead Capture", "24/7 Response"],
       badge: isEs ? "Atención Automatizada" : "Automated Sales",
       color: "emerald",
       href: "/servicios/chatbot-ia",
@@ -94,7 +94,7 @@ export default function ServiciosSection() {
       description: isEs
         ? "Optimización técnica y de contenido para lograr las primeras posiciones en Google sin depender exclusivamente de campañas de publicidad pagada."
         : "Comprehensive technical and content optimization to secure top organic rankings on Google and attract high-intent leads consistently.",
-      tags: ["Google #1", "Core Vitals", "Tráfico Orgánico"],
+      tags: isEs ? ["Google #1", "Core Vitals", "Tráfico Orgánico"] : ["Google #1", "Core Vitals", "Organic Traffic"],
       badge: isEs ? "Tráfico Recurrente" : "High Intent Leads",
       color: "emerald",
       href: "/servicios/posicionamiento-seo",
@@ -111,7 +111,7 @@ export default function ServiciosSection() {
       description: isEs
         ? "Permita que sus clientes reserven citas comerciales o reuniones directamente desde su web en franjas disponibles sin llamadas ni errores de agenda."
         : "Allow prospects to schedule consultations directly from your website in open time slots without back-and-forth emails or phone calls.",
-      tags: ["Calendario", "Sincronización", "Confirmación Email"],
+      tags: isEs ? ["Calendario", "Sincronización", "Confirmación Email"] : ["Calendar", "Sync", "Email Confirmation"],
       badge: isEs ? "Agenda Automatizada" : "Zero Friction",
       color: "indigo",
       href: "/servicios/sistema-reservas",
@@ -128,7 +128,9 @@ export default function ServiciosSection() {
       description: isEs
         ? "Multiplique sus valoraciones de 5 estrellas en Google Maps y envíe recordatorios de cita automáticos por email para fidelizar y eliminar ausencias."
         : "Generate continuous 5-star Google Maps reviews and send automated email reminders to reduce no-shows and build local authority.",
-      tags: ["Google Maps ⭐", "Reseñas 5★", "Email Lifecycle", "Anti No-Show"],
+      tags: isEs
+        ? ["Google Maps ⭐", "Reseñas 5★", "Email Lifecycle", "Anti No-Show"]
+        : ["Google Maps ⭐", "5★ Reviews", "Email Lifecycle", "Anti No-Show"],
       badge: isEs ? "+350% Más Reseñas" : "+350% More Reviews",
       color: "amber",
       href: "/servicios/booster-resenas",
