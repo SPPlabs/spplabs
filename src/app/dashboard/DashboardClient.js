@@ -105,6 +105,17 @@ export default function DashboardClient({
     }
   }, [searchParams]);
 
+  // Pending note draft state to transfer contact/booking info into "Notas y Equipo"
+  const [pendingNoteDraft, setPendingNoteDraft] = useState(null);
+
+  const handleExportToNotes = (draftData) => {
+    setPendingNoteDraft(draftData);
+    setActiveTab("notas");
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  };
+
   // Background heartbeat to track user dashboard activity
   useEffect(() => {
     const sendHeartbeat = () => {
@@ -1483,6 +1494,7 @@ export default function DashboardClient({
               setActiveTab={setActiveTab}
               googleCalendarConnection={googleCalendarConnection}
               externalCalendarEvents={externalCalendarEvents}
+              handleExportToNotes={handleExportToNotes}
             />
           )}
 
@@ -1500,6 +1512,7 @@ export default function DashboardClient({
               router={router}
               googleCalendarConnection={googleCalendarConnection}
               externalCalendarEvents={externalCalendarEvents}
+              handleExportToNotes={handleExportToNotes}
             />
           )}
 
@@ -1511,6 +1524,8 @@ export default function DashboardClient({
               initialNotes={dashboardNotes}
               currentWebsite={currentWebsite}
               router={router}
+              pendingNoteDraft={pendingNoteDraft}
+              onClearPendingNoteDraft={() => setPendingNoteDraft(null)}
             />
           )}
 

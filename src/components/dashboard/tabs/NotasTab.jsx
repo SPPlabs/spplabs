@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   DocumentTextIcon,
   UsersIcon,
@@ -19,6 +19,8 @@ export default function NotasTab({
   initialNotes = [],
   currentWebsite,
   router,
+  pendingNoteDraft = null,
+  onClearPendingNoteDraft = null,
 }) {
   const isEs = lang === "es";
 
@@ -43,6 +45,28 @@ export default function NotasTab({
   const [formEmail, setFormEmail] = useState("");
   const [formPhone, setFormPhone] = useState("");
   const [formRole, setFormRole] = useState("");
+
+  // Handle incoming draft exported from contacts or bookings
+  useEffect(() => {
+    if (pendingNoteDraft) {
+      setIsEditing(false);
+      setEditingNoteId(null);
+      setFormType(pendingNoteDraft.type || "CLIENT");
+      setFormTitle(pendingNoteDraft.title || "");
+      setFormContent(pendingNoteDraft.content || "");
+      setFormEmail(pendingNoteDraft.email || "");
+      setFormPhone(pendingNoteDraft.phone || "");
+      setFormRole(pendingNoteDraft.role || "");
+      setFormTag(pendingNoteDraft.tag || "General");
+      setFormColor(pendingNoteDraft.color || "blue");
+      setFormPinned(Boolean(pendingNoteDraft.pinned));
+      if (viewingNote) setViewingNote(null);
+      setIsFormModalOpen(true);
+      if (onClearPendingNoteDraft) {
+        onClearPendingNoteDraft();
+      }
+    }
+  }, [pendingNoteDraft]);
   const [formTag, setFormTag] = useState("General");
   const [formColor, setFormColor] = useState("slate");
   const [formPinned, setFormPinned] = useState(false);

@@ -13,6 +13,7 @@ import {
   ChatBubbleIcon,
   ClipboardIcon,
   ClipboardCheckIcon,
+  GoogleGIcon,
 } from "@/components/dashboard/DashboardIcons";
 import {
   copyTextToClipboard,
@@ -39,23 +40,81 @@ export default function OverviewTab({
   setActiveTab,
   googleCalendarConnection = null,
   externalCalendarEvents = [],
+  onExportToNotes = null,
 }) {
   const [copiedId, setCopiedId] = useState(null);
   const pendingBookingsCount = (bookings || []).filter((b) => b.status === "PENDING").length;
   const recentContactsCount = contactForms.length;
   const announcementsCount = announcementsList.length;
 
-  const googleBookingsCount = useMemo(() => {
-    if (!googleCalendarConnection || !externalCalendarEvents?.length) return 0;
+  // Filter out external events that correspond to native bookings already in SPP Labs or are cancelled
+  const uniqueExternalEvents = useMemo(() => {
+    if (!googleCalendarConnection || !externalCalendarEvents?.length) return [];
     const nativeGoogleEventIds = new Set(
       (bookings || []).map((b) => b.googleEventId).filter(Boolean)
     );
     return externalCalendarEvents.filter(
       (e) => !nativeGoogleEventIds.has(e.googleEventId) && e.status !== "cancelled"
-    ).length;
+    );
   }, [googleCalendarConnection, externalCalendarEvents, bookings]);
 
+  const googleBookingsCount = uniqueExternalEvents.length;
   const totalBookingsCount = (bookings?.length || 0) + googleBookingsCount;
+
+  // Combined and chronologically sorted appointments (both on-web bookings and Google Calendar events)
+  const combinedAppointments = useMemo(() => {
+    const webItems = (bookings || []).map((b) => {
+      let sortTimestamp = 0;
+      try {
+        const dateStr = typeof b.date === "string" ? b.date.split("T")[0] : new Date(b.date).toISOString().split("T")[0];
+        const timeStr = b.time || "00:00";
+        sortTimestamp = new Date(`${dateStr}T${timeStr}:00`).getTime() || 0;
+      } catch {
+        sortTimestamp = 0;
+      }
+      return {
+        type: "web",
+        id: b.id,
+        sortTimestamp,
+        data: b,
+      };
+    });
+
+    const googleItems = uniqueExternalEvents.map((ext) => {
+      const startDate = new Date(ext.startDateTime);
+      const endDate = new Date(ext.endDateTime);
+      const startTime = ext.isAllDay
+        ? (lang === "es" ? "Todo el día" : "All day")
+        : !isNaN(startDate.getTime())
+        ? startDate.toLocaleTimeString(lang === "es" ? "es-ES" : "en-US", { hour: "2-digit", minute: "2-digit" })
+        : "";
+      const endTime = ext.isAllDay
+        ? ""
+        : !isNaN(endDate.getTime())
+        ? endDate.toLocaleTimeString(lang === "es" ? "es-ES" : "en-US", { hour: "2-digit", minute: "2-digit" })
+        : "";
+      const formattedDate = !isNaN(startDate.getTime())
+        ? startDate.toLocaleDateString(lang === "es" ? "es-ES" : "en-US", {
+            month: "short",
+            day: "numeric",
+          })
+        : "";
+
+      return {
+        type: "google",
+        id: ext.id,
+        sortTimestamp: startDate.getTime() || 0,
+        startTime,
+        endTime,
+        formattedDate,
+        data: ext,
+      };
+    });
+
+    const combined = [...webItems, ...googleItems];
+    combined.sort((a, b) => b.sortTimestamp - a.sortTimestamp);
+    return combined;
+  }, [bookings, uniqueExternalEvents, lang]);
 
   const handleCopyContact = async (form) => {
     const text = formatContactToText(form, lang);
@@ -71,6 +130,39 @@ export default function OverviewTab({
     const ok = await copyTextToClipboard(text);
     if (ok) {
       setCopiedId(b.id);
+      setTimeout(() => setCopiedId(null), 2500);
+    }
+  };
+
+  const handleCopyGoogleEvent = async (ext) => {
+    const startDate = new Date(ext.startDateTime);
+    const formattedDate = !isNaN(startDate.getTime())
+      ? startDate.toLocaleDateString(lang === "es" ? "es-ES" : "en-US", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : ext.startDateTime;
+    const timeStr = ext.isAllDay
+      ? (lang === "es" ? "Todo el día" : "All day")
+      : `${new Date(ext.startDateTime).toLocaleTimeString(lang === "es" ? "es-ES" : "en-US", { hour: "2-digit", minute: "2-digit" })} - ${new Date(ext.endDateTime).toLocaleTimeString(lang === "es" ? "es-ES" : "en-US", { hour: "2-digit", minute: "2-digit" })}`;
+
+    const lines = [
+      lang === "es" ? "📅 CITA DE GOOGLE CALENDAR" : "📅 GOOGLE CALENDAR EVENT",
+      "----------------------------------------",
+      `${lang === "es" ? "Evento / Cliente:" : "Event / Client:"} ${ext.title || "-"}`,
+      `${lang === "es" ? "Fecha:" : "Date:"} ${formattedDate}`,
+      `${lang === "es" ? "Horario:" : "Time:"} ${timeStr}`,
+      ext.description ? `${lang === "es" ? "Notas:" : "Notes:"} ${ext.description}` : null,
+      "----------------------------------------",
+      `Origen: Google Calendar (${currentWebsite?.domain || "SPP Labs"})`,
+    ].filter(Boolean);
+
+    const text = lines.join("\n");
+    const ok = await copyTextToClipboard(text);
+    if (ok) {
+      setCopiedId(ext.id);
       setTimeout(() => setCopiedId(null), 2500);
     }
   };
@@ -313,13 +405,80 @@ export default function OverviewTab({
               </button>
             </div>
 
-            {bookings.length === 0 ? (
+            {combinedAppointments.length === 0 ? (
               <div className="text-center py-12 text-slate-400 text-xs italic font-medium">
                 {t.clientesNoBookings}
               </div>
             ) : (
               <div className="space-y-3">
-                {bookings.slice(0, 3).map((booking) => {
+                {combinedAppointments.slice(0, 3).map((item) => {
+                  if (item.type === "google") {
+                    const ext = item.data;
+
+                    return (
+                      <div
+                        key={`google-${ext.id}`}
+                        className="p-3.5 bg-indigo-50/40 hover:bg-indigo-50/70 border border-indigo-200/80 rounded-2xl transition-all space-y-2.5"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                              <GoogleGIcon className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="font-extrabold text-xs text-slate-900 block truncate" title={ext.title}>
+                                {ext.title || (lang === "es" ? "Cita de Google Calendar" : "Google Calendar Event")}
+                              </span>
+                              <div className="flex items-center gap-1.5 text-[10px] tabular-nums font-sans mt-0.5">
+                                <span className="inline-flex items-center gap-1 font-bold text-indigo-900 bg-white px-1.5 py-0.5 rounded border border-indigo-200/60">
+                                  <ClockIcon className="w-2.5 h-2.5 text-indigo-500" />
+                                  {item.startTime} {item.endTime ? `- ${item.endTime}` : ""}
+                                </span>
+                                <span className="text-slate-400">·</span>
+                                <span className="text-slate-500 font-medium">
+                                  {item.formattedDate}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className="font-black text-[9px] uppercase px-2 py-0.5 rounded-full border bg-indigo-50 border-indigo-200 text-indigo-700 inline-flex items-center gap-1">
+                              <GoogleGIcon className="w-2.5 h-2.5" />
+                              Google
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => handleCopyGoogleEvent(ext)}
+                              className="p-1 hover:bg-white border border-transparent hover:border-slate-200 text-slate-400 hover:text-slate-700 rounded-lg transition-colors cursor-pointer"
+                              title={lang === "es" ? "Copiar detalles de la cita" : "Copy booking details"}
+                            >
+                              {copiedId === ext.id ? (
+                                <ClipboardCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
+                              ) : (
+                                <ClipboardIcon className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Motivo / Notas del evento o pill de sincronización */}
+                        {ext.description ? (
+                          <p className="text-slate-600 text-xs line-clamp-1 italic bg-white/80 p-2 rounded-xl border border-indigo-100/80 leading-relaxed">
+                            {`"${ext.description}"`}
+                          </p>
+                        ) : (
+                          <div className="flex items-center gap-1 text-[10px] text-indigo-600/80 font-medium">
+                            <GoogleGIcon className="w-2.5 h-2.5 shrink-0" />
+                            <span>{lang === "es" ? "Sincronizado con Google Calendar" : "Synced with Google Calendar"}</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  const booking = item.data;
                   const isConfirmed = booking.status === "CONFIRMED";
                   const isCancelled = booking.status === "CANCELLED";
 

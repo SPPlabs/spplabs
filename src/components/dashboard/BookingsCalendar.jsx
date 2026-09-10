@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ClipboardIcon,
   ClipboardCheckIcon,
@@ -14,6 +14,7 @@ import {
   ChatBubbleIcon,
   TrashIcon,
   GoogleGIcon,
+  DocumentTextIcon,
 } from "@/components/dashboard/DashboardIcons";
 import {
   copyTextToClipboard,
@@ -23,6 +24,9 @@ import {
   exportBookingIcsFile,
   exportCalendarIcsFile,
   formatWhatsAppUrl,
+  exportSingleBookingToCsv,
+  exportGoogleEventToCsv,
+  exportGoogleEventIcsFile,
 } from "@/lib/exportUtils";
 
 function getInitials(name) {
@@ -43,10 +47,29 @@ export default function BookingsCalendar({
   t = {},
   currentWebsiteDomain,
   router,
+  onExportToNotes = null,
 }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState("");
   const [copiedId, setCopiedId] = useState(null);
+
+  // Dropdown states for export
+  const [isHeaderCalendarDropdownOpen, setIsHeaderCalendarDropdownOpen] = useState(false);
+  const [openDayBookingDropdownId, setOpenDayBookingDropdownId] = useState(null);
+  const [openDayGoogleDropdownId, setOpenDayGoogleDropdownId] = useState(null);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (!e.target.closest("[data-export-dropdown]")) {
+        setIsHeaderCalendarDropdownOpen(false);
+        setOpenDayBookingDropdownId(null);
+        setOpenDayGoogleDropdownId(null);
+      }
+    };
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, []);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [formTime, setFormTime] = useState("09:00");
@@ -352,6 +375,105 @@ export default function BookingsCalendar({
     exportBookingIcsFile(b, currentWebsiteDomain || "SPP Labs");
   };
 
+  const handleExportSingleBookingCsv = (b) => {
+    exportSingleBookingToCsv(b, currentWebsiteDomain || "spplabs");
+  };
+
+  const handleExportBookingToNotes = (b) => {
+    if (onExportToNotes) {
+      onExportToNotes({
+        type: "CLIENT",
+        title: b.name || (lang === "es" ? "Cita de cliente" : "Client Booking"),
+        email: b.email || "",
+        phone: b.phone || "",
+        role: lang === "es" ? "Cliente (Cita)" : "Client (Booking)",
+        tag: "CITA",
+        content: formatBookingToText(b, currentWebsiteDomain),
+        color: "emerald",
+      });
+    }
+  };
+
+  const handleCopyGoogleEvent = async (ext) => {
+    const startDate = new Date(ext.startDateTime);
+    const formattedDate = !isNaN(startDate.getTime())
+      ? startDate.toLocaleDateString(lang === "es" ? "es-ES" : "en-US", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : ext.startDateTime;
+    const timeStr = ext.isAllDay
+      ? (lang === "es" ? "Todo el día" : "All day")
+      : `${new Date(ext.startDateTime).toLocaleTimeString(lang === "es" ? "es-ES" : "en-US", { hour: "2-digit", minute: "2-digit" })} - ${new Date(ext.endDateTime).toLocaleTimeString(lang === "es" ? "es-ES" : "en-US", { hour: "2-digit", minute: "2-digit" })}`;
+
+    const lines = [
+      lang === "es" ? "📅 CITA DE GOOGLE CALENDAR" : "📅 GOOGLE CALENDAR EVENT",
+      "----------------------------------------",
+      `${lang === "es" ? "Evento / Cliente:" : "Event / Client:"} ${ext.title || "-"}`,
+      `${lang === "es" ? "Fecha:" : "Date:"} ${formattedDate}`,
+      `${lang === "es" ? "Horario:" : "Time:"} ${timeStr}`,
+      ext.description ? `${lang === "es" ? "Notas:" : "Notes:"} ${ext.description}` : null,
+      "----------------------------------------",
+      `Origen: Google Calendar (${currentWebsiteDomain || "SPP Labs"})`,
+    ].filter(Boolean);
+
+    const text = lines.join("\n");
+    const ok = await copyTextToClipboard(text);
+    if (ok) {
+      setCopiedId(ext.id);
+      setTimeout(() => setCopiedId(null), 2500);
+    }
+  };
+
+  const handleExportGoogleEventIcs = (ext) => {
+    exportGoogleEventIcsFile(ext, currentWebsiteDomain || "SPP Labs");
+  };
+
+  const handleExportGoogleEventCsv = (ext) => {
+    exportGoogleEventToCsv(ext, currentWebsiteDomain || "spplabs");
+  };
+
+  const handleExportGoogleEventToNotes = (ext) => {
+    if (onExportToNotes) {
+      const isAllDay = ext.isAllDay;
+      const startStr = isAllDay
+        ? lang === "es" ? "Todo el día" : "All day"
+        : new Date(ext.startDateTime).toLocaleTimeString(lang === "es" ? "es-ES" : "en-US", { hour: "2-digit", minute: "2-digit" });
+      const endStr = isAllDay
+        ? ""
+        : new Date(ext.endDateTime).toLocaleTimeString(lang === "es" ? "es-ES" : "en-US", { hour: "2-digit", minute: "2-digit" });
+      const dateStr = new Date(ext.startDateTime).toLocaleDateString(lang === "es" ? "es-ES" : "en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+
+      const lines = [
+        `=== ${lang === "es" ? "EVENTO GOOGLE CALENDAR" : "GOOGLE CALENDAR EVENT"} ===`,
+        `${lang === "es" ? "Título" : "Title"}: ${ext.title || ""}`,
+        `${lang === "es" ? "Fecha" : "Date"}: ${dateStr}`,
+        `${lang === "es" ? "Horario" : "Time"}: ${startStr}${endStr ? ` - ${endStr}` : ""}`,
+        ext.location ? `${lang === "es" ? "Ubicación" : "Location"}: ${ext.location}` : null,
+        ext.description ? `${lang === "es" ? "Descripción" : "Description"}: ${ext.description}` : null,
+        ext.htmlLink ? `Google Calendar Link: ${ext.htmlLink}` : null,
+      ].filter(Boolean);
+
+      onExportToNotes({
+        type: "CLIENT",
+        title: ext.title || (lang === "es" ? "Evento Google Calendar" : "Google Calendar Event"),
+        email: "",
+        phone: "",
+        role: lang === "es" ? "Evento (Google)" : "Event (Google)",
+        tag: "GOOGLE",
+        content: lines.join("\n"),
+        color: "indigo",
+      });
+    }
+  };
+
   const handleCopyMonthBookings = async () => {
     const listToCopy = currentMonthBookings.length > 0 ? currentMonthBookings : bookings;
     const title = `${monthLabel} ${year}`;
@@ -512,46 +634,67 @@ export default function BookingsCalendar({
 
             <div className="flex items-center gap-2 flex-wrap">
               {bookings.length > 0 && (
-                <>
+                <div className="relative" data-export-dropdown>
                   <button
                     type="button"
-                    onClick={handleCopyMonthBookings}
-                    className="px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                    title={lang === "es" ? "Copiar citas del mes al portapapeles" : "Copy month bookings to clipboard"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsHeaderCalendarDropdownOpen(!isHeaderCalendarDropdownOpen);
+                    }}
+                    className="px-2.5 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                    title={lang === "es" ? "Opciones de exportación" : "Export options"}
                   >
-                    {copiedId === "month-bookings" ? (
-                      <>
-                        <ClipboardCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
-                        <span className="text-emerald-600 font-bold">{lang === "es" ? "¡Copiado!" : "Copied!"}</span>
-                      </>
-                    ) : (
-                      <>
-                        <ClipboardIcon className="w-3.5 h-3.5 text-slate-500" />
-                        <span>{lang === "es" ? "Copiar Citas" : "Copy"}</span>
-                      </>
-                    )}
+                    <DownloadIcon className="w-3.5 h-3.5 text-slate-500" />
+                    <span>{lang === "es" ? "Exportar" : "Export"}</span>
+                    <svg className={`w-3 h-3 text-slate-400 transition-transform ${isHeaderCalendarDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={handleExportMonthIcs}
-                    className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                    title={lang === "es" ? "Exportar a formato iCal (.ics) para Google/Apple Calendar" : "Export to iCal (.ics)"}
-                  >
-                    <DownloadIcon className="w-3.5 h-3.5 text-emerald-700" />
-                    <span>.ics</span>
-                  </button>
+                  {isHeaderCalendarDropdownOpen && (
+                    <div className="absolute right-0 top-full mt-1.5 w-48 bg-white border border-slate-200/90 rounded-2xl shadow-xl p-1.5 z-40 animate-fade-in space-y-0.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleCopyMonthBookings();
+                          setIsHeaderCalendarDropdownOpen(false);
+                        }}
+                        className="w-full px-3 py-2 text-left text-xs font-bold text-slate-700 hover:text-slate-950 hover:bg-slate-50 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                      >
+                        {copiedId === "month-bookings" ? (
+                          <ClipboardCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
+                        ) : (
+                          <ClipboardIcon className="w-3.5 h-3.5 text-slate-400" />
+                        )}
+                        <span>{copiedId === "month-bookings" ? (lang === "es" ? "¡Copiado!" : "Copied!") : (lang === "es" ? "Copiar Citas" : "Copy Bookings")}</span>
+                      </button>
 
-                  <button
-                    type="button"
-                    onClick={handleExportMonthCsv}
-                    className="px-2.5 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                    title={lang === "es" ? "Exportar en formato CSV / Excel" : "Export as CSV / Excel"}
-                  >
-                    <DownloadIcon className="w-3.5 h-3.5" />
-                    <span>CSV</span>
-                  </button>
-                </>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleExportMonthIcs();
+                          setIsHeaderCalendarDropdownOpen(false);
+                        }}
+                        className="w-full px-3 py-2 text-left text-xs font-bold text-emerald-700 hover:text-emerald-950 hover:bg-emerald-50/60 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                      >
+                        <DownloadIcon className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>{lang === "es" ? "Exportar .ics" : "Export .ics"}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleExportMonthCsv();
+                          setIsHeaderCalendarDropdownOpen(false);
+                        }}
+                        className="w-full px-3 py-2 text-left text-xs font-bold text-slate-700 hover:text-slate-950 hover:bg-slate-50 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                      >
+                        <DownloadIcon className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{lang === "es" ? "Exportar CSV" : "Export CSV"}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
 
               <div className="flex gap-1.5 ml-1">
@@ -889,37 +1032,78 @@ export default function BookingsCalendar({
 
                           {/* Action Buttons */}
                           <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-100">
-                            <div className="flex items-center gap-1.5">
+                            <div className="relative" data-export-dropdown>
                               <button
                                 type="button"
-                                onClick={() => handleCopySingleBooking(b)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenDayBookingDropdownId(openDayBookingDropdownId === b.id ? null : b.id);
+                                }}
                                 className="px-2.5 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
-                                title={lang === "es" ? "Copiar cita" : "Copy"}
+                                title={lang === "es" ? "Opciones de exportación" : "Export options"}
                               >
-                                {copiedId === b.id ? (
-                                  <>
-                                    <ClipboardCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
-                                    <span className="text-emerald-600 font-black">
-                                      {lang === "es" ? "¡Copiado!" : "Copied!"}
-                                    </span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <ClipboardIcon className="w-3.5 h-3.5 text-slate-400" />
-                                    <span>{lang === "es" ? "Copiar" : "Copy"}</span>
-                                  </>
-                                )}
+                                <DownloadIcon className="w-3.5 h-3.5 text-slate-500" />
+                                <span>{lang === "es" ? "Exportar" : "Export"}</span>
+                                <svg className={`w-3 h-3 text-slate-400 transition-transform ${openDayBookingDropdownId === b.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
                               </button>
 
-                              <button
-                                type="button"
-                                onClick={() => handleExportSingleBookingIcs(b)}
-                                className="px-2.5 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
-                                title={lang === "es" ? "Descargar .ics" : "Download .ics"}
-                              >
-                                <DownloadIcon className="w-3.5 h-3.5 text-slate-400" />
-                                <span>.ics</span>
-                              </button>
+                              {openDayBookingDropdownId === b.id && (
+                                <div className="absolute left-0 bottom-full mb-1.5 w-52 bg-white border border-slate-200/90 rounded-2xl shadow-xl p-1.5 z-40 animate-fade-in space-y-0.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleCopySingleBooking(b);
+                                      setOpenDayBookingDropdownId(null);
+                                    }}
+                                    className="w-full px-2.5 py-1.5 text-left text-xs font-bold text-slate-700 hover:text-slate-950 hover:bg-slate-50 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                                  >
+                                    {copiedId === b.id ? (
+                                      <ClipboardCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
+                                    ) : (
+                                      <ClipboardIcon className="w-3.5 h-3.5 text-slate-400" />
+                                    )}
+                                    <span>{copiedId === b.id ? (lang === "es" ? "¡Copiado!" : "Copied!") : (lang === "es" ? "Copiar datos" : "Copy details")}</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleExportSingleBookingIcs(b);
+                                      setOpenDayBookingDropdownId(null);
+                                    }}
+                                    className="w-full px-2.5 py-1.5 text-left text-xs font-bold text-emerald-700 hover:text-emerald-950 hover:bg-emerald-50/60 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                                  >
+                                    <DownloadIcon className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span>{lang === "es" ? "Exportar .ics" : "Export .ics"}</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleExportSingleBookingCsv(b);
+                                      setOpenDayBookingDropdownId(null);
+                                    }}
+                                    className="w-full px-2.5 py-1.5 text-left text-xs font-bold text-slate-700 hover:text-slate-950 hover:bg-slate-50 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                                  >
+                                    <DownloadIcon className="w-3.5 h-3.5 text-slate-400" />
+                                    <span>{lang === "es" ? "Exportar CSV" : "Export CSV"}</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleExportBookingToNotes(b);
+                                      setOpenDayBookingDropdownId(null);
+                                    }}
+                                    className="w-full px-2.5 py-1.5 text-left text-xs font-bold text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50/70 rounded-xl transition-all flex items-center gap-2 cursor-pointer border-t border-slate-100"
+                                  >
+                                    <DocumentTextIcon className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span>{lang === "es" ? "Exportar a Notas y Equipo" : "Export to Notes & Team"}</span>
+                                  </button>
+                                </div>
+                              )}
                             </div>
 
                             <div className="flex items-center gap-1.5 ml-auto">
@@ -1010,12 +1194,86 @@ export default function BookingsCalendar({
                             </p>
                           )}
 
-                          <div className="flex items-center justify-end pt-2 border-t border-indigo-100/60">
+                          <div className="flex items-center justify-between pt-2 border-t border-indigo-100/60 gap-2">
+                            <div className="relative" data-export-dropdown>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenDayGoogleDropdownId(openDayGoogleDropdownId === ext.id ? null : ext.id);
+                                }}
+                                className="px-2.5 py-1 bg-white hover:bg-indigo-50/50 border border-indigo-200 text-indigo-900 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                                title={lang === "es" ? "Opciones de exportación" : "Export options"}
+                              >
+                                <DownloadIcon className="w-3.5 h-3.5 text-indigo-600" />
+                                <span>{lang === "es" ? "Exportar" : "Export"}</span>
+                                <svg className={`w-3 h-3 text-indigo-400 transition-transform ${openDayGoogleDropdownId === ext.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
+                              </button>
+
+                              {openDayGoogleDropdownId === ext.id && (
+                                <div className="absolute left-0 bottom-full mb-1.5 w-52 bg-white border border-slate-200/90 rounded-2xl shadow-xl p-1.5 z-40 animate-fade-in space-y-0.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleCopyGoogleEvent(ext);
+                                      setOpenDayGoogleDropdownId(null);
+                                    }}
+                                    className="w-full px-2.5 py-1.5 text-left text-xs font-bold text-slate-700 hover:text-slate-950 hover:bg-slate-50 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                                  >
+                                    {copiedId === ext.id ? (
+                                      <ClipboardCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
+                                    ) : (
+                                      <ClipboardIcon className="w-3.5 h-3.5 text-slate-400" />
+                                    )}
+                                    <span>{copiedId === ext.id ? (lang === "es" ? "¡Copiado!" : "Copied!") : (lang === "es" ? "Copiar datos" : "Copy details")}</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleExportGoogleEventIcs(ext);
+                                      setOpenDayGoogleDropdownId(null);
+                                    }}
+                                    className="w-full px-2.5 py-1.5 text-left text-xs font-bold text-emerald-700 hover:text-emerald-950 hover:bg-emerald-50/60 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                                  >
+                                    <DownloadIcon className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span>{lang === "es" ? "Exportar .ics" : "Export .ics"}</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleExportGoogleEventCsv(ext);
+                                      setOpenDayGoogleDropdownId(null);
+                                    }}
+                                    className="w-full px-2.5 py-1.5 text-left text-xs font-bold text-slate-700 hover:text-slate-950 hover:bg-slate-50 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                                  >
+                                    <DownloadIcon className="w-3.5 h-3.5 text-slate-400" />
+                                    <span>{lang === "es" ? "Exportar CSV" : "Export CSV"}</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleExportGoogleEventToNotes(ext);
+                                      setOpenDayGoogleDropdownId(null);
+                                    }}
+                                    className="w-full px-2.5 py-1.5 text-left text-xs font-bold text-indigo-700 hover:text-indigo-900 hover:bg-indigo-50/70 rounded-xl transition-all flex items-center gap-2 cursor-pointer border-t border-slate-100"
+                                  >
+                                    <DocumentTextIcon className="w-3.5 h-3.5 text-indigo-600" />
+                                    <span>{lang === "es" ? "Exportar a Notas y Equipo" : "Export to Notes & Team"}</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+
                             <button
                               type="button"
                               onClick={() => handleDeleteGoogleEvent(ext)}
                               disabled={isDeleting}
-                              className="text-red-650 hover:bg-red-50 hover:border-red-200 font-semibold text-[10px] px-2.5 py-1 rounded-lg border border-red-100 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                              className="text-red-650 hover:bg-red-50 hover:border-red-200 font-semibold text-[10px] px-2.5 py-1 rounded-lg border border-red-100 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50 ml-auto"
                               title={lang === "es" ? "Eliminar de Google Calendar" : "Delete from Google Calendar"}
                             >
                               <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

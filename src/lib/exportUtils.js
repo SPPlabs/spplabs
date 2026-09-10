@@ -309,3 +309,119 @@ export function formatWhatsAppUrl(phone, defaultCountryCode = "34") {
   return `https://api.whatsapp.com/send?phone=${cleaned}`;
 }
 
+/**
+ * Export a single contact form submission to a CSV file.
+ */
+export function exportSingleContactToCsv(form, domain = "empresa") {
+  const headers = ["Nombre", "Email", "Teléfono", "Fecha de Recepción", "Mensaje"];
+  const rows = [[
+    escapeCsv(form.name),
+    escapeCsv(form.email),
+    escapeCsv(form.phone || ""),
+    escapeCsv(new Date(form.createdAt).toLocaleString("es-ES")),
+    escapeCsv(form.message || ""),
+  ]];
+
+  const csvContent = "\uFEFF" + [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
+  const dateStr = new Date(form.createdAt).toISOString().split("T")[0];
+  const safeName = (form.name || "contacto").replace(/[^a-zA-Z0-9_-]/g, "_");
+  downloadBlob(csvContent, `contacto_${safeName}_${dateStr}.csv`, "text/csv;charset=utf-8;");
+}
+
+/**
+ * Export a single booking to a CSV file.
+ */
+export function exportSingleBookingToCsv(booking, domain = "empresa") {
+  const headers = ["Cliente", "Fecha", "Hora", "Estado", "Email", "Teléfono", "Detalles"];
+  const rows = [[
+    escapeCsv(booking.name),
+    escapeCsv(new Date(booking.date).toLocaleDateString("es-ES")),
+    escapeCsv(booking.time || ""),
+    escapeCsv(booking.status || "PENDING"),
+    escapeCsv(booking.email || ""),
+    escapeCsv(booking.phone || ""),
+    escapeCsv(booking.message || ""),
+  ]];
+
+  const csvContent = "\uFEFF" + [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
+  const dateStr = new Date(booking.date).toISOString().split("T")[0];
+  const safeName = (booking.name || "cita").replace(/[^a-zA-Z0-9_-]/g, "_");
+  downloadBlob(csvContent, `cita_${safeName}_${dateStr}.csv`, "text/csv;charset=utf-8;");
+}
+
+/**
+ * Export a single Google Calendar event to a CSV file.
+ */
+export function exportGoogleEventToCsv(event, domain = "empresa") {
+  const headers = ["Evento / Cliente", "Fecha Inicio", "Fecha Fin", "Todo el día", "Notas / Descripción", "Origen"];
+  const rows = [[
+    escapeCsv(event.title || "Evento Google Calendar"),
+    escapeCsv(new Date(event.startDateTime).toLocaleString("es-ES")),
+    escapeCsv(new Date(event.endDateTime).toLocaleString("es-ES")),
+    escapeCsv(event.isAllDay ? "Sí" : "No"),
+    escapeCsv(event.description || ""),
+    escapeCsv("Google Calendar"),
+  ]];
+
+  const csvContent = "\uFEFF" + [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
+  const dateStr = new Date(event.startDateTime).toISOString().split("T")[0];
+  const safeTitle = (event.title || "google_evento").replace(/[^a-zA-Z0-9_-]/g, "_");
+  downloadBlob(csvContent, `google_cita_${safeTitle}_${dateStr}.csv`, "text/csv;charset=utf-8;");
+}
+
+/**
+ * Generate iCal (.ics) string for a single Google Calendar event.
+ */
+export function generateGoogleEventIcs(event, companyName = "SPP Labs") {
+  const uid = `gcal-${event.googleEventId || event.id || Date.now()}@${(companyName || "spplabs").toLowerCase().replace(/\s+/g, "")}.com`;
+  const startDate = new Date(event.startDateTime);
+  const endDate = new Date(event.endDateTime);
+
+  const pad = (n) => String(n).padStart(2, "0");
+  const dtStart = event.isAllDay
+    ? `${startDate.getFullYear()}${pad(startDate.getMonth() + 1)}${pad(startDate.getDate())}`
+    : `${startDate.getFullYear()}${pad(startDate.getMonth() + 1)}${pad(startDate.getDate())}T${pad(startDate.getHours())}${pad(startDate.getMinutes())}00`;
+  const dtEnd = event.isAllDay
+    ? `${endDate.getFullYear()}${pad(endDate.getMonth() + 1)}${pad(endDate.getDate())}`
+    : `${endDate.getFullYear()}${pad(endDate.getMonth() + 1)}${pad(endDate.getDate())}T${pad(endDate.getHours())}${pad(endDate.getMinutes())}00`;
+  const nowIcs = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+
+  const summary = escapeIcs(event.title || `Cita Google Calendar - ${companyName}`);
+  const description = escapeIcs(
+    `Evento: ${event.title || ""}\nNotas: ${event.description || ""}\nOrigen: Google Calendar (${companyName})`
+  );
+
+  const eventLines = [
+    "BEGIN:VEVENT",
+    `UID:${uid}`,
+    `DTSTAMP:${nowIcs}`,
+    event.isAllDay ? `DTSTART;VALUE=DATE:${dtStart}` : `DTSTART:${dtStart}`,
+    event.isAllDay ? `DTEND;VALUE=DATE:${dtEnd}` : `DTEND:${dtEnd}`,
+    `SUMMARY:${summary}`,
+    `DESCRIPTION:${description}`,
+    "STATUS:CONFIRMED",
+    "END:VEVENT",
+  ];
+
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//SPP Labs//Google Calendar Export//ES",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    ...eventLines,
+    "END:VCALENDAR",
+  ].join("\r\n");
+}
+
+/**
+ * Download iCal (.ics) file for a Google Calendar event.
+ */
+export function exportGoogleEventIcsFile(event, companyName = "SPP Labs") {
+  const ics = generateGoogleEventIcs(event, companyName);
+  const dateStr = new Date(event.startDateTime).toISOString().split("T")[0];
+  const safeName = (event.title || "cita_google").replace(/[^a-zA-Z0-9_-]/g, "_");
+  downloadBlob(ics, `cita_google_${safeName}_${dateStr}.ics`, "text/calendar;charset=utf-8");
+}
+
+
