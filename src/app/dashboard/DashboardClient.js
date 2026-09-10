@@ -364,15 +364,6 @@ export default function DashboardClient({
       },
     });
   };
-      console.error("Logo delete error:", err);
-      setLogoMessage({
-        text: lang === "es" ? "Error de conexión" : "Connection error",
-        type: "error",
-      });
-    } finally {
-      setIsUploadingLogo(false);
-    }
-  };
 
   // RAG Chatbot plain text info prompt
   const [chatbotContent, setChatbotContent] = useState(chatbotKnowledge?.content || "");

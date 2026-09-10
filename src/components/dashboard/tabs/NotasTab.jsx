@@ -46,6 +46,10 @@ export default function NotasTab({
   const [formPhone, setFormPhone] = useState("");
   const [formRole, setFormRole] = useState("");
 
+  const [formTag, setFormTag] = useState("General");
+  const [formColor, setFormColor] = useState("slate");
+  const [formPinned, setFormPinned] = useState(false);
+
   // Handle incoming draft exported from contacts or bookings
   useEffect(() => {
     if (pendingNoteDraft) {
@@ -67,9 +71,6 @@ export default function NotasTab({
       }
     }
   }, [pendingNoteDraft]);
-  const [formTag, setFormTag] = useState("General");
-  const [formColor, setFormColor] = useState("slate");
-  const [formPinned, setFormPinned] = useState(false);
 
   // Preset options
   const defaultTags = [
