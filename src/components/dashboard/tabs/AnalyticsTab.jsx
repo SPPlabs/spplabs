@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import WorldMap from "@/components/analytics/WorldMap";
 import SpainMap from "@/components/analytics/SpainMap";
 
@@ -237,6 +238,28 @@ export default function AnalyticsTab({
   activeChartPointIdx,
   setActiveChartPointIdx,
 }) {
+  const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (!e.target.closest("[data-visitors-period-dropdown]")) {
+        setIsPeriodDropdownOpen(false);
+      }
+    };
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, []);
+
+  const periodOptions = [
+    { value: "day", label: lang === "es" ? "Día" : "Day", badge: lang === "es" ? "Por hora (24h)" : "Hourly (24h)" },
+    { value: "week", label: lang === "es" ? "Semana" : "Week", badge: lang === "es" ? "Por día (7 días)" : "Daily (7d)" },
+    { value: "month", label: lang === "es" ? "Mes" : "Month", badge: lang === "es" ? "Por día (30 días)" : "Daily (30d)" },
+    { value: "year", label: lang === "es" ? "Año" : "Year", badge: lang === "es" ? "Por mes (12 meses)" : "Monthly (12m)" },
+    { value: "all", label: lang === "es" ? "Todo" : "All", badge: lang === "es" ? "Histórico total" : "All-time" },
+  ];
+
+  const selectedPeriodObj = periodOptions.find((p) => p.value === visitorsTimeframe) || periodOptions[1];
+
   return (
     <div className="space-y-8 animate-fade-in w-full max-w-full overflow-x-hidden">
       {/* Header stats & Timeframe Controls */}
@@ -385,7 +408,7 @@ export default function AnalyticsTab({
           </div>
 
           {/* Independent Traffic Trend Line Chart */}
-          <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm w-full relative overflow-hidden">
+          <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm w-full relative overflow-visible">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-slate-950 text-white flex items-center justify-center font-bold shadow-md">
@@ -403,27 +426,83 @@ export default function AnalyticsTab({
                 </div>
               </div>
 
-              {/* Independent Timeframe Dropdown Select for Visitors Chart */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:inline-block">
-                  {lang === "es" ? "Periodo Gráfica:" : "Chart Period:"}
-                </span>
-                <select
-                  value={visitorsTimeframe}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setVisitorsTimeframe(val);
-                    fetchVisitorsTrends(val);
+              {/* Independent SPP Labs Custom Dropdown Select for Visitors Chart */}
+              <div className="relative" data-visitors-period-dropdown>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsPeriodDropdownOpen((prev) => !prev);
                   }}
                   disabled={visitorsTrendsLoading}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs px-3.5 py-1.5 rounded-xl font-bold border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-400 cursor-pointer transition-all shadow-xs"
+                  className="bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-900 font-extrabold text-xs rounded-2xl px-3.5 py-2.5 shadow-2xs flex items-center gap-2.5 cursor-pointer transition-all hover:shadow-xs active:scale-95 disabled:opacity-60"
+                  title={lang === "es" ? "Cambiar periodo de la gráfica" : "Change chart timeframe"}
                 >
-                  <option value="day">{lang === "es" ? "Día (Por hora)" : "Day (Hourly)"}</option>
-                  <option value="week">{lang === "es" ? "Semana (Por día)" : "Week (Daily)"}</option>
-                  <option value="month">{lang === "es" ? "Mes (Por día)" : "Month (Daily)"}</option>
-                  <option value="year">{lang === "es" ? "Año (Por mes)" : "Year (Monthly)"}</option>
-                  <option value="all">{lang === "es" ? "Todo (Por mes)" : "All (Monthly)"}</option>
-                </select>
+                  <div className="w-2 h-2 rounded-full bg-cyan-500 shrink-0"></div>
+                  <span className="text-slate-400 font-bold text-[11px] uppercase tracking-wider hidden sm:inline">
+                    {lang === "es" ? "Periodo:" : "Period:"}
+                  </span>
+                  <span className="font-extrabold text-slate-900">
+                    {selectedPeriodObj.label}
+                  </span>
+                  <span className="text-slate-400 font-medium text-[11px] hidden md:inline">
+                    ({selectedPeriodObj.badge})
+                  </span>
+                  {visitorsTrendsLoading ? (
+                    <svg className="w-3.5 h-3.5 text-cyan-500 animate-spin shrink-0 ml-0.5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                  ) : (
+                    <svg
+                      className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ml-0.5 ${
+                        isPeriodDropdownOpen ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                  )}
+                </button>
+
+                {isPeriodDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-60 bg-white border border-slate-200/90 rounded-2xl shadow-xl p-1.5 z-40 animate-fade-in space-y-1">
+                    <div className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 flex items-center justify-between">
+                      <span>{lang === "es" ? "Periodo Gráfica" : "Chart Period"}</span>
+                      <span className="text-cyan-600 font-bold">SPP Labs</span>
+                    </div>
+                    {periodOptions.map((opt) => {
+                      const isSelected = visitorsTimeframe === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => {
+                            setVisitorsTimeframe(opt.value);
+                            fetchVisitorsTrends(opt.value);
+                            setIsPeriodDropdownOpen(false);
+                          }}
+                          className={`w-full px-3 py-2 text-left rounded-xl text-xs font-bold transition-all flex items-center justify-between gap-2 cursor-pointer ${
+                            isSelected
+                              ? "bg-slate-950 text-white shadow-xs"
+                              : "hover:bg-slate-100 text-slate-700"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <span className={`w-2 h-2 rounded-full ${isSelected ? "bg-cyan-400 ring-2 ring-cyan-400/30" : "bg-slate-300"}`} />
+                            <span className={isSelected ? "text-white font-extrabold" : "text-slate-800"}>{opt.label}</span>
+                          </div>
+                          <span className={`text-[10px] font-medium ${isSelected ? "text-slate-300" : "text-slate-400"}`}>
+                            {opt.badge}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
             
@@ -459,55 +538,105 @@ export default function AnalyticsTab({
                     ? `${chartLeft},${chartBottom} ${ptsString} ${chartRight},${chartBottom}` 
                     : "";
 
-                  const formatXLabel = (t) => {
+                  const monthsShortEs = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+                  const monthsShortEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                  const daysShortEs = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+                  const daysShortEn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+                  const formatPointInfo = (t) => {
+                    const isEs = lang === "es";
+                    const mNames = isEs ? monthsShortEs : monthsShortEn;
+                    const dNames = isEs ? daysShortEs : daysShortEn;
                     const tf = visitorsTimeframe;
+
                     if (tf === "day") {
-                      if (t.hour !== undefined && t.hour !== null) return `${String(t.hour).padStart(2, "0")}:00`;
-                      if (t.date && t.date.includes(":")) return t.date;
-                      return t.date || `${t.hour || 0}:00`;
+                      let h = 0;
+                      if (t.hour !== undefined && t.hour !== null) {
+                        h = Number(t.hour);
+                      } else if (t.date && t.date.includes(":")) {
+                        h = parseInt(t.date.split(":")[0], 10) || 0;
+                      }
+                      const hStr = `${String(h).padStart(2, "0")}:00`;
+                      const nextH = `${String((h + 1) % 24).padStart(2, "0")}:00`;
+                      return {
+                        tickLabel: hStr,
+                        tooltipTime: `${hStr} - ${nextH}`,
+                      };
                     }
+
                     if (tf === "week") {
                       if (t.date) {
                         const parts = t.date.split("-");
                         if (parts.length === 3) {
                           const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-                          const days = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-                          return `${days[d.getDay()]} ${parts[2]}/${parts[1]}`;
+                          const dName = dNames[d.getDay()] || "";
+                          const dNum = Number(parts[2]);
+                          const mName = mNames[Number(parts[1]) - 1] || "";
+                          return {
+                            tickLabel: `${dName} ${dNum}`,
+                            tooltipTime: `${dName}, ${dNum} ${mName} ${parts[0]}`,
+                          };
                         }
-                        return t.date;
+                        return { tickLabel: t.date, tooltipTime: t.date };
                       }
-                      return t.hour !== undefined ? `${t.hour}:00` : "";
+                      const h = t.hour !== undefined ? `${t.hour}:00` : "";
+                      return { tickLabel: h, tooltipTime: h };
                     }
+
                     if (tf === "month") {
                       if (t.date) {
                         const parts = t.date.split("-");
-                        if (parts.length === 3) return `${parts[2]}/${parts[1]}`;
-                        return t.date;
+                        if (parts.length === 3) {
+                          const dNum = Number(parts[2]);
+                          const mName = mNames[Number(parts[1]) - 1] || "";
+                          return {
+                            tickLabel: `${dNum} ${mName}`,
+                            tooltipTime: `${dNum} ${mName} ${parts[0]}`,
+                          };
+                        }
+                        return { tickLabel: t.date, tooltipTime: t.date };
                       }
-                      return "";
+                      return { tickLabel: "", tooltipTime: "" };
                     }
+
                     if (tf === "year" || tf === "all") {
                       if (t.date) {
                         const parts = t.date.split("-");
                         if (parts.length >= 2) {
-                          const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
                           const mIdx = Number(parts[1]) - 1;
-                          return months[mIdx] || parts[1];
+                          const mName = mNames[mIdx] || parts[1];
+                          const yr = parts[0] ? `'${parts[0].slice(-2)}` : "";
+                          return {
+                            tickLabel: tf === "all" ? `${mName} ${yr}` : mName,
+                            tooltipTime: `${mName} ${parts[0]}`,
+                          };
                         }
-                        return t.date;
+                        return { tickLabel: t.date, tooltipTime: t.date };
                       }
-                      return "";
+                      return { tickLabel: "", tooltipTime: "" };
                     }
-                    if (t.date) {
-                      const parts = t.date.split("-");
-                      return parts.length > 1 ? parts.slice(1).join("/") : t.date;
-                    }
-                    return t.hour !== undefined ? `${t.hour}:00` : "";
+
+                    return { tickLabel: t.date || "", tooltipTime: t.date || "" };
                   };
 
+                  // Evenly distributed ticks to eliminate cramped/overlapping labels
+                  const targetTicks = visitorsTimeframe === "week" ? Math.min(ptsArr.length, 7) : 6;
+                  const tickIndices = [];
+                  if (ptsArr.length <= targetTicks) {
+                    for (let i = 0; i < ptsArr.length; i++) tickIndices.push(i);
+                  } else {
+                    for (let i = 0; i < targetTicks; i++) {
+                      const idx = Math.round((i * (ptsArr.length - 1)) / (targetTicks - 1));
+                      if (!tickIndices.includes(idx)) {
+                        tickIndices.push(idx);
+                      }
+                    }
+                  }
+                  const tickSet = new Set(tickIndices);
+
                   const xAxisTitle = lang === "es"
-                    ? (visitorsTimeframe === "day" ? "Hora del día (24h)" : visitorsTimeframe === "week" ? "Día de la semana" : visitorsTimeframe === "month" ? "Día del mes" : visitorsTimeframe === "year" ? "Mes del año" : "Periodo")
-                    : (visitorsTimeframe === "day" ? "Hour of day (24h)" : visitorsTimeframe === "week" ? "Day of week" : visitorsTimeframe === "month" ? "Day of month" : visitorsTimeframe === "year" ? "Month" : "Period");
+                    ? (visitorsTimeframe === "day" ? "Hora del día (24h)" : visitorsTimeframe === "week" ? "Día de la semana" : visitorsTimeframe === "month" ? "Día del mes" : visitorsTimeframe === "year" ? "Mes del año" : "Periodo histórico")
+                    : (visitorsTimeframe === "day" ? "Hour of day (24h)" : visitorsTimeframe === "week" ? "Day of week" : visitorsTimeframe === "month" ? "Day of month" : visitorsTimeframe === "year" ? "Month of year" : "All-time period");
 
                   return (
                     <div className="w-full overflow-x-auto">
@@ -515,29 +644,29 @@ export default function AnalyticsTab({
                         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-64 overflow-visible">
                           <defs>
                             <linearGradient id="areaGradVibrant" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#0284c7" stopOpacity="0.25"/>
+                              <stop offset="0%" stopColor="#0284c7" stopOpacity="0.28"/>
                               <stop offset="100%" stopColor="#0284c7" stopOpacity="0.0"/>
                             </linearGradient>
                           </defs>
 
-                          {/* Y-AXIS TITLE & NUMERICAL LABELS */}
-                          <text x="5" y="16" fill="#0284c7" className="text-[10px] font-black font-mono uppercase tracking-wider">
+                          {/* Y-AXIS TITLE & NUMERICAL LABELS (KPI font: font-sans tabular-nums font-black) */}
+                          <text x={chartLeft} y="16" fill="#0284c7" className="text-[10px] font-black font-sans uppercase tracking-wider">
                             {lang === "es" ? "Visitantes" : "Visitors"}
                           </text>
 
                           {/* Y-AXIS GRID LINES & NUMBERS */}
                           <line x1={chartLeft} y1={chartTop} x2={chartRight} y2={chartTop} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 4" />
-                          <text x={chartLeft - 8} y={chartTop + 4} fill="#64748b" textAnchor="end" className="text-[10px] font-mono font-bold">
+                          <text x={chartLeft - 10} y={chartTop + 4} fill="#64748b" textAnchor="end" className="text-[11px] font-sans font-bold tabular-nums">
                             {maxVal}
                           </text>
 
                           <line x1={chartLeft} y1={chartTop + plotHeight / 2} x2={chartRight} y2={chartTop + plotHeight / 2} stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4 4" />
-                          <text x={chartLeft - 8} y={chartTop + plotHeight / 2 + 4} fill="#64748b" textAnchor="end" className="text-[10px] font-mono font-bold">
+                          <text x={chartLeft - 10} y={chartTop + plotHeight / 2 + 4} fill="#64748b" textAnchor="end" className="text-[11px] font-sans font-bold tabular-nums">
                             {midVal}
                           </text>
 
                           <line x1={chartLeft} y1={chartBottom} x2={chartRight} y2={chartBottom} stroke="#cbd5e1" strokeWidth="1.5" />
-                          <text x={chartLeft - 8} y={chartBottom + 4} fill="#64748b" textAnchor="end" className="text-[10px] font-sans font-bold tabular-nums">
+                          <text x={chartLeft - 10} y={chartBottom + 4} fill="#64748b" textAnchor="end" className="text-[11px] font-sans font-bold tabular-nums">
                             0
                           </text>
 
@@ -554,62 +683,140 @@ export default function AnalyticsTab({
                               strokeLinejoin="round" 
                             />
                           )}
-                          
-                          {/* HOVER & TOUCH TAP POINTS */}
+
+                          {/* X-AXIS TICKS AND LABELS (EVENLY SPACED & KPI FONT) */}
                           {ptsArr.map((pt, idx) => {
-                            const labelX = formatXLabel(pt.t);
+                            if (!tickSet.has(idx)) return null;
+                            const pointInfo = formatPointInfo(pt.t);
+                            return (
+                              <g key={`tick-${idx}`} className="pointer-events-none">
+                                <line x1={pt.x} y1={chartBottom} x2={pt.x} y2={chartBottom + 5} stroke="#cbd5e1" strokeWidth="1.5" />
+                                <text
+                                  x={pt.x}
+                                  y={chartBottom + 19}
+                                  fill="#64748b"
+                                  fontSize="10.5"
+                                  fontWeight="700"
+                                  textAnchor="middle"
+                                  className="font-sans tabular-nums select-none"
+                                >
+                                  {pointInfo.tickLabel}
+                                </text>
+                              </g>
+                            );
+                          })}
+                          
+                          {/* HOVER & TOUCH TAP POINTS WITH GUIDELINE AND TOOLTIP */}
+                          {ptsArr.map((pt, idx) => {
+                            const pointInfo = formatPointInfo(pt.t);
                             const countVal = Number(pt.t.count || 0);
                             const isPointActive = activeChartPointIdx === idx;
 
-                            const tooltipY = pt.y < 45 ? pt.y + 12 : pt.y - 32;
+                            const tooltipWidth = 120;
+                            const tooltipHeight = 38;
+                            const tooltipY = pt.y < 50 ? pt.y + 12 : pt.y - 46;
                             
-                            let tooltipX = pt.x - 45;
-                            if (pt.x < 55) tooltipX = pt.x - 10;
-                            if (pt.x > width - 55) tooltipX = pt.x - 80;
+                            let tooltipX = pt.x - tooltipWidth / 2;
+                            if (tooltipX < chartLeft) tooltipX = chartLeft;
+                            if (tooltipX + tooltipWidth > chartRight) tooltipX = chartRight - tooltipWidth;
 
                             return (
                               <g 
                                 key={idx} 
-                                className="cursor-pointer"
+                                className="group cursor-pointer"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
                                   setActiveChartPointIdx(prev => (prev === idx ? null : idx));
                                 }}
                               >
-                                <circle cx={pt.x} cy={pt.y} r="20" fill="transparent" className="cursor-pointer" />
+                                {/* Vertical Guideline on hover or active */}
+                                <line
+                                  x1={pt.x}
+                                  y1={pt.y}
+                                  x2={pt.x}
+                                  y2={chartBottom}
+                                  stroke="#0284c7"
+                                  strokeWidth="1.5"
+                                  strokeDasharray="3 3"
+                                  className={`pointer-events-none transition-opacity duration-150 ${
+                                    isPointActive ? "opacity-70" : "opacity-0 group-hover:opacity-40"
+                                  }`}
+                                />
 
+                                {/* Transparent wide hit area for easy mouse / touch interaction */}
+                                <circle cx={pt.x} cy={pt.y} r="18" fill="transparent" className="cursor-pointer" />
+
+                                {/* Outer glow ring on active */}
+                                {isPointActive && (
+                                  <circle 
+                                    cx={pt.x} 
+                                    cy={pt.y} 
+                                    r="8.5" 
+                                    fill="none" 
+                                    stroke="#38bdf8" 
+                                    strokeWidth="2" 
+                                    className="pointer-events-none animate-pulse" 
+                                  />
+                                )}
+
+                                {/* Data point circle */}
                                 <circle 
                                   cx={pt.x} 
                                   cy={pt.y} 
-                                  r="4.5" 
+                                  r={isPointActive ? "5" : "3.5"} 
                                   fill={isPointActive ? "#0f172a" : "#0284c7"} 
                                   stroke="#ffffff" 
                                   strokeWidth="2" 
-                                  className="pointer-events-none transition-colors" 
+                                  className="pointer-events-none transition-all duration-150 group-hover:r-[5px] group-hover:fill-slate-950" 
                                 />
 
-                                <g className={`transition-opacity duration-150 pointer-events-none ${
+                                {/* Modern High-Contrast Tooltip */}
+                                <g className={`transition-all duration-150 pointer-events-none ${
                                   isPointActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                                 }`}>
-                                  <rect x={tooltipX} y={tooltipY} width="90" height="22" rx="6" fill="#0f172a" />
-                                  <text x={tooltipX + 45} y={tooltipY + 14} fill="#ffffff" fontSize="9" fontWeight="900" textAnchor="middle" className="font-sans tabular-nums">
+                                  <rect
+                                    x={tooltipX}
+                                    y={tooltipY}
+                                    width={tooltipWidth}
+                                    height={tooltipHeight}
+                                    rx="8"
+                                    fill="#0f172a"
+                                    className="shadow-xl"
+                                  />
+                                  <text
+                                    x={tooltipX + tooltipWidth / 2}
+                                    y={tooltipY + 14}
+                                    fill="#94a3b8"
+                                    fontSize="9.5"
+                                    fontWeight="700"
+                                    textAnchor="middle"
+                                    className="font-sans tabular-nums"
+                                  >
+                                    {pointInfo.tooltipTime}
+                                  </text>
+                                  <text
+                                    x={tooltipX + tooltipWidth / 2}
+                                    y={tooltipY + 29}
+                                    fill="#38bdf8"
+                                    fontSize="11.5"
+                                    fontWeight="900"
+                                    textAnchor="middle"
+                                    className="font-sans tabular-nums"
+                                  >
                                     {countVal} {countVal === 1 ? (lang === "es" ? "visitante" : "visitor") : (lang === "es" ? "visitantes" : "visitors")}
                                   </text>
                                 </g>
-
-                                <text x={pt.x} y={chartBottom + 16} fill="#64748b" fontSize="9" fontWeight="bold" textAnchor="middle" className="pointer-events-none font-mono">
-                                  {labelX}
-                                </text>
                               </g>
                             );
                           })}
 
+                          {/* X-AXIS TITLE (KPI font: font-sans uppercase tracking-widest) */}
                           <text 
                             x={(chartLeft + chartRight) / 2} 
-                            y={chartBottom + 35} 
-                            fill="#475569" 
-                            className="text-[10px] font-black font-mono uppercase tracking-widest"
+                            y={chartBottom + 38} 
+                            fill="#64748b" 
+                            className="text-[10px] font-black font-sans uppercase tracking-widest"
                             textAnchor="middle"
                           >
                             {xAxisTitle}
