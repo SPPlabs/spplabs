@@ -61,6 +61,7 @@ export async function proxy(request) {
       path === "/bookings" ||
       path.startsWith("/api/bookings/") ||
       path.startsWith("/api/integrations/google-calendar/") ||
+      path.startsWith("/api/cron/") ||
       path === "/api/analytics" ||
       path === "/api/chat" ||
       path === "/tracker.js"

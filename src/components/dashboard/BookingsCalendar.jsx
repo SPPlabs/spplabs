@@ -78,6 +78,7 @@ export default function BookingsCalendar({
   const [formEmail, setFormEmail] = useState("");
   const [formPhone, setFormPhone] = useState("");
   const [formMessage, setFormMessage] = useState("");
+  const [formSendNotifications, setFormSendNotifications] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Google Calendar sync & disconnect state
@@ -228,6 +229,7 @@ export default function BookingsCalendar({
           message: formMessage,
           status: "CONFIRMED",
           targetWebsiteDomain: currentWebsiteDomain,
+          sendNotifications: formSendNotifications,
         }),
       });
 
@@ -238,6 +240,7 @@ export default function BookingsCalendar({
         setFormPhone("");
         setFormMessage("");
         setFormTime("09:00");
+        setFormSendNotifications(false);
         if (router) router.refresh();
       } else {
         const data = await res.json();
@@ -886,7 +889,10 @@ export default function BookingsCalendar({
               </div>
               {selectedDateStr && (
                 <button
-                  onClick={() => setShowAddModal(true)}
+                  onClick={() => {
+                    setFormSendNotifications(false);
+                    setShowAddModal(true);
+                  }}
                   className="px-3 py-1.5 bg-black hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer"
                 >
                   {lang === "es" ? "+ Cita" : "+ Event"}
@@ -1406,6 +1412,30 @@ export default function BookingsCalendar({
                   placeholder={lang === "es" ? "Detalles de la cita..." : "Booking details..."}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:border-brand-blue"
                 />
+              </div>
+
+              {/* Checkbox: Enviar notificaciones por email al cliente */}
+              <div className="p-3 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl transition-colors">
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={formSendNotifications}
+                    onChange={(e) => setFormSendNotifications(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded text-brand-blue border-slate-300 focus:ring-brand-blue cursor-pointer accent-black"
+                  />
+                  <div className="text-xs">
+                    <span className="font-bold text-slate-800 block">
+                      {lang === "es"
+                        ? "Enviar notificaciones por email al cliente"
+                        : "Send email notifications to client"}
+                    </span>
+                    <span className="text-slate-500 text-[11px] leading-relaxed block mt-0.5">
+                      {lang === "es"
+                        ? "Envía la confirmación y programa recordatorio y reseña según la configuración activa en la sección de Email y Reseñas."
+                        : "Dispatches confirmation and schedules reminder/review based on Email & Reviews settings."}
+                    </span>
+                  </div>
+                </label>
               </div>
 
               <div className="flex justify-end gap-2.5 pt-4">

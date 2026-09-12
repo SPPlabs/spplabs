@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { prisma, withRLS } from "@/lib/prisma";
 import { verifyJWT } from "@/lib/jwt";
 
-async function getAuthAndTargetWebsite(request) {
+async function getAuthAndTargetWebsite(request, bodyDomain = null) {
   const cookieStore = await cookies();
   const token = cookieStore.get("spp_session")?.value;
   if (!token) return { error: "Unauthorized", status: 401 };
@@ -12,7 +12,7 @@ async function getAuthAndTargetWebsite(request) {
   if (!session) return { error: "Unauthorized", status: 401 };
 
   const { searchParams } = new URL(request.url);
-  const requestedDomain = searchParams.get("domain")?.trim().toLowerCase();
+  const requestedDomain = (searchParams.get("domain") || bodyDomain)?.trim().toLowerCase();
 
   let targetDomain = session.domain;
   if (session.role === "ADMIN" && requestedDomain) {
@@ -57,13 +57,19 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const auth = await getAuthAndTargetWebsite(request);
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    const auth = await getAuthAndTargetWebsite(request, body?.domain);
     if (auth.error) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
     const { session, website } = auth;
-    const body = await request.json();
     const { type, title, content, email, phone, role, tag, color, pinned } = body;
 
     if (!title || !title.trim()) {
@@ -99,13 +105,19 @@ export async function POST(request) {
 
 export async function PATCH(request) {
   try {
-    const auth = await getAuthAndTargetWebsite(request);
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    const auth = await getAuthAndTargetWebsite(request, body?.domain);
     if (auth.error) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
     const { session, website } = auth;
-    const body = await request.json();
     const { id, type, title, content, email, phone, role, tag, color, pinned } = body;
 
     if (!id) {
@@ -147,6 +159,10 @@ export async function PATCH(request) {
     console.error("PATCH /api/admin/notes error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
+}
+
+export async function PUT(request) {
+  return PATCH(request);
 }
 
 export async function DELETE(request) {

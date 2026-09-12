@@ -4,6 +4,7 @@ import { verifyJWT } from "@/lib/jwt";
 import { prisma } from "@/lib/prisma";
 import { clickhouseQuery } from "@/lib/clickhouse";
 import { generateChatCompletion } from "@/core/services/ai";
+import { getSpainDate, getSpainMonthBoundariesUtc } from "@/lib/dateUtils";
 
 export async function GET(request) {
   try {
@@ -37,10 +38,10 @@ export async function GET(request) {
       return NextResponse.json({ error: "NotFound", message: "Domain not registered" }, { status: 404 });
     }
 
-    // 2. Parse year and month parameters
-    const now = new Date();
-    const currentCalYear = now.getFullYear();
-    const currentCalMonth = now.getMonth() + 1; // 1-12
+    // 2. Parse year and month parameters based on Spain (Europe/Madrid) timezone
+    const nowSpain = getSpainDate();
+    const currentCalYear = nowSpain.year;
+    const currentCalMonth = nowSpain.month; // 1-12
 
     const targetYear = parseInt(url.searchParams.get("year") || String(currentCalMonth === 1 ? currentCalYear - 1 : currentCalYear), 10);
     const targetMonth = parseInt(url.searchParams.get("month") || String(currentCalMonth === 1 ? 12 : currentCalMonth - 1), 10);
@@ -63,8 +64,9 @@ export async function GET(request) {
       console.warn("Could not query ClickHouse min event_time:", e.message);
     }
 
-    const firstActiveYear = initialDate.getFullYear();
-    const firstActiveMonth = initialDate.getMonth() + 1;
+    const firstActive = getSpainDate(initialDate);
+    const firstActiveYear = firstActive.year;
+    const firstActiveMonth = firstActive.month;
 
     // Rule: Months prior to registration/first active activity cannot be viewed
     const isBeforeActive = targetYear < firstActiveYear || (targetYear === firstActiveYear && targetMonth < firstActiveMonth);
@@ -115,13 +117,12 @@ export async function GET(request) {
       });
     }
 
-    // Build date boundaries for target month
-    const startDateObj = new Date(Date.UTC(targetYear, targetMonth - 1, 1, 0, 0, 0));
-    const lastDayOfMonth = new Date(Date.UTC(targetYear, targetMonth, 0)).getDate();
-    const endDateObj = new Date(Date.UTC(targetYear, targetMonth - 1, lastDayOfMonth, 23, 59, 59, 999));
-
-    const startISO = startDateObj.toISOString().replace("T", " ").substring(0, 19);
-    const endISO = endDateObj.toISOString().replace("T", " ").substring(0, 19);
+    // Build date boundaries for target month aligned with Spain (Europe/Madrid) timezone
+    const targetBoundaries = getSpainMonthBoundariesUtc(targetYear, targetMonth);
+    const startDateObj = targetBoundaries.startDate;
+    const endDateObj = targetBoundaries.endDate;
+    const startISO = targetBoundaries.startISO;
+    const endISO = targetBoundaries.endISO;
 
     // Build date boundaries for previous month (for optional comparison)
     let prevYear = targetYear;
@@ -130,12 +131,9 @@ export async function GET(request) {
       prevMonth = 12;
       prevYear -= 1;
     }
-    const prevStartDateObj = new Date(Date.UTC(prevYear, prevMonth - 1, 1, 0, 0, 0));
-    const prevLastDay = new Date(Date.UTC(prevYear, prevMonth, 0)).getDate();
-    const prevEndDateObj = new Date(Date.UTC(prevYear, prevMonth - 1, prevLastDay, 23, 59, 59, 999));
-
-    const prevStartISO = prevStartDateObj.toISOString().replace("T", " ").substring(0, 19);
-    const prevEndISO = prevEndDateObj.toISOString().replace("T", " ").substring(0, 19);
+    const prevBoundaries = getSpainMonthBoundariesUtc(prevYear, prevMonth);
+    const prevStartISO = prevBoundaries.startISO;
+    const prevEndISO = prevBoundaries.endISO;
 
     const monthTimeClause = `AND event_time >= '${startISO}' AND event_time <= '${endISO}'`;
     const prevMonthTimeClause = `AND event_time >= '${prevStartISO}' AND event_time <= '${prevEndISO}'`;

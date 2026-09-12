@@ -1,12 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { sendEmail } from "@/lib/email";
-import {
-  generateWelcomeContactHtml,
-  generateBookingConfirmationHtml,
-  generateBookingReminderHtml,
-  generateGoogleReviewHtml,
-} from "@/lib/emailTemplates";
+import { dispatchPendingScheduledEmails } from "@/lib/emailCronWorker";
 
 export async function GET(request) {
   return handleCronDispatch(request);
@@ -32,143 +25,16 @@ async function handleCronDispatch(request) {
       }
     }
 
-    const now = new Date();
+    const result = await dispatchPendingScheduledEmails();
 
-    // 1. Fetch pending emails scheduled for now or past
-    const pendingEmails = await prisma.scheduledEmail.findMany({
-      where: {
-        status: "PENDING",
-        scheduledFor: { lte: now },
-      },
-      include: {
-        website: {
-          include: { emailConfig: true },
-        },
-      },
-      take: 50,
-      orderBy: { scheduledFor: "asc" },
-    });
-
-    if (pendingEmails.length === 0) {
-      return NextResponse.json({
-        success: true,
-        message: "No pending emails to dispatch.",
-        processedCount: 0,
-      });
+    if (!result.success && result.error) {
+      return NextResponse.json({ error: "DispatchError", message: result.error }, { status: 500 });
     }
 
-    let successCount = 0;
-    let failedCount = 0;
-
-    // 2. Process each email
-    for (const item of pendingEmails) {
-      try {
-        const website = item.website;
-        const config = website?.emailConfig || {
-          senderName: website?.displayName || "Atención al Cliente",
-          brandColor: "#0284c7",
-          googleReviewUrl: null,
-        };
-
-        let html = "";
-        const meta = (item.metadata && typeof item.metadata === "object") ? item.metadata : {};
-
-        const customLogoUrl = config.customLogoUrl || website?.logoUrl || null;
-
-        if (item.emailType === "WELCOME_CONTACT") {
-          html = generateWelcomeContactHtml({
-            recipientName: item.recipientName,
-            companyName: website?.displayName,
-            clientDomain: website?.domain,
-            brandColor: config.brandColor,
-            messageSnippet: meta.messageSnippet || "",
-            customLogoUrl,
-          });
-        } else if (item.emailType === "BOOKING_CONFIRMATION") {
-          html = generateBookingConfirmationHtml({
-            recipientName: item.recipientName,
-            companyName: website?.displayName,
-            clientDomain: website?.domain,
-            dateStr: meta.dateStr || "",
-            timeStr: meta.timeStr || "",
-            brandColor: config.brandColor,
-            customLogoUrl,
-          });
-        } else if (item.emailType === "BOOKING_REMINDER") {
-          html = generateBookingReminderHtml({
-            recipientName: item.recipientName,
-            companyName: website?.displayName,
-            clientDomain: website?.domain,
-            dateStr: meta.dateStr || "",
-            timeStr: meta.timeStr || "",
-            brandColor: config.brandColor,
-            customLogoUrl,
-          });
-        } else if (item.emailType === "GOOGLE_REVIEW_REQUEST") {
-          html = generateGoogleReviewHtml({
-            recipientName: item.recipientName,
-            companyName: website?.displayName,
-            clientDomain: website?.domain,
-            googleReviewUrl: config.googleReviewUrl || `https://${website?.domain}`,
-            brandColor: config.brandColor,
-            customLogoUrl,
-          });
-        }
-
-        if (!html) {
-          throw new Error(`Unknown or unhandled email template type: ${item.emailType}`);
-        }
-
-        const result = await sendEmail({
-          to: item.recipientEmail,
-          subject: item.subject,
-          html,
-          senderName: config.senderName || website?.displayName,
-          replyTo: config.replyToEmail || undefined,
-          clientDomain: website?.domain,
-        });
-
-        if (result.success) {
-          await prisma.scheduledEmail.update({
-            where: { id: item.id },
-            data: {
-              status: "SENT",
-              sentAt: new Date(),
-              error: null,
-            },
-          });
-          successCount++;
-        } else {
-          await prisma.scheduledEmail.update({
-            where: { id: item.id },
-            data: {
-              status: "FAILED",
-              error: result.error || "Failed to deliver",
-            },
-          });
-          failedCount++;
-        }
-      } catch (err) {
-        console.error(`Error processing email ID ${item.id}:`, err);
-        await prisma.scheduledEmail.update({
-          where: { id: item.id },
-          data: {
-            status: "FAILED",
-            error: err.message || "Execution exception",
-          },
-        });
-        failedCount++;
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      processedCount: pendingEmails.length,
-      successCount,
-      failedCount,
-    });
+    return NextResponse.json(result);
   } catch (error) {
-    console.error("Cron scheduled-emails error:", error);
+    console.error("Cron scheduled-emails route error:", error);
     return NextResponse.json({ error: "InternalError", message: error.message }, { status: 500 });
   }
 }
+

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { verifyJWT } from "@/lib/jwt";
 import { sendEmail } from "@/lib/email";
 import { generateTestEmailHtml } from "@/lib/emailTemplates";
+import { getSpainDate, getSpainMonthBoundariesUtc } from "@/lib/dateUtils";
 
 export async function GET(request) {
   try {
@@ -35,9 +36,10 @@ export async function GET(request) {
       return NextResponse.json({ error: "NotFound", message: "Website not found" }, { status: 404 });
     }
 
-    const now = new Date();
-    const startOfMonth = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0));
-    const endOfMonth = new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999));
+    const spainNow = getSpainDate();
+    const boundaries = getSpainMonthBoundariesUtc(spainNow.year, spainNow.month);
+    const startOfMonth = boundaries.startDate;
+    const endOfMonth = boundaries.endDate;
 
     let timeWhere = {};
     if (timeframe === "day") {

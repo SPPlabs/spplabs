@@ -193,10 +193,12 @@ export default function NotasTab({
         pinned: formPinned,
       };
 
+      const domainParam = currentWebsite?.domain ? `?domain=${encodeURIComponent(currentWebsite.domain)}` : "";
+
       if (isEditing && editingNoteId) {
         payload.id = editingNoteId;
-        const res = await fetch("/api/admin/notes", {
-          method: "PUT",
+        const res = await fetch(`/api/admin/notes${domainParam}`, {
+          method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
@@ -206,10 +208,10 @@ export default function NotasTab({
           setIsFormModalOpen(false);
           router.refresh();
         } else {
-          alert(data.message || "Error al actualizar la nota");
+          alert(data.error || data.message || "Error al actualizar la nota");
         }
       } else {
-        const res = await fetch("/api/admin/notes", {
+        const res = await fetch(`/api/admin/notes${domainParam}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -220,7 +222,7 @@ export default function NotasTab({
           setIsFormModalOpen(false);
           router.refresh();
         } else {
-          alert(data.message || "Error al crear la nota");
+          alert(data.error || data.message || "Error al crear la nota");
         }
       }
     } catch (err) {
@@ -236,12 +238,14 @@ export default function NotasTab({
     if (e) e.stopPropagation();
     try {
       const newPinned = !note.pinned;
-      const res = await fetch("/api/admin/notes", {
-        method: "PUT",
+      const domainParam = currentWebsite?.domain ? `?domain=${encodeURIComponent(currentWebsite.domain)}` : "";
+      const res = await fetch(`/api/admin/notes${domainParam}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: note.id,
           pinned: newPinned,
+          domain: currentWebsite?.domain,
         }),
       });
       const data = await res.json();
@@ -259,7 +263,8 @@ export default function NotasTab({
   // Delete note
   const handleDeleteNote = async (id) => {
     try {
-      const res = await fetch(`/api/admin/notes?id=${id}`, {
+      const domainParam = currentWebsite?.domain ? `&domain=${encodeURIComponent(currentWebsite.domain)}` : "";
+      const res = await fetch(`/api/admin/notes?id=${id}${domainParam}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -269,7 +274,7 @@ export default function NotasTab({
         setDeleteConfirmId(null);
         router.refresh();
       } else {
-        alert(data.message || "Error al eliminar");
+        alert(data.error || data.message || "Error al eliminar");
       }
     } catch (err) {
       console.error("Delete note error:", err);

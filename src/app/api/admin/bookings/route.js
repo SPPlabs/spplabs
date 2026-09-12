@@ -161,7 +161,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
 
-    const { date, time, name, phone, email, message, status, targetWebsiteDomain } = body;
+    const { date, time, name, phone, email, message, status, targetWebsiteDomain, sendNotifications } = body;
 
     const trimmedName = typeof name === "string" ? name.trim() : "";
     const trimmedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
@@ -249,6 +249,123 @@ export async function POST(request) {
         websiteDisplayName: website.displayName || "SPP Labs",
       });
     }).catch((e) => console.error("Failed to create Google Calendar event on admin POST:", e));
+
+    // If sendNotifications is enabled, dispatch confirmation & schedule reminders/reviews based on emailConfig
+    if (Boolean(sendNotifications)) {
+      (async () => {
+        try {
+          const emailConfig = await prisma.websiteEmailConfig.findUnique({
+            where: { websiteId: website.id },
+          });
+
+          const companyName = website.displayName || "Atención al Cliente";
+          const brandColor = emailConfig?.brandColor || "#0284c7";
+          const dateStr = parsedDate.toLocaleDateString("es-ES", { dateStyle: "long" });
+          const timeStr = trimmedTime;
+          const customLogoUrl = emailConfig?.customLogoUrl || website.logoUrl || null;
+
+          const { sendEmail } = await import("@/lib/email");
+          const { generateBookingConfirmationHtml } = await import("@/lib/emailTemplates");
+          const { getSpainDateTimeUtc } = await import("@/lib/dateUtils");
+
+          // A. Immediate Booking Confirmation
+          if (!emailConfig || emailConfig.enableBookingConfirm) {
+            const html = generateBookingConfirmationHtml({
+              recipientName: trimmedName,
+              companyName,
+              clientDomain: website.domain,
+              dateStr,
+              timeStr,
+              brandColor,
+              customLogoUrl,
+            });
+
+            const sendRes = await sendEmail({
+              to: trimmedEmail,
+              subject: `Confirmación de cita - ${companyName} (${dateStr} a las ${timeStr})`,
+              html,
+              senderName: emailConfig?.senderName || companyName,
+              replyTo: emailConfig?.replyToEmail || undefined,
+              clientDomain: website.domain,
+            });
+
+            await prisma.scheduledEmail.create({
+              data: {
+                websiteId: website.id,
+                recipientEmail: trimmedEmail,
+                recipientName: trimmedName,
+                subject: `Confirmación de cita - ${companyName}`,
+                emailType: "BOOKING_CONFIRMATION",
+                status: sendRes.success ? "SENT" : "FAILED",
+                scheduledFor: new Date(),
+                sentAt: sendRes.success ? new Date() : null,
+                error: sendRes.error || null,
+                metadata: { bookingId: newBooking.id, dateStr, timeStr },
+              },
+            });
+          }
+
+          // Exact appointment timestamp in UTC respecting Spain (Europe/Madrid)
+          const appointmentDateTime = getSpainDateTimeUtc(date, trimmedTime);
+          const now = new Date();
+
+          // B. Schedule Reminder
+          if (!emailConfig || emailConfig.enableBookingReminder) {
+            const reminderHoursBefore = emailConfig?.reminderHoursBefore ?? 24;
+            let reminderScheduledDate = new Date(appointmentDateTime.getTime() - reminderHoursBefore * 60 * 60 * 1000);
+
+            if (reminderScheduledDate <= now) {
+              const twoHoursBefore = new Date(appointmentDateTime.getTime() - 2 * 60 * 60 * 1000);
+              if (twoHoursBefore > now) {
+                reminderScheduledDate = twoHoursBefore;
+              } else {
+                const thirtyMinsBefore = new Date(appointmentDateTime.getTime() - 30 * 60 * 1000);
+                if (thirtyMinsBefore > now) {
+                  reminderScheduledDate = thirtyMinsBefore;
+                }
+              }
+            }
+
+            if (reminderScheduledDate > now) {
+              await prisma.scheduledEmail.create({
+                data: {
+                  websiteId: website.id,
+                  recipientEmail: trimmedEmail,
+                  recipientName: trimmedName,
+                  subject: `Recordatorio de tu cita en ${companyName}`,
+                  emailType: "BOOKING_REMINDER",
+                  status: "PENDING",
+                  scheduledFor: reminderScheduledDate,
+                  metadata: { bookingId: newBooking.id, dateStr, timeStr },
+                },
+              });
+            }
+          }
+
+          // C. Schedule Google Review Booster
+          const isBookingReviewEnabled = emailConfig ? (emailConfig.enableBookingReviewRequest ?? emailConfig.enableReviewRequest ?? true) : true;
+          if (isBookingReviewEnabled) {
+            const reviewDelayHours = emailConfig?.bookingReviewDelayHours ?? emailConfig?.reviewDelayHours ?? 2;
+            const reviewScheduledDate = new Date(appointmentDateTime.getTime() + reviewDelayHours * 60 * 60 * 1000);
+
+            await prisma.scheduledEmail.create({
+              data: {
+                websiteId: website.id,
+                recipientEmail: trimmedEmail,
+                recipientName: trimmedName,
+                subject: `¿Qué tal fue tu experiencia en ${companyName}? ⭐`,
+                emailType: "GOOGLE_REVIEW_REQUEST",
+                status: "PENDING",
+                scheduledFor: reviewScheduledDate,
+                metadata: { bookingId: newBooking.id, source: "dashboard_booking" },
+              },
+            });
+          }
+        } catch (err) {
+          console.error("Dashboard booking email dispatch error:", err);
+        }
+      })();
+    }
 
     return NextResponse.json({ success: true, data: newBooking });
   } catch (error) {

@@ -11,5 +11,13 @@ export async function register(): Promise<void> {
     } catch (error) {
       console.error("Failed to execute initializeAI inside Next.js instrumentation hook:", error);
     }
+
+    try {
+      const { startScheduledEmailBackgroundWorker } = await import("@/lib/emailCronWorker");
+      startScheduledEmailBackgroundWorker(60000); // Check every 60 seconds
+    } catch (error) {
+      console.error("Failed to start scheduled email background worker:", error);
+    }
   }
 }
+

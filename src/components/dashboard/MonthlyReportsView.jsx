@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import MonthlyReportPdfTemplate from "@/components/dashboard/MonthlyReportPdfTemplate";
+import { getSpainDate } from "@/lib/dateUtils";
 import {
   TableIcon,
   DownloadIcon,
@@ -59,11 +60,11 @@ export default function MonthlyReportsView({
   lang = "es",
 }) {
   const isEs = lang === "es";
-  const now = new Date();
-  const currentCalYear = now.getFullYear();
-  const currentCalMonth = now.getMonth() + 1; // 1-12
+  const nowSpain = getSpainDate();
+  const currentCalYear = nowSpain.year;
+  const currentCalMonth = nowSpain.month; // 1-12
 
-  // Last closed month (e.g. if today is August 2026, default is July 2026)
+  // Last closed month (e.g. if today is August 2026 in Spain, default is July 2026)
   const defaultYear = currentCalMonth === 1 ? currentCalYear - 1 : currentCalYear;
   const defaultMonth = currentCalMonth === 1 ? 12 : currentCalMonth - 1;
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyApiKey, hashApiKey, isLegacyApiKeyHash } from "@/lib/crypto";
 import { prisma, withRLS } from "@/lib/prisma";
+import { getSpainDateTimeUtc } from "@/lib/dateUtils";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -263,22 +264,36 @@ export async function POST(request) {
           });
         }
 
+        // Compute exact appointment timestamp in UTC respecting Spain (Europe/Madrid) timezone
+        const appointmentDateTime = getSpainDateTimeUtc(date, time);
+        const now = new Date();
+
         // B. Schedule Reminder (e.g. 24h before appointment)
         if (!emailConfig || emailConfig.enableBookingReminder) {
-          const [hours, minutes] = (time.trim() || "09:00").split(":").map(Number);
-          const appointmentDateTime = new Date(parsedDate);
-          appointmentDateTime.setHours(hours || 9, minutes || 0, 0, 0);
-
           const reminderHoursBefore = emailConfig?.reminderHoursBefore ?? 24;
-          const reminderScheduledDate = new Date(appointmentDateTime.getTime() - reminderHoursBefore * 60 * 60 * 1000);
+          let reminderScheduledDate = new Date(appointmentDateTime.getTime() - reminderHoursBefore * 60 * 60 * 1000);
 
-          if (reminderScheduledDate > new Date()) {
+          // Fallback: If appointment was booked with less than reminderHoursBefore notice,
+          // schedule a reminder in an intelligent window before the appointment
+          if (reminderScheduledDate <= now) {
+            const twoHoursBefore = new Date(appointmentDateTime.getTime() - 2 * 60 * 60 * 1000);
+            if (twoHoursBefore > now) {
+              reminderScheduledDate = twoHoursBefore;
+            } else {
+              const thirtyMinsBefore = new Date(appointmentDateTime.getTime() - 30 * 60 * 1000);
+              if (thirtyMinsBefore > now) {
+                reminderScheduledDate = thirtyMinsBefore;
+              }
+            }
+          }
+
+          if (reminderScheduledDate > now) {
             await prisma.scheduledEmail.create({
               data: {
                 websiteId: website.id,
                 recipientEmail: email.trim().toLowerCase(),
                 recipientName: name.trim(),
-                subject: `Recordatorio de tu cita mañana en ${companyName}`,
+                subject: `Recordatorio de tu cita en ${companyName}`,
                 emailType: "BOOKING_REMINDER",
                 status: "PENDING",
                 scheduledFor: reminderScheduledDate,
@@ -291,10 +306,6 @@ export async function POST(request) {
         // C. Schedule Google Review Booster for Booking (e.g. 2h after appointment)
         const isBookingReviewEnabled = emailConfig ? (emailConfig.enableBookingReviewRequest ?? emailConfig.enableReviewRequest ?? true) : true;
         if (isBookingReviewEnabled) {
-          const [hours, minutes] = (time.trim() || "09:00").split(":").map(Number);
-          const appointmentDateTime = new Date(parsedDate);
-          appointmentDateTime.setHours(hours || 9, minutes || 0, 0, 0);
-
           const reviewDelayHours = emailConfig?.bookingReviewDelayHours ?? emailConfig?.reviewDelayHours ?? 2;
           const reviewScheduledDate = new Date(appointmentDateTime.getTime() + reviewDelayHours * 60 * 60 * 1000);
 
