@@ -11,7 +11,7 @@ export default function GlobalGalaxyCTA() {
       <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/15 via-purple-600/15 to-brand-green/15 pointer-events-none" />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10">
         <span className="text-xs font-bold uppercase tracking-widest text-purple-400 bg-purple-500/10 border border-purple-500/20 px-4 py-1.5 rounded-full inline-block mb-4">
-          {lang === "es" ? "Promoción Especial 2026-2027" : "Special Offer 2026-2027"}
+          {lang === "es" ? "Promoción Especial para Nuevos Clientes" : "Special Promotion for New Clients"}
         </span>
         
         <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white mb-4 leading-tight">
