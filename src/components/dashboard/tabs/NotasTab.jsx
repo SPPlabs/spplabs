@@ -67,7 +67,7 @@ export default function NotasTab({
   const [formPhone, setFormPhone] = useState("");
   const [formRole, setFormRole] = useState("");
 
-  const [formTag, setFormTag] = useState("General");
+  const [formTag, setFormTag] = useState("");
   const [formColor, setFormColor] = useState("slate");
   const [formPinned, setFormPinned] = useState(false);
 
@@ -83,7 +83,7 @@ export default function NotasTab({
       setFormEmail(pendingNoteDraft.email || "");
       setFormPhone(pendingNoteDraft.phone || "");
       setFormRole(pendingNoteDraft.role || "");
-      setFormTag(pendingNoteDraft.tag || "General");
+      setFormTag(pendingNoteDraft.tag || "");
       setFormColor(pendingNoteDraft.color || "blue");
       setFormPinned(Boolean(pendingNoteDraft.pinned));
       if (viewingNote) setViewingNote(null);
@@ -95,14 +95,17 @@ export default function NotasTab({
     return () => clearTimeout(timer);
   }, [pendingNoteDraft, viewingNote, onClearPendingNoteDraft]);
 
-  // Preset options
-  const defaultTags = useMemo(
+  // Popular suggestions shown ONLY when creating a new tag in the modal
+  const popularTagSuggestions = useMemo(
     () => [
-      "General",
       isEs ? "Urgente" : "Urgent",
       isEs ? "Idea" : "Idea",
       isEs ? "En progreso" : "In Progress",
-      isEs ? "Importante" : "Important",
+      "VIP",
+      isEs ? "Reunión" : "Meeting",
+      isEs ? "Presupuesto" : "Budget",
+      isEs ? "Facturación" : "Billing",
+      isEs ? "Revisión" : "Review",
       isEs ? "Completado" : "Completed",
     ],
     [isEs]
@@ -177,20 +180,19 @@ export default function NotasTab({
     }
   };
 
-  // Combined tags list (default presets + custom user tags + note tags)
+  // Combined tags list: ONLY active tags from notes + tags created by the user
   const allAvailableTags = useMemo(() => {
     const set = new Set();
-    defaultTags.forEach((t) => {
-      if (t && t.trim()) set.add(t.trim());
-    });
+    // 1. Tags created by the user
     customTags.forEach((t) => {
       if (t && t.trim()) set.add(t.trim());
     });
+    // 2. Active tags present on notes
     notes.forEach((n) => {
       if (n.tag && n.tag.trim()) set.add(n.tag.trim());
     });
     return Array.from(set);
-  }, [defaultTags, customTags, notes]);
+  }, [customTags, notes]);
 
   // Filtered tags inside the SPP Labs dropdown
   const filteredDropdownTags = useMemo(() => {
@@ -254,7 +256,7 @@ export default function NotasTab({
     setFormEmail("");
     setFormPhone("");
     setFormRole("");
-    setFormTag("General");
+    setFormTag(allAvailableTags.length > 0 ? allAvailableTags[0] : "");
     setFormColor(preselectedType === "CLIENT" ? "blue" : preselectedType === "STAFF" ? "emerald" : "slate");
     setFormPinned(false);
     setIsFormTagDropdownOpen(false);
@@ -273,7 +275,7 @@ export default function NotasTab({
     setFormEmail(note.email || "");
     setFormPhone(note.phone || "");
     setFormRole(note.role || "");
-    setFormTag(note.tag || "General");
+    setFormTag(note.tag || "");
     setFormColor(note.color || "slate");
     setFormPinned(Boolean(note.pinned));
     setIsFormTagDropdownOpen(false);
@@ -297,10 +299,14 @@ export default function NotasTab({
         email: formEmail.trim() || null,
         phone: formPhone.trim() || null,
         role: formRole.trim() || null,
-        tag: formTag.trim() || "General",
+        tag: formTag.trim() || null,
         color: formColor,
         pinned: formPinned,
       };
+
+      if (formTag && formTag.trim()) {
+        handleCreateNewTag(formTag.trim());
+      }
 
       const domainParam = currentWebsite?.domain ? `?domain=${encodeURIComponent(currentWebsite.domain)}` : "";
 
@@ -1004,7 +1010,9 @@ export default function NotasTab({
                   >
                     <span className="flex items-center gap-1.5 truncate">
                       <TagIcon className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                      <span className="truncate font-bold text-slate-800">#{formTag || "General"}</span>
+                      <span className="truncate font-bold text-slate-800">
+                        {formTag ? `#${formTag}` : (isEs ? "Sin etiqueta (seleccionar o crear)" : "No tag (select or create)")}
+                      </span>
                     </span>
                     <svg
                       className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${
@@ -1045,6 +1053,36 @@ export default function NotasTab({
 
                       {/* Tag List */}
                       <div className="max-h-36 overflow-y-auto space-y-0.5 pr-0.5 scrollbar-thin">
+                        {/* Option: Sin etiqueta */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormTag("");
+                            setIsFormTagDropdownOpen(false);
+                            setFormTagSearchQuery("");
+                          }}
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                            !formTag
+                              ? "bg-slate-100 text-slate-900 font-bold"
+                              : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                          }`}
+                        >
+                          <span className="flex items-center gap-1.5 truncate italic">
+                            <span>{isEs ? "Sin etiqueta" : "No tag"}</span>
+                          </span>
+                          {!formTag && (
+                            <svg
+                              className="w-3.5 h-3.5 text-slate-600 shrink-0"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                            </svg>
+                          )}
+                        </button>
+
                         {filteredDropdownTags.map((tag) => {
                           const isSelected = (formTag || "").toLowerCase() === tag.toLowerCase();
                           return (
@@ -1080,6 +1118,12 @@ export default function NotasTab({
                             </button>
                           );
                         })}
+
+                        {filteredDropdownTags.length === 0 && !showQuickCreateOption && (
+                          <div className="py-2 px-2 text-center text-[10px] text-slate-400 font-medium">
+                            {isEs ? "No hay otras etiquetas activas." : "No other active tags."}
+                          </div>
+                        )}
 
                         {/* Quick create item if user types a new tag name */}
                         {showQuickCreateOption && (
@@ -1432,17 +1476,7 @@ export default function NotasTab({
                   {isEs ? "Sugerencias populares:" : "Popular suggestions:"}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
-                  {[
-                    isEs ? "Urgente" : "Urgent",
-                    isEs ? "Idea" : "Idea",
-                    isEs ? "En progreso" : "In Progress",
-                    "VIP",
-                    isEs ? "Reunión" : "Meeting",
-                    isEs ? "Presupuesto" : "Budget",
-                    isEs ? "Facturación" : "Billing",
-                    isEs ? "Revisión" : "Review",
-                    isEs ? "Completado" : "Completed",
-                  ].map((sug) => (
+                  {popularTagSuggestions.map((sug) => (
                     <button
                       key={sug}
                       type="button"
