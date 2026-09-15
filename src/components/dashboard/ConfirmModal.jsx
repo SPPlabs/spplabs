@@ -23,12 +23,13 @@ export default function ConfirmModal({
   const resolvedConfirm = confirmText || (lang === "es" ? "Eliminar" : "Delete");
   const resolvedCancel = (cancelText && cancelText !== "Cancelar") ? cancelText : (lang === "es" ? "Cancelar" : "Cancel");
 
-  // Reset input value whenever modal opens or closes
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       setInputValue("");
     }
-  }, [isOpen]);
+  }
 
   // Handle Escape key to close modal
   useEffect(() => {
@@ -64,9 +65,6 @@ export default function ConfirmModal({
       aria-modal="true"
     >
       <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 sm:p-7 shadow-2xl animate-scale-up text-center relative text-slate-900 overflow-hidden">
-        {/* Top subtle decorative accent bar */}
-        <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-rose-500 via-red-500 to-amber-500" />
-
         {/* Warning Icon Badge */}
         <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100/80 flex items-center justify-center mx-auto mb-4 shadow-2xs ring-4 ring-rose-50/60">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

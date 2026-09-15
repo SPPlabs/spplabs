@@ -344,13 +344,13 @@ export default function AnalyticsTab({
 
       {analyticsData && (
         <div className="space-y-8 w-full">
-          {/* Color-Coded KPI Overview Stat Cards */}
+          {/* KPI Overview Stat Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 w-full relative">
-            <div className={`bg-white border-t-4 border-t-purple-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover transition-all relative ${
+            <div className={`bg-white border border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover transition-all relative ${
               activeTooltipId === "totalHits" ? "z-50 shadow-md scale-[1.01]" : "z-10 hover:z-30"
             }`}>
               <div className="flex items-center justify-center gap-1 mb-1.5">
-                <span className="text-[11px] font-extrabold text-purple-600 uppercase tracking-wider">{t.analyticsTotalHits}</span>
+                <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">{t.analyticsTotalHits}</span>
                 {renderInfoTooltip("totalHits", lang === "es" ? "Suma total de páginas cargadas y solicitudes registradas en la web." : "Total number of pageviews and requests logged on the site.", "shift-right-mobile")}
               </div>
               <span className="text-3xl font-black font-sans tabular-nums text-slate-950 tracking-tight">{analyticsData.overview.visitors}</span>
@@ -359,11 +359,11 @@ export default function AnalyticsTab({
               </span>
             </div>
 
-            <div className={`bg-white border-t-4 border-t-sky-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover transition-all relative ${
+            <div className={`bg-white border border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover transition-all relative ${
               activeTooltipId === "uniques" ? "z-50 shadow-md scale-[1.01]" : "z-10 hover:z-30"
             }`}>
               <div className="flex items-center justify-center gap-1 mb-1.5">
-                <span className="text-[11px] font-extrabold text-sky-600 uppercase tracking-wider">{t.analyticsUniques}</span>
+                <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">{t.analyticsUniques}</span>
                 {renderInfoTooltip("uniques", lang === "es" ? "Número de usuarios o dispositivos distintos que han accedido a la web." : "Number of distinct users or individual devices visiting the site.", "shift-left-mobile")}
               </div>
               <span className="text-3xl font-black font-sans tabular-nums text-slate-950 tracking-tight">{analyticsData.overview.unique_visitors}</span>
@@ -372,11 +372,11 @@ export default function AnalyticsTab({
               </span>
             </div>
 
-            <div className={`bg-white border-t-4 border-t-emerald-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover transition-all relative ${
+            <div className={`bg-white border border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover transition-all relative ${
               activeTooltipId === "sessions" ? "z-50 shadow-md scale-[1.01]" : "z-10 hover:z-30"
             }`}>
               <div className="flex items-center justify-center gap-1 mb-1.5">
-                <span className="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">{t.analyticsSessions}</span>
+                <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">{t.analyticsSessions}</span>
                 {renderInfoTooltip("sessions", lang === "es" ? "Grupos de interacción continua realizadas por un visitante sin interrupciones." : "Continuous periods of user activity on the site without long breaks.", "shift-right-mobile")}
               </div>
               <span className="text-3xl font-black font-sans tabular-nums text-slate-950 tracking-tight">{analyticsData.overview.sessions}</span>
@@ -385,22 +385,22 @@ export default function AnalyticsTab({
               </span>
             </div>
 
-            <div className={`bg-white border-t-4 border-t-amber-500 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover transition-all relative ${
+            <div className={`bg-white border border-slate-200/80 rounded-2xl p-5 text-center shadow-sm glass-card-hover transition-all relative ${
               activeTooltipId === "duration" ? "z-50 shadow-md scale-[1.01]" : "z-10 hover:z-30"
             }`}>
               <div className="flex items-center justify-center gap-1 mb-1.5">
-                <span className="text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">{t.analyticsDuration}</span>
+                <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">{t.analyticsDuration}</span>
                 {renderInfoTooltip("duration", lang === "es" ? "Tiempo medio estimado que pasa cada visitante dentro del sitio web." : "Average time a visitor spends navigating pages during a session.", "shift-left-mobile")}
               </div>
               <span className="text-3xl font-black font-sans tabular-nums text-slate-950 tracking-tight">{analyticsData.overview.avg_duration}s</span>
               <span className="text-[10px] text-slate-500 font-bold block mt-1">{lang === "es" ? "Promedio por sesión" : "Avg per session"}</span>
             </div>
 
-            <div className={`bg-white border-t-4 border-t-indigo-600 border-x border-b border-slate-200/80 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm glass-card-hover flex flex-col justify-center items-center transition-all relative ${
+            <div className={`bg-white border border-slate-200/80 rounded-2xl p-5 text-center col-span-2 lg:col-span-1 shadow-sm glass-card-hover flex flex-col justify-center items-center transition-all relative ${
               activeTooltipId === "bounce" ? "z-50 shadow-md scale-[1.01]" : "z-10 hover:z-30"
             }`}>
               <div className="flex items-center justify-center gap-1 mb-1.5">
-                <span className="text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider">{t.analyticsBounce}</span>
+                <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">{t.analyticsBounce}</span>
                 {renderInfoTooltip("bounce", lang === "es" ? "Porcentaje de visitas donde el usuario salió tras ver solo una página." : "Percentage of visits where the user left after viewing only one page.", "shift-left")}
               </div>
               <span className="text-3xl font-black font-sans tabular-nums text-slate-950 tracking-tight">{analyticsData.overview.bounce_rate}%</span>

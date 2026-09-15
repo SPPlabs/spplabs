@@ -210,10 +210,8 @@ export default function OverviewTab({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
           {/* Alert: Bookings */}
-          <div className={`p-5 rounded-2xl border-l-4 border transition-all flex items-center gap-4 bg-white shadow-xs ${
-            pendingBookingsCount > 0 
-              ? "border-l-amber-500 border-slate-200/90 text-amber-900" 
-              : "border-l-slate-400 border-slate-200/90 text-slate-800"
+          <div className={`p-5 rounded-2xl border border-slate-200/90 transition-all flex items-center gap-4 bg-white shadow-xs ${
+            pendingBookingsCount > 0 ? "text-amber-900" : "text-slate-800"
           }`}>
             <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200/60 flex items-center justify-center text-amber-600 shrink-0">
               <CalendarIcon className="w-5 h-5" />
@@ -232,10 +230,8 @@ export default function OverviewTab({
           </div>
 
           {/* Alert: Contact forms */}
-          <div className={`p-5 rounded-2xl border-l-4 border transition-all flex items-center gap-4 bg-white shadow-xs ${
-            recentContactsCount > 0 
-              ? "border-l-blue-600 border-slate-200/90 text-blue-900" 
-              : "border-l-slate-400 border-slate-200/90 text-slate-800"
+          <div className={`p-5 rounded-2xl border border-slate-200/90 transition-all flex items-center gap-4 bg-white shadow-xs ${
+            recentContactsCount > 0 ? "text-blue-900" : "text-slate-800"
           }`}>
             <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200/60 flex items-center justify-center text-blue-600 shrink-0">
               <MailIcon className="w-5 h-5" />
@@ -254,7 +250,7 @@ export default function OverviewTab({
           </div>
 
           {/* Alert: Announcements */}
-          <div className="p-5 rounded-2xl border-l-4 border-l-purple-600 border border-slate-200/90 text-slate-800 flex items-center gap-4 bg-white shadow-xs">
+          <div className="p-5 rounded-2xl border border-slate-200/90 text-slate-800 flex items-center gap-4 bg-white shadow-xs">
             <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200/60 flex items-center justify-center text-purple-600 shrink-0">
               <MegaphoneIcon className="w-5 h-5" />
             </div>

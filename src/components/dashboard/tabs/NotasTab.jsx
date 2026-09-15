@@ -11,6 +11,7 @@ import {
   PinIcon,
   TrashIcon,
   CloseIcon,
+  TagIcon,
 } from "@/components/dashboard/DashboardIcons";
 
 export default function NotasTab({
@@ -29,6 +30,26 @@ export default function NotasTab({
   const [activeTypeFilter, setActiveTypeFilter] = useState("ALL"); // "ALL" | "NOTE" | "CLIENT" | "STAFF"
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTagFilter, setSelectedTagFilter] = useState("ALL"); // "ALL" or tag string
+
+  // Tag management & SPP Labs custom dropdown state
+  const [customTags, setCustomTags] = useState(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const storageKey = `spp_notes_tags_${currentWebsite?.domain || "default"}`;
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {
+      // Ignore
+    }
+    return [];
+  });
+  const [isCreateTagModalOpen, setIsCreateTagModalOpen] = useState(false);
+  const [newTagNameInput, setNewTagNameInput] = useState("");
+  const [isFormTagDropdownOpen, setIsFormTagDropdownOpen] = useState(false);
+  const [formTagSearchQuery, setFormTagSearchQuery] = useState("");
 
   // Modals state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -52,7 +73,8 @@ export default function NotasTab({
 
   // Handle incoming draft exported from contacts or bookings
   useEffect(() => {
-    if (pendingNoteDraft) {
+    if (!pendingNoteDraft) return;
+    const timer = setTimeout(() => {
       setIsEditing(false);
       setEditingNoteId(null);
       setFormType(pendingNoteDraft.type || "CLIENT");
@@ -69,18 +91,22 @@ export default function NotasTab({
       if (onClearPendingNoteDraft) {
         onClearPendingNoteDraft();
       }
-    }
-  }, [pendingNoteDraft]);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [pendingNoteDraft, viewingNote, onClearPendingNoteDraft]);
 
   // Preset options
-  const defaultTags = [
-    "General",
-    isEs ? "Urgente" : "Urgent",
-    isEs ? "Idea" : "Idea",
-    isEs ? "En progreso" : "In Progress",
-    isEs ? "Importante" : "Important",
-    isEs ? "Completado" : "Completed",
-  ];
+  const defaultTags = useMemo(
+    () => [
+      "General",
+      isEs ? "Urgente" : "Urgent",
+      isEs ? "Idea" : "Idea",
+      isEs ? "En progreso" : "In Progress",
+      isEs ? "Importante" : "Important",
+      isEs ? "Completado" : "Completed",
+    ],
+    [isEs]
+  );
 
   const colorOptions = [
     { id: "slate", label: isEs ? "Gris Neutro" : "Slate", bg: "bg-slate-100", border: "border-slate-300", ring: "ring-slate-400" },
@@ -92,24 +118,93 @@ export default function NotasTab({
     { id: "purple", label: isEs ? "Púrpura" : "Purple", bg: "bg-purple-100", border: "border-purple-300", ring: "ring-purple-500" },
   ];
 
-  // Counts for tabs
-  const counts = useMemo(() => {
-    return {
-      all: notes.length,
-      note: notes.filter((n) => n.type === "NOTE").length,
-      client: notes.filter((n) => n.type === "CLIENT").length,
-      staff: notes.filter((n) => n.type === "STAFF").length,
+  // Synchronize custom tags on cross-tab storage changes
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const storageKey = `spp_notes_tags_${currentWebsite?.domain || "default"}`;
+    const handleStorage = (e) => {
+      if (e.key === storageKey && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) {
+            setCustomTags(parsed);
+          }
+        } catch {
+          // Ignore
+        }
+      }
     };
-  }, [notes]);
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [currentWebsite?.domain]);
 
-  // Unique tags for filter bar
-  const availableTags = useMemo(() => {
+  // Close tag dropdown on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (!e.target.closest("[data-form-tag-dropdown]")) {
+        setIsFormTagDropdownOpen(false);
+      }
+    };
+    if (isFormTagDropdownOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [isFormTagDropdownOpen]);
+
+  // Create tag handler with persistence
+  const handleCreateNewTag = (rawTagName, autoSelectInForm = false) => {
+    if (!rawTagName) return;
+    const cleaned = rawTagName.trim().replace(/^#+/, "").trim();
+    if (!cleaned) return;
+
+    setCustomTags((prev) => {
+      const exists = prev.some((t) => t.toLowerCase() === cleaned.toLowerCase());
+      if (exists) return prev;
+      const next = [...prev, cleaned];
+      try {
+        const storageKey = `spp_notes_tags_${currentWebsite?.domain || "default"}`;
+        localStorage.setItem(storageKey, JSON.stringify(next));
+      } catch (err) {
+        console.error("Error saving custom tags:", err);
+      }
+      return next;
+    });
+
+    if (autoSelectInForm) {
+      setFormTag(cleaned);
+    }
+  };
+
+  // Combined tags list (default presets + custom user tags + note tags)
+  const allAvailableTags = useMemo(() => {
     const set = new Set();
+    defaultTags.forEach((t) => {
+      if (t && t.trim()) set.add(t.trim());
+    });
+    customTags.forEach((t) => {
+      if (t && t.trim()) set.add(t.trim());
+    });
     notes.forEach((n) => {
       if (n.tag && n.tag.trim()) set.add(n.tag.trim());
     });
     return Array.from(set);
-  }, [notes]);
+  }, [defaultTags, customTags, notes]);
+
+  // Filtered tags inside the SPP Labs dropdown
+  const filteredDropdownTags = useMemo(() => {
+    if (!formTagSearchQuery.trim()) return allAvailableTags;
+    const q = formTagSearchQuery.trim().toLowerCase().replace(/^#+/, "");
+    return allAvailableTags.filter((t) => t.toLowerCase().includes(q));
+  }, [allAvailableTags, formTagSearchQuery]);
+
+  // Show quick create option when query doesn't match an existing tag
+  const showQuickCreateOption = useMemo(() => {
+    const q = formTagSearchQuery.trim().replace(/^#+/, "").trim();
+    if (!q) return false;
+    return !allAvailableTags.some((t) => t.toLowerCase() === q.toLowerCase());
+  }, [allAvailableTags, formTagSearchQuery]);
 
   // Filtered notes
   const filteredNotes = useMemo(() => {
@@ -139,6 +234,16 @@ export default function NotasTab({
     });
   }, [notes, activeTypeFilter, selectedTagFilter, searchQuery]);
 
+  // Counts for tabs
+  const counts = useMemo(() => {
+    return {
+      all: notes.length,
+      note: notes.filter((n) => n.type === "NOTE").length,
+      client: notes.filter((n) => n.type === "CLIENT").length,
+      staff: notes.filter((n) => n.type === "STAFF").length,
+    };
+  }, [notes]);
+
   // Open creation modal
   const handleOpenCreate = (preselectedType = "NOTE") => {
     setIsEditing(false);
@@ -152,6 +257,8 @@ export default function NotasTab({
     setFormTag("General");
     setFormColor(preselectedType === "CLIENT" ? "blue" : preselectedType === "STAFF" ? "emerald" : "slate");
     setFormPinned(false);
+    setIsFormTagDropdownOpen(false);
+    setFormTagSearchQuery("");
     setIsFormModalOpen(true);
   };
 
@@ -169,6 +276,8 @@ export default function NotasTab({
     setFormTag(note.tag || "General");
     setFormColor(note.color || "slate");
     setFormPinned(Boolean(note.pinned));
+    setIsFormTagDropdownOpen(false);
+    setFormTagSearchQuery("");
     if (viewingNote) setViewingNote(null);
     setIsFormModalOpen(true);
   };
@@ -474,31 +583,32 @@ export default function NotasTab({
           </div>
         </div>
 
-        {/* Optional Tag Filter Row (if tags exist) */}
-        {availableTags.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">
-              {isEs ? "Etiquetas:" : "Tags:"}
+        {/* Always Displayed Tags Filter Row */}
+        <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 text-xs w-full sm:w-auto scrollbar-none">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
+              <TagIcon className="w-3.5 h-3.5 text-slate-400" />
+              <span>{isEs ? "Etiquetas:" : "Tags:"}</span>
             </span>
             <button
               type="button"
               onClick={() => setSelectedTagFilter("ALL")}
-              className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer shrink-0 ${
+              className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer shrink-0 ${
                 selectedTagFilter === "ALL"
-                  ? "bg-slate-800 text-white"
+                  ? "bg-slate-900 text-white shadow-2xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
               {isEs ? "Todas" : "All"}
             </button>
-            {availableTags.map((tag) => (
+            {allAvailableTags.map((tag) => (
               <button
                 key={tag}
                 type="button"
-                onClick={() => setSelectedTagFilter(tag)}
-                className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer shrink-0 ${
+                onClick={() => setSelectedTagFilter(selectedTagFilter === tag ? "ALL" : tag)}
+                className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer shrink-0 ${
                   selectedTagFilter === tag
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-indigo-600 text-white shadow-2xs"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
@@ -506,7 +616,22 @@ export default function NotasTab({
               </button>
             ))}
           </div>
-        )}
+
+          <button
+            type="button"
+            onClick={() => {
+              setNewTagNameInput("");
+              setIsCreateTagModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-xl text-[11px] font-bold transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap active:scale-95"
+            title={isEs ? "Crear una nueva etiqueta" : "Create a new tag"}
+          >
+            <svg className="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>{isEs ? "Crear Etiqueta" : "Create Tag"}</span>
+          </button>
+        </div>
       </div>
 
       {/* Grid of Notes */}
@@ -853,24 +978,154 @@ export default function NotasTab({
 
               {/* Tag & Color Chooser */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
-                {/* Tag Selection */}
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-                    {isEs ? "Etiqueta" : "Tag"}
-                  </label>
-                  <input
-                    type="text"
-                    value={formTag}
-                    onChange={(e) => setFormTag(e.target.value)}
-                    placeholder="General, Urgente, Idea..."
-                    list="tag-options"
-                    className="w-full h-9 bg-slate-50 border border-slate-200 rounded-xl px-3 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white"
-                  />
-                  <datalist id="tag-options">
-                    {defaultTags.map((dt) => (
-                      <option key={dt} value={dt} />
-                    ))}
-                  </datalist>
+                {/* Tag Selection - SPP Labs Custom Dropdown */}
+                <div className="relative" data-form-tag-dropdown>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      {isEs ? "Etiqueta" : "Tag"}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNewTagNameInput("");
+                        setIsCreateTagModalOpen(true);
+                      }}
+                      className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 cursor-pointer flex items-center gap-0.5"
+                    >
+                      <span>+ {isEs ? "Crear etiqueta" : "Create tag"}</span>
+                    </button>
+                  </div>
+
+                  {/* SPP Labs Dropdown Trigger */}
+                  <button
+                    type="button"
+                    onClick={() => setIsFormTagDropdownOpen(!isFormTagDropdownOpen)}
+                    className="w-full h-9 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl px-3 flex items-center justify-between text-xs font-semibold text-slate-900 transition-all cursor-pointer focus:outline-none focus:border-brand-blue focus:bg-white"
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <TagIcon className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                      <span className="truncate font-bold text-slate-800">#{formTag || "General"}</span>
+                    </span>
+                    <svg
+                      className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${
+                        isFormTagDropdownOpen ? "rotate-180 text-slate-600" : ""
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                  </button>
+
+                  {/* SPP Labs Dropdown Menu */}
+                  {isFormTagDropdownOpen && (
+                    <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200/90 rounded-2xl shadow-xl p-2 z-50 animate-fade-in flex flex-col">
+                      {/* Search / Filter Inside Dropdown */}
+                      <div className="relative mb-1.5">
+                        <input
+                          type="text"
+                          value={formTagSearchQuery}
+                          onChange={(e) => setFormTagSearchQuery(e.target.value)}
+                          placeholder={isEs ? "Buscar o escribir etiqueta..." : "Search or type tag..."}
+                          className="w-full h-8 pl-7 pr-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white"
+                          autoFocus
+                        />
+                        <svg
+                          className="w-3.5 h-3.5 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                      </div>
+
+                      {/* Tag List */}
+                      <div className="max-h-36 overflow-y-auto space-y-0.5 pr-0.5 scrollbar-thin">
+                        {filteredDropdownTags.map((tag) => {
+                          const isSelected = (formTag || "").toLowerCase() === tag.toLowerCase();
+                          return (
+                            <button
+                              key={tag}
+                              type="button"
+                              onClick={() => {
+                                setFormTag(tag);
+                                setIsFormTagDropdownOpen(false);
+                                setFormTagSearchQuery("");
+                              }}
+                              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                                isSelected
+                                  ? "bg-indigo-50 text-indigo-700 font-bold"
+                                  : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                              }`}
+                            >
+                              <span className="flex items-center gap-1.5 truncate">
+                                <span className="text-indigo-400 font-normal">#</span>
+                                <span className="truncate">{tag}</span>
+                              </span>
+                              {isSelected && (
+                                <svg
+                                  className="w-3.5 h-3.5 text-indigo-600 shrink-0"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.5"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                              )}
+                            </button>
+                          );
+                        })}
+
+                        {/* Quick create item if user types a new tag name */}
+                        {showQuickCreateOption && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const cleaned = formTagSearchQuery.trim().replace(/^#+/, "").trim();
+                              if (cleaned) {
+                                handleCreateNewTag(cleaned, true);
+                                setIsFormTagDropdownOpen(false);
+                                setFormTagSearchQuery("");
+                              }
+                            }}
+                            className="w-full flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-bold text-indigo-600 hover:bg-indigo-50 transition-all cursor-pointer border-t border-dashed border-slate-200 mt-1"
+                          >
+                            <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            <span className="truncate">
+                              {isEs
+                                ? `Crear "#${formTagSearchQuery.trim().replace(/^#+/, "")}"`
+                                : `Create "#${formTagSearchQuery.trim().replace(/^#+/, "")}"`}
+                            </span>
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Footer button inside dropdown */}
+                      <div className="pt-1.5 mt-1 border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsFormTagDropdownOpen(false);
+                            setNewTagNameInput(formTagSearchQuery.trim().replace(/^#+/, ""));
+                            setIsCreateTagModalOpen(true);
+                          }}
+                          className="w-full flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-[11px] font-bold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all cursor-pointer"
+                        >
+                          <svg className="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                          </svg>
+                          <span>{isEs ? "+ Crear nueva etiqueta" : "+ Create new tag"}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Color Chooser */}
@@ -1097,6 +1352,132 @@ export default function NotasTab({
                 {isEs ? "Eliminar" : "Delete"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* CREATE NEW TAG MODAL */}
+      {isCreateTagModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[60] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 shadow-2xl animate-scale-up">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shadow-2xs">
+                  <TagIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-base">
+                    {isEs ? "Crear Nueva Etiqueta" : "Create New Tag"}
+                  </h3>
+                  <p className="text-[11px] font-medium text-slate-400">
+                    {isEs
+                      ? "Clasifica y organiza tus notas, clientes o equipo"
+                      : "Classify and organize notes, clients or staff"}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCreateTagModalOpen(false);
+                  setNewTagNameInput("");
+                }}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-all cursor-pointer"
+              >
+                <CloseIcon className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const cleaned = newTagNameInput.trim().replace(/^#+/, "").trim();
+                if (cleaned) {
+                  handleCreateNewTag(cleaned, isFormModalOpen);
+                  setIsCreateTagModalOpen(false);
+                  setNewTagNameInput("");
+                }
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                  {isEs ? "Nombre de la Etiqueta" : "Tag Name"}
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-black text-indigo-500">
+                    #
+                  </span>
+                  <input
+                    type="text"
+                    required
+                    value={newTagNameInput}
+                    onChange={(e) => setNewTagNameInput(e.target.value)}
+                    placeholder={isEs ? "ej. Presupuesto, VIP, Proyecto Alpha..." : "e.g. Budget, VIP, Project Alpha..."}
+                    maxLength={30}
+                    autoFocus
+                    className="w-full h-11 pl-8 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white transition-all shadow-2xs"
+                  />
+                </div>
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  {isEs
+                    ? "Se añadirá a la lista de etiquetas para filtrar y asignar a cualquier tipo de nota."
+                    : "Will be added to the tags list to filter and assign to any note type."}
+                </span>
+              </div>
+
+              {/* Suggestions chips */}
+              <div>
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                  {isEs ? "Sugerencias populares:" : "Popular suggestions:"}
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    isEs ? "Urgente" : "Urgent",
+                    isEs ? "Idea" : "Idea",
+                    isEs ? "En progreso" : "In Progress",
+                    "VIP",
+                    isEs ? "Reunión" : "Meeting",
+                    isEs ? "Presupuesto" : "Budget",
+                    isEs ? "Facturación" : "Billing",
+                    isEs ? "Revisión" : "Review",
+                    isEs ? "Completado" : "Completed",
+                  ].map((sug) => (
+                    <button
+                      key={sug}
+                      type="button"
+                      onClick={() => setNewTagNameInput(sug)}
+                      className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[11px] font-semibold transition-all cursor-pointer"
+                    >
+                      #{sug}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCreateTagModalOpen(false);
+                    setNewTagNameInput("");
+                  }}
+                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                >
+                  {isEs ? "Cancelar" : "Cancel"}
+                </button>
+                <button
+                  type="submit"
+                  disabled={!newTagNameInput.trim()}
+                  className="px-5 py-2.5 bg-slate-950 hover:bg-black text-white text-xs font-black rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95"
+                >
+                  <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  <span>{isEs ? "Crear Etiqueta" : "Create Tag"}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

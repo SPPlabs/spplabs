@@ -132,6 +132,8 @@ export async function GET(request) {
       prevYear -= 1;
     }
     const prevBoundaries = getSpainMonthBoundariesUtc(prevYear, prevMonth);
+    const prevStartDateObj = prevBoundaries.startDate;
+    const prevEndDateObj = prevBoundaries.endDate;
     const prevStartISO = prevBoundaries.startISO;
     const prevEndISO = prevBoundaries.endISO;
 
