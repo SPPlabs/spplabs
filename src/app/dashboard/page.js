@@ -239,11 +239,36 @@ export default async function DashboardPage(props) {
     status: e.status,
   }));
 
+  // Fetch or initialize Dashboard State for this viewer on the target website
+  let rawState = await prisma.websiteDashboardState.findUnique({
+    where: {
+      viewerWebsiteId_targetWebsiteId: {
+        viewerWebsiteId: session.id,
+        targetWebsiteId: currentWebsite.id,
+      },
+    },
+  });
+
+  const dashboardState = {
+    lastContactView: rawState?.lastContactView?.toISOString() || null,
+    lastBookingView: rawState?.lastBookingView?.toISOString() || null,
+    lastNotificationView: rawState?.lastNotificationView?.toISOString() || null,
+    lastSupportView: rawState?.lastSupportView?.toISOString() || null,
+    lastAnalyticsView: rawState?.lastAnalyticsView?.toISOString() || null,
+    lastConversationView: rawState?.lastConversationView?.toISOString() || null,
+    viewedBookingIds: rawState?.viewedBookingIds || [],
+  };
+
+  const serializedCurrentWebsite = {
+    ...currentWebsite,
+    lastAnalyticsAt: currentWebsite.lastAnalyticsAt?.toISOString() || null,
+  };
+
   return (
     <DashboardClient
       session={session}
       allWebsites={allWebsites}
-      currentWebsite={currentWebsite}
+      currentWebsite={serializedCurrentWebsite}
       contactForms={contactForms}
       bookings={bookings}
       apiKeys={apiKeys}
@@ -254,6 +279,7 @@ export default async function DashboardPage(props) {
       dashboardNotes={dashboardNotes}
       googleCalendarConnection={googleCalendarConnection}
       externalCalendarEvents={externalCalendarEvents}
+      initialDashboardState={dashboardState}
     />
   );
 }

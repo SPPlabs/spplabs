@@ -60,6 +60,10 @@ export default function ClientesTab({
   externalCalendarEvents = [],
   handleExportToNotes = null,
   openConfirmModal = null,
+  viewedBookingIds = [],
+  onViewBookings = null,
+  unreadContactsCount = 0,
+  unreadBookingsCount = 0,
 }) {
   const [copiedId, setCopiedId] = useState(null);
   const [contactSearch, setContactSearch] = useState("");
@@ -791,7 +795,7 @@ export default function ClientesTab({
             <button
               type="button"
               onClick={() => setBookingsViewMode("calendar")}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 relative ${
                 bookingsViewMode === "calendar"
                   ? "bg-white text-slate-950 shadow-xs font-black"
                   : "text-slate-600 hover:text-slate-900"
@@ -799,6 +803,11 @@ export default function ClientesTab({
             >
               <CalendarDaysIcon className="w-4 h-4 text-emerald-600" />
               <span>{lang === "es" ? "Vista Calendario" : "Calendar View"}</span>
+              {unreadBookingsCount > 0 && (
+                <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-black bg-red-600 text-white animate-pulse">
+                  {unreadBookingsCount}
+                </span>
+              )}
             </button>
             <button
               type="button"
@@ -833,6 +842,8 @@ export default function ClientesTab({
             externalCalendarEvents={externalCalendarEvents}
             onExportToNotes={handleExportToNotes}
             openConfirmModal={openConfirmModal}
+            viewedBookingIds={viewedBookingIds}
+            onViewBookings={onViewBookings}
           />
         )}
 
@@ -1172,31 +1183,39 @@ export default function ClientesTab({
                             </div>
                           </div>
 
-                          {/* Status Pill */}
-                          <span
-                            className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border shrink-0 inline-flex items-center gap-1.5 ${
-                              isConfirmed
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                : isCancelled
-                                ? "bg-rose-50 text-rose-700 border-rose-200"
-                                : "bg-amber-50 text-amber-800 border-amber-200"
-                            }`}
-                          >
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {!viewedBookingIds.includes(b.id) && (
+                              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0 inline-flex items-center gap-1 bg-red-50 text-red-700 border-red-200 animate-pulse">
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
+                                {lang === "es" ? "Nueva" : "New"}
+                              </span>
+                            )}
+                            {/* Status Pill */}
                             <span
-                              className={`w-1.5 h-1.5 rounded-full ${
+                              className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border shrink-0 inline-flex items-center gap-1.5 ${
                                 isConfirmed
-                                  ? "bg-emerald-500"
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                   : isCancelled
-                                  ? "bg-rose-500"
-                                  : "bg-amber-500 animate-ping"
+                                  ? "bg-rose-50 text-rose-700 border-rose-200"
+                                  : "bg-amber-50 text-amber-800 border-amber-200"
                               }`}
-                            />
-                            {isConfirmed
-                              ? (lang === "es" ? "Confirmada" : "Confirmed")
-                              : isCancelled
-                              ? (lang === "es" ? "Cancelada" : "Cancelled")
-                              : (lang === "es" ? "Pendiente" : "Pending")}
-                          </span>
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  isConfirmed
+                                    ? "bg-emerald-500"
+                                    : isCancelled
+                                    ? "bg-rose-500"
+                                    : "bg-amber-500 animate-ping"
+                                }`}
+                              />
+                              {isConfirmed
+                                ? (lang === "es" ? "Confirmada" : "Confirmed")
+                                : isCancelled
+                                ? (lang === "es" ? "Cancelada" : "Cancelled")
+                                : (lang === "es" ? "Pendiente" : "Pending")}
+                            </span>
+                          </div>
                         </div>
 
                         {/* Structured Contact Details Grid */}

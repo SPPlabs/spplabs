@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   ClipboardIcon,
   ClipboardCheckIcon,
@@ -49,6 +49,8 @@ export default function BookingsCalendar({
   router,
   onExportToNotes = null,
   openConfirmModal = null,
+  viewedBookingIds = [],
+  onViewBookings = null,
 }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState("");
@@ -270,21 +272,24 @@ export default function BookingsCalendar({
   );
 
   // Map SPP Labs Bookings by Date (YYYY-MM-DD)
-  const bookingsMap = {};
-  bookings.forEach((b) => {
-    let dateStr = "";
-    if (typeof b.date === "string") {
-      dateStr = b.date.split("T")[0];
-    } else if (b.date instanceof Date) {
-      dateStr = b.date.toISOString().split("T")[0];
-    }
-    if (dateStr) {
-      if (!bookingsMap[dateStr]) {
-        bookingsMap[dateStr] = [];
+  const bookingsMap = useMemo(() => {
+    const map = {};
+    (bookings || []).forEach((b) => {
+      let dateStr = "";
+      if (typeof b.date === "string") {
+        dateStr = b.date.split("T")[0];
+      } else if (b.date instanceof Date) {
+        dateStr = b.date.toISOString().split("T")[0];
       }
-      bookingsMap[dateStr].push(b);
-    }
-  });
+      if (dateStr) {
+        if (!map[dateStr]) {
+          map[dateStr] = [];
+        }
+        map[dateStr].push(b);
+      }
+    });
+    return map;
+  }, [bookings]);
 
   // Filter out any external event that corresponds to a native SPP Labs booking
   const uniqueExternalEvents = externalCalendarEvents.filter(
@@ -314,15 +319,15 @@ export default function BookingsCalendar({
     return d.getFullYear() === year && d.getMonth() === month;
   });
 
-  // Calculate upcoming and previous months booking counts and pending notification badges
+  // Calculate upcoming and previous months booking counts and unread notification badges
   const isPendingBooking = (b) =>
     b.status === "PENDING" ||
     b.status === "pending" ||
     (!b.status && b.status !== "CONFIRMED" && b.status !== "CANCELLED");
 
-  let nextMonthsPendingCount = 0;
+  let nextMonthsUnreadCount = 0;
   let nextMonthsTotalCount = 0;
-  let prevMonthsPendingCount = 0;
+  let prevMonthsUnreadCount = 0;
   let prevMonthsTotalCount = 0;
 
   bookings.forEach((b) => {
@@ -345,13 +350,13 @@ export default function BookingsCalendar({
 
     const isFuture = bYear > year || (bYear === year && bMonth > month);
     const isPast = bYear < year || (bYear === year && bMonth < month);
-    const pending = isPendingBooking(b);
+    const isUnread = !viewedBookingIds.includes(b.id);
 
     if (isFuture) {
-      if (pending) nextMonthsPendingCount++;
+      if (isUnread) nextMonthsUnreadCount++;
       nextMonthsTotalCount++;
     } else if (isPast) {
-      if (pending) prevMonthsPendingCount++;
+      if (isUnread) prevMonthsUnreadCount++;
       prevMonthsTotalCount++;
     }
   });
@@ -379,7 +384,30 @@ export default function BookingsCalendar({
   const handleDayClick = (day) => {
     const formattedDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     setSelectedDateStr(formattedDate);
+
+    // If there are unread bookings on this day, mark them as viewed!
+    const dayBookings = bookingsMap[formattedDate] || [];
+    const unreadBookingIds = dayBookings
+      .filter((b) => b.status !== "CANCELLED" && !viewedBookingIds.includes(b.id))
+      .map((b) => b.id);
+
+    if (unreadBookingIds.length > 0 && onViewBookings) {
+      onViewBookings(unreadBookingIds);
+    }
   };
+
+  // If a day is already selected and has unread bookings, mark them as viewed
+  useEffect(() => {
+    if (selectedDateStr && onViewBookings) {
+      const dayBookings = bookingsMap[selectedDateStr] || [];
+      const unreadBookingIds = dayBookings
+        .filter((b) => b.status !== "CANCELLED" && !viewedBookingIds.includes(b.id))
+        .map((b) => b.id);
+      if (unreadBookingIds.length > 0) {
+        onViewBookings(unreadBookingIds);
+      }
+    }
+  }, [selectedDateStr, bookingsMap, viewedBookingIds, onViewBookings]);
 
   const handleCopySingleBooking = async (b) => {
     const text = formatBookingToText(b, lang);
@@ -723,10 +751,10 @@ export default function BookingsCalendar({
                   className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl transition-all cursor-pointer text-sm font-bold relative"
                   aria-label={lang === "es" ? "Mes anterior" : "Previous month"}
                   title={
-                    prevMonthsPendingCount > 0
+                    prevMonthsUnreadCount > 0
                       ? lang === "es"
-                        ? `${prevMonthsPendingCount} cita(s) pendiente(s) en meses anteriores`
-                        : `${prevMonthsPendingCount} pending booking(s) in previous months`
+                        ? `${prevMonthsUnreadCount} cita(s) nueva(s) en meses anteriores`
+                        : `${prevMonthsUnreadCount} unread booking(s) in previous months`
                       : prevMonthsTotalCount > 0
                       ? lang === "es"
                         ? `${prevMonthsTotalCount} cita(s) en meses anteriores`
@@ -737,11 +765,11 @@ export default function BookingsCalendar({
                   }
                 >
                   &larr;
-                  {prevMonthsPendingCount > 0 ? (
+                  {prevMonthsUnreadCount > 0 ? (
                     <span className="absolute -top-1.5 -left-1.5 z-10 flex items-center justify-center pointer-events-none">
                       <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
                       <span className="relative z-10 flex items-center justify-center min-w-[15px] h-4 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[9px] font-black leading-none shadow-sm border border-white/60">
-                        {prevMonthsPendingCount}
+                        {prevMonthsUnreadCount}
                       </span>
                     </span>
                   ) : prevMonthsTotalCount > 0 ? (
@@ -754,10 +782,10 @@ export default function BookingsCalendar({
                   className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl transition-all cursor-pointer text-sm font-bold relative"
                   aria-label={lang === "es" ? "Mes siguiente" : "Next month"}
                   title={
-                    nextMonthsPendingCount > 0
+                    nextMonthsUnreadCount > 0
                       ? lang === "es"
-                        ? `${nextMonthsPendingCount} cita(s) pendiente(s) en meses posteriores`
-                        : `${nextMonthsPendingCount} pending booking(s) in upcoming months`
+                        ? `${nextMonthsUnreadCount} cita(s) nueva(s) en meses posteriores`
+                        : `${nextMonthsUnreadCount} unread booking(s) in upcoming months`
                       : nextMonthsTotalCount > 0
                       ? lang === "es"
                         ? `${nextMonthsTotalCount} cita(s) en meses posteriores`
@@ -768,11 +796,11 @@ export default function BookingsCalendar({
                   }
                 >
                   &rarr;
-                  {nextMonthsPendingCount > 0 ? (
+                  {nextMonthsUnreadCount > 0 ? (
                     <span className="absolute -top-1.5 -right-1.5 z-10 flex items-center justify-center pointer-events-none">
                       <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
                       <span className="relative z-10 flex items-center justify-center min-w-[15px] h-4 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[9px] font-black leading-none shadow-sm border border-white/60">
-                        {nextMonthsPendingCount}
+                        {nextMonthsUnreadCount}
                       </span>
                     </span>
                   ) : nextMonthsTotalCount > 0 ? (
@@ -827,6 +855,12 @@ export default function BookingsCalendar({
                 dayStyles = "bg-slate-900 border-slate-900 text-white shadow-md scale-95 font-black";
               }
 
+              const unreadDayBookings = dayBookings.filter(
+                (b) => b.status !== "CANCELLED" && !viewedBookingIds.includes(b.id)
+              );
+              const unreadCount = unreadDayBookings.length;
+              const hasUnread = unreadCount > 0;
+
               return (
                 <button
                   key={day}
@@ -835,12 +869,12 @@ export default function BookingsCalendar({
                 >
                   <span className="text-xs font-extrabold block">{day}</span>
 
-                  {/* Notification Badge with Number of Pending Bookings */}
-                  {hasPending && (
+                  {/* Notification Badge with Number of Unread Bookings on this specific day */}
+                  {hasUnread && (
                     <span className="absolute -top-1.5 -right-1.5 z-20 flex items-center justify-center pointer-events-none">
                       <span className="absolute -inset-0.5 rounded-full bg-red-500 opacity-75 animate-ping" />
                       <span className="relative z-10 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[9px] font-black leading-none shadow-sm border border-white/60">
-                        {pendingCount}
+                        {unreadCount}
                       </span>
                     </span>
                   )}

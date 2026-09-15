@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -41,6 +41,7 @@ export default function DashboardClient({
   dashboardNotes = [],
   googleCalendarConnection = null,
   externalCalendarEvents = [],
+  initialDashboardState = null,
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -384,6 +385,11 @@ export default function DashboardClient({
   const [announcementSuccess, setAnnouncementSuccess] = useState(false);
   const [announcementsList, setAnnouncementsList] = useState(notifications || []);
 
+  // Chatbot Conversations State
+  const [conversationsList, setConversationsList] = useState([]);
+  const [conversationsLoading, setConversationsLoading] = useState(false);
+  const [selectedConversation, setSelectedConversation] = useState(null);
+
   const isImpersonating = session.role === "ADMIN" && currentWebsite.domain !== "spplabs.es";
 
   // Mobile Drawer State
@@ -400,34 +406,220 @@ export default function DashboardClient({
   const [visitorsTrends, setVisitorsTrends] = useState([]);
   const [visitorsTrendsLoading, setVisitorsTrendsLoading] = useState(false);
 
-  // Track visited/cleared tabs for notification badges
-  const [clearedTabs, setClearedTabs] = useState(new Set());
-  const prevTabRef = useRef(activeTab);
+  // Dashboard state tracking for notification view persistence
+  const [dashboardState, setDashboardState] = useState(() => ({
+    lastContactView: initialDashboardState?.lastContactView || null,
+    lastBookingView: initialDashboardState?.lastBookingView || null,
+    lastNotificationView: initialDashboardState?.lastNotificationView || null,
+    lastSupportView: initialDashboardState?.lastSupportView || null,
+    lastAnalyticsView: initialDashboardState?.lastAnalyticsView || null,
+    lastConversationView: initialDashboardState?.lastConversationView || null,
+    viewedBookingIds: initialDashboardState?.viewedBookingIds || [],
+  }));
 
-  // Clear "overview" badge ONLY when switching away from overview to another tab.
-  // Clear all other tabs (analytics, clientes, ia, notificaciones) when entered.
+  const updateDashboardView = useCallback(async (tabOrAction, extraData = {}) => {
+    try {
+      let body = { targetDomain: currentWebsite?.domain };
+      if (tabOrAction === "view_bookings") {
+        body.action = "view_bookings";
+        body.bookingIds = extraData.bookingIds || [];
+      } else {
+        body.action = "view_tab";
+        body.tab = tabOrAction;
+      }
+
+      const res = await fetch("/api/dashboard/state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.state) {
+          setDashboardState(data.state);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to update dashboard view state:", e);
+    }
+  }, [currentWebsite?.domain]);
+
+  const handleViewBookings = useCallback((bookingIds) => {
+    if (!bookingIds || !Array.isArray(bookingIds) || bookingIds.length === 0) return;
+    setDashboardState(prev => {
+      const set = new Set(prev.viewedBookingIds || []);
+      bookingIds.forEach(id => set.add(id));
+      return {
+        ...prev,
+        viewedBookingIds: Array.from(set),
+      };
+    });
+    updateDashboardView("view_bookings", { bookingIds });
+  }, [updateDashboardView]);
+
+  // When activeTab changes, mark the specific section as viewed
   useEffect(() => {
-    if (prevTabRef.current && prevTabRef.current !== activeTab) {
-      const leavingTab = prevTabRef.current;
-      setClearedTabs(prev => {
-        if (prev.has(leavingTab)) return prev;
-        const next = new Set(prev);
-        next.add(leavingTab);
-        return next;
-      });
+    if (activeTab === "analytics") {
+      setDashboardState(prev => ({ ...prev, lastAnalyticsView: new Date().toISOString() }));
+      updateDashboardView("analytics");
+    } else if (activeTab === "notificaciones") {
+      setDashboardState(prev => ({
+        ...prev,
+        lastNotificationView: new Date().toISOString(),
+        ...(session.role === "ADMIN" && currentWebsite?.domain === "spplabs.es" ? { lastSupportView: new Date().toISOString() } : {})
+      }));
+      updateDashboardView("notificaciones");
+    } else if (activeTab === "clientes") {
+      // Mark contact forms viewed upon opening the clientes tab
+      setDashboardState(prev => ({ ...prev, lastContactView: new Date().toISOString() }));
+      updateDashboardView("clientes_contacts");
+      // Note: Bookings are strictly marked only when clicking/entering that day in the calendar
+    } else if (activeTab === "ia") {
+      setDashboardState(prev => ({ ...prev, lastConversationView: new Date().toISOString() }));
+      updateDashboardView("ia");
     }
+  }, [activeTab, session.role, currentWebsite?.domain, updateDashboardView]);
 
-    if (activeTab && activeTab !== "overview") {
-      setClearedTabs(prev => {
-        if (prev.has(activeTab)) return prev;
-        const next = new Set(prev);
-        next.add(activeTab);
-        return next;
-      });
+  // Granular unread calculation based on DB timestamps
+  const unreadContactsCount = useMemo(() => {
+    return (contactForms || []).filter(c => {
+      if (!dashboardState.lastContactView) return true;
+      return new Date(c.createdAt) > new Date(dashboardState.lastContactView);
+    }).length;
+  }, [contactForms, dashboardState.lastContactView]);
+
+  const unreadBookingsCount = useMemo(() => {
+    return (bookings || []).filter(b => {
+      if (b.status === "CANCELLED") return false;
+      return !dashboardState.viewedBookingIds?.includes(b.id);
+    }).length;
+  }, [bookings, dashboardState.viewedBookingIds]);
+
+  const hasNewAnalytics = useMemo(() => {
+    return Boolean(
+      currentWebsite?.lastAnalyticsAt &&
+      (!dashboardState.lastAnalyticsView || new Date(currentWebsite.lastAnalyticsAt) > new Date(dashboardState.lastAnalyticsView))
+    );
+  }, [currentWebsite?.lastAnalyticsAt, dashboardState.lastAnalyticsView]);
+
+  const unreadAnnouncementsCount = useMemo(() => {
+    return (announcementsList || []).filter(a => {
+      if (!dashboardState.lastNotificationView) return true;
+      return new Date(a.createdAt) > new Date(dashboardState.lastNotificationView);
+    }).length;
+  }, [announcementsList, dashboardState.lastNotificationView]);
+
+  const unreadPetitionsCount = useMemo(() => {
+    if (session.role === "ADMIN" && currentWebsite?.domain === "spplabs.es") {
+      return (petitionsList || []).filter(p => {
+        if (!dashboardState.lastSupportView) return true;
+        return new Date(p.createdAt) > new Date(dashboardState.lastSupportView);
+      }).length;
     }
+    return 0;
+  }, [session.role, currentWebsite?.domain, petitionsList, dashboardState.lastSupportView]);
 
-    prevTabRef.current = activeTab;
-  }, [activeTab]);
+  const unreadIaCount = useMemo(() => {
+    return (conversationsList || []).filter(c => {
+      if (!dashboardState.lastConversationView) return true;
+      const time = c.updatedAt || c.createdAt;
+      return new Date(time) > new Date(dashboardState.lastConversationView);
+    }).length;
+  }, [conversationsList, dashboardState.lastConversationView]);
+
+  const clientesNotifCount = unreadContactsCount + unreadBookingsCount;
+  const notificacionesNotifCount = unreadAnnouncementsCount + unreadPetitionsCount;
+  const overviewNotifCount = clientesNotifCount + notificacionesNotifCount + unreadIaCount + (hasNewAnalytics ? 1 : 0);
+  const hasAnyActiveNotification = overviewNotifCount > 0 || hasNewAnalytics;
+
+  const getNavItems = () => [
+    {
+      id: "overview",
+      label: t.menuResumen,
+      count: overviewNotifCount,
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
+        </svg>
+      ),
+    },
+    {
+      id: "analytics",
+      label: t.menuAnaliticas,
+      hasDotNoNumber: hasNewAnalytics,
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
+    },
+    {
+      id: "clientes",
+      label: t.menuClientes,
+      count: clientesNotifCount,
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      ),
+    },
+    {
+      id: "notas",
+      label: t.menuNotas || "Notas y Equipo",
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+        </svg>
+      ),
+    },
+    {
+      id: "ia",
+      label: t.menuIA,
+      count: unreadIaCount,
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364.364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+      ),
+    },
+    {
+      id: "notificaciones",
+      label: t.menuNotificaciones,
+      count: notificacionesNotifCount,
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+      ),
+    },
+    {
+      id: "informes",
+      label: t.menuInformes || "Informes Mensuales",
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
+    },
+    {
+      id: "email",
+      label: t.menuEmail || "Email y Reseñas",
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+        </svg>
+      ),
+    },
+    ...(session.role === "ADMIN" && !isImpersonating ? [{
+      id: "admin",
+      label: t.menuUsuarios,
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      ),
+    }] : []),
+  ];
 
   // Mobile / Touch Active States for Info Tooltips & Chart Points
   const [activeTooltipId, setActiveTooltipId] = useState(null);
@@ -560,10 +752,7 @@ export default function DashboardClient({
     }
   };
 
-  // Chatbot Conversations State
-  const [conversationsList, setConversationsList] = useState([]);
-  const [conversationsLoading, setConversationsLoading] = useState(false);
-  const [selectedConversation, setSelectedConversation] = useState(null);
+
 
   const fetchConversations = async () => {
     setConversationsLoading(true);
@@ -1029,106 +1218,7 @@ export default function DashboardClient({
           {/* Navigation Links */}
           <nav className="flex flex-col gap-1.5">
             {(() => {
-              const pendingBookingsCount = bookings.filter(b => b.status === "PENDING" || b.status === "pending" || (!b.status && b.status !== "CONFIRMED" && b.status !== "CANCELLED")).length;
-              const recentContactsCount = contactForms.filter(c => {
-                const created = new Date(c.createdAt).getTime();
-                return nowTimestamp - created < 48 * 60 * 60 * 1000;
-              }).length;
-
-              const overviewNotifCount = clearedTabs.has("overview") ? 0 : (pendingBookingsCount + recentContactsCount + announcementsList.length);
-              const clientesNotifCount = pendingBookingsCount > 0 ? pendingBookingsCount : (clearedTabs.has("clientes") ? 0 : contactForms.length);
-              const iaNotifCount = clearedTabs.has("ia") ? 0 : conversationsList.length;
-              const notificacionesNotifCount = clearedTabs.has("notificaciones") ? 0 : (announcementsList.length + petitionsList.length);
-              const hasAnalyticsNotif = clearedTabs.has("analytics") ? false : Boolean(analyticsData || analyticsLoading);
-
-              const navItems = [
-                {
-                  id: "overview",
-                  label: t.menuResumen,
-                  count: overviewNotifCount,
-                  icon: (
-                    <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
-                    </svg>
-                  ),
-                },
-                {
-                  id: "analytics",
-                  label: t.menuAnaliticas,
-                  hasDotNoNumber: hasAnalyticsNotif,
-                  icon: (
-                    <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  ),
-                },
-                {
-                  id: "clientes",
-                  label: t.menuClientes,
-                  count: clientesNotifCount,
-                  icon: (
-                    <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                  ),
-                },
-                {
-                  id: "notas",
-                  label: t.menuNotas || "Notas y Equipo",
-                  icon: (
-                    <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                    </svg>
-                  ),
-                },
-                {
-                  id: "ia",
-                  label: t.menuIA,
-                  count: iaNotifCount,
-                  icon: (
-                    <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364.364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  ),
-                },
-                {
-                  id: "notificaciones",
-                  label: t.menuNotificaciones,
-                  count: notificacionesNotifCount,
-                  icon: (
-                    <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                  ),
-                },
-                {
-                  id: "informes",
-                  label: t.menuInformes || "Informes Mensuales",
-                  icon: (
-                    <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  ),
-                },
-                {
-                  id: "email",
-                  label: t.menuEmail || "Email y Reseñas",
-                  icon: (
-                    <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                    </svg>
-                  ),
-                },
-                ...(session.role === "ADMIN" && !isImpersonating ? [{
-                  id: "admin",
-                  label: t.menuUsuarios,
-                  icon: (
-                    <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                  ),
-                }] : []),
-              ];
+              const navItems = getNavItems();
 
               return navItems.map((item) => (
                 <button
@@ -1265,19 +1355,6 @@ export default function DashboardClient({
 
         {/* STICKY MOBILE TOP HEADER (lg:hidden) */}
         {(() => {
-          const pendingBookingsCount = bookings.filter(b => b.status === "PENDING" || b.status === "pending" || (!b.status && b.status !== "CONFIRMED" && b.status !== "CANCELLED")).length;
-          const recentContactsCount = contactForms.filter(c => {
-            const created = new Date(c.createdAt).getTime();
-            return nowTimestamp - created < 48 * 60 * 60 * 1000;
-          }).length;
-
-          const overviewNotifCount = clearedTabs.has("overview") ? 0 : (pendingBookingsCount + recentContactsCount + announcementsList.length);
-          const clientesNotifCount = pendingBookingsCount > 0 ? pendingBookingsCount : (clearedTabs.has("clientes") ? 0 : contactForms.length);
-          const iaNotifCount = clearedTabs.has("ia") ? 0 : conversationsList.length;
-          const notificacionesNotifCount = clearedTabs.has("notificaciones") ? 0 : (announcementsList.length + petitionsList.length);
-          const hasAnalyticsNotif = clearedTabs.has("analytics") ? false : Boolean(analyticsData || analyticsLoading);
-
-          const hasAnyActiveNotification = overviewNotifCount > 0 || clientesNotifCount > 0 || iaNotifCount > 0 || notificacionesNotifCount > 0 || hasAnalyticsNotif;
 
           return (
             <header className="lg:hidden bg-white border-b border-slate-200/90 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs shrink-0">
@@ -1352,106 +1429,7 @@ export default function DashboardClient({
 
                 <nav className="space-y-1.5">
                   {(() => {
-                    const pendingBookingsCount = bookings.filter(b => b.status === "PENDING" || b.status === "pending" || (!b.status && b.status !== "CONFIRMED" && b.status !== "CANCELLED")).length;
-                    const recentContactsCount = contactForms.filter(c => {
-                      const created = new Date(c.createdAt).getTime();
-                      return Date.now() - created < 48 * 60 * 60 * 1000;
-                    }).length;
-
-                    const overviewNotifCount = clearedTabs.has("overview") ? 0 : (pendingBookingsCount + recentContactsCount + announcementsList.length);
-                    const clientesNotifCount = pendingBookingsCount > 0 ? pendingBookingsCount : (clearedTabs.has("clientes") ? 0 : contactForms.length);
-                    const iaNotifCount = clearedTabs.has("ia") ? 0 : conversationsList.length;
-                    const notificacionesNotifCount = clearedTabs.has("notificaciones") ? 0 : (announcementsList.length + petitionsList.length);
-                    const hasAnalyticsNotif = clearedTabs.has("analytics") ? false : Boolean(analyticsData || analyticsLoading);
-
-                    const navItems = [
-                      {
-                        id: "overview",
-                        label: t.menuResumen,
-                        count: overviewNotifCount,
-                        icon: (
-                          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
-                          </svg>
-                        ),
-                      },
-                      {
-                        id: "analytics",
-                        label: t.menuAnaliticas,
-                        hasDotNoNumber: hasAnalyticsNotif,
-                        icon: (
-                          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                          </svg>
-                        ),
-                      },
-                      {
-                        id: "clientes",
-                        label: t.menuClientes,
-                        count: clientesNotifCount,
-                        icon: (
-                          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                          </svg>
-                        ),
-                      },
-                      {
-                        id: "notas",
-                        label: t.menuNotas || "Notas y Equipo",
-                        icon: (
-                          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                          </svg>
-                        ),
-                      },
-                      {
-                        id: "ia",
-                        label: t.menuIA,
-                        count: iaNotifCount,
-                        icon: (
-                          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364.364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                          </svg>
-                        ),
-                      },
-                      {
-                        id: "notificaciones",
-                        label: t.menuNotificaciones,
-                        count: notificacionesNotifCount,
-                        icon: (
-                          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                          </svg>
-                        ),
-                      },
-                      {
-                        id: "informes",
-                        label: t.menuInformes || "Informes Mensuales",
-                        icon: (
-                          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                        ),
-                      },
-                      {
-                        id: "email",
-                        label: t.menuEmail || "Email y Reseñas",
-                        icon: (
-                          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                          </svg>
-                        ),
-                      },
-                      ...(session.role === "ADMIN" && !isImpersonating ? [{
-                        id: "admin",
-                        label: t.menuUsuarios,
-                        icon: (
-                          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                        ),
-                      }] : []),
-                    ];
+                    const navItems = getNavItems();
 
                     return navItems.map((item) => {
                       const active = activeTab === item.id;
@@ -1620,6 +1598,9 @@ export default function DashboardClient({
               googleCalendarConnection={googleCalendarConnection}
               externalCalendarEvents={externalCalendarEvents}
               handleExportToNotes={handleExportToNotes}
+              unreadBookingsCount={unreadBookingsCount}
+              unreadContactsCount={unreadContactsCount}
+              unreadAnnouncementsCount={unreadAnnouncementsCount}
             />
           )}
 
@@ -1639,6 +1620,10 @@ export default function DashboardClient({
               externalCalendarEvents={externalCalendarEvents}
               handleExportToNotes={handleExportToNotes}
               openConfirmModal={openConfirmModal}
+              viewedBookingIds={dashboardState.viewedBookingIds}
+              onViewBookings={handleViewBookings}
+              unreadContactsCount={unreadContactsCount}
+              unreadBookingsCount={unreadBookingsCount}
             />
           )}
 

@@ -41,6 +41,9 @@ export default function OverviewTab({
   googleCalendarConnection = null,
   externalCalendarEvents = [],
   onExportToNotes = null,
+  unreadBookingsCount = 0,
+  unreadContactsCount = 0,
+  unreadAnnouncementsCount = 0,
 }) {
   const [copiedId, setCopiedId] = useState(null);
   const pendingBookingsCount = (bookings || []).filter((b) => b.status === "PENDING").length;
@@ -98,7 +101,7 @@ export default function OverviewTab({
             month: "short",
             day: "numeric",
           })
-        : "";
+        : ext.startDateTime;
 
       return {
         type: "google",
@@ -210,10 +213,16 @@ export default function OverviewTab({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
           {/* Alert: Bookings */}
-          <div className={`p-5 rounded-2xl border border-slate-200/90 transition-all flex items-center gap-4 bg-white shadow-xs ${
-            pendingBookingsCount > 0 ? "text-amber-900" : "text-slate-800"
-          }`}>
-            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200/60 flex items-center justify-center text-amber-600 shrink-0">
+          <button
+            type="button"
+            onClick={() => setActiveTab && setActiveTab("clientes")}
+            className={`p-5 rounded-2xl border transition-all flex items-center gap-4 text-left shadow-xs cursor-pointer hover:shadow-sm ${
+              unreadBookingsCount > 0 ? "border-amber-300 bg-amber-50/40 hover:bg-amber-50/70" : "bg-white border-slate-200/90 hover:bg-slate-50"
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+              unreadBookingsCount > 0 ? "bg-amber-100/80 border-amber-200 text-amber-700" : "bg-slate-100 border-slate-200/80 text-slate-600"
+            }`}>
               <CalendarIcon className="w-5 h-5" />
             </div>
             <div>
@@ -221,37 +230,51 @@ export default function OverviewTab({
                 {lang === "es" ? "Reservas Pendientes" : "Pending Bookings"}
               </span>
               <span className="text-base font-black block mt-0.5 text-slate-900">
-                {pendingBookingsCount > 0 
-                  ? (lang === "es" ? `${pendingBookingsCount} por confirmar` : `${pendingBookingsCount} to confirm`)
+                {unreadBookingsCount > 0 
+                  ? (lang === "es" ? `${unreadBookingsCount} por revisar` : `${unreadBookingsCount} to review`)
                   : (lang === "es" ? "Todo al día" : "All caught up")
                 }
               </span>
             </div>
-          </div>
+          </button>
 
           {/* Alert: Contact forms */}
-          <div className={`p-5 rounded-2xl border border-slate-200/90 transition-all flex items-center gap-4 bg-white shadow-xs ${
-            recentContactsCount > 0 ? "text-blue-900" : "text-slate-800"
-          }`}>
-            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200/60 flex items-center justify-center text-blue-600 shrink-0">
+          <button
+            type="button"
+            onClick={() => setActiveTab && setActiveTab("clientes")}
+            className={`p-5 rounded-2xl border transition-all flex items-center gap-4 text-left shadow-xs cursor-pointer hover:shadow-sm ${
+              unreadContactsCount > 0 ? "border-blue-300 bg-blue-50/40 hover:bg-blue-50/70" : "bg-white border-slate-200/90 hover:bg-slate-50"
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+              unreadContactsCount > 0 ? "bg-blue-100/80 border-blue-200 text-blue-700" : "bg-slate-100 border-slate-200/80 text-slate-600"
+            }`}>
               <MailIcon className="w-5 h-5" />
             </div>
             <div>
               <span className="text-xs font-bold uppercase tracking-wider block text-slate-500">
-                {lang === "es" ? "Mensajes Nuevos (48h)" : "New Messages (48h)"}
+                {lang === "es" ? "Mensajes Nuevos" : "New Messages"}
               </span>
               <span className="text-base font-black block mt-0.5 text-slate-900">
-                {recentContactsCount > 0 
-                  ? (lang === "es" ? `${recentContactsCount} mensajes nuevos` : `${recentContactsCount} new messages`)
+                {unreadContactsCount > 0 
+                  ? (lang === "es" ? `${unreadContactsCount} mensajes nuevos` : `${unreadContactsCount} new messages`)
                   : (lang === "es" ? "Sin mensajes nuevos" : "No new messages")
                 }
               </span>
             </div>
-          </div>
+          </button>
 
           {/* Alert: Announcements */}
-          <div className="p-5 rounded-2xl border border-slate-200/90 text-slate-800 flex items-center gap-4 bg-white shadow-xs">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200/60 flex items-center justify-center text-purple-600 shrink-0">
+          <button
+            type="button"
+            onClick={() => setActiveTab && setActiveTab("notificaciones")}
+            className={`p-5 rounded-2xl border transition-all flex items-center gap-4 text-left shadow-xs cursor-pointer hover:shadow-sm ${
+              unreadAnnouncementsCount > 0 ? "border-purple-300 bg-purple-50/40 hover:bg-purple-50/70" : "bg-white border-slate-200/90 hover:bg-slate-50"
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+              unreadAnnouncementsCount > 0 ? "bg-purple-100/80 border-purple-200 text-purple-700" : "bg-slate-100 border-slate-200/80 text-slate-600"
+            }`}>
               <MegaphoneIcon className="w-5 h-5" />
             </div>
             <div>
@@ -259,13 +282,13 @@ export default function OverviewTab({
                 {lang === "es" ? "Comunicados de SPP Labs" : "SPP Labs Announcements"}
               </span>
               <span className="text-base font-black block mt-0.5 text-slate-900">
-                {announcementsCount > 0 
-                  ? (lang === "es" ? `${announcementsCount} publicados` : `${announcementsCount} published`)
-                  : (lang === "es" ? "Sin comunicados" : "No announcements")
+                {unreadAnnouncementsCount > 0 
+                  ? (lang === "es" ? `${unreadAnnouncementsCount} nuevos comunicados` : `${unreadAnnouncementsCount} new announcements`)
+                  : (lang === "es" ? "Sin comunicados nuevos" : "No new announcements")
                 }
               </span>
             </div>
-          </div>
+          </button>
         </div>
       </div>
 

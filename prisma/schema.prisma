@@ -26,6 +26,7 @@ model Website {
   role                    WebsiteRole
   registeredAt            DateTime?                 @map("registered_at") @db.Timestamptz
   lastActiveAt            DateTime?                 @map("last_active_at") @db.Timestamptz
+  lastAnalyticsAt         DateTime?                 @map("last_analytics_at") @db.Timestamptz
   createdAt               DateTime                  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt               DateTime                  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
   logoUrl                 String?                   @map("logo_url")
@@ -213,6 +214,9 @@ model WebsiteDashboardState {
   lastBookingView      DateTime? @map("last_booking_view") @db.Timestamptz
   lastNotificationView DateTime? @map("last_notification_view") @db.Timestamptz
   lastSupportView      DateTime? @map("last_support_view") @db.Timestamptz
+  lastAnalyticsView    DateTime? @map("last_analytics_view") @db.Timestamptz
+  lastConversationView DateTime? @map("last_conversation_view") @db.Timestamptz
+  viewedBookingIds     String[]  @default([]) @map("viewed_booking_ids")
 
   viewerWebsite        Website   @relation("ViewerWebsite", fields: [viewerWebsiteId], references: [id], onDelete: Cascade)
   targetWebsite        Website   @relation("TargetWebsite", fields: [targetWebsiteId], references: [id], onDelete: Cascade)

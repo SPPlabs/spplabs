@@ -187,6 +187,14 @@ export async function POST(request) {
       })
       .catch((e) => console.error("Failed to update API key lastUsedAt/keyHash:", e));
 
+    // Update website's lastAnalyticsAt so the dashboard knows a new analytic event has arrived
+    prisma.website
+      .update({
+        where: { id: website.id },
+        data: { lastAnalyticsAt: new Date() },
+      })
+      .catch((e) => console.error("Failed to update website lastAnalyticsAt:", e));
+
     return jsonResponse({
       success: true,
       message: "Event logged successfully",
