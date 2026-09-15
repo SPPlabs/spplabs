@@ -58,6 +58,8 @@ export default function NotasTab({
   const [viewingNote, setViewingNote] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [tagToDelete, setTagToDelete] = useState(null);
+  const [isDeletingTag, setIsDeletingTag] = useState(false);
 
   // Form Fields
   const [formType, setFormType] = useState("NOTE"); // "NOTE" | "CLIENT" | "STAFF"
@@ -177,6 +179,69 @@ export default function NotasTab({
 
     if (autoSelectInForm) {
       setFormTag(cleaned);
+    }
+  };
+
+  // Delete tag handler: removes tag from notes (tag becomes null) and customTags list
+  const handleDeleteTag = async (tag) => {
+    if (!tag) return;
+    const cleanTag = tag.trim().replace(/^#+/, "").trim();
+    setIsDeletingTag(true);
+
+    try {
+      const domainParam = currentWebsite?.domain ? `&domain=${encodeURIComponent(currentWebsite.domain)}` : "";
+      const res = await fetch(`/api/admin/notes?tag=${encodeURIComponent(cleanTag)}${domainParam}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        // 1. Remove tag from any active note (set to null)
+        setNotes((prev) =>
+          prev.map((n) =>
+            n.tag && n.tag.trim().toLowerCase() === cleanTag.toLowerCase()
+              ? { ...n, tag: null }
+              : n
+          )
+        );
+
+        // 2. Remove tag from customTags and localStorage
+        setCustomTags((prev) => {
+          const next = prev.filter((t) => t.toLowerCase() !== cleanTag.toLowerCase());
+          try {
+            const storageKey = `spp_notes_tags_${currentWebsite?.domain || "default"}`;
+            localStorage.setItem(storageKey, JSON.stringify(next));
+          } catch (err) {
+            console.error("Error updating custom tags in localStorage:", err);
+          }
+          return next;
+        });
+
+        // 3. Reset tag filter if active
+        if (selectedTagFilter.toLowerCase() === cleanTag.toLowerCase()) {
+          setSelectedTagFilter("ALL");
+        }
+
+        // 4. Reset formTag if open note form had this tag selected
+        if (formTag.toLowerCase() === cleanTag.toLowerCase()) {
+          setFormTag("");
+        }
+
+        // 5. Update viewingNote if currently opened
+        if (viewingNote?.tag && viewingNote.tag.toLowerCase() === cleanTag.toLowerCase()) {
+          setViewingNote((prev) => ({ ...prev, tag: null }));
+        }
+
+        setTagToDelete(null);
+        router.refresh();
+      } else {
+        alert(data.error || data.message || "Error al eliminar la etiqueta");
+      }
+    } catch (err) {
+      console.error("Delete tag error:", err);
+      alert("Error al eliminar la etiqueta");
+    } finally {
+      setIsDeletingTag(false);
     }
   };
 
@@ -608,18 +673,39 @@ export default function NotasTab({
               {isEs ? "Todas" : "All"}
             </button>
             {allAvailableTags.map((tag) => (
-              <button
+              <div
                 key={tag}
-                type="button"
-                onClick={() => setSelectedTagFilter(selectedTagFilter === tag ? "ALL" : tag)}
-                className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer shrink-0 ${
+                className={`inline-flex items-center rounded-xl text-[11px] font-bold transition-all shrink-0 group ${
                   selectedTagFilter === tag
                     ? "bg-indigo-600 text-white shadow-2xs"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200/80"
                 }`}
               >
-                #{tag}
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTagFilter(selectedTagFilter === tag ? "ALL" : tag)}
+                  className="pl-2.5 pr-1 py-1 cursor-pointer flex items-center gap-0.5"
+                  title={isEs ? `Filtrar por #${tag}` : `Filter by #${tag}`}
+                >
+                  #{tag}
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setTagToDelete(tag);
+                  }}
+                  className={`pr-2 pl-0.5 py-1 transition-all cursor-pointer flex items-center justify-center opacity-40 group-hover:opacity-100 hover:scale-110 ${
+                    selectedTagFilter === tag
+                      ? "text-indigo-200 hover:text-white"
+                      : "text-slate-400 hover:text-rose-600"
+                  }`}
+                  title={isEs ? `Eliminar etiqueta #${tag}` : `Delete tag #${tag}`}
+                  aria-label={isEs ? `Eliminar etiqueta ${tag}` : `Delete tag ${tag}`}
+                >
+                  <CloseIcon className="w-2.5 h-2.5" />
+                </button>
+              </div>
             ))}
           </div>
 
@@ -1086,36 +1172,50 @@ export default function NotasTab({
                         {filteredDropdownTags.map((tag) => {
                           const isSelected = (formTag || "").toLowerCase() === tag.toLowerCase();
                           return (
-                            <button
+                            <div
                               key={tag}
-                              type="button"
-                              onClick={() => {
-                                setFormTag(tag);
-                                setIsFormTagDropdownOpen(false);
-                                setFormTagSearchQuery("");
-                              }}
-                              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                              className={`w-full flex items-center justify-between px-2.5 py-1 rounded-lg text-xs font-semibold transition-all group ${
                                 isSelected
                                   ? "bg-indigo-50 text-indigo-700 font-bold"
                                   : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
                               }`}
                             >
-                              <span className="flex items-center gap-1.5 truncate">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormTag(tag);
+                                  setIsFormTagDropdownOpen(false);
+                                  setFormTagSearchQuery("");
+                                }}
+                                className="flex items-center gap-1.5 truncate flex-1 text-left py-1 cursor-pointer"
+                              >
                                 <span className="text-indigo-400 font-normal">#</span>
                                 <span className="truncate">{tag}</span>
-                              </span>
-                              {isSelected && (
-                                <svg
-                                  className="w-3.5 h-3.5 text-indigo-600 shrink-0"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2.5"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                </svg>
-                              )}
-                            </button>
+                                {isSelected && (
+                                  <svg
+                                    className="w-3.5 h-3.5 text-indigo-600 shrink-0 ml-1"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                  </svg>
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsFormTagDropdownOpen(false);
+                                  setTagToDelete(tag);
+                                }}
+                                className="p-1 text-slate-400 hover:text-rose-600 rounded-md hover:bg-rose-50 transition-all cursor-pointer opacity-30 group-hover:opacity-100 shrink-0"
+                                title={isEs ? `Eliminar etiqueta #${tag}` : `Delete tag #${tag}`}
+                              >
+                                <TrashIcon className="w-3 h-3" />
+                              </button>
+                            </div>
                           );
                         })}
 
@@ -1512,6 +1612,57 @@ export default function NotasTab({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE TAG CONFIRM MODAL */}
+      {tagToDelete && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[70] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-scale-up text-center">
+            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4">
+              <TrashIcon className="w-6 h-6" />
+            </div>
+            <h3 className="font-extrabold text-slate-900 text-base mb-1">
+              {isEs ? `¿Eliminar etiqueta #${tagToDelete}?` : `Delete tag #${tagToDelete}?`}
+            </h3>
+            <p className="text-xs text-slate-500 mb-6 leading-relaxed">
+              {(() => {
+                const count = notes.filter(
+                  (n) => n.tag && n.tag.trim().toLowerCase() === tagToDelete.trim().toLowerCase()
+                ).length;
+                if (count > 0) {
+                  return isEs
+                    ? `Hay ${count} ${count === 1 ? "nota" : "notas"} con esta etiqueta. Si la eliminas, ${count === 1 ? "esta nota pasará" : "estas notas pasarán"} a no tener ninguna etiqueta.`
+                    : `There ${count === 1 ? "is 1 note" : `are ${count} notes`} with this tag. If you delete it, ${count === 1 ? "it" : "they"} will no longer have any tag.`;
+                }
+                return isEs
+                  ? "Esta etiqueta se eliminará de la lista permanentemente."
+                  : "This tag will be permanently removed from the list.";
+              })()}
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={isDeletingTag}
+                onClick={() => setTagToDelete(null)}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isEs ? "Cancelar" : "Cancel"}
+              </button>
+              <button
+                type="button"
+                disabled={isDeletingTag}
+                onClick={() => handleDeleteTag(tagToDelete)}
+                className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                {isDeletingTag ? (
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  <span>{isEs ? "Eliminar Etiqueta" : "Delete Tag"}</span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

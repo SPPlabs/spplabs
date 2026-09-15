@@ -175,12 +175,36 @@ export async function DELETE(request) {
     const { session, website } = auth;
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-
-    if (!id) {
-      return NextResponse.json({ error: "id is required" }, { status: 400 });
-    }
+    const tagToDelete = searchParams.get("tag");
 
     const db = session.role === "ADMIN" ? prisma : withRLS(website.id);
+
+    // If deleting an entire tag: update all notes with this tag to tag: null
+    if (tagToDelete) {
+      const cleanTag = tagToDelete.trim().replace(/^#+/, "").trim();
+      const result = await db.dashboardNote.updateMany({
+        where: {
+          websiteId: website.id,
+          tag: {
+            equals: cleanTag,
+            mode: "insensitive",
+          },
+        },
+        data: {
+          tag: null,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Tag "${cleanTag}" removed from notes`,
+        affectedCount: result.count,
+      });
+    }
+
+    if (!id) {
+      return NextResponse.json({ error: "id or tag is required" }, { status: 400 });
+    }
 
     const existing = await db.dashboardNote.findFirst({
       where: { id, websiteId: website.id },
