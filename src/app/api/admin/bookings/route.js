@@ -51,6 +51,9 @@ export async function PATCH(request) {
       return NextResponse.json({ error: "Forbidden", message: "Access denied" }, { status: 403 });
     }
 
+    const previousStatus = booking.status;
+    const newStatus = status;
+
     const updatedBooking = await db.booking.update({
       where: { id: bookingId },
       data: { status },
@@ -73,6 +76,158 @@ export async function PATCH(request) {
         websiteDisplayName: booking.website?.displayName || "SPP Labs",
       });
     }).catch((e) => console.error("Failed to update Google Calendar event on PATCH:", e));
+
+    // A. If booking is ACCEPTED / CONFIRMED: Dispatch confirmation & schedule reminder + review request
+    if (previousStatus !== "CONFIRMED" && newStatus === "CONFIRMED") {
+      (async () => {
+        try {
+          const emailConfig = await prisma.websiteEmailConfig.findUnique({
+            where: { websiteId: booking.websiteId },
+          });
+
+          const companyName = booking.website.displayName || "Atención al Cliente";
+          const brandColor = emailConfig?.brandColor || "#0284c7";
+          const parsedDate = new Date(booking.date);
+          const dateStr = parsedDate.toLocaleDateString("es-ES", { dateStyle: "long" });
+          const timeStr = booking.time?.trim() || "09:00";
+          const customLogoUrl = emailConfig?.customLogoUrl || booking.website.logoUrl || null;
+
+          const { sendEmail } = await import("@/lib/email");
+          const { generateBookingConfirmationHtml } = await import("@/lib/emailTemplates");
+          const { getSpainDateTimeUtc } = await import("@/lib/dateUtils");
+
+          // 1. Immediate Booking Confirmation
+          if (!emailConfig || emailConfig.enableBookingConfirm) {
+            const html = generateBookingConfirmationHtml({
+              recipientName: booking.name.trim(),
+              companyName,
+              clientDomain: booking.website.domain,
+              dateStr,
+              timeStr,
+              brandColor,
+              customLogoUrl,
+            });
+
+            const sendRes = await sendEmail({
+              to: booking.email.trim().toLowerCase(),
+              subject: `Confirmación de cita - ${companyName} (${dateStr} a las ${timeStr})`,
+              html,
+              senderName: emailConfig?.senderName || companyName,
+              replyTo: emailConfig?.replyToEmail || undefined,
+              clientDomain: booking.website.domain,
+            });
+
+            await prisma.scheduledEmail.create({
+              data: {
+                websiteId: booking.websiteId,
+                recipientEmail: booking.email.trim().toLowerCase(),
+                recipientName: booking.name.trim(),
+                subject: `Confirmación de cita - ${companyName}`,
+                emailType: "BOOKING_CONFIRMATION",
+                status: sendRes.success ? "SENT" : "FAILED",
+                scheduledFor: new Date(),
+                sentAt: sendRes.success ? new Date() : null,
+                error: sendRes.error || null,
+                metadata: { bookingId: booking.id, dateStr, timeStr },
+              },
+            });
+          }
+
+          // Exact appointment timestamp in UTC respecting Spain (Europe/Madrid) timezone
+          const appointmentDateTime = getSpainDateTimeUtc(booking.date, timeStr);
+          const now = new Date();
+
+          // 2. Schedule Reminder (e.g. 24h before appointment)
+          if (!emailConfig || emailConfig.enableBookingReminder) {
+            const reminderHoursBefore = emailConfig?.reminderHoursBefore ?? 24;
+            let reminderScheduledDate = new Date(appointmentDateTime.getTime() - reminderHoursBefore * 60 * 60 * 1000);
+
+            if (reminderScheduledDate <= now) {
+              const twoHoursBefore = new Date(appointmentDateTime.getTime() - 2 * 60 * 60 * 1000);
+              if (twoHoursBefore > now) {
+                reminderScheduledDate = twoHoursBefore;
+              } else {
+                const thirtyMinsBefore = new Date(appointmentDateTime.getTime() - 30 * 60 * 1000);
+                if (thirtyMinsBefore > now) {
+                  reminderScheduledDate = thirtyMinsBefore;
+                }
+              }
+            }
+
+            if (reminderScheduledDate > now) {
+              await prisma.scheduledEmail.create({
+                data: {
+                  websiteId: booking.websiteId,
+                  recipientEmail: booking.email.trim().toLowerCase(),
+                  recipientName: booking.name.trim(),
+                  subject: `Recordatorio de tu cita en ${companyName}`,
+                  emailType: "BOOKING_REMINDER",
+                  status: "PENDING",
+                  scheduledFor: reminderScheduledDate,
+                  metadata: { bookingId: booking.id, dateStr, timeStr },
+                },
+              });
+            }
+          }
+
+          // 3. Schedule Google Review Booster (e.g. 2h after appointment)
+          const isBookingReviewEnabled = emailConfig
+            ? (emailConfig.enableBookingReviewRequest ?? emailConfig.enableReviewRequest ?? true)
+            : true;
+
+          if (isBookingReviewEnabled) {
+            const reviewDelayHours = emailConfig?.bookingReviewDelayHours ?? emailConfig?.reviewDelayHours ?? 2;
+            const reviewScheduledDate = new Date(appointmentDateTime.getTime() + reviewDelayHours * 60 * 60 * 1000);
+
+            await prisma.scheduledEmail.create({
+              data: {
+                websiteId: booking.websiteId,
+                recipientEmail: booking.email.trim().toLowerCase(),
+                recipientName: booking.name.trim(),
+                subject: `¿Qué tal fue tu experiencia en ${companyName}? ⭐`,
+                emailType: "GOOGLE_REVIEW_REQUEST",
+                status: "PENDING",
+                scheduledFor: reviewScheduledDate,
+                metadata: { bookingId: booking.id, source: "booking" },
+              },
+            });
+          }
+        } catch (err) {
+          console.error("Async booking confirmation & scheduling error on PATCH:", err);
+        }
+      })();
+    }
+
+    // B. If booking is CANCELLED: Cancel any pending scheduled emails for this booking
+    if (newStatus === "CANCELLED") {
+      (async () => {
+        try {
+          const pendingEmails = await prisma.scheduledEmail.findMany({
+            where: {
+              websiteId: booking.websiteId,
+              status: "PENDING",
+            },
+          });
+
+          const toCancel = pendingEmails.filter(
+            (e) => e.metadata && typeof e.metadata === "object" && e.metadata.bookingId === booking.id
+          );
+
+          if (toCancel.length > 0) {
+            await Promise.all(
+              toCancel.map((item) =>
+                prisma.scheduledEmail.update({
+                  where: { id: item.id },
+                  data: { status: "CANCELLED" },
+                })
+              )
+            );
+          }
+        } catch (err) {
+          console.error("Error cancelling pending scheduled emails for cancelled booking:", err);
+        }
+      })();
+    }
 
     return NextResponse.json({ success: true, data: updatedBooking });
   } catch (error) {
@@ -122,6 +277,30 @@ export async function DELETE(request) {
     await db.booking.delete({
       where: { id },
     });
+
+    // Cancel any pending scheduled emails for this deleted booking
+    (async () => {
+      try {
+        const pendingEmails = await prisma.scheduledEmail.findMany({
+          where: { websiteId: booking.websiteId, status: "PENDING" },
+        });
+        const toCancel = pendingEmails.filter(
+          (e) => e.metadata && typeof e.metadata === "object" && e.metadata.bookingId === booking.id
+        );
+        if (toCancel.length > 0) {
+          await Promise.all(
+            toCancel.map((item) =>
+              prisma.scheduledEmail.update({
+                where: { id: item.id },
+                data: { status: "CANCELLED" },
+              })
+            )
+          );
+        }
+      } catch (err) {
+        console.error("Error cancelling pending scheduled emails on booking delete:", err);
+      }
+    })();
 
     if (booking.googleEventId) {
       import("@/lib/googleCalendar").then(({ deleteGoogleCalendarEvent }) => {

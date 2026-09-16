@@ -211,137 +211,25 @@ export async function POST(request) {
       })
       .catch((e) => console.error("Failed to update API key lastUsedAt/keyHash:", e));
 
-    // 6. Asynchronously dispatch confirmation and schedule reminders + review requests
+    // 6. Asynchronously sync to Google Calendar if connected
+    // (Note: Confirmation, Reminder and Google Review emails are dispatched upon business approval in dashboard)
     (async () => {
       try {
-        const emailConfig = await prisma.websiteEmailConfig.findUnique({
+        const companyName = website.displayName || "Atención al Cliente";
+        const gcalConnection = await prisma.googleCalendarConnection.findUnique({
           where: { websiteId: website.id },
         });
 
-        const companyName = website.displayName || "Atención al Cliente";
-        const brandColor = emailConfig?.brandColor || "#0284c7";
-        const dateStr = parsedDate.toLocaleDateString("es-ES", { dateStyle: "long" });
-        const timeStr = time.trim();
-        const customLogoUrl = emailConfig?.customLogoUrl || website.logoUrl || null;
-
-        const { sendEmail } = await import("@/lib/email");
-        const { generateBookingConfirmationHtml } = await import("@/lib/emailTemplates");
-
-        // A. Immediate Booking Confirmation
-        if (!emailConfig || emailConfig.enableBookingConfirm) {
-          const html = generateBookingConfirmationHtml({
-            recipientName: name.trim(),
-            companyName,
-            clientDomain: website.domain,
-            dateStr,
-            timeStr,
-            brandColor,
-            customLogoUrl,
-          });
-
-          const sendRes = await sendEmail({
-            to: email.trim().toLowerCase(),
-            subject: `Confirmación de cita - ${companyName} (${dateStr} a las ${timeStr})`,
-            html,
-            senderName: emailConfig?.senderName || companyName,
-            replyTo: emailConfig?.replyToEmail || undefined,
-            clientDomain: website.domain,
-          });
-
-          await prisma.scheduledEmail.create({
-            data: {
-              websiteId: website.id,
-              recipientEmail: email.trim().toLowerCase(),
-              recipientName: name.trim(),
-              subject: `Confirmación de cita - ${companyName}`,
-              emailType: "BOOKING_CONFIRMATION",
-              status: sendRes.success ? "SENT" : "FAILED",
-              scheduledFor: new Date(),
-              sentAt: sendRes.success ? new Date() : null,
-              error: sendRes.error || null,
-              metadata: { bookingId: booking.id, dateStr, timeStr },
-            },
+        if (gcalConnection) {
+          const { createGoogleCalendarEvent } = await import("@/lib/googleCalendar");
+          await createGoogleCalendarEvent({
+            websiteId: website.id,
+            booking,
+            websiteDisplayName: companyName,
           });
         }
-
-        // Compute exact appointment timestamp in UTC respecting Spain (Europe/Madrid) timezone
-        const appointmentDateTime = getSpainDateTimeUtc(date, time);
-        const now = new Date();
-
-        // B. Schedule Reminder (e.g. 24h before appointment)
-        if (!emailConfig || emailConfig.enableBookingReminder) {
-          const reminderHoursBefore = emailConfig?.reminderHoursBefore ?? 24;
-          let reminderScheduledDate = new Date(appointmentDateTime.getTime() - reminderHoursBefore * 60 * 60 * 1000);
-
-          // Fallback: If appointment was booked with less than reminderHoursBefore notice,
-          // schedule a reminder in an intelligent window before the appointment
-          if (reminderScheduledDate <= now) {
-            const twoHoursBefore = new Date(appointmentDateTime.getTime() - 2 * 60 * 60 * 1000);
-            if (twoHoursBefore > now) {
-              reminderScheduledDate = twoHoursBefore;
-            } else {
-              const thirtyMinsBefore = new Date(appointmentDateTime.getTime() - 30 * 60 * 1000);
-              if (thirtyMinsBefore > now) {
-                reminderScheduledDate = thirtyMinsBefore;
-              }
-            }
-          }
-
-          if (reminderScheduledDate > now) {
-            await prisma.scheduledEmail.create({
-              data: {
-                websiteId: website.id,
-                recipientEmail: email.trim().toLowerCase(),
-                recipientName: name.trim(),
-                subject: `Recordatorio de tu cita en ${companyName}`,
-                emailType: "BOOKING_REMINDER",
-                status: "PENDING",
-                scheduledFor: reminderScheduledDate,
-                metadata: { bookingId: booking.id, dateStr, timeStr },
-              },
-            });
-          }
-        }
-
-        // C. Schedule Google Review Booster for Booking (e.g. 2h after appointment)
-        const isBookingReviewEnabled = emailConfig ? (emailConfig.enableBookingReviewRequest ?? emailConfig.enableReviewRequest ?? true) : true;
-        if (isBookingReviewEnabled) {
-          const reviewDelayHours = emailConfig?.bookingReviewDelayHours ?? emailConfig?.reviewDelayHours ?? 2;
-          const reviewScheduledDate = new Date(appointmentDateTime.getTime() + reviewDelayHours * 60 * 60 * 1000);
-
-          await prisma.scheduledEmail.create({
-            data: {
-              websiteId: website.id,
-              recipientEmail: email.trim().toLowerCase(),
-              recipientName: name.trim(),
-              subject: `¿Qué tal fue tu experiencia en ${companyName}? ⭐`,
-              emailType: "GOOGLE_REVIEW_REQUEST",
-              status: "PENDING",
-              scheduledFor: reviewScheduledDate,
-              metadata: { bookingId: booking.id, source: "booking" },
-            },
-          });
-        }
-
-        // D. Create Google Calendar Event if connected
-        try {
-          const gcalConnection = await prisma.googleCalendarConnection.findUnique({
-            where: { websiteId: website.id },
-          });
-
-          if (gcalConnection) {
-            const { createGoogleCalendarEvent } = await import("@/lib/googleCalendar");
-            await createGoogleCalendarEvent({
-              websiteId: website.id,
-              booking,
-              websiteDisplayName: companyName,
-            });
-          }
-        } catch (gcalErr) {
-          console.error("Async Google Calendar event creation error:", gcalErr);
-        }
-      } catch (err) {
-        console.error("Async booking email & scheduling error:", err);
+      } catch (gcalErr) {
+        console.error("Async Google Calendar event creation error:", gcalErr);
       }
     })();
 
