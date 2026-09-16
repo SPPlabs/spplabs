@@ -395,3 +395,85 @@ export function generateTestEmailHtml({ companyName, clientDomain, brandColor = 
 </html>
   `;
 }
+
+export function generateCustomEmailHtml({
+  recipientName = "",
+  companyName = "SPP Labs",
+  clientDomain = "spplabs.es",
+  brandColor = "#0284c7",
+  customLogoUrl = null,
+  subject = "Comunicado Oficial",
+  messageBody = "",
+  ctaText = null,
+  ctaUrl = null,
+  badgeText = "Comunicado Oficial",
+}) {
+  const formattedBody = messageBody && messageBody.trim() !== ""
+    ? messageBody
+        .split(/\n\s*\n/)
+        .map((para) => `<p style="font-size: 14px; line-height: 1.65; color: #334155; margin: 0 0 16px 0;">${para.trim().replace(/\n/g, "<br/>")}</p>`)
+        .join("")
+    : `<p style="font-size: 14px; line-height: 1.65; color: #334155; margin: 0 0 16px 0;">Te escribimos de parte de <strong>${companyName || clientDomain}</strong> en relación con nuestros servicios.</p>`;
+
+  const cleanCtaUrl = ctaUrl && ctaUrl.trim() !== "" ? ctaUrl.trim() : `https://${clientDomain}`;
+  const ctaButtonHtml = ctaText && ctaText.trim() !== "" ? `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 24px;">
+      <tr>
+        <td align="center">
+          <a href="${cleanCtaUrl}" target="_blank" style="display: inline-block; background-color: #0f172a; color: #ffffff; font-size: 14px; font-weight: 700; text-decoration: none; padding: 13px 32px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); line-height: 1;">
+            ${ctaText} →
+          </a>
+        </td>
+      </tr>
+    </table>
+  ` : "";
+
+  return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject || "Comunicado"}</title>
+</head>
+<body style="${getBaseStyles(brandColor)}">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 580px; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+          <tr>
+            <td>
+              ${renderHeader(companyName, clientDomain, brandColor, customLogoUrl)}
+
+              <div style="padding: 32px;">
+                <div style="display: inline-block; padding: 6px 14px; background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; font-size: 12px; font-weight: 700; color: #1e40af; margin-bottom: 20px; line-height: 1.4;">
+                  ${badgeText || "Comunicado Oficial"}
+                </div>
+
+                <h1 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3;">
+                  ${subject || "Comunicado de " + (companyName || clientDomain)}
+                </h1>
+
+                ${recipientName && recipientName.trim() !== "" ? `
+                <p style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0;">
+                  Hola ${recipientName},
+                </p>
+                ` : ""}
+
+                ${formattedBody}
+
+                ${ctaButtonHtml}
+              </div>
+
+              ${renderFooter(companyName, clientDomain)}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+}
+

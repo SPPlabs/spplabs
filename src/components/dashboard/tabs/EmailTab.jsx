@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   generateWelcomeContactHtml,
   generateBookingConfirmationHtml,
   generateBookingReminderHtml,
   generateGoogleReviewHtml,
+  generateCustomEmailHtml,
 } from "@/lib/emailTemplates";
 import {
   MailIcon,
@@ -25,6 +26,8 @@ import {
 export default function EmailTab({
   currentWebsite,
   currentLogoUrl,
+  contactForms = [],
+  dashboardNotes = [],
   t,
   lang,
 }) {
@@ -64,6 +67,340 @@ export default function EmailTab({
 
   // Template Preview Active Tab
   const [previewTab, setPreviewTab] = useState("review"); // 'welcome' | 'booking' | 'reminder' | 'review'
+
+  // DISPATCHER & CAMPAIGN HUB STATE
+  const [dispatcherTiming, setDispatcherTiming] = useState("instant"); // 'instant' | 'scheduled'
+  const [dispatcherRecipientsInput, setDispatcherRecipientsInput] = useState("");
+  const [dispatcherRecipientsList, setDispatcherRecipientsList] = useState([]);
+  const [dispatcherTemplate, setDispatcherTemplate] = useState("custom"); // 'custom' | 'welcome' | 'reminder' | 'review' | 'booking'
+  const [dispatcherSubject, setDispatcherSubject] = useState("");
+  const [dispatcherMessage, setDispatcherMessage] = useState("");
+  const [dispatcherDate, setDispatcherDate] = useState("");
+  const [dispatcherTime, setDispatcherTime] = useState("10:00");
+  const [dispatcherGoogleReviewUrl, setDispatcherGoogleReviewUrl] = useState("");
+  const [dispatcherCtaText, setDispatcherCtaText] = useState("");
+  const [dispatcherCtaUrl, setDispatcherCtaUrl] = useState("");
+  const [dispatcherRecipientName, setDispatcherRecipientName] = useState("");
+
+  const [dispatcherScheduledDate, setDispatcherScheduledDate] = useState("");
+  const [dispatcherScheduledTime, setDispatcherScheduledTime] = useState("09:00");
+
+  const [dispatcherSending, setDispatcherSending] = useState(false);
+  const [dispatcherResult, setDispatcherResult] = useState(null);
+  const [showContactsPicker, setShowContactsPicker] = useState(false);
+  const [showDispatcherPreview, setShowDispatcherPreview] = useState(false);
+
+  // Parse emails helper
+  const parseEmails = useCallback((text) => {
+    if (!text) return [];
+    const matches = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [];
+    const unique = [];
+    matches.forEach((m) => {
+      const lower = m.toLowerCase().trim();
+      if (!unique.includes(lower)) unique.push(lower);
+    });
+    return unique;
+  }, []);
+
+  // CRM Contacts memo
+  const crmContacts = useMemo(() => {
+    const map = new Map();
+    (contactForms || []).forEach((c) => {
+      if (c.email && c.email.includes("@")) {
+        const clean = c.email.trim().toLowerCase();
+        if (!map.has(clean)) {
+          map.set(clean, {
+            email: clean,
+            name: c.name || clean.split("@")[0],
+            source: lang === "es" ? "Contacto Web" : "Web Contact",
+          });
+        }
+      }
+    });
+    (dashboardNotes || []).forEach((n) => {
+      if (n.email && n.email.includes("@")) {
+        const clean = n.email.trim().toLowerCase();
+        if (!map.has(clean)) {
+          map.set(clean, {
+            email: clean,
+            name: n.title || clean.split("@")[0],
+            source: lang === "es" ? "Directorio / Clientes" : "Directory / Clients",
+          });
+        }
+      }
+    });
+    return Array.from(map.values());
+  }, [contactForms, dashboardNotes, lang]);
+
+  // Handle adding recipients from raw input
+  const handleAddRecipientsFromInput = useCallback(() => {
+    if (!dispatcherRecipientsInput.trim()) return;
+    const extracted = parseEmails(dispatcherRecipientsInput);
+    if (extracted.length > 0) {
+      setDispatcherRecipientsList((prev) => {
+        const merged = [...prev];
+        extracted.forEach((email) => {
+          if (!merged.includes(email)) merged.push(email);
+        });
+        return merged;
+      });
+      setDispatcherRecipientsInput("");
+    }
+  }, [dispatcherRecipientsInput, parseEmails]);
+
+  const handleRemoveRecipient = useCallback((emailToRemove) => {
+    setDispatcherRecipientsList((prev) => prev.filter((e) => e !== emailToRemove));
+  }, []);
+
+  const handleToggleCrmContact = useCallback((email) => {
+    setDispatcherRecipientsList((prev) => {
+      if (prev.includes(email)) {
+        return prev.filter((e) => e !== email);
+      }
+      return [...prev, email];
+    });
+  }, []);
+
+  const handleAddAllCrmContacts = useCallback(() => {
+    setDispatcherRecipientsList((prev) => {
+      const merged = [...prev];
+      crmContacts.forEach((c) => {
+        if (!merged.includes(c.email)) merged.push(c.email);
+      });
+      return merged;
+    });
+  }, [crmContacts]);
+
+  // Set default scheduled dates on mount
+  useEffect(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split("T")[0];
+    setDispatcherScheduledDate(tomorrowStr);
+    setDispatcherDate(tomorrowStr);
+  }, []);
+
+  // Sync Google Review URL if loaded later
+  useEffect(() => {
+    if (googleReviewUrl && !dispatcherGoogleReviewUrl) {
+      setDispatcherGoogleReviewUrl(googleReviewUrl);
+    }
+  }, [googleReviewUrl, dispatcherGoogleReviewUrl]);
+
+  // Update template selection with smart defaults
+  const handleSelectDispatcherTemplate = useCallback((type) => {
+    setDispatcherTemplate(type);
+    const company = senderName || currentWebsite?.displayName || "SPP Labs";
+
+    if (type === "welcome") {
+      setDispatcherSubject(lang === "es" ? `¡Te damos la bienvenida a ${company}! 🌟` : `Welcome to ${company}! 🌟`);
+      setDispatcherMessage(
+        lang === "es"
+          ? "Gracias por ponerte en contacto con nosotros. Estamos encantados de atenderte y ayudarte en todo lo que necesites."
+          : "Thank you for reaching out to us. We are thrilled to assist you and help you achieve your goals."
+      );
+    } else if (type === "reminder") {
+      setDispatcherSubject(lang === "es" ? `Recordatorio de tu cita en ${company} ⏰` : `Appointment reminder at ${company} ⏰`);
+    } else if (type === "review") {
+      setDispatcherSubject(
+        lang === "es"
+          ? `¿Qué tal fue tu experiencia con ${company}? ⭐⭐⭐⭐⭐`
+          : `How was your experience with ${company}? ⭐⭐⭐⭐⭐`
+      );
+      if (!dispatcherGoogleReviewUrl) {
+        setDispatcherGoogleReviewUrl(googleReviewUrl || `https://${currentWebsite?.domain}`);
+      }
+    } else if (type === "booking") {
+      setDispatcherSubject(lang === "es" ? `Confirmación de cita en ${company} 📅` : `Booking confirmation at ${company} 📅`);
+    } else if (type === "custom") {
+      setDispatcherSubject(lang === "es" ? `Novedades importantes de ${company}` : `Important update from ${company}`);
+      setDispatcherMessage("");
+    }
+  }, [senderName, currentWebsite?.displayName, currentWebsite?.domain, lang, dispatcherGoogleReviewUrl, googleReviewUrl]);
+
+  // Live preview HTML for dispatcher
+  const getDispatcherPreviewHtml = useCallback(() => {
+    const companyName = senderName || currentWebsite?.displayName || currentWebsite?.domain || "SPP Labs";
+    const clientDomain = currentWebsite?.domain || "spplabs.es";
+    const logoUrl = customLogoUrl || currentLogoUrl || null;
+    const recipient = dispatcherRecipientsList[0] || "cliente@ejemplo.com";
+    const name = dispatcherRecipientName || recipient.split("@")[0];
+
+    if (dispatcherTemplate === "welcome") {
+      return generateWelcomeContactHtml({
+        recipientName: name,
+        companyName,
+        clientDomain,
+        brandColor,
+        messageSnippet: dispatcherMessage,
+        customLogoUrl: logoUrl,
+      });
+    }
+    if (dispatcherTemplate === "reminder") {
+      return generateBookingReminderHtml({
+        recipientName: name,
+        companyName,
+        clientDomain,
+        dateStr: dispatcherDate || (lang === "es" ? "Mañana" : "Tomorrow"),
+        timeStr: dispatcherTime || "10:00",
+        brandColor,
+        customLogoUrl: logoUrl,
+      });
+    }
+    if (dispatcherTemplate === "review") {
+      return generateGoogleReviewHtml({
+        recipientName: name,
+        companyName,
+        clientDomain,
+        googleReviewUrl: dispatcherGoogleReviewUrl || googleReviewUrl || `https://${clientDomain}`,
+        brandColor,
+        customLogoUrl: logoUrl,
+      });
+    }
+    if (dispatcherTemplate === "booking") {
+      return generateBookingConfirmationHtml({
+        recipientName: name,
+        companyName,
+        clientDomain,
+        dateStr: dispatcherDate || (lang === "es" ? "Próximamente" : "Soon"),
+        timeStr: dispatcherTime || "10:00",
+        brandColor,
+        customLogoUrl: logoUrl,
+      });
+    }
+
+    return generateCustomEmailHtml({
+      recipientName: name,
+      companyName,
+      clientDomain,
+      brandColor,
+      customLogoUrl: logoUrl,
+      subject: dispatcherSubject || (lang === "es" ? "Comunicado Oficial" : "Official Notice"),
+      messageBody: dispatcherMessage,
+      ctaText: dispatcherCtaText || null,
+      ctaUrl: dispatcherCtaUrl || null,
+      badgeText: lang === "es" ? "Comunicado Oficial" : "Official Notice",
+    });
+  }, [
+    senderName,
+    currentWebsite?.displayName,
+    currentWebsite?.domain,
+    customLogoUrl,
+    currentLogoUrl,
+    dispatcherRecipientsList,
+    dispatcherRecipientName,
+    dispatcherTemplate,
+    brandColor,
+    dispatcherMessage,
+    dispatcherDate,
+    dispatcherTime,
+    dispatcherGoogleReviewUrl,
+    googleReviewUrl,
+    dispatcherSubject,
+    dispatcherCtaText,
+    dispatcherCtaUrl,
+    lang,
+  ]);
+
+  // Dispatch execution
+  const handleDispatchEmails = async (e) => {
+    if (e) e.preventDefault();
+    setDispatcherSending(true);
+    setDispatcherResult(null);
+
+    let allRecipients = [...dispatcherRecipientsList];
+    if (dispatcherRecipientsInput.trim()) {
+      const extra = parseEmails(dispatcherRecipientsInput);
+      extra.forEach((r) => {
+        if (!allRecipients.includes(r)) allRecipients.push(r);
+      });
+    }
+
+    if (allRecipients.length === 0) {
+      setDispatcherResult({
+        success: false,
+        message: lang === "es" ? "Debes ingresar al menos un correo electrónico válido." : "Please enter at least one valid email address.",
+      });
+      setDispatcherSending(false);
+      return;
+    }
+
+    const payload = {
+      domain: currentWebsite.domain,
+      recipients: allRecipients,
+      timing: dispatcherTiming,
+      templateType:
+        dispatcherTemplate === "welcome"
+          ? "WELCOME_CONTACT"
+          : dispatcherTemplate === "reminder"
+          ? "BOOKING_REMINDER"
+          : dispatcherTemplate === "review"
+          ? "GOOGLE_REVIEW_REQUEST"
+          : dispatcherTemplate === "booking"
+          ? "BOOKING_CONFIRMATION"
+          : "CUSTOM",
+      subject: dispatcherSubject,
+      recipientName: dispatcherRecipientName,
+      messageBody: dispatcherMessage,
+      dateStr: dispatcherDate,
+      timeStr: dispatcherTime,
+      googleReviewUrl: dispatcherGoogleReviewUrl || googleReviewUrl,
+      ctaText: dispatcherCtaText,
+      ctaUrl: dispatcherCtaUrl,
+    };
+
+    if (dispatcherTiming === "scheduled") {
+      if (!dispatcherScheduledDate || !dispatcherScheduledTime) {
+        setDispatcherResult({
+          success: false,
+          message: lang === "es" ? "Por favor selecciona la fecha y hora programada." : "Please select scheduled date and time.",
+        });
+        setDispatcherSending(false);
+        return;
+      }
+      payload.scheduledFor = new Date(`${dispatcherScheduledDate}T${dispatcherScheduledTime}:00`).toISOString();
+    }
+
+    try {
+      const res = await fetch("/api/admin/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setDispatcherResult({
+          success: false,
+          message: data.message || (lang === "es" ? "Error al procesar el envío de correos" : "Error processing email dispatch"),
+        });
+      } else {
+        setDispatcherResult({
+          success: true,
+          message: data.message,
+          timing: data.timing,
+          total: data.totalRecipients || allRecipients.length,
+          sent: data.sentCount,
+          scheduled: data.scheduledCount,
+          scheduledFor: data.scheduledFor,
+        });
+
+        // Clear input state on success
+        setDispatcherRecipientsInput("");
+        setDispatcherRecipientsList([]);
+
+        // Automatically reload logs & stats below
+        fetchLogs();
+      }
+    } catch (err) {
+      setDispatcherResult({
+        success: false,
+        message: err.message || (lang === "es" ? "Error de conexión" : "Connection error"),
+      });
+    } finally {
+      setDispatcherSending(false);
+    }
+  };
 
   // Helper to refresh logs & stats
   const fetchLogs = async (tf = logsTimeframe) => {
@@ -775,6 +1112,629 @@ export default function EmailTab({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* SECTION: EMAIL CAMPAIGN & DISPATCH HUB */}
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-fade-in relative">
+        {/* Top Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 text-white flex items-center justify-center shadow-2xs shrink-0">
+                <PaperAirplaneIcon className="w-4 h-4" />
+              </span>
+              <h3 className="text-xl font-black text-slate-950">
+                {lang === "es" ? "Centro de Envío y Campañas de Correo" : "Email Dispatch & Campaigns Hub"}
+              </h3>
+            </div>
+            <p className="text-xs text-slate-500 font-medium mt-1">
+              {lang === "es"
+                ? "Envía correos instantáneamente o prográmalos para un día y hora específicos a clientes individuales o listas completas con plantillas predeterminadas o mensajes libres."
+                : "Send emails instantly or schedule dispatches for a specific date and time to individual clients or full lists with pre-built templates or custom messages."}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/70 px-3 py-1.5 rounded-xl font-sans">
+              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+              <span>{lang === "es" ? "Envíos Directos & Programados" : "Instant & Scheduled Dispatch"}</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Dispatcher Form */}
+        <form onSubmit={handleDispatchEmails} className="space-y-6">
+          {/* Timing / Mode Selector */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-50/80 border border-slate-200/80 rounded-2xl">
+            <div>
+              <span className="text-xs font-black uppercase tracking-wider text-slate-800 block">
+                {lang === "es" ? "Modalidad de Entrega" : "Delivery Mode"}
+              </span>
+              <span className="text-[11px] text-slate-500 font-medium">
+                {dispatcherTiming === "instant"
+                  ? (lang === "es" ? "Los correos se entregarán de inmediato a través de los servidores de correo." : "Emails will be dispatched immediately via mail servers.")
+                  : (lang === "es" ? "Los correos quedarán en cola y se enviarán automáticamente en la fecha y hora elegida." : "Emails will be queued and sent automatically at the chosen date and time.")}
+              </span>
+            </div>
+
+            <div className="inline-flex p-1 bg-white border border-slate-200 rounded-xl shadow-2xs shrink-0">
+              <button
+                type="button"
+                onClick={() => setDispatcherTiming("instant")}
+                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  dispatcherTiming === "instant"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <BoltIcon className="w-3.5 h-3.5 text-amber-400" />
+                <span>{lang === "es" ? "Enviar Ahora" : "Send Instantly"}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setDispatcherTiming("scheduled")}
+                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  dispatcherTiming === "scheduled"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <ClockIcon className="w-3.5 h-3.5 text-indigo-400" />
+                <span>{lang === "es" ? "Programar Fecha & Hora" : "Schedule Date & Time"}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Date & Time Picker (if Scheduled) */}
+          {dispatcherTiming === "scheduled" && (
+            <div className="p-4 bg-indigo-50/50 border border-indigo-200/80 rounded-2xl space-y-3 animate-fade-in">
+              <div className="flex items-center gap-2 text-xs font-black text-indigo-950 uppercase tracking-wider">
+                <CalendarIcon className="w-4 h-4 text-indigo-600" />
+                <span>{lang === "es" ? "Configurar Fecha y Hora de Envío Programado" : "Configure Scheduled Date & Time"}</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                    {lang === "es" ? "Fecha de Envío" : "Delivery Date"}
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    min={new Date().toISOString().split("T")[0]}
+                    value={dispatcherScheduledDate}
+                    onChange={(e) => setDispatcherScheduledDate(e.target.value)}
+                    className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-brand-blue"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                    {lang === "es" ? "Hora de Envío (Zona horaria España / CET)" : "Delivery Time (CET)"}
+                  </label>
+                  <input
+                    type="time"
+                    required
+                    value={dispatcherScheduledTime}
+                    onChange={(e) => setDispatcherScheduledTime(e.target.value)}
+                    className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-brand-blue"
+                  />
+                </div>
+              </div>
+              <p className="text-[11px] text-indigo-700 font-medium">
+                {lang === "es"
+                  ? `⏰ El correo quedará programado y el despachador automático lo enviará el ${dispatcherScheduledDate || "..."} a las ${dispatcherScheduledTime || "..."}.`
+                  : `⏰ Email will be queued and automatically dispatched on ${dispatcherScheduledDate || "..."} at ${dispatcherScheduledTime || "..."}.`}
+              </p>
+            </div>
+          )}
+
+          {/* Recipients Section */}
+          <div className="space-y-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+                  {lang === "es" ? "Destinatarios (Uno o Lista Múltiple)" : "Recipients (Single or Broadcast List)"}
+                </span>
+                <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                  {dispatcherRecipientsList.length + parseEmails(dispatcherRecipientsInput).filter((e) => !dispatcherRecipientsList.includes(e)).length}{" "}
+                  {lang === "es" ? "destinatario(s)" : "recipient(s)"}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {crmContacts.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowContactsPicker((prev) => !prev)}
+                    className="text-xs font-bold text-brand-blue hover:text-blue-800 transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <span>{showContactsPicker ? (lang === "es" ? "Ocultar CRM" : "Hide CRM") : (lang === "es" ? `Contactos CRM (${crmContacts.length})` : `CRM Contacts (${crmContacts.length})`)}</span>
+                    <svg className={`w-3.5 h-3.5 transition-transform ${showContactsPicker ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                  </button>
+                )}
+                {dispatcherRecipientsList.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setDispatcherRecipientsList([])}
+                    className="text-xs font-bold text-rose-600 hover:text-rose-800 transition-colors cursor-pointer"
+                  >
+                    {lang === "es" ? "Limpiar Lista" : "Clear List"}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Quick CRM Contacts Drawer/Panel */}
+            {showContactsPicker && crmContacts.length > 0 && (
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 animate-fade-in shadow-inner">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-800">
+                    {lang === "es" ? "Selecciona contactos de tu base de datos:" : "Select contacts from your CRM database:"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleAddAllCrmContacts}
+                    className="px-2.5 py-1 bg-brand-blue text-white rounded-lg text-[11px] font-bold hover:bg-blue-600 transition-all cursor-pointer"
+                  >
+                    {lang === "es" ? "Añadir Todos los Contactos" : "Add All Contacts"}
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
+                  {crmContacts.map((contact) => {
+                    const isSelected = dispatcherRecipientsList.includes(contact.email);
+                    return (
+                      <button
+                        key={contact.email}
+                        type="button"
+                        onClick={() => handleToggleCrmContact(contact.email)}
+                        className={`p-2 rounded-xl text-left border transition-all cursor-pointer flex items-center justify-between text-xs ${
+                          isSelected
+                            ? "bg-blue-50 border-blue-300 text-blue-900 font-bold"
+                            : "bg-white border-slate-200 text-slate-700 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="truncate mr-2">
+                          <span className="block truncate font-semibold">{contact.name}</span>
+                          <span className="block text-[10px] text-slate-400 font-mono truncate">{contact.email}</span>
+                        </div>
+                        <span className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 text-[10px] border ${
+                          isSelected ? "bg-brand-blue text-white border-brand-blue" : "border-slate-300 bg-white"
+                        }`}>
+                          {isSelected ? "✓" : ""}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Recipients Badges/Pills */}
+            {dispatcherRecipientsList.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-slate-50/80 border border-slate-200 rounded-xl">
+                {dispatcherRecipientsList.map((email) => (
+                  <span
+                    key={email}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200/90 text-slate-800 text-xs font-semibold shadow-2xs group"
+                  >
+                    <span className="font-mono text-[11px]">{email}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveRecipient(email)}
+                      className="text-slate-400 hover:text-rose-600 transition-colors cursor-pointer font-bold ml-0.5"
+                      title="Eliminar"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Input / Textarea for manual entry or paste */}
+            <div className="relative">
+              <textarea
+                rows={2}
+                value={dispatcherRecipientsInput}
+                onChange={(e) => setDispatcherRecipientsInput(e.target.value)}
+                onBlur={handleAddRecipientsFromInput}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleAddRecipientsFromInput();
+                  }
+                }}
+                placeholder={
+                  lang === "es"
+                    ? "Escribe o pega uno o varios correos separados por comas, espacios o saltos de línea (ej. cliente@gmail.com, empresa@ejemplo.es)..."
+                    : "Type or paste one or multiple emails separated by commas, spaces, or lines (e.g. client@gmail.com)..."
+                }
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:bg-white transition-all resize-y"
+              />
+              {dispatcherRecipientsInput.trim() && (
+                <button
+                  type="button"
+                  onClick={handleAddRecipientsFromInput}
+                  className="absolute right-2.5 bottom-3 px-3 py-1 bg-slate-900 text-white rounded-lg text-[11px] font-bold hover:bg-slate-800 transition-all cursor-pointer shadow-xs"
+                >
+                  {lang === "es" ? "Añadir a la lista" : "Add to list"}
+                </button>
+              )}
+            </div>
+            <p className="text-[10px] text-slate-400">
+              {lang === "es"
+                ? "Consejo: Puedes pegar directamente listas completas de Excel o texto. El sistema filtrará automáticamente los correos válidos sin duplicados."
+                : "Tip: You can paste lists from Excel or text. The system automatically validates emails and removes duplicates."}
+            </p>
+          </div>
+
+          {/* Template Selector Grid */}
+          <div className="space-y-2.5">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-800 block">
+              {lang === "es" ? "Plantilla de Correo" : "Email Template"}
+            </span>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+              {/* Template 1: Custom */}
+              <button
+                type="button"
+                onClick={() => handleSelectDispatcherTemplate("custom")}
+                className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  dispatcherTemplate === "custom"
+                    ? "bg-indigo-50/80 border-indigo-300 ring-2 ring-indigo-500/20 shadow-xs"
+                    : "bg-white border-slate-200/90 hover:border-slate-300"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="w-7 h-7 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-xs">
+                    ✉️
+                  </span>
+                  {dispatcherTemplate === "custom" && (
+                    <span className="w-2 h-2 rounded-full bg-indigo-600"></span>
+                  )}
+                </div>
+                <div>
+                  <span className="text-xs font-black text-slate-900 block truncate">
+                    {lang === "es" ? "Personalizado" : "Custom"}
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-medium line-clamp-1">
+                    {lang === "es" ? "Mensaje libre corporativo" : "Freeform message"}
+                  </span>
+                </div>
+              </button>
+
+              {/* Template 2: Welcome */}
+              <button
+                type="button"
+                onClick={() => handleSelectDispatcherTemplate("welcome")}
+                className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  dispatcherTemplate === "welcome"
+                    ? "bg-blue-50/80 border-blue-300 ring-2 ring-blue-500/20 shadow-xs"
+                    : "bg-white border-slate-200/90 hover:border-slate-300"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="w-7 h-7 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-black text-xs">
+                    👋
+                  </span>
+                  {dispatcherTemplate === "welcome" && (
+                    <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                  )}
+                </div>
+                <div>
+                  <span className="text-xs font-black text-slate-900 block truncate">
+                    {lang === "es" ? "Bienvenida" : "Welcome"}
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-medium line-clamp-1">
+                    {lang === "es" ? "Saludo a nuevos clientes" : "Welcome greeting"}
+                  </span>
+                </div>
+              </button>
+
+              {/* Template 3: Reminder */}
+              <button
+                type="button"
+                onClick={() => handleSelectDispatcherTemplate("reminder")}
+                className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  dispatcherTemplate === "reminder"
+                    ? "bg-amber-50/80 border-amber-300 ring-2 ring-amber-500/20 shadow-xs"
+                    : "bg-white border-slate-200/90 hover:border-slate-300"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="w-7 h-7 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-black text-xs">
+                    ⏰
+                  </span>
+                  {dispatcherTemplate === "reminder" && (
+                    <span className="w-2 h-2 rounded-full bg-amber-600"></span>
+                  )}
+                </div>
+                <div>
+                  <span className="text-xs font-black text-slate-900 block truncate">
+                    {lang === "es" ? "Recordatorio" : "Reminder"}
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-medium line-clamp-1">
+                    {lang === "es" ? "Aviso previo de cita" : "Prior appointment alert"}
+                  </span>
+                </div>
+              </button>
+
+              {/* Template 4: Google Review */}
+              <button
+                type="button"
+                onClick={() => handleSelectDispatcherTemplate("review")}
+                className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  dispatcherTemplate === "review"
+                    ? "bg-amber-50/80 border-amber-300 ring-2 ring-amber-500/20 shadow-xs"
+                    : "bg-white border-slate-200/90 hover:border-slate-300"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="w-7 h-7 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-black text-xs">
+                    ⭐
+                  </span>
+                  {dispatcherTemplate === "review" && (
+                    <span className="w-2 h-2 rounded-full bg-amber-600"></span>
+                  )}
+                </div>
+                <div>
+                  <span className="text-xs font-black text-slate-900 block truncate">
+                    {lang === "es" ? "Reseña Google" : "Google Review"}
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-medium line-clamp-1">
+                    {lang === "es" ? "Solicitud 5 estrellas" : "5-star booster"}
+                  </span>
+                </div>
+              </button>
+
+              {/* Template 5: Booking */}
+              <button
+                type="button"
+                onClick={() => handleSelectDispatcherTemplate("booking")}
+                className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  dispatcherTemplate === "booking"
+                    ? "bg-emerald-50/80 border-emerald-300 ring-2 ring-emerald-500/20 shadow-xs"
+                    : "bg-white border-slate-200/90 hover:border-slate-300"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black text-xs">
+                    📅
+                  </span>
+                  {dispatcherTemplate === "booking" && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+                  )}
+                </div>
+                <div>
+                  <span className="text-xs font-black text-slate-900 block truncate">
+                    {lang === "es" ? "Confirmación" : "Confirmation"}
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-medium line-clamp-1">
+                    {lang === "es" ? "Confirmación de cita" : "Booking details"}
+                  </span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Dynamic Inputs according to Template */}
+          <div className="p-5 bg-slate-50/60 border border-slate-200/80 rounded-2xl space-y-4">
+            {/* Subject Field */}
+            <div>
+              <label className="text-xs font-bold text-slate-800 block mb-1">
+                {lang === "es" ? "Asunto del Correo" : "Email Subject"}
+              </label>
+              <input
+                type="text"
+                required
+                value={dispatcherSubject}
+                onChange={(e) => setDispatcherSubject(e.target.value)}
+                placeholder={lang === "es" ? "ej. Novedades y promociones exclusivas..." : "e.g. Important updates..."}
+                className="w-full h-11 px-3.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-brand-blue"
+              />
+            </div>
+
+            {/* Optional Specific Fields: Reminder or Booking Confirmation */}
+            {(dispatcherTemplate === "reminder" || dispatcherTemplate === "booking") && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                    {lang === "es" ? "Fecha de la Cita (Texto o Fecha)" : "Appointment Date"}
+                  </label>
+                  <input
+                    type="text"
+                    value={dispatcherDate}
+                    onChange={(e) => setDispatcherDate(e.target.value)}
+                    placeholder={lang === "es" ? "ej. 25 de Octubre o Mañana" : "e.g. October 25th"}
+                    className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-brand-blue"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                    {lang === "es" ? "Hora de la Cita" : "Appointment Time"}
+                  </label>
+                  <input
+                    type="text"
+                    value={dispatcherTime}
+                    onChange={(e) => setDispatcherTime(e.target.value)}
+                    placeholder="ej. 10:30 o 17:00"
+                    className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-brand-blue"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Optional Specific Fields: Review */}
+            {dispatcherTemplate === "review" && (
+              <div>
+                <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                  {lang === "es" ? "Enlace de Reseña en Google Maps" : "Google Maps Review Link"}
+                </label>
+                <input
+                  type="url"
+                  value={dispatcherGoogleReviewUrl}
+                  onChange={(e) => setDispatcherGoogleReviewUrl(e.target.value)}
+                  placeholder="https://g.page/r/..."
+                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-brand-blue"
+                />
+              </div>
+            )}
+
+            {/* Message Body Field (Custom or Welcome note) */}
+            {(dispatcherTemplate === "custom" || dispatcherTemplate === "welcome") && (
+              <div>
+                <label className="text-xs font-bold text-slate-800 block mb-1">
+                  {dispatcherTemplate === "welcome"
+                    ? (lang === "es" ? "Mensaje de Bienvenida Adicional (Opcional)" : "Additional Welcome Note (Optional)")
+                    : (lang === "es" ? "Cuerpo del Mensaje (Párrafos)" : "Message Body")}
+                </label>
+                <textarea
+                  rows={4}
+                  value={dispatcherMessage}
+                  onChange={(e) => setDispatcherMessage(e.target.value)}
+                  placeholder={
+                    lang === "es"
+                      ? "Escribe aquí el contenido del correo. Puedes separar párrafos con un salto de línea..."
+                      : "Write your email message here. Paragraphs are supported..."
+                  }
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-brand-blue"
+                />
+              </div>
+            )}
+
+            {/* Call to Action Buttons (for Custom template) */}
+            {dispatcherTemplate === "custom" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                    {lang === "es" ? "Texto del Botón CTA (Opcional)" : "CTA Button Label (Optional)"}
+                  </label>
+                  <input
+                    type="text"
+                    value={dispatcherCtaText}
+                    onChange={(e) => setDispatcherCtaText(e.target.value)}
+                    placeholder={lang === "es" ? "ej. Ver Oferta Especial o Reservar Ahora" : "e.g. View Offer"}
+                    className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-brand-blue"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                    {lang === "es" ? "Enlace URL del Botón (Opcional)" : "Button URL Link (Optional)"}
+                  </label>
+                  <input
+                    type="text"
+                    value={dispatcherCtaUrl}
+                    onChange={(e) => setDispatcherCtaUrl(e.target.value)}
+                    placeholder={`https://${currentWebsite?.domain || "spplabs.es"}/promocion`}
+                    className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-brand-blue"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Live Preview Toggle & Frame */}
+          <div className="border border-slate-200/80 rounded-2xl p-4 bg-slate-50/50 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                <EyeIcon className="w-4 h-4 text-slate-600" />
+                <span>{lang === "es" ? "Vista Previa en Vivo del Correo" : "Live Email Preview Sandbox"}</span>
+              </span>
+
+              <button
+                type="button"
+                onClick={() => setShowDispatcherPreview((prev) => !prev)}
+                className="text-xs font-bold text-brand-blue hover:text-blue-800 transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <span>{showDispatcherPreview ? (lang === "es" ? "Ocultar Vista Previa" : "Hide Preview") : (lang === "es" ? "Ver Vista Previa" : "Show Preview")}</span>
+                <svg className={`w-3.5 h-3.5 transition-transform ${showDispatcherPreview ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </button>
+            </div>
+
+            {showDispatcherPreview && (
+              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-inner h-[360px] animate-fade-in">
+                <iframe
+                  title="Dispatcher Email Preview"
+                  srcDoc={getDispatcherPreviewHtml()}
+                  className="w-full h-full border-0"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Result Feedback Banner */}
+          {dispatcherResult && (
+            <div
+              className={`p-4 rounded-2xl border text-xs font-bold flex items-start gap-3 animate-fade-in ${
+                dispatcherResult.success
+                  ? "bg-emerald-50 text-emerald-900 border-emerald-200"
+                  : "bg-rose-50 text-rose-900 border-rose-200"
+              }`}
+            >
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                dispatcherResult.success ? "bg-emerald-600 text-white" : "bg-rose-600 text-white"
+              }`}>
+                {dispatcherResult.success ? "✓" : "×"}
+              </span>
+              <div className="space-y-1">
+                <p className="font-extrabold">{dispatcherResult.message}</p>
+                {dispatcherResult.success && (
+                  <p className="text-[11px] text-emerald-700 font-medium">
+                    {lang === "es"
+                      ? "Las estadísticas y el registro de correos situados debajo se han actualizado automáticamente."
+                      : "The statistics and delivery logs below have been refreshed automatically."}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Action Button */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+            <span className="text-[11px] text-slate-500 font-medium">
+              {dispatcherTiming === "instant"
+                ? (lang === "es" ? "⚡ El envío se procesará en tiempo real para todos los destinatarios válidos." : "⚡ The dispatch will be executed in real-time.")
+                : (lang === "es" ? "⏰ Se agendará en la base de datos y se enviará en el momento programado." : "⏰ Will be queued and sent at the scheduled time.")}
+            </span>
+
+            <button
+              type="submit"
+              disabled={dispatcherSending}
+              className="w-full sm:w-auto h-12 px-6 bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold rounded-xl transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm hover:shadow active:scale-98"
+            >
+              {dispatcherSending ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                  </svg>
+                  <span>{lang === "es" ? "Procesando Envío..." : "Processing..."}</span>
+                </>
+              ) : dispatcherTiming === "instant" ? (
+                <>
+                  <BoltIcon className="w-4 h-4 text-amber-400" />
+                  <span>
+                    {lang === "es"
+                      ? `Enviar Correo Ahora (${dispatcherRecipientsList.length + parseEmails(dispatcherRecipientsInput).filter((e) => !dispatcherRecipientsList.includes(e)).length})`
+                      : `Send Emails Now (${dispatcherRecipientsList.length + parseEmails(dispatcherRecipientsInput).filter((e) => !dispatcherRecipientsList.includes(e)).length})`}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <ClockIcon className="w-4 h-4 text-indigo-400" />
+                  <span>
+                    {lang === "es"
+                      ? `Programar Envío (${dispatcherRecipientsList.length + parseEmails(dispatcherRecipientsInput).filter((e) => !dispatcherRecipientsList.includes(e)).length})`
+                      : `Schedule Dispatch (${dispatcherRecipientsList.length + parseEmails(dispatcherRecipientsInput).filter((e) => !dispatcherRecipientsList.includes(e)).length})`}
+                  </span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* SECTION: EMAIL & GOOGLE REVIEWS ANALYTICS */}

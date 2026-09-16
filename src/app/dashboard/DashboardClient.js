@@ -1715,6 +1715,8 @@ export default function DashboardClient({
             <EmailTab
               currentWebsite={currentWebsite}
               currentLogoUrl={currentLogoUrl}
+              contactForms={contactForms}
+              dashboardNotes={dashboardNotes}
               t={t}
               lang={lang}
             />

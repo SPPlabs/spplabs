@@ -5,9 +5,13 @@ import { verifyJWT } from "@/lib/jwt";
 import { sendEmail } from "@/lib/email";
 import { generateTestEmailHtml } from "@/lib/emailTemplates";
 import { getSpainDate, getSpainMonthBoundariesUtc } from "@/lib/dateUtils";
+import { dispatchPendingScheduledEmails } from "@/lib/emailCronWorker";
 
 export async function GET(request) {
   try {
+    // Opportunistically process any pending scheduled emails due for dispatch
+    dispatchPendingScheduledEmails().catch(() => {});
+
     const cookieStore = await cookies();
     const token = cookieStore.get("spp_session")?.value;
     if (!token) {

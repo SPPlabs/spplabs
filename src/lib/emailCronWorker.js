@@ -5,6 +5,7 @@ import {
   generateBookingConfirmationHtml,
   generateBookingReminderHtml,
   generateGoogleReviewHtml,
+  generateCustomEmailHtml,
 } from "@/lib/emailTemplates";
 
 let isProcessing = false;
@@ -57,7 +58,9 @@ export async function dispatchPendingScheduledEmails() {
         const meta = (item.metadata && typeof item.metadata === "object") ? item.metadata : {};
         const customLogoUrl = config.customLogoUrl || website?.logoUrl || null;
 
-        if (item.emailType === "WELCOME_CONTACT") {
+        if (meta.customHtml && typeof meta.customHtml === "string" && meta.customHtml.trim()) {
+          html = meta.customHtml;
+        } else if (item.emailType === "WELCOME_CONTACT") {
           html = generateWelcomeContactHtml({
             recipientName: item.recipientName,
             companyName: website?.displayName,
@@ -94,6 +97,19 @@ export async function dispatchPendingScheduledEmails() {
             googleReviewUrl: config.googleReviewUrl || `https://${website?.domain}`,
             brandColor: config.brandColor,
             customLogoUrl,
+          });
+        } else if (item.emailType === "TEST_EMAIL" || meta.isCustom) {
+          html = generateCustomEmailHtml({
+            recipientName: item.recipientName,
+            companyName: website?.displayName,
+            clientDomain: website?.domain,
+            brandColor: config.brandColor,
+            customLogoUrl,
+            subject: item.subject,
+            messageBody: meta.messageBody || meta.messageSnippet || "",
+            ctaText: meta.ctaText || null,
+            ctaUrl: meta.ctaUrl || null,
+            badgeText: meta.badgeText || "Comunicado Oficial",
           });
         }
 
