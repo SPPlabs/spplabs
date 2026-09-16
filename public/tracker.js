@@ -277,5 +277,8 @@
     window.addEventListener("spp_cookie_consent_accepted", function () {
       initTracker();
     });
+    window.addEventListener("storage", function () {
+      if (hasConsent()) initTracker();
+    });
   }
 })();

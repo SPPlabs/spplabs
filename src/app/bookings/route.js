@@ -349,6 +349,7 @@ export async function POST(request) {
       success: true,
       message: "Booking requested successfully",
       id: booking.id,
+      bookingId: booking.id,
     });
   } catch (error) {
     console.error("Public bookings API error:", error);
