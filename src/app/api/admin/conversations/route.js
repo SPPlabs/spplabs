@@ -34,9 +34,19 @@ export async function GET(request) {
 
     const db = session.role === "ADMIN" ? prisma : withRLS(website.id);
 
+    const isMainAdminDashboard = session.role === "ADMIN" && targetDomain === "spplabs.es";
+    const whereClause = isMainAdminDashboard ? {} : { websiteId: website.id };
+
     const conversations = await db.chatConversation.findMany({
-      where: { websiteId: website.id },
+      where: whereClause,
       include: {
+        website: {
+          select: {
+            id: true,
+            domain: true,
+            displayName: true,
+          },
+        },
         messages: {
           orderBy: { createdAt: "asc" },
         },
@@ -46,12 +56,17 @@ export async function GET(request) {
 
     const formatted = conversations.map(c => ({
       id: c.id,
+      websiteId: c.websiteId,
+      websiteDomain: c.website?.domain || website.domain,
+      websiteDisplayName: c.website?.displayName || website.displayName,
       visitorId: c.visitorId,
       visitorName: c.visitorName || "Visitante",
       visitorEmail: c.visitorEmail || null,
       status: c.status,
       startedAt: c.startedAt,
       lastMessageAt: c.lastMessageAt,
+      createdAt: c.startedAt,
+      updatedAt: c.lastMessageAt,
       firstMessageSnippet: c.messages[0]?.content || "Conversación iniciada",
       messageCount: c.messages.length,
       messages: c.messages,

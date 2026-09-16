@@ -446,6 +446,11 @@ export default function AiTab({
                       <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">
                         {conv.messageCount} msgs
                       </span>
+                      {conv.websiteDomain && conv.websiteDomain !== currentWebsite.domain && (
+                        <span className="text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-200/60 px-2 py-0.5 rounded-full font-bold">
+                          {conv.websiteDisplayName || conv.websiteDomain}
+                        </span>
+                      )}
                       <span className="text-[10px] text-slate-400 font-mono sm:ml-auto">
                         {new Date(conv.lastMessageAt).toLocaleString(lang === "es" ? "es-ES" : "en-US", {
                           year: "numeric",

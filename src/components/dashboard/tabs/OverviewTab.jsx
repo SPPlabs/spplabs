@@ -44,6 +44,7 @@ export default function OverviewTab({
   unreadBookingsCount = 0,
   unreadContactsCount = 0,
   unreadAnnouncementsCount = 0,
+  unreadIaCount = 0,
 }) {
   const [copiedId, setCopiedId] = useState(null);
   const pendingBookingsCount = (bookings || []).filter((b) => b.status === "PENDING").length;
@@ -626,6 +627,11 @@ export default function OverviewTab({
                   <BotIcon className="w-4 h-4" />
                 </span>
                 <span>{t.overviewAiConversations}</span>
+                {unreadIaCount > 0 && (
+                  <span className="flex items-center justify-center min-w-[18px] h-4.5 px-1.5 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-[9px] font-black leading-none shadow-[0_0_8px_rgba(239,68,68,0.9)] border border-white/40">
+                    {unreadIaCount}
+                  </span>
+                )}
               </h3>
               <button
                 onClick={() => setActiveTab("ia")}
@@ -667,9 +673,16 @@ export default function OverviewTab({
                         </div>
                       </div>
 
-                      <span className="text-[9.5px] bg-indigo-50 border border-indigo-200/60 text-indigo-700 font-bold px-2 py-0.5 rounded-full shrink-0">
-                        {conv.messageCount} msgs
-                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {conv.websiteDomain && conv.websiteDomain !== currentWebsite.domain && (
+                          <span className="text-[9px] bg-blue-50 text-blue-700 border border-blue-200/60 font-bold px-1.5 py-0.5 rounded-md truncate max-w-[90px]">
+                            {conv.websiteDisplayName || conv.websiteDomain}
+                          </span>
+                        )}
+                        <span className="text-[9.5px] bg-indigo-50 border border-indigo-200/60 text-indigo-700 font-bold px-2 py-0.5 rounded-full shrink-0">
+                          {conv.messageCount} msgs
+                        </span>
+                      </div>
                     </div>
 
                     {conv.firstMessageSnippet && (

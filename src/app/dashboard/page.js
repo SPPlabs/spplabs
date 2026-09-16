@@ -175,6 +175,48 @@ export default async function DashboardPage(props) {
     }));
   }
 
+  // Fetch AI Conversations (Admin on spplabs.es sees all client chats; client or impersonated view sees target site chats)
+  const rawConversations = await prisma.chatConversation.findMany({
+    where: isAdminMainDashboard ? {} : { websiteId: currentWebsite.id },
+    include: {
+      website: {
+        select: {
+          id: true,
+          domain: true,
+          displayName: true,
+        },
+      },
+      messages: {
+        orderBy: { createdAt: "asc" },
+      },
+    },
+    orderBy: { lastMessageAt: "desc" },
+  });
+
+  const initialConversations = rawConversations.map((c) => ({
+    id: c.id,
+    websiteId: c.websiteId,
+    websiteDomain: c.website?.domain || currentWebsite.domain,
+    websiteDisplayName: c.website?.displayName || currentWebsite.displayName,
+    visitorId: c.visitorId,
+    visitorName: c.visitorName || "Visitante",
+    visitorEmail: c.visitorEmail || null,
+    status: c.status,
+    startedAt: c.startedAt.toISOString(),
+    lastMessageAt: c.lastMessageAt.toISOString(),
+    createdAt: c.startedAt.toISOString(),
+    updatedAt: c.lastMessageAt.toISOString(),
+    firstMessageSnippet: c.messages[0]?.content || "Conversación iniciada",
+    messageCount: c.messages.length,
+    messages: c.messages.map((m) => ({
+      id: m.id,
+      sender: m.sender,
+      content: m.content,
+      tokens: m.tokens,
+      createdAt: m.createdAt.toISOString(),
+    })),
+  }));
+
   // Fetch Dashboard Notes / Directory
   const rawNotes = await prisma.dashboardNote.findMany({
     where: { websiteId: currentWebsite.id },
@@ -184,21 +226,35 @@ export default async function DashboardPage(props) {
     ],
   });
 
-  const dashboardNotes = rawNotes.map((n) => ({
-    id: n.id,
-    websiteId: n.websiteId,
-    type: n.type,
-    title: n.title,
-    content: n.content,
-    email: n.email,
-    phone: n.phone,
-    role: n.role,
-    tag: n.tag,
-    color: n.color,
-    pinned: n.pinned,
-    createdAt: n.createdAt.toISOString(),
-    updatedAt: n.updatedAt.toISOString(),
-  }));
+  // Extract server tags catalog note if present
+  const catalogNote = rawNotes.find((n) => n.role === "__SYSTEM_TAGS_CATALOG__");
+  let serverCustomTags = [];
+  if (catalogNote && catalogNote.content) {
+    try {
+      const parsed = JSON.parse(catalogNote.content);
+      if (Array.isArray(parsed)) serverCustomTags = parsed;
+    } catch {
+      serverCustomTags = [];
+    }
+  }
+
+  const dashboardNotes = rawNotes
+    .filter((n) => n.role !== "__SYSTEM_TAGS_CATALOG__")
+    .map((n) => ({
+      id: n.id,
+      websiteId: n.websiteId,
+      type: n.type,
+      title: n.title,
+      content: n.content,
+      email: n.email,
+      phone: n.phone,
+      role: n.role,
+      tag: n.tag,
+      color: n.color,
+      pinned: n.pinned,
+      createdAt: n.createdAt.toISOString(),
+      updatedAt: n.updatedAt.toISOString(),
+    }));
 
   // Fetch Google Calendar Connection
   const rawGCal = await prisma.googleCalendarConnection.findUnique({
@@ -277,6 +333,8 @@ export default async function DashboardPage(props) {
       notifications={notifications}
       supportRequests={supportRequests}
       dashboardNotes={dashboardNotes}
+      serverCustomTags={serverCustomTags}
+      initialConversations={initialConversations}
       googleCalendarConnection={googleCalendarConnection}
       externalCalendarEvents={externalCalendarEvents}
       initialDashboardState={dashboardState}

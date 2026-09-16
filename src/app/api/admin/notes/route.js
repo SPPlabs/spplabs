@@ -40,7 +40,7 @@ export async function GET(request) {
     const { session, website } = auth;
     const db = session.role === "ADMIN" ? prisma : withRLS(website.id);
 
-    const notes = await db.dashboardNote.findMany({
+    const allNotes = await db.dashboardNote.findMany({
       where: { websiteId: website.id },
       orderBy: [
         { pinned: "desc" },
@@ -48,7 +48,20 @@ export async function GET(request) {
       ],
     });
 
-    return NextResponse.json({ success: true, notes });
+    const catalogNote = allNotes.find((n) => n.role === "__SYSTEM_TAGS_CATALOG__");
+    let tags = [];
+    if (catalogNote && catalogNote.content) {
+      try {
+        const parsed = JSON.parse(catalogNote.content);
+        if (Array.isArray(parsed)) tags = parsed;
+      } catch {
+        tags = [];
+      }
+    }
+
+    const notes = allNotes.filter((n) => n.role !== "__SYSTEM_TAGS_CATALOG__");
+
+    return NextResponse.json({ success: true, notes, tags });
   } catch (error) {
     console.error("GET /api/admin/notes error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -70,6 +83,45 @@ export async function POST(request) {
     }
 
     const { session, website } = auth;
+
+    // Special action: Sync / Persist website custom tags catalog
+    if (body.action === "sync_tags") {
+      const tags = Array.isArray(body.tags)
+        ? body.tags.map((t) => String(t).trim().replace(/^#+/, "")).filter(Boolean)
+        : [];
+
+      const db = session.role === "ADMIN" ? prisma : withRLS(website.id);
+
+      const existingCatalog = await db.dashboardNote.findFirst({
+        where: {
+          websiteId: website.id,
+          role: "__SYSTEM_TAGS_CATALOG__",
+        },
+      });
+
+      let updatedNote;
+      if (existingCatalog) {
+        updatedNote = await db.dashboardNote.update({
+          where: { id: existingCatalog.id },
+          data: {
+            content: JSON.stringify(tags),
+          },
+        });
+      } else {
+        updatedNote = await db.dashboardNote.create({
+          data: {
+            websiteId: website.id,
+            type: "NOTE",
+            title: "__SPP_TAGS_CATALOG__",
+            content: JSON.stringify(tags),
+            role: "__SYSTEM_TAGS_CATALOG__",
+          },
+        });
+      }
+
+      return NextResponse.json({ success: true, tags, noteId: updatedNote.id });
+    }
+
     const { type, title, content, email, phone, role, tag, color, pinned } = body;
 
     if (!title || !title.trim()) {
@@ -194,6 +246,29 @@ export async function DELETE(request) {
           tag: null,
         },
       });
+
+      // Also remove from server tags catalog if present
+      const existingCatalog = await db.dashboardNote.findFirst({
+        where: {
+          websiteId: website.id,
+          role: "__SYSTEM_TAGS_CATALOG__",
+        },
+      });
+
+      if (existingCatalog && existingCatalog.content) {
+        try {
+          const parsed = JSON.parse(existingCatalog.content);
+          if (Array.isArray(parsed)) {
+            const updated = parsed.filter((t) => t.toLowerCase() !== cleanTag.toLowerCase());
+            await db.dashboardNote.update({
+              where: { id: existingCatalog.id },
+              data: { content: JSON.stringify(updated) },
+            });
+          }
+        } catch (e) {
+          console.error("Error updating tags catalog in DELETE:", e);
+        }
+      }
 
       return NextResponse.json({
         success: true,

@@ -39,6 +39,8 @@ export default function DashboardClient({
   notifications,
   supportRequests,
   dashboardNotes = [],
+  serverCustomTags = [],
+  initialConversations = [],
   googleCalendarConnection = null,
   externalCalendarEvents = [],
   initialDashboardState = null,
@@ -386,7 +388,7 @@ export default function DashboardClient({
   const [announcementsList, setAnnouncementsList] = useState(notifications || []);
 
   // Chatbot Conversations State
-  const [conversationsList, setConversationsList] = useState([]);
+  const [conversationsList, setConversationsList] = useState(initialConversations || []);
   const [conversationsLoading, setConversationsLoading] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState(null);
 
@@ -522,7 +524,7 @@ export default function DashboardClient({
   const unreadIaCount = useMemo(() => {
     return (conversationsList || []).filter(c => {
       if (!dashboardState.lastConversationView) return true;
-      const time = c.updatedAt || c.createdAt;
+      const time = c.lastMessageAt || c.startedAt || c.updatedAt || c.createdAt;
       return new Date(time) > new Date(dashboardState.lastConversationView);
     }).length;
   }, [conversationsList, dashboardState.lastConversationView]);
@@ -798,11 +800,11 @@ export default function DashboardClient({
     setAnnouncementsList(notifications || []);
     setAnalyticsData(null);
     setVisitorsTrends([]);
-    setConversationsList([]);
+    setConversationsList(initialConversations || []);
     setSelectedConversation(null);
     fetchConversations();
     fetchAnalytics(analyticsTimeframe);
-  }, [currentWebsite.domain, chatbotKnowledge?.content, supportRequests, notifications]);
+  }, [currentWebsite.domain, chatbotKnowledge?.content, supportRequests, notifications, initialConversations]);
 
   useEffect(() => {
     if (activeTab === "analytics" && !analyticsData && !analyticsLoading) {
@@ -1601,6 +1603,7 @@ export default function DashboardClient({
               unreadBookingsCount={unreadBookingsCount}
               unreadContactsCount={unreadContactsCount}
               unreadAnnouncementsCount={unreadAnnouncementsCount}
+              unreadIaCount={unreadIaCount}
             />
           )}
 
@@ -1633,6 +1636,7 @@ export default function DashboardClient({
               t={t}
               lang={lang}
               initialNotes={dashboardNotes}
+              serverCustomTags={serverCustomTags}
               currentWebsite={currentWebsite}
               router={router}
               pendingNoteDraft={pendingNoteDraft}
