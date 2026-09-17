@@ -127,7 +127,8 @@ export default function DashboardClient({
     }
   }, [searchParams]);
 
-  const handleSaveNotificationPreferences = async () => {
+  const handleSaveNotificationPreferences = async (overrideEnabled = undefined) => {
+    const targetEnabled = typeof overrideEnabled === "boolean" ? overrideEnabled : notifEnabled;
     setIsSavingNotif(true);
     setNotifFeedback(null);
     try {
@@ -136,7 +137,7 @@ export default function DashboardClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           domain: currentWebsite?.domain,
-          enabled: notifEnabled,
+          enabled: targetEnabled,
           notificationEmail: notifEmail,
           notifyContacts: notifContacts,
           notifyBookings: notifBookings,
@@ -150,23 +151,40 @@ export default function DashboardClient({
       if (res.ok) {
         setNotifFeedback({
           type: "success",
-          message: lang === "es" ? "Preferencias guardadas correctamente." : "Preferences saved successfully.",
+          message: targetEnabled
+            ? (lang === "es" ? "Preferencias guardadas correctamente." : "Preferences saved successfully.")
+            : (lang === "es" ? "Notificaciones desactivadas correctamente." : "Notifications disabled successfully."),
         });
         router.refresh();
         setTimeout(() => setNotifFeedback(null), 4000);
+        return true;
       } else {
         setNotifFeedback({
           type: "error",
           message: data.message || (lang === "es" ? "Error al guardar preferencias" : "Error saving preferences"),
         });
+        return false;
       }
     } catch {
       setNotifFeedback({
         type: "error",
         message: lang === "es" ? "Error de conexión al guardar" : "Connection error while saving",
       });
+      return false;
     } finally {
       setIsSavingNotif(false);
+    }
+  };
+
+  const handleToggleNotificationSwitch = async () => {
+    const nextState = !notifEnabled;
+    setNotifEnabled(nextState);
+    if (!nextState) {
+      // Immediately persist disabled state to server when toggled off
+      const ok = await handleSaveNotificationPreferences(false);
+      if (!ok) {
+        setNotifEnabled(true);
+      }
     }
   };
 
@@ -2101,8 +2119,9 @@ export default function DashboardClient({
                     type="button"
                     role="switch"
                     aria-checked={notifEnabled}
-                    onClick={() => setNotifEnabled((prev) => !prev)}
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-offset-2 ${
+                    onClick={handleToggleNotificationSwitch}
+                    disabled={isSavingNotif}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-offset-2 disabled:opacity-60 ${
                       notifEnabled ? "bg-brand-blue" : "bg-slate-300"
                     }`}
                   >
@@ -2117,6 +2136,17 @@ export default function DashboardClient({
                     />
                   </button>
                 </div>
+
+                {/* Feedback messages (visible whether notifications are on or off) */}
+                {notifFeedback && (
+                  <div className={`p-2.5 rounded-xl text-xs font-semibold animate-fade-in ${
+                    notifFeedback.type === "error"
+                      ? "bg-rose-50 text-rose-700 border border-rose-200"
+                      : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  }`}>
+                    {notifFeedback.message}
+                  </div>
+                )}
 
                 {/* Sub-configuration expanded when notifEnabled is true */}
                 {notifEnabled ? (
@@ -2309,12 +2339,7 @@ export default function DashboardClient({
                       </button>
                     </div>
 
-                    {/* Feedback messages */}
-                    {notifFeedback && (
-                      <div className={`p-2.5 rounded-xl text-xs font-semibold ${notifFeedback.type === "error" ? "bg-rose-50 text-rose-700 border border-rose-200" : "bg-emerald-50 text-emerald-700 border border-emerald-200"}`}>
-                        {notifFeedback.message}
-                      </div>
-                    )}
+                    {/* Test notification feedback message */}
                     {testNotifFeedback && (
                       <div className={`p-2.5 rounded-xl text-xs font-semibold ${testNotifFeedback.type === "error" ? "bg-rose-50 text-rose-700 border border-rose-200" : "bg-emerald-50 text-emerald-700 border border-emerald-200"}`}>
                         {testNotifFeedback.message}
@@ -2368,15 +2393,21 @@ export default function DashboardClient({
             <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end shrink-0">
               <button
                 type="button"
+                disabled={isSavingNotif}
                 onClick={async () => {
-                  if (notifEnabled && notifEmail.trim()) {
-                    await handleSaveNotificationPreferences();
+                  if (!notifEnabled) {
+                    await handleSaveNotificationPreferences(false);
+                  } else if (notifEmail.trim()) {
+                    await handleSaveNotificationPreferences(true);
                   }
                   setShowSettingsModal(false);
                 }}
-                className="h-10 px-6 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+                className="h-10 px-6 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
               >
-                {t.settingsSave}
+                {isSavingNotif && (
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                )}
+                <span>{t.settingsSave}</span>
               </button>
             </div>
           </div>

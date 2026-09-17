@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { verifyJWT } from "@/lib/jwt";
 import DashboardClient from "./DashboardClient";
+import { getUserNotificationPreferences } from "@/lib/userNotifications";
 
 export default async function DashboardPage(props) {
   // Await searchParams as they are a Promise in Next.js 15+
@@ -87,9 +88,7 @@ export default async function DashboardPage(props) {
   // Fetch User Notification Preferences for SSR
   let userNotificationPreference = null;
   try {
-    userNotificationPreference = await prisma.userNotificationPreference.findUnique({
-      where: { websiteId: currentWebsite.id },
-    });
+    userNotificationPreference = await getUserNotificationPreferences(currentWebsite.id);
   } catch {
     // Graceful fallback if table is not yet created
   }
@@ -333,8 +332,16 @@ export default async function DashboardPage(props) {
   const serializedNotificationPreferences = userNotificationPreference
     ? {
         ...userNotificationPreference,
-        createdAt: userNotificationPreference.createdAt?.toISOString() || null,
-        updatedAt: userNotificationPreference.updatedAt?.toISOString() || null,
+        createdAt: userNotificationPreference.createdAt
+          ? (typeof userNotificationPreference.createdAt === "string"
+              ? userNotificationPreference.createdAt
+              : userNotificationPreference.createdAt?.toISOString?.() || null)
+          : null,
+        updatedAt: userNotificationPreference.updatedAt
+          ? (typeof userNotificationPreference.updatedAt === "string"
+              ? userNotificationPreference.updatedAt
+              : userNotificationPreference.updatedAt?.toISOString?.() || null)
+          : null,
       }
     : null;
 
