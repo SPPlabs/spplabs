@@ -11,9 +11,12 @@ export async function ensureNotificationPreferencesTable() {
   if (tableEnsured) return;
   try {
     await prisma.$executeRawUnsafe(`
+      CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+      CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
       CREATE TABLE IF NOT EXISTS "user_notification_preferences" (
         "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-        "website_id" UUID NOT NULL UNIQUE REFERENCES "websites"("id") ON DELETE CASCADE,
+        "website_id" UUID NOT NULL,
         "enabled" BOOLEAN NOT NULL DEFAULT false,
         "notification_email" TEXT,
         "notify_contacts" BOOLEAN NOT NULL DEFAULT true,
@@ -26,6 +29,21 @@ export async function ensureNotificationPreferencesTable() {
         "updated_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT "user_notification_preferences_pkey" PRIMARY KEY ("id")
       );
+
+      CREATE UNIQUE INDEX IF NOT EXISTS "user_notification_preferences_website_id_key" 
+      ON "user_notification_preferences"("website_id");
+
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.table_constraints 
+          WHERE constraint_name = 'user_notification_preferences_website_id_fkey'
+        ) THEN
+          ALTER TABLE "user_notification_preferences" 
+          ADD CONSTRAINT "user_notification_preferences_website_id_fkey" 
+          FOREIGN KEY ("website_id") REFERENCES "websites"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+        END IF;
+      END $$;
     `);
     tableEnsured = true;
   } catch (err) {

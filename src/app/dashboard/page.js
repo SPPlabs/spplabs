@@ -84,6 +84,16 @@ export default async function DashboardPage(props) {
     where: { websiteId: currentWebsite.id },
   });
 
+  // Fetch User Notification Preferences for SSR
+  let userNotificationPreference = null;
+  try {
+    userNotificationPreference = await prisma.userNotificationPreference.findUnique({
+      where: { websiteId: currentWebsite.id },
+    });
+  } catch {
+    // Graceful fallback if table is not yet created
+  }
+
   // Fetch AI Usage Monthly
   const aiUsageRaw = await prisma.aiUsageMonthly.findMany({
     where: { websiteId: currentWebsite.id },
@@ -320,6 +330,14 @@ export default async function DashboardPage(props) {
     lastAnalyticsAt: currentWebsite.lastAnalyticsAt?.toISOString() || null,
   };
 
+  const serializedNotificationPreferences = userNotificationPreference
+    ? {
+        ...userNotificationPreference,
+        createdAt: userNotificationPreference.createdAt?.toISOString() || null,
+        updatedAt: userNotificationPreference.updatedAt?.toISOString() || null,
+      }
+    : null;
+
   return (
     <DashboardClient
       session={session}
@@ -338,6 +356,7 @@ export default async function DashboardPage(props) {
       googleCalendarConnection={googleCalendarConnection}
       externalCalendarEvents={externalCalendarEvents}
       initialDashboardState={dashboardState}
+      initialNotificationPreferences={serializedNotificationPreferences}
     />
   );
 }

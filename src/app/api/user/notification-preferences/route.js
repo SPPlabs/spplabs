@@ -7,6 +7,8 @@ import {
   saveUserNotificationPreferences,
 } from "@/lib/userNotifications";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request) {
   try {
     const cookieStore = await cookies();
@@ -39,10 +41,19 @@ export async function GET(request) {
 
     const preferences = await getUserNotificationPreferences(website.id);
 
-    return NextResponse.json({
-      success: true,
-      data: preferences,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        data: preferences,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      }
+    );
   } catch (error) {
     console.error("GET notification-preferences error:", error);
     return NextResponse.json({ error: "InternalError", message: error.message }, { status: 500 });

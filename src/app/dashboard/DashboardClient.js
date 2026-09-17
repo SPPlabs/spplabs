@@ -46,6 +46,7 @@ export default function DashboardClient({
   googleCalendarConnection = null,
   externalCalendarEvents = [],
   initialDashboardState = null,
+  initialNotificationPreferences = null,
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -57,26 +58,43 @@ export default function DashboardClient({
   const [theme, setTheme] = useState("light");
   const [copiedKey, setCopiedKey] = useState(null);
 
-  // Email Notification Preferences State
-  const [notifEnabled, setNotifEnabled] = useState(false);
-  const [notifEmail, setNotifEmail] = useState("");
-  const [notifContacts, setNotifContacts] = useState(true);
-  const [notifBookings, setNotifBookings] = useState(true);
-  const [notifAiChats, setNotifAiChats] = useState(false);
-  const [notifSppAnnouncements, setNotifSppAnnouncements] = useState(true);
-  const [notifMonthlyReport, setNotifMonthlyReport] = useState(true);
-  const [notifGeneralSummary, setNotifGeneralSummary] = useState(true);
+  // Email Notification Preferences State initialized from SSR
+  const [notifEnabled, setNotifEnabled] = useState(initialNotificationPreferences?.enabled ?? false);
+  const [notifEmail, setNotifEmail] = useState(initialNotificationPreferences?.notificationEmail || "");
+  const [notifContacts, setNotifContacts] = useState(initialNotificationPreferences?.notifyContacts ?? true);
+  const [notifBookings, setNotifBookings] = useState(initialNotificationPreferences?.notifyBookings ?? true);
+  const [notifAiChats, setNotifAiChats] = useState(initialNotificationPreferences?.notifyAiChats ?? false);
+  const [notifSppAnnouncements, setNotifSppAnnouncements] = useState(initialNotificationPreferences?.notifySppAnnouncements ?? true);
+  const [notifMonthlyReport, setNotifMonthlyReport] = useState(initialNotificationPreferences?.notifyMonthlyReport ?? true);
+  const [notifGeneralSummary, setNotifGeneralSummary] = useState(initialNotificationPreferences?.notifyGeneralSummary ?? true);
   const [isLoadingNotifs, setIsLoadingNotifs] = useState(false);
   const [isSavingNotif, setIsSavingNotif] = useState(false);
   const [notifFeedback, setNotifFeedback] = useState(null);
   const [isSendingTestNotif, setIsSendingTestNotif] = useState(false);
   const [testNotifFeedback, setTestNotifFeedback] = useState(null);
 
+  // Synchronize SSR notification preferences when prop updates
+  useEffect(() => {
+    if (initialNotificationPreferences) {
+      setNotifEnabled(initialNotificationPreferences.enabled ?? false);
+      setNotifEmail(initialNotificationPreferences.notificationEmail || "");
+      setNotifContacts(initialNotificationPreferences.notifyContacts ?? true);
+      setNotifBookings(initialNotificationPreferences.notifyBookings ?? true);
+      setNotifAiChats(initialNotificationPreferences.notifyAiChats ?? false);
+      setNotifSppAnnouncements(initialNotificationPreferences.notifySppAnnouncements ?? true);
+      setNotifMonthlyReport(initialNotificationPreferences.notifyMonthlyReport ?? true);
+      setNotifGeneralSummary(initialNotificationPreferences.notifyGeneralSummary ?? true);
+    }
+  }, [initialNotificationPreferences]);
+
   // Load notification preferences
   const loadNotificationPreferences = useCallback(async () => {
     setIsLoadingNotifs(true);
     try {
-      const res = await fetch(`/api/user/notification-preferences?domain=${currentWebsite?.domain || ""}`);
+      const res = await fetch(`/api/user/notification-preferences?domain=${currentWebsite?.domain || ""}`, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" },
+      });
       const json = await res.json();
       if (res.ok && json.data) {
         const d = json.data;
@@ -134,6 +152,7 @@ export default function DashboardClient({
           type: "success",
           message: lang === "es" ? "Preferencias guardadas correctamente." : "Preferences saved successfully.",
         });
+        router.refresh();
         setTimeout(() => setNotifFeedback(null), 4000);
       } else {
         setNotifFeedback({
@@ -2349,7 +2368,12 @@ export default function DashboardClient({
             <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end shrink-0">
               <button
                 type="button"
-                onClick={() => setShowSettingsModal(false)}
+                onClick={async () => {
+                  if (notifEnabled && notifEmail.trim()) {
+                    await handleSaveNotificationPreferences();
+                  }
+                  setShowSettingsModal(false);
+                }}
                 className="h-10 px-6 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
               >
                 {t.settingsSave}
