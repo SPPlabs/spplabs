@@ -2077,18 +2077,26 @@ export default function DashboardClient({
                     </div>
                   </div>
 
-                  {/* Master Switch */}
-                  <div className="toggle-switch scale-75 origin-right">
-                    <label className="switch-label">
-                      <input 
-                        type="checkbox" 
-                        className="checkbox" 
-                        checked={notifEnabled} 
-                        onChange={(e) => setNotifEnabled(e.target.checked)}
-                      />
-                      <span className="slider" />
-                    </label>
-                  </div>
+                  {/* Master Switch - Traditional Pill Button */}
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={notifEnabled}
+                    onClick={() => setNotifEnabled((prev) => !prev)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-offset-2 ${
+                      notifEnabled ? "bg-brand-blue" : "bg-slate-300"
+                    }`}
+                  >
+                    <span className="sr-only">
+                      {lang === "es" ? "Habilitar notificaciones" : "Enable notifications"}
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                        notifEnabled ? "translate-x-5" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
                 </div>
 
                 {/* Sub-configuration expanded when notifEnabled is true */}

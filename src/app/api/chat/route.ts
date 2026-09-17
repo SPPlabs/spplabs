@@ -398,21 +398,6 @@ export async function POST(request: NextRequest): Promise<Response> {
     // Strict Guard: Reasoning/Thinking is ONLY permissible from authenticated Dashboard test sessions
     const allowThinking = Boolean(isDashboardSession && isPreviewMode && (body.enable_thinking || body.thinking));
 
-    // Align AI internal reasoning/thoughts (<think>) with dashboard language setting
-    if (allowThinking) {
-      const targetLang = typeof body.lang === "string" && body.lang.trim().toLowerCase() === "en" ? "en" : "es";
-      const thinkingDirective = targetLang === "en"
-        ? "\n\nCRITICAL REASONING LANGUAGE DIRECTIVE:\nYou are operating in Thinking/Reasoning mode. You MUST perform all your internal thinking, reasoning, and analysis inside <think>...</think> strictly in English. Do NOT think in Chinese, Spanish, or any other language."
-        : "\n\nCRITICAL REASONING LANGUAGE DIRECTIVE:\nEstás operando en modo de Razonamiento/Pensamiento. Es OBLIGATORIO que desarrolles todo tu pensamiento interno, análisis y razonamiento paso a paso dentro de <think>...</think> estrictamente en Español. No utilices inglés, chino ni ningún otro idioma en tu proceso de razonamiento.";
-
-      const systemIdx = messages.findIndex((m) => m.role === "system");
-      if (systemIdx !== -1) {
-        messages[systemIdx].content += thinkingDirective;
-      } else {
-        messages.unshift({ role: "system", content: thinkingDirective.trim() });
-      }
-    }
-
     // 10. Streaming LLM generation
     const stream = await generateChatCompletion({
       messages,
