@@ -42,6 +42,46 @@ export const Message: React.FC<MessageProps> = ({ message, accentColor, lang = "
     }
   }
 
+  // State for on-demand AI thought translation (Form A)
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translatedThought, setTranslatedThought] = useState<string | null>(null);
+  const [showTranslated, setShowTranslated] = useState(true);
+  const [translateError, setTranslateError] = useState<string | null>(null);
+
+  const handleTranslateThought = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (translatedThought) {
+      setShowTranslated((prev) => !prev);
+      return;
+    }
+    if (!thoughtText || isTranslating) return;
+
+    setIsTranslating(true);
+    setTranslateError(null);
+    try {
+      const res = await fetch("/api/chat/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: thoughtText,
+          targetLang: lang === "es" ? "es" : "en",
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.translatedText) {
+        setTranslatedThought(data.translatedText);
+        setShowTranslated(true);
+      } else {
+        setTranslateError(data.message || (lang === "es" ? "Error al traducir" : "Translation error"));
+      }
+    } catch {
+      setTranslateError(lang === "es" ? "Error de conexión" : "Connection error");
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
   return (
     <div className={`flex w-full mb-4 group ${isUser ? "justify-end" : "justify-start"}`}>
       <div className={`flex flex-col max-w-[85%] ${isUser ? "items-end" : "items-start"}`}>
@@ -51,23 +91,68 @@ export const Message: React.FC<MessageProps> = ({ message, accentColor, lang = "
           <div className="w-full mb-2">
             <details className="group/think rounded-xl border border-violet-200/90 bg-violet-50/60 overflow-hidden text-xs transition-all shadow-2xs" open={isThinking}>
               <summary className="flex items-center justify-between px-3 py-2 cursor-pointer text-violet-800 font-bold hover:bg-violet-100/50 select-none transition-colors">
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-2 flex-wrap">
                   <span className={`w-2 h-2 rounded-full ${isThinking ? "bg-violet-600 animate-pulse" : "bg-violet-500"}`} />
                   <span>
                     {isThinking
                       ? lang === "es" ? "Pensando..." : "Thinking..."
                       : lang === "es" ? "Razonamiento de la IA" : "AI Reasoning"}
                   </span>
+                  {translatedThought && showTranslated && (
+                    <span className="text-[10px] px-1.5 py-0.2 bg-violet-200/80 text-violet-900 rounded-md font-semibold">
+                      {lang === "es" ? "Traducido" : "Translated"}
+                    </span>
+                  )}
                 </span>
-                <span className="text-[10px] text-violet-600 font-semibold underline ml-2">
-                  {isThinking
-                    ? lang === "es" ? "En progreso" : "In progress"
-                    : lang === "es" ? "Ver detalles" : "View details"}
-                </span>
+                
+                <div className="flex items-center gap-2">
+                  {/* On-demand Translation Button (Form A) */}
+                  {!isThinking && (
+                    <button
+                      type="button"
+                      onClick={handleTranslateThought}
+                      disabled={isTranslating}
+                      className="inline-flex items-center gap-1 text-[10.5px] px-2.5 py-1 rounded-lg bg-white hover:bg-violet-100/60 text-violet-700 border border-violet-200 shadow-2xs font-bold transition-all cursor-pointer disabled:opacity-60"
+                      title={lang === "es" ? "Traducir razonamiento al español" : "Translate reasoning"}
+                    >
+                      {isTranslating ? (
+                        <>
+                          <span className="w-2.5 h-2.5 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
+                          <span>{lang === "es" ? "Traduciendo..." : "Translating..."}</span>
+                        </>
+                      ) : translatedThought ? (
+                        <>
+                          <span>🌐</span>
+                          <span>
+                            {showTranslated
+                              ? lang === "es" ? "Ver original (EN)" : "View original (EN)"
+                              : lang === "es" ? "Ver traducción (ES)" : "View translation (ES)"}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span>🌐</span>
+                          <span>{lang === "es" ? "Traducir a Español" : "Translate to English"}</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  <span className="text-[10px] text-violet-600 font-semibold underline ml-1">
+                    {isThinking
+                      ? lang === "es" ? "En progreso" : "In progress"
+                      : lang === "es" ? "Ver detalles" : "View details"}
+                  </span>
+                </div>
               </summary>
               <div className="px-3 py-2.5 text-[11px] text-slate-600 border-t border-violet-100 font-mono whitespace-pre-wrap leading-relaxed max-h-[220px] overflow-y-auto bg-white/70">
-                {thoughtText}
+                {translatedThought && showTranslated ? translatedThought : thoughtText}
               </div>
+              {translateError && (
+                <div className="px-3 py-1.5 bg-rose-50 text-[10.5px] text-rose-600 border-t border-rose-100 font-medium">
+                  {translateError}
+                </div>
+              )}
             </details>
           </div>
         )}
