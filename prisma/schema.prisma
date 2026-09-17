@@ -48,6 +48,7 @@ model Website {
   dashboardNotes          DashboardNote[]
   monthlyMetrics          WebsiteMonthlyMetrics[]
   externalCalendarEvents  ExternalCalendarEvent[]
+  userNotificationPreference UserNotificationPreference?
 
   @@map("websites")
 }
@@ -383,6 +384,25 @@ model WebsiteMonthlyMetrics {
 
   @@unique([websiteId, year, month])
   @@map("website_monthly_metrics")
+}
+
+model UserNotificationPreference {
+  id                     String   @id @default(uuid()) @db.Uuid
+  websiteId              String   @unique @map("website_id") @db.Uuid
+  enabled                Boolean  @default(false)
+  notificationEmail      String?  @map("notification_email")
+  notifyContacts         Boolean  @default(true) @map("notify_contacts")
+  notifyBookings         Boolean  @default(true) @map("notify_bookings")
+  notifyAiChats          Boolean  @default(false) @map("notify_ai_chats")
+  notifySppAnnouncements Boolean  @default(true) @map("notify_spp_announcements")
+  notifyMonthlyReport    Boolean  @default(true) @map("notify_monthly_report")
+  notifyGeneralSummary   Boolean  @default(true) @map("notify_general_summary")
+  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt              DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  website                Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@map("user_notification_preferences")
 }
 
 

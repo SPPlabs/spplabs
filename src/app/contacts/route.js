@@ -170,6 +170,16 @@ export async function POST(request) {
 
     // 6. Trigger automated welcome/confirmation email asynchronously
     (async () => {
+      // Notify tenant/website owner if enabled in preferences
+      import("@/lib/userNotifications").then(({ sendTenantNotification }) => {
+        sendTenantNotification({
+          websiteId: website.id,
+          type: "contact",
+          ctaText: "Ver en el Dashboard",
+          ctaUrl: "/dashboard?tab=clientes",
+        });
+      }).catch((e) => console.error("Failed to trigger tenant contact notification:", e));
+
       try {
         const emailConfig = await prisma.websiteEmailConfig.findUnique({
           where: { websiteId: website.id },

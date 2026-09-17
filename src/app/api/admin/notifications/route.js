@@ -55,6 +55,41 @@ export async function POST(request) {
       targetDisplayName: notification.website?.displayName || null,
     };
 
+    // Trigger email notifications to recipient(s) asynchronously
+    (async () => {
+      try {
+        const { sendTenantNotification } = await import("@/lib/userNotifications");
+        if (targetWebsiteId) {
+          sendTenantNotification({
+            websiteId: targetWebsiteId,
+            type: "spp_announcement",
+            title: notification.title,
+            message: notification.message,
+            ctaText: "Leer Comunicado en el Dashboard",
+            ctaUrl: "/dashboard?tab=notifications",
+          });
+        } else {
+          // Global announcement to all client tenants
+          const websites = await prisma.website.findMany({
+            where: { role: "USER" },
+            select: { id: true },
+          });
+          for (const w of websites) {
+            sendTenantNotification({
+              websiteId: w.id,
+              type: "spp_announcement",
+              title: notification.title,
+              message: notification.message,
+              ctaText: "Leer Comunicado en el Dashboard",
+              ctaUrl: "/dashboard?tab=notifications",
+            }).catch(() => {});
+          }
+        }
+      } catch (err) {
+        console.error("Failed to dispatch SPP announcement email notifications:", err);
+      }
+    })();
+
     return NextResponse.json({ success: true, notification: formattedNotification });
   } catch (error) {
     console.error("Notification creation error:", error);

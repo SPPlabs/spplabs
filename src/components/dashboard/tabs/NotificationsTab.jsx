@@ -1,6 +1,15 @@
 "use client";
 
-import { MegaphoneIcon, InboxIcon, ChatBubbleIcon } from "@/components/dashboard/DashboardIcons";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import Image from "next/image";
+import {
+  MegaphoneIcon,
+  InboxIcon,
+  ChatBubbleIcon,
+  UsersIcon,
+  CheckIcon,
+  GlobeAltIcon,
+} from "@/components/dashboard/DashboardIcons";
 
 export default function NotificationsTab({
   t,
@@ -27,6 +36,60 @@ export default function NotificationsTab({
   setPetitionMsg,
   petitionSending,
 }) {
+  // SPP Labs Custom Dropdown State for Target Users
+  const [isTargetDropdownOpen, setIsTargetDropdownOpen] = useState(false);
+  const [targetSearchQuery, setTargetSearchQuery] = useState("");
+  const targetDropdownRef = useRef(null);
+  const searchInputRef = useRef(null);
+
+  // Close dropdown on outside click or Escape
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (targetDropdownRef.current && !targetDropdownRef.current.contains(e.target)) {
+        setIsTargetDropdownOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsTargetDropdownOpen(false);
+      }
+    };
+
+    if (isTargetDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+      setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }, 50);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isTargetDropdownOpen]);
+
+  // Selected website helper
+  const selectedTargetWebsite = useMemo(() => {
+    if (!announcementTargetId) return null;
+    return (allWebsites || []).find((w) => w.id === announcementTargetId) || null;
+  }, [announcementTargetId, allWebsites]);
+
+  // Filtered client websites
+  const filteredClientWebsites = useMemo(() => {
+    const clients = (allWebsites || []).filter((w) => w.domain !== "spplabs.es");
+    if (!targetSearchQuery.trim()) return clients;
+    const q = targetSearchQuery.toLowerCase().trim();
+    return clients.filter(
+      (w) =>
+        (w.displayName && w.displayName.toLowerCase().includes(q)) ||
+        (w.domain && w.domain.toLowerCase().includes(q))
+    );
+  }, [allWebsites, targetSearchQuery]);
+
   return (
     <div className="space-y-10 animate-fade-in w-full max-w-full">
       {/* ADMIN VIEW: Send Notifications Form */}
@@ -66,18 +129,227 @@ export default function NotificationsTab({
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">{t.adminNotifTarget}</label>
-              <select
-                value={announcementTargetId}
-                onChange={(e) => setAnnouncementTargetId(e.target.value)}
-                className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-4 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
+            {/* SPP Labs Custom Dropdown: Target Selection */}
+            <div className="relative" ref={targetDropdownRef}>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                {t.adminNotifTarget}
+              </label>
+
+              {/* Hidden input to ensure form consistency */}
+              <input type="hidden" name="announcementTargetId" value={announcementTargetId} />
+
+              {/* SPP Labs Trigger Button */}
+              <button
+                type="button"
+                onClick={() => setIsTargetDropdownOpen((prev) => !prev)}
+                className={`w-full min-h-[46px] bg-slate-50 hover:bg-slate-100/80 border rounded-xl px-3.5 py-2 flex items-center justify-between text-xs transition-all cursor-pointer focus:outline-none focus:bg-white shadow-2xs ${
+                  isTargetDropdownOpen
+                    ? "border-blue-600 ring-2 ring-blue-600/15 bg-white"
+                    : "border-slate-200 hover:border-slate-300"
+                }`}
+                aria-haspopup="listbox"
+                aria-expanded={isTargetDropdownOpen}
               >
-                <option value="">{lang === "es" ? "-- Todos los usuarios (Global) --" : "-- All users (Global) --"}</option>
-                {allWebsites.filter(w => w.domain !== "spplabs.es").map(w => (
-                  <option key={w.id} value={w.id}>{w.displayName} ({w.domain})</option>
-                ))}
-              </select>
+                <div className="flex items-center gap-2.5 truncate min-w-0">
+                  {selectedTargetWebsite ? (
+                    <>
+                      {selectedTargetWebsite.logoUrl ? (
+                        <div className="w-6 h-6 rounded-lg overflow-hidden shrink-0 border border-slate-200 bg-white relative">
+                          <Image
+                            src={selectedTargetWebsite.logoUrl}
+                            alt=""
+                            fill
+                            className="object-contain p-0.5"
+                            sizes="24px"
+                          />
+                        </div>
+                      ) : (
+                        <span className="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 font-extrabold text-[10px] flex items-center justify-center shrink-0 border border-blue-200">
+                          {selectedTargetWebsite.displayName?.slice(0, 2).toUpperCase() || "CL"}
+                        </span>
+                      )}
+                      <span className="font-bold text-slate-900 truncate">
+                        {selectedTargetWebsite.displayName}
+                      </span>
+                      <span className="text-[10px] font-mono font-medium text-slate-500 bg-slate-200/70 px-1.5 py-0.5 rounded shrink-0">
+                        {selectedTargetWebsite.domain}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="w-6 h-6 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0 border border-purple-200">
+                        <UsersIcon className="w-3.5 h-3.5" />
+                      </span>
+                      <span className="font-bold text-slate-900 truncate">
+                        {lang === "es" ? "Todos los usuarios (Global)" : "All users (Global)"}
+                      </span>
+                      <span className="text-[10px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded shrink-0">
+                        {lang === "es" ? "Difusión General" : "Broadcast"}
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                <svg
+                  className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ml-2 ${
+                    isTargetDropdownOpen ? "rotate-180 text-blue-600" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </button>
+
+              {/* SPP Labs Floating Menu */}
+              {isTargetDropdownOpen && (
+                <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200/90 rounded-2xl shadow-xl p-2.5 z-50 animate-fade-in flex flex-col max-w-full">
+                  {/* Search / Filter Inside Dropdown */}
+                  <div className="relative mb-2">
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={targetSearchQuery}
+                      onChange={(e) => setTargetSearchQuery(e.target.value)}
+                      placeholder={lang === "es" ? "Buscar por cliente o dominio..." : "Search by client or domain..."}
+                      className="w-full h-8.5 pl-8 pr-7 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
+                    />
+                    <svg
+                      className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                    {targetSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setTargetSearchQuery("")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer text-xs"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Option: Global Broadcast */}
+                  {(!targetSearchQuery.trim() ||
+                    "todos los usuarios global broadcast".includes(targetSearchQuery.toLowerCase())) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAnnouncementTargetId("");
+                        setIsTargetDropdownOpen(false);
+                        setTargetSearchQuery("");
+                      }}
+                      className={`w-full p-2.5 rounded-xl flex items-center justify-between text-left transition-all cursor-pointer ${
+                        !announcementTargetId
+                          ? "bg-purple-50/80 border border-purple-200 text-purple-900 font-bold"
+                          : "hover:bg-slate-50 border border-transparent text-slate-800"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border ${
+                          !announcementTargetId ? "bg-purple-200/80 text-purple-800 border-purple-300" : "bg-purple-100 text-purple-700 border-purple-200"
+                        }`}>
+                          <UsersIcon className="w-4 h-4" />
+                        </span>
+                        <div className="truncate">
+                          <span className="font-bold text-xs block text-slate-900">
+                            {lang === "es" ? "Todos los usuarios (Global)" : "All users (Global)"}
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-medium block">
+                            {lang === "es" ? "Visible en el dashboard de todos los clientes" : "Visible on all client dashboards"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {!announcementTargetId && (
+                        <span className="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 ml-2 shadow-2xs">
+                          <CheckIcon className="w-3 h-3" />
+                        </span>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Section Divider */}
+                  <div className="my-1.5 border-t border-slate-100 flex items-center justify-between px-2 pt-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      {lang === "es" ? "Clientes registrados" : "Registered clients"}
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono font-medium">
+                      {filteredClientWebsites.length}
+                    </span>
+                  </div>
+
+                  {/* Client Websites List */}
+                  <div className="max-h-52 overflow-y-auto space-y-1 pr-1 scrollbar-thin">
+                    {filteredClientWebsites.length === 0 ? (
+                      <div className="py-4 text-center text-xs text-slate-400 font-medium">
+                        {lang === "es" ? "No se encontraron clientes con esa búsqueda" : "No clients match your search"}
+                      </div>
+                    ) : (
+                      filteredClientWebsites.map((w) => {
+                        const isSelected = announcementTargetId === w.id;
+                        return (
+                          <button
+                            key={w.id}
+                            type="button"
+                            onClick={() => {
+                              setAnnouncementTargetId(w.id);
+                              setIsTargetDropdownOpen(false);
+                              setTargetSearchQuery("");
+                            }}
+                            className={`w-full p-2.5 rounded-xl flex items-center justify-between text-left transition-all cursor-pointer ${
+                              isSelected
+                                ? "bg-blue-50/80 border border-blue-200 text-blue-900 font-bold"
+                                : "hover:bg-slate-50 border border-transparent text-slate-800"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0 truncate">
+                              {w.logoUrl ? (
+                                <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0 border border-slate-200 bg-white relative">
+                                  <Image
+                                    src={w.logoUrl}
+                                    alt=""
+                                    fill
+                                    className="object-contain p-0.5"
+                                    sizes="28px"
+                                  />
+                                </div>
+                              ) : (
+                                <span className={`w-7 h-7 rounded-lg font-extrabold text-[10px] flex items-center justify-center shrink-0 border ${
+                                  isSelected ? "bg-blue-200/80 text-blue-800 border-blue-300" : "bg-blue-100 text-blue-700 border-blue-200"
+                                }`}>
+                                  {w.displayName?.slice(0, 2).toUpperCase() || "CL"}
+                                </span>
+                              )}
+                              <div className="truncate">
+                                <span className="font-bold text-xs block text-slate-900 truncate">
+                                  {w.displayName}
+                                </span>
+                                <span className="text-[10px] font-mono text-slate-500 block truncate">
+                                  {w.domain}
+                                </span>
+                              </div>
+                            </div>
+
+                            {isSelected && (
+                              <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 ml-2 shadow-2xs">
+                                <CheckIcon className="w-3 h-3" />
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {announcementSuccess && (

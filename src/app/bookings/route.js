@@ -214,6 +214,16 @@ export async function POST(request) {
     // 6. Asynchronously sync to Google Calendar if connected
     // (Note: Confirmation, Reminder and Google Review emails are dispatched upon business approval in dashboard)
     (async () => {
+      // Notify tenant/website owner if enabled in preferences
+      import("@/lib/userNotifications").then(({ sendTenantNotification }) => {
+        sendTenantNotification({
+          websiteId: website.id,
+          type: "booking",
+          ctaText: "Gestionar Reserva",
+          ctaUrl: "/dashboard?tab=clientes",
+        });
+      }).catch((e) => console.error("Failed to trigger tenant booking notification:", e));
+
       try {
         const companyName = website.displayName || "Atención al Cliente";
         const gcalConnection = await prisma.googleCalendarConnection.findUnique({

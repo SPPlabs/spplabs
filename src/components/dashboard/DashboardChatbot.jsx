@@ -153,6 +153,7 @@ export default function DashboardChatbot({
           message: text,
           preview_mode: true, // Counts tokens, skips visitor transcript logging & monthly chat reports
           enable_thinking: enableThinking,
+          lang: lang || "es",
         }),
         signal: controller.signal,
       });
@@ -337,7 +338,7 @@ export default function DashboardChatbot({
         className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 sm:p-6 min-h-[320px] max-h-[460px] overflow-y-auto space-y-4 text-xs shadow-inner"
       >
         {messages.map((msg, idx) => (
-          <Message key={idx} message={msg} accentColor="bg-slate-900" />
+          <Message key={idx} message={msg} accentColor="bg-slate-900" lang={lang} />
         ))}
 
         {isLoading && (

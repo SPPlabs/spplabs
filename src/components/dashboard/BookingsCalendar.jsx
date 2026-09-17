@@ -15,6 +15,7 @@ import {
   TrashIcon,
   GoogleGIcon,
   DocumentTextIcon,
+  LockClosedIcon,
 } from "@/components/dashboard/DashboardIcons";
 import {
   copyTextToClipboard,
@@ -56,6 +57,27 @@ export default function BookingsCalendar({
   const [selectedDateStr, setSelectedDateStr] = useState("");
   const [copiedId, setCopiedId] = useState(null);
 
+  const todayStr = useMemo(() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }, []);
+
+  const blockWeekdaysList = useMemo(
+    () => [
+      { id: 1, label: lang === "es" ? "Lunes" : "Monday", short: lang === "es" ? "Lun" : "Mon" },
+      { id: 2, label: lang === "es" ? "Martes" : "Tuesday", short: lang === "es" ? "Mar" : "Tue" },
+      { id: 3, label: lang === "es" ? "Miércoles" : "Wednesday", short: lang === "es" ? "Mié" : "Wed" },
+      { id: 4, label: lang === "es" ? "Jueves" : "Thursday", short: lang === "es" ? "Jue" : "Thu" },
+      { id: 5, label: lang === "es" ? "Viernes" : "Friday", short: lang === "es" ? "Vie" : "Fri" },
+      { id: 6, label: lang === "es" ? "Sábado" : "Saturday", short: lang === "es" ? "Sáb" : "Sat" },
+      { id: 0, label: lang === "es" ? "Domingo" : "Sunday", short: lang === "es" ? "Dom" : "Sun" },
+    ],
+    [lang]
+  );
+
   // Dropdown states for export
   const [isHeaderCalendarDropdownOpen, setIsHeaderCalendarDropdownOpen] = useState(false);
   const [openDayBookingDropdownId, setOpenDayBookingDropdownId] = useState(null);
@@ -82,6 +104,143 @@ export default function BookingsCalendar({
   const [formMessage, setFormMessage] = useState("");
   const [formSendNotifications, setFormSendNotifications] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Schedule Block Modal States
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [blockMode, setBlockMode] = useState("recurring"); // "single" | "recurring"
+  const [blockDate, setBlockDate] = useState("");
+  const [blockStartTime, setBlockStartTime] = useState("09:00");
+  const [blockEndTime, setBlockEndTime] = useState("09:00");
+  const [blockRecurringDays, setBlockRecurringDays] = useState([1, 5]); // Default: Lunes (1) y Viernes (5)
+  const [blockRecurringWeeks, setBlockRecurringWeeks] = useState(4);
+  const [blockTitle, setBlockTitle] = useState("");
+  const [blockReason, setBlockReason] = useState("");
+  const [isSubmittingBlock, setIsSubmittingBlock] = useState(false);
+
+  const toggleRecurringDay = (dayId) => {
+    setBlockRecurringDays((prev) => {
+      if (prev.includes(dayId)) {
+        if (prev.length === 1) return prev;
+        return prev.filter((d) => d !== dayId);
+      } else {
+        return [...prev, dayId].sort((a, b) => {
+          const orderA = a === 0 ? 7 : a;
+          const orderB = b === 0 ? 7 : b;
+          return orderA - orderB;
+        });
+      }
+    });
+  };
+
+  const getRecurringDates = (startDateStr, selectedDays, weeksCount) => {
+    const dates = [];
+    if (!startDateStr) return dates;
+    const [startY, startM, startD] = startDateStr.split("-").map(Number);
+    const start = new Date(startY, startM - 1, startD);
+    const totalDays = Math.max(1, weeksCount) * 7;
+    for (let i = 0; i < totalDays; i++) {
+      const cur = new Date(start);
+      cur.setDate(start.getDate() + i);
+      const dayOfWeek = cur.getDay(); // 0 = Sun, 1 = Mon, ..., 5 = Fri, 6 = Sat
+      if (selectedDays.includes(dayOfWeek)) {
+        const y = cur.getFullYear();
+        const m = String(cur.getMonth() + 1).padStart(2, "0");
+        const d = String(cur.getDate()).padStart(2, "0");
+        dates.push(`${y}-${m}-${d}`);
+      }
+    }
+    return dates;
+  };
+
+  const getTimeSlotsToBlock = (startTime, endTime) => {
+    if (!endTime || endTime <= startTime) {
+      return [startTime];
+    }
+    const [sH, sM] = startTime.split(":").map(Number);
+    const [eH, eM] = endTime.split(":").map(Number);
+    const startMin = sH * 60 + sM;
+    const endMin = eH * 60 + eM;
+    const slots = [];
+    for (let m = startMin; m < endMin; m += 30) {
+      const h = Math.floor(m / 60);
+      const min = m % 60;
+      slots.push(`${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`);
+    }
+    return slots.length > 0 ? slots : [startTime];
+  };
+
+  const handleSaveBlock = async (e) => {
+    e.preventDefault();
+    setIsSubmittingBlock(true);
+
+    try {
+      const effectiveStartDate = blockDate || selectedDateStr || new Date().toISOString().split("T")[0];
+      const datesToBlock =
+        blockMode === "recurring"
+          ? getRecurringDates(effectiveStartDate, blockRecurringDays, blockRecurringWeeks)
+          : [effectiveStartDate];
+
+      if (datesToBlock.length === 0) {
+        alert(lang === "es" ? "Por favor selecciona al menos un día." : "Please select at least one day.");
+        setIsSubmittingBlock(false);
+        return;
+      }
+
+      const timeSlots = getTimeSlotsToBlock(blockStartTime, blockEndTime);
+      const blockTitleText = blockTitle.trim() || (lang === "es" ? "Horario Bloqueado" : "Blocked Slot");
+      const blockReasonText =
+        blockReason.trim() ||
+        (lang === "es"
+          ? "Franja horaria reservada para trabajo u otros compromisos (bloqueada en la web)."
+          : "Reserved time slot for work or other commitments (blocked on web).");
+
+      const requests = [];
+      for (const d of datesToBlock) {
+        for (const tSlot of timeSlots) {
+          requests.push(
+            fetch("/api/admin/bookings", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                date: d,
+                time: tSlot,
+                name: `[BLOQUEO] ${blockTitleText}`,
+                email: "bloqueado@spplabs.local",
+                phone: "",
+                message: blockReasonText,
+                status: "CONFIRMED",
+                targetWebsiteDomain: currentWebsiteDomain,
+                sendNotifications: false,
+              }),
+            })
+          );
+        }
+      }
+
+      const results = await Promise.all(requests);
+      const allOk = results.every((r) => r.ok);
+
+      if (allOk) {
+        setShowBlockModal(false);
+        setBlockTitle("");
+        setBlockReason("");
+        if (router) router.refresh();
+      } else {
+        alert(
+          lang === "es"
+            ? "Algunos horarios no pudieron bloquearse. Por favor revisa el calendario."
+            : "Some time slots could not be blocked. Please check the calendar."
+        );
+        setShowBlockModal(false);
+        if (router) router.refresh();
+      }
+    } catch (err) {
+      console.error(err);
+      alert(lang === "es" ? "Error al bloquear horarios" : "Error blocking schedule");
+    } finally {
+      setIsSubmittingBlock(false);
+    }
+  };
 
   // Google Calendar sync & disconnect state
   const [isSyncingGcal, setIsSyncingGcal] = useState(false);
@@ -319,6 +478,10 @@ export default function BookingsCalendar({
     return d.getFullYear() === year && d.getMonth() === month;
   });
 
+  // Helper to identify blocked slots
+  const isBlockedBooking = (b) =>
+    Boolean(b?.name?.startsWith("[BLOQUEO]") || b?.email === "bloqueado@spplabs.local");
+
   // Calculate upcoming and previous months booking counts and unread notification badges
   const isPendingBooking = (b) =>
     b.status === "PENDING" ||
@@ -331,7 +494,7 @@ export default function BookingsCalendar({
   let prevMonthsTotalCount = 0;
 
   bookings.forEach((b) => {
-    if (b.status === "CANCELLED") return;
+    if (b.status === "CANCELLED" || isBlockedBooking(b)) return;
 
     let bYear, bMonth;
     if (typeof b.date === "string") {
@@ -388,7 +551,7 @@ export default function BookingsCalendar({
     // If there are unread bookings on this day, mark them as viewed!
     const dayBookings = bookingsMap[formattedDate] || [];
     const unreadBookingIds = dayBookings
-      .filter((b) => b.status !== "CANCELLED" && !viewedBookingIds.includes(b.id))
+      .filter((b) => b.status !== "CANCELLED" && !isBlockedBooking(b) && !viewedBookingIds.includes(b.id))
       .map((b) => b.id);
 
     if (unreadBookingIds.length > 0 && onViewBookings) {
@@ -401,7 +564,7 @@ export default function BookingsCalendar({
     if (selectedDateStr && onViewBookings) {
       const dayBookings = bookingsMap[selectedDateStr] || [];
       const unreadBookingIds = dayBookings
-        .filter((b) => b.status !== "CANCELLED" && !viewedBookingIds.includes(b.id))
+        .filter((b) => b.status !== "CANCELLED" && !isBlockedBooking(b) && !viewedBookingIds.includes(b.id))
         .map((b) => b.id);
       if (unreadBookingIds.length > 0) {
         onViewBookings(unreadBookingIds);
@@ -668,8 +831,14 @@ export default function BookingsCalendar({
               </h4>
               <div className="flex items-center gap-3 mt-0.5">
                 <span className="text-xs text-slate-400 font-sans tabular-nums">
-                  {currentMonthBookings.length} {lang === "es" ? "citas este mes" : "bookings this month"}
+                  {currentMonthBookings.filter((b) => !isBlockedBooking(b)).length} {lang === "es" ? "citas este mes" : "bookings this month"}
                 </span>
+                {currentMonthBookings.filter(isBlockedBooking).length > 0 && (
+                  <span className="text-xs text-amber-700 font-medium flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
+                    {currentMonthBookings.filter(isBlockedBooking).length} {lang === "es" ? "bloqueado(s)" : "blocked"}
+                  </span>
+                )}
                 {uniqueExternalEvents.length > 0 && (
                   <span className="text-xs text-indigo-600 font-medium flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 inline-block" />
@@ -680,6 +849,23 @@ export default function BookingsCalendar({
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
+              {/* Botón Bloquear Horario */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (!blockDate) {
+                    const todayIso = new Date().toISOString().split("T")[0];
+                    setBlockDate(selectedDateStr || todayIso);
+                  }
+                  setShowBlockModal(true);
+                }}
+                className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100/80 border border-amber-200/90 hover:border-amber-300 text-amber-900 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                title={lang === "es" ? "Bloquear un horario en el calendario web" : "Block time slot in web calendar"}
+              >
+                <LockClosedIcon className="w-3.5 h-3.5 text-amber-600" />
+                <span>{lang === "es" ? "Bloquear" : "Block"}</span>
+              </button>
+
               {bookings.length > 0 && (
                 <div className="relative" data-export-dropdown>
                   <button
@@ -827,18 +1013,22 @@ export default function BookingsCalendar({
               const dayBookings = bookingsMap[dateStr] || [];
               const dayExternalEvents = externalEventsMap[dateStr] || [];
 
-              const pendingCount = dayBookings.filter(
+              const realDayBookings = dayBookings.filter((b) => !isBlockedBooking(b));
+              const blockedDayBookings = dayBookings.filter(isBlockedBooking);
+
+              const pendingCount = realDayBookings.filter(
                 (b) =>
                   b.status === "PENDING" ||
                   b.status === "pending" ||
                   (!b.status && b.status !== "CONFIRMED" && b.status !== "CANCELLED")
               ).length;
-              const confirmedCount = dayBookings.filter(
+              const confirmedCount = realDayBookings.filter(
                 (b) => b.status === "CONFIRMED" || b.status === "confirmed" || b.status === "ACCEPTED"
               ).length;
 
               const hasPending = pendingCount > 0;
               const hasConfirmed = confirmedCount > 0;
+              const hasBlocked = blockedDayBookings.length > 0;
               const hasExternal = dayExternalEvents.length > 0;
               const isSelected = selectedDateStr === dateStr;
 
@@ -847,6 +1037,8 @@ export default function BookingsCalendar({
                 dayStyles = "bg-emerald-600 border-emerald-700 text-white hover:bg-emerald-700 shadow-xs font-black";
               } else if (hasPending) {
                 dayStyles = "bg-emerald-50 border-emerald-300 text-emerald-950 hover:bg-emerald-100 font-extrabold";
+              } else if (hasBlocked) {
+                dayStyles = "bg-amber-50/80 border-amber-300 text-amber-950 hover:bg-amber-100 font-bold";
               } else if (hasExternal) {
                 dayStyles = "bg-indigo-50 border-indigo-200 text-indigo-950 hover:bg-indigo-100 font-bold";
               }
@@ -855,7 +1047,7 @@ export default function BookingsCalendar({
                 dayStyles = "bg-slate-900 border-slate-900 text-white shadow-md scale-95 font-black";
               }
 
-              const unreadDayBookings = dayBookings.filter(
+              const unreadDayBookings = realDayBookings.filter(
                 (b) => b.status !== "CANCELLED" && !viewedBookingIds.includes(b.id)
               );
               const unreadCount = unreadDayBookings.length;
@@ -886,6 +1078,14 @@ export default function BookingsCalendar({
                         className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                           isSelected ? "bg-white" : hasConfirmed ? "bg-emerald-200" : "bg-emerald-500"
                         }`}
+                      />
+                    )}
+                    {hasBlocked && (
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                          isSelected ? "bg-amber-300" : "bg-amber-500"
+                        }`}
+                        title={lang === "es" ? "Horario bloqueado" : "Blocked schedule"}
                       />
                     )}
                     {hasExternal && (
@@ -951,11 +1151,80 @@ export default function BookingsCalendar({
                   <div className="space-y-3.5">
                     <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                      {lang === "es" ? "Citas de la Web (SPP Labs)" : "Website Bookings (SPP Labs)"} (
+                      {lang === "es" ? "Citas y Horarios de la Web" : "Website Bookings & Schedule"} (
                       {selectedDayBookings.length})
                     </span>
 
                     {selectedDayBookings.map((b) => {
+                      const isBlocked = isBlockedBooking(b);
+                      if (isBlocked) {
+                        const blockTitleDisplay =
+                          b.name?.replace(/^\[BLOQUEO\]\s*/, "") ||
+                          (lang === "es" ? "Horario Bloqueado" : "Blocked Slot");
+
+                        return (
+                          <div
+                            key={b.id}
+                            className="bg-amber-50/40 border border-amber-200/90 hover:border-amber-300 rounded-2xl p-4 space-y-3 shadow-2xs hover:shadow-xs transition-all"
+                          >
+                            {/* Header: Lock Avatar, Title, Time, Status Pill */}
+                            <div className="flex items-start justify-between gap-2.5">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-500/15 border border-amber-300/80 text-amber-800 shrink-0 shadow-2xs">
+                                  <LockClosedIcon className="w-5 h-5 text-amber-700" />
+                                </div>
+                                <div className="min-w-0">
+                                  <span className="font-extrabold text-sm text-amber-950 block truncate">
+                                    {blockTitleDisplay}
+                                  </span>
+                                  <div className="flex items-center gap-1.5 text-[11px] font-sans tabular-nums mt-0.5">
+                                    <span className="inline-flex items-center gap-1 font-bold text-amber-900 bg-amber-100/90 px-2 py-0.5 rounded-md border border-amber-200/80">
+                                      <ClockIcon className="w-3 h-3 text-amber-700" />
+                                      {b.time}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <span className="text-[9.5px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border shrink-0 inline-flex items-center gap-1 bg-amber-100 text-amber-900 border-amber-300/80">
+                                <LockClosedIcon className="w-2.5 h-2.5 text-amber-700" />
+                                {lang === "es" ? "Bloqueado" : "Blocked"}
+                              </span>
+                            </div>
+
+                            {/* Message / Reason */}
+                            {b.message && (
+                              <div className="bg-white/90 border border-amber-200/80 rounded-xl p-2.5 space-y-1">
+                                <span className="text-[9.5px] font-black uppercase tracking-wider text-amber-800/80 flex items-center gap-1">
+                                  <ChatBubbleIcon className="w-3 h-3 text-amber-600" />
+                                  <span>{lang === "es" ? "Motivo del bloqueo:" : "Block reason:"}</span>
+                                </span>
+                                <p className="text-xs text-slate-700 italic leading-relaxed whitespace-pre-wrap">
+                                  {`"${b.message}"`}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Footer Actions */}
+                            <div className="flex items-center justify-between gap-2 pt-2 border-t border-amber-200/60">
+                              <span className="text-[11px] text-amber-800 font-medium flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                {lang === "es" ? "No disponible en la web" : "Unavailable on web"}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => onDelete(b.id)}
+                                className="px-2.5 py-1 bg-white hover:bg-rose-50 text-rose-700 hover:text-rose-800 border border-rose-200 hover:border-rose-300 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                                title={lang === "es" ? "Desbloquear este horario" : "Unblock this slot"}
+                              >
+                                <TrashIcon className="w-3 h-3 text-rose-600" />
+                                <span>{lang === "es" ? "Desbloquear" : "Unblock"}</span>
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      }
+
                       const isConfirmed = b.status === "CONFIRMED";
                       const isCancelled = b.status === "CANCELLED";
 
@@ -1488,6 +1757,308 @@ export default function BookingsCalendar({
                   {isSubmitting
                     ? lang === "es" ? "Guardando..." : "Saving..."
                     : lang === "es" ? "Guardar Cita" : "Save Booking"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Schedule Block Modal */}
+      {showBlockModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-100 my-8 max-h-[90vh] overflow-y-auto space-y-5">
+            {/* Header */}
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-300/80 text-amber-800 flex items-center justify-center shrink-0">
+                  <LockClosedIcon className="w-5 h-5 text-amber-700" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 leading-tight">
+                    {lang === "es" ? "Bloquear Horario en la Web" : "Block Web Calendar Slot"}
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                    {lang === "es"
+                      ? "Inhabilita franjas horarias en tu calendario para que no se puedan agendar online"
+                      : "Disable slots so visitors cannot book them on your website"}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBlockModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                aria-label="Cerrar"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Explanation Card with the Cleaning Company example */}
+            <div className="bg-gradient-to-br from-amber-50/90 via-orange-50/60 to-amber-100/40 border border-amber-200/90 rounded-2xl p-4 space-y-3 shadow-2xs">
+              <div className="flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 text-xs font-black shadow-2xs">
+                  ℹ️
+                </span>
+                <div className="min-w-0 space-y-1">
+                  <h4 className="text-xs font-extrabold text-amber-950">
+                    {lang === "es" ? "¿Para qué sirve y cómo funciona?" : "What is this and how does it work?"}
+                  </h4>
+                  <p className="text-[11.5px] text-amber-900 leading-relaxed">
+                    {lang === "es"
+                      ? "Esta función te permite reservar y proteger franjas horarias en tu calendario web. Al bloquear un horario, esa hora queda automáticamente ocupada y ningún cliente podrá solicitarla desde tu página web pública."
+                      : "This feature allows you to lock and protect time slots on your web calendar. Once blocked, that slot is automatically occupied and no client can book it on your public website."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white/85 border border-amber-200/70 rounded-xl p-3 text-[11.5px] text-amber-950/95 leading-relaxed space-y-1">
+                <span className="font-bold text-amber-900 block flex items-center gap-1">
+                  <span>📌 {lang === "es" ? "Ejemplo práctico:" : "Practical example:"}</span>
+                </span>
+                <p className="text-slate-600 leading-relaxed">
+                  {lang === "es" ? (
+                    <>
+                      Una empresa de limpieza que debe asistir todos los <strong>lunes y viernes a las 9:00 AM</strong> a realizar un trabajo en un edificio, puede utilizar esta opción para bloquear esa franja de forma recurrente. De esta manera, nadie podrá reservar esa hora en su web.
+                    </>
+                  ) : (
+                    <>
+                      A cleaning company that must attend a building every <strong>Monday and Friday at 9:00 AM</strong> to perform scheduled work can block that time window recurringly. This ensures no client can book that slot on their public website.
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSaveBlock} className="space-y-4">
+              {/* Block Mode Selector */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                  {lang === "es" ? "Tipo de Bloqueo" : "Block Type"}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBlockMode("recurring")}
+                    className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${
+                      blockMode === "recurring"
+                        ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                        : "bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200"
+                    }`}
+                  >
+                    <span>🔄</span>
+                    <span>{lang === "es" ? "Recurrente semanal" : "Weekly recurring"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBlockMode("single")}
+                    className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${
+                      blockMode === "single"
+                        ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                        : "bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200"
+                    }`}
+                  >
+                    <span>📅</span>
+                    <span>{lang === "es" ? "Día puntual" : "Single day"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Recurring Options */}
+              {blockMode === "recurring" ? (
+                <div className="p-3.5 bg-slate-50/70 border border-slate-200/90 rounded-2xl space-y-3">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                      {lang === "es" ? "Días de la semana a bloquear" : "Days of the week to block"}
+                    </label>
+                    <div className="grid grid-cols-7 gap-1.5">
+                      {blockWeekdaysList.map((day) => {
+                        const isSelected = blockRecurringDays.includes(day.id);
+                        return (
+                          <button
+                            key={day.id}
+                            type="button"
+                            onClick={() => toggleRecurringDay(day.id)}
+                            className={`py-2 px-1 text-center rounded-xl text-xs font-extrabold transition-all cursor-pointer border ${
+                              isSelected
+                                ? "bg-amber-500 text-white border-amber-600 shadow-2xs scale-[1.02]"
+                                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                            }`}
+                            title={day.label}
+                          >
+                            <span className="block">{day.short}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">
+                        {lang === "es" ? "A partir del día" : "Starting on date"}
+                      </label>
+                      <input
+                        type="date"
+                        required
+                        value={blockDate || selectedDateStr || todayStr}
+                        onChange={(e) => setBlockDate(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">
+                        {lang === "es" ? "Repetir durante" : "Repeat for"}
+                      </label>
+                      <select
+                        value={blockRecurringWeeks}
+                        onChange={(e) => setBlockRecurringWeeks(Number(e.target.value))}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-amber-500"
+                      >
+                        <option value={4}>{lang === "es" ? "4 semanas (~1 mes)" : "4 weeks (~1 month)"}</option>
+                        <option value={8}>{lang === "es" ? "8 semanas (~2 meses)" : "8 weeks (~2 months)"}</option>
+                        <option value={12}>{lang === "es" ? "12 semanas (~3 meses)" : "12 weeks (~3 months)"}</option>
+                        <option value={24}>{lang === "es" ? "24 semanas (~6 meses)" : "24 weeks (~6 months)"}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                    {lang === "es" ? "Fecha a bloquear" : "Date to block"}
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={blockDate || selectedDateStr || todayStr}
+                    onChange={(e) => setBlockDate(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              )}
+
+              {/* Time Range */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                    {lang === "es" ? "Hora inicio *" : "Start time *"}
+                  </label>
+                  <select
+                    value={blockStartTime}
+                    onChange={(e) => {
+                      setBlockStartTime(e.target.value);
+                      if (blockEndTime < e.target.value) {
+                        setBlockEndTime(e.target.value);
+                      }
+                    }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-amber-500"
+                  >
+                    {Array.from({ length: 24 }).map((_, i) => {
+                      const h = String(i).padStart(2, "0");
+                      return (
+                        <optgroup key={`start-${h}`} label={`${h}:00`}>
+                          <option value={`${h}:00`}>{h}:00</option>
+                          <option value={`${h}:30`}>{h}:30</option>
+                        </optgroup>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                    {lang === "es" ? "Hora fin (opcional)" : "End time (optional)"}
+                  </label>
+                  <select
+                    value={blockEndTime}
+                    onChange={(e) => setBlockEndTime(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-amber-500"
+                  >
+                    {Array.from({ length: 24 }).map((_, i) => {
+                      const h = String(i).padStart(2, "0");
+                      return (
+                        <optgroup key={`end-${h}`} label={`${h}:00`}>
+                          <option value={`${h}:00`}>{h}:00</option>
+                          <option value={`${h}:30`}>{h}:30</option>
+                        </optgroup>
+                      );
+                    })}
+                  </select>
+                </div>
+              </div>
+              <p className="text-[10.5px] text-slate-400 italic">
+                {lang === "es"
+                  ? "💡 Si la hora de inicio y fin son iguales, se bloqueará solo esa franja horaria."
+                  : "💡 If start and end times are identical, only that specific slot will be blocked."}
+              </p>
+
+              {/* Title / Reason */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                  {lang === "es" ? "Título o motivo del bloqueo" : "Block title or reason"}
+                </label>
+                <input
+                  type="text"
+                  value={blockTitle}
+                  onChange={(e) => setBlockTitle(e.target.value)}
+                  placeholder={
+                    lang === "es"
+                      ? "Ej: Limpieza edificio oficinas / Compromiso externo"
+                      : "e.g. Office cleaning / Off-site work"
+                  }
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              {/* Internal Notes */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                  {lang === "es" ? "Notas adicionales (opcional)" : "Additional notes (optional)"}
+                </label>
+                <textarea
+                  rows={2}
+                  value={blockReason}
+                  onChange={(e) => setBlockReason(e.target.value)}
+                  placeholder={
+                    lang === "es"
+                      ? "Detalles internos, dirección del trabajo o recordatorio..."
+                      : "Internal details, address or reminders..."
+                  }
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end items-center gap-2.5 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowBlockModal(false)}
+                  className="px-4 py-2.5 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+                >
+                  {lang === "es" ? "Cancelar" : "Cancel"}
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingBlock}
+                  className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer shadow-sm flex items-center gap-2"
+                >
+                  {isSubmittingBlock ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>{lang === "es" ? "Bloqueando..." : "Blocking..."}</span>
+                    </>
+                  ) : (
+                    <>
+                      <LockClosedIcon className="w-3.5 h-3.5 text-white" />
+                      <span>{lang === "es" ? "Confirmar Bloqueo" : "Confirm Block"}</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

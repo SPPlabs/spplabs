@@ -4,9 +4,10 @@ import { MessageType } from "./types";
 interface MessageProps {
   message: MessageType;
   accentColor: string;
+  lang?: string;
 }
 
-export const Message: React.FC<MessageProps> = ({ message, accentColor }) => {
+export const Message: React.FC<MessageProps> = ({ message, accentColor, lang = "es" }) => {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
 
@@ -52,10 +53,16 @@ export const Message: React.FC<MessageProps> = ({ message, accentColor }) => {
               <summary className="flex items-center justify-between px-3 py-2 cursor-pointer text-violet-800 font-bold hover:bg-violet-100/50 select-none transition-colors">
                 <span className="flex items-center gap-2">
                   <span className={`w-2 h-2 rounded-full ${isThinking ? "bg-violet-600 animate-pulse" : "bg-violet-500"}`} />
-                  <span>{isThinking ? "Pensando..." : "Razonamiento de la IA"}</span>
+                  <span>
+                    {isThinking
+                      ? lang === "es" ? "Pensando..." : "Thinking..."
+                      : lang === "es" ? "Razonamiento de la IA" : "AI Reasoning"}
+                  </span>
                 </span>
                 <span className="text-[10px] text-violet-600 font-semibold underline ml-2">
-                  {isThinking ? "En progreso" : "Ver detalles"}
+                  {isThinking
+                    ? lang === "es" ? "En progreso" : "In progress"
+                    : lang === "es" ? "Ver detalles" : "View details"}
                 </span>
               </summary>
               <div className="px-3 py-2.5 text-[11px] text-slate-600 border-t border-violet-100 font-mono whitespace-pre-wrap leading-relaxed max-h-[220px] overflow-y-auto bg-white/70">

@@ -577,11 +577,11 @@ export default function AiTab({
               </div>
               <div className="flex items-center gap-2 self-start sm:self-center">
                 <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-xl shadow-2xs border ${
-                  chatbotContent.length >= 40000
+                  chatbotContent.length >= 50000
                     ? "text-amber-700 bg-amber-50 border-amber-300 font-extrabold"
                     : "text-slate-400 bg-white border-slate-200"
                 }`}>
-                  {chatbotContent.length.toLocaleString()} / 40,000 {lang === "es" ? "caracteres" : "characters"}
+                  {chatbotContent.length.toLocaleString()} / 50,000 {lang === "es" ? "caracteres" : "characters"}
                 </span>
 
                 {!isEditingKnowledge ? (
@@ -613,7 +613,7 @@ export default function AiTab({
               readOnly={!isEditingKnowledge}
               value={chatbotContent}
               onChange={(e) => setChatbotContent(e.target.value)}
-              maxLength={40000}
+              maxLength={50000}
               placeholder={t.iaPlaceholder}
               className={`w-full h-72 rounded-xl p-4 text-xs resize-y leading-relaxed mt-3 shadow-2xs font-normal transition-all overflow-y-auto ${
                 !isEditingKnowledge

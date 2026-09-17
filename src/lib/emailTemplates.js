@@ -477,3 +477,232 @@ export function generateCustomEmailHtml({
   `;
 }
 
+function escapeHtml(str) {
+  if (!str || typeof str !== "string") return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
+ * SPP Labs Tenant Activity Notification Email Template.
+ * Dispatches sleek, privacy-first teaser alerts with link directly to the dashboard.
+ */
+export function generateTenantNotificationHtml({
+  notificationType = "general_summary",
+  recipientName = "",
+  clientDomain = "spplabs.es",
+  title = "",
+  message = "",
+  ctaText = "Acceder al Dashboard",
+  ctaUrl = "https://spplabs.es/dashboard",
+  summaryItems = [],
+  unsubscribeUrl = "https://spplabs.es/dashboard?openSettings=notifications",
+}) {
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://spplabs.es";
+  const cleanBaseUrl = appBaseUrl.endsWith("/") ? appBaseUrl.slice(0, -1) : appBaseUrl;
+
+  const fullCtaUrl = ctaUrl.startsWith("http") ? ctaUrl : `${cleanBaseUrl}${ctaUrl.startsWith("/") ? "" : "/"}${ctaUrl}`;
+  const fullUnsubUrl = unsubscribeUrl.startsWith("http") ? unsubscribeUrl : `${cleanBaseUrl}${unsubscribeUrl.startsWith("/") ? "" : "/"}${unsubscribeUrl}`;
+
+  // Badge configurations
+  const badges = {
+    contact: {
+      text: "📩 Nuevo Formulario de Contacto",
+      bgColor: "#eff6ff",
+      borderColor: "#bfdbfe",
+      textColor: "#1d4ed8",
+      defaultTitle: "Has recibido un nuevo mensaje en tu web",
+      defaultMsg: "Un usuario ha completado el formulario de contacto de tu sitio web. Por motivos de privacidad y rapidez, puedes revisar los detalles y responder directamente desde tu panel de control.",
+      defaultCta: "Ver Mensaje en el Dashboard",
+    },
+    booking: {
+      text: "📅 Nueva Reserva Solicitada",
+      bgColor: "#ecfdf5",
+      borderColor: "#a7f3d0",
+      textColor: "#047857",
+      defaultTitle: "Tienes una nueva cita agendada en tu web",
+      defaultMsg: "Un visitante ha solicitado una nueva cita en tu calendario web. Accede a tu panel para comprobar la disponibilidad, confirmar o gestionar la reserva.",
+      defaultCta: "Gestionar Cita en el Dashboard",
+    },
+    ai_chat: {
+      text: "🤖 Nueva Conversación Chatbot IA",
+      bgColor: "#f5f3ff",
+      borderColor: "#ddd6fe",
+      textColor: "#6d28d9",
+      defaultTitle: "Nueva interacción con tu asistente virtual",
+      defaultMsg: "Un visitante acaba de mantener una conversación con el chatbot de inteligencia artificial en tu web. Revisa las consultas realizadas y métricas en tu panel.",
+      defaultCta: "Ver Conversación en el Dashboard",
+    },
+    spp_announcement: {
+      text: "📢 Comunicado Oficial de SPP Labs",
+      bgColor: "#fffbeb",
+      borderColor: "#fde68a",
+      textColor: "#b45309",
+      defaultTitle: "Tienes una nueva notificación de SPP Labs",
+      defaultMsg: "El equipo de SPP Labs ha publicado una actualización importante para tu cuenta y servicios web. Accede a tu panel para revisarla.",
+      defaultCta: "Leer Comunicado en el Dashboard",
+    },
+    monthly_report: {
+      text: "📊 Informe Mensual de Rendimiento",
+      bgColor: "#eef2ff",
+      borderColor: "#c7d2fe",
+      textColor: "#4338ca",
+      defaultTitle: "Tu Informe Mensual ya está disponible",
+      defaultMsg: "El balance analítico de rendimiento y actividad de tu sitio web correspondiente a este mes ha sido generado con éxito. Ya puedes consultarlo o descargarlo en PDF.",
+      defaultCta: "Consultar Informe Mensual",
+    },
+    general_summary: {
+      text: "⚡ Resumen de Actividad Pendiente",
+      bgColor: "#f0fdfa",
+      borderColor: "#99f6e4",
+      textColor: "#0f766e",
+      defaultTitle: "Novedades pendientes en tu panel de SPP Labs",
+      defaultMsg: "Tienes nueva actividad sin revisar en tu sitio web. Accede a tu panel de control para gestionar todas las solicitudes en un solo lugar.",
+      defaultCta: "Acceder a mi Panel de Control",
+    },
+  };
+
+  const badge = badges[notificationType] || badges.general_summary;
+  const headingTitle = escapeHtml(title || badge.defaultTitle);
+  const descriptionText = escapeHtml(message || badge.defaultMsg);
+  const buttonText = escapeHtml(ctaText || badge.defaultCta);
+  const safeClientDomain = escapeHtml(clientDomain);
+  const safeRecipientName = escapeHtml(recipientName);
+
+  const logoUrl = `${cleanBaseUrl}/logo.png`;
+
+  return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${headingTitle}</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; background-color: #f8fafc; margin: 0; padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 580px; background-color: #ffffff; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.04); overflow: hidden;">
+          
+          <!-- SPP Labs Luxury Dark Header -->
+          <tr>
+            <td style="background-color: #0b1329; padding: 28px 32px; border-bottom: 1px solid #1e293b;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td>
+                    <table role="presentation" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="vertical-align: middle; padding-right: 12px;">
+                          <img src="${logoUrl}" alt="SPP Labs Logo" width="32" height="32" style="width: 32px; height: 32px; border-radius: 8px; display: block; object-fit: contain;" />
+                        </td>
+                        <td style="vertical-align: middle;">
+                          <span style="font-size: 19px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px; display: block; line-height: 1;">
+                            SPP Labs
+                          </span>
+                          <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #38bdf8; display: block; margin-top: 3px;">
+                            Panel de Control &amp; Notificaciones
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td align="right" style="vertical-align: middle;">
+                    <span style="display: inline-block; font-size: 11px; font-weight: 600; font-family: monospace; color: #94a3b8; background-color: #1e293b; padding: 4px 10px; border-radius: 8px;">
+                      ${safeClientDomain}
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Notification Body Card -->
+          <tr>
+            <td style="padding: 36px 32px 28px 32px;">
+              <!-- Badge -->
+              <div style="display: inline-block; padding: 6px 14px; background-color: ${badge.bgColor}; border: 1px solid ${badge.borderColor}; border-radius: 12px; font-size: 12px; font-weight: 800; color: ${badge.textColor}; margin-bottom: 20px; line-height: 1.4;">
+                ${badge.text}
+              </div>
+
+              <!-- Title -->
+              <h1 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 14px 0; line-height: 1.35; letter-spacing: -0.3px;">
+                ${headingTitle}
+              </h1>
+
+              ${safeRecipientName ? `
+              <p style="font-size: 14px; font-weight: 700; color: #334155; margin: 0 0 14px 0;">
+                Hola ${safeRecipientName},
+              </p>
+              ` : ""}
+
+              <!-- Message Teaser (Intrigue/Privacy compliant) -->
+              <p style="font-size: 14px; line-height: 1.65; color: #475569; margin: 0 0 24px 0;">
+                ${descriptionText}
+              </p>
+
+              <!-- Optional Summary Box -->
+              ${Array.isArray(summaryItems) && summaryItems.length > 0 ? `
+              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 20px; margin-bottom: 26px;">
+                <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; display: block; margin-bottom: 10px;">
+                  Resumen de actividad reciente:
+                </span>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  ${summaryItems.map((item) => {
+                    const text = typeof item === "string" ? item : (item?.label ? `${item.label}: ${item.value || ""}` : "");
+                    return `
+                  <tr>
+                    <td style="padding: 5px 0; font-size: 13px; font-weight: 600; color: #1e293b;">
+                      <span style="color: #0284c7; margin-right: 8px;">•</span> ${escapeHtml(text)}
+                    </td>
+                  </tr>
+                    `;
+                  }).join("")}
+                </table>
+              </div>
+              ` : ""}
+
+              <!-- Action Button -->
+              <div style="text-align: center; margin: 28px 0 20px 0;">
+                <a href="${fullCtaUrl}" target="_blank" style="display: inline-block; background-color: #0f172a; color: #ffffff; padding: 14px 32px; font-size: 14px; font-weight: 800; text-decoration: none; border-radius: 14px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);">
+                  ${buttonText} &rarr;
+                </a>
+              </div>
+
+              <!-- Security / Privacy Teaser note -->
+              <p style="font-size: 11.5px; color: #94a3b8; text-align: center; line-height: 1.5; margin: 16px 0 0 0;">
+                🔒 Por seguridad y protección de datos, los detalles completos y las respuestas se gestionan exclusivamente desde tu panel seguro de SPP Labs.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Subtle Footer with Unsubscribe / Notification Preferences Button -->
+          <tr>
+            <td style="padding: 24px 32px; background-color: #f8fafc; border-top: 1px solid #f1f5f9; text-align: center;">
+              <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 700; color: #64748b;">
+                &copy; ${new Date().getFullYear()} SPP Labs &bull; Gestión Inteligente y Presencia Digital
+              </p>
+              <p style="margin: 0 0 12px 0; font-size: 11px; color: #94a3b8; line-height: 1.5;">
+                Has recibido esta notificación porque tu cuenta de <strong>${clientDomain}</strong> tiene activadas las alertas por email en SPP Labs.
+              </p>
+              <div style="padding-top: 4px;">
+                <a href="${fullUnsubUrl}" target="_blank" style="font-size: 11px; font-weight: 600; color: #64748b; text-decoration: underline; display: inline-block;">
+                  Gestionar preferencias o desactivar notificaciones por email
+                </a>
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+}
+
